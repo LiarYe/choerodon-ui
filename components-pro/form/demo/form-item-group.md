@@ -111,7 +111,7 @@ class App extends React.Component {
         </div>
         <br/>
         <h2>Form下使用：</h2>
-        <Form dataSet={this.ds} style={{ width: '4.5rem' }} labelWidth={120}>
+        <Form showValidation="newLine" dataSet={this.ds} style={{ width: '4.5rem' }} labelWidth={120}>
           <ItemGroup label="手机号(compact)" help="请正确填写手机号" required useColon compact>
             <TextField name="phonePrefix" placeholder="例：+86" style={{ width: '40%' }} help="手机区号" />
             <TextField name="phone" style={{ width: '50%' }} />

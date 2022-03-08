@@ -1,11 +1,4 @@
-import React, {
-  ReactNode,
-  CSSProperties,
-  FC,
-  useContext,
-  Children,
-  isValidElement,
-} from 'react';
+import React, { Children, CSSProperties, FunctionComponent, isValidElement, ReactNode, useContext } from 'react';
 import classNames from 'classnames';
 import isNil from 'lodash/isNil';
 import isFunction from 'lodash/isFunction';
@@ -26,12 +19,12 @@ export interface ItemGroupProps {
   compact?: boolean;
 }
 
-const ItemGroup: FC<ItemGroupProps> = props => {
+const ItemGroup: FunctionComponent<ItemGroupProps> = props => {
   const {
     className,
     children,
     compact,
-    ...oterProps
+    ...otherProps
   } = props;
   const { getProPrefixCls } = useContext(ConfigContext);
   const prefixCls = getProPrefixCls('form-item-group');
@@ -64,18 +57,27 @@ const ItemGroup: FC<ItemGroupProps> = props => {
     if ((isFunction(child.type) || typeof child.type === 'object') && (child.type as any).displayName === 'FormItem') {
       return mapChildren(child.props.children);
     }
+
+    let childCls = '';
+    if (compact) {
+      const { suffixCls } = child.props;
+      const prefixCls = getProPrefixCls(suffixCls);
+      childCls = `${prefixCls}-compact`;
+    }
+
     return (
-      <span className={`${prefixCls}-item`} style={{ ...itemStyle }}>
+      <span className={`${prefixCls}-item ${childCls}`} style={{ ...itemStyle }}>
         {child}
       </span>
     );
-  }
-  const childs = Children.map<ReactNode, ReactNode>(children, child => mapChildren(child));
-  if (isNil(childs)) {
+  };
+
+  const childes = Children.map<ReactNode, ReactNode>(children, child => mapChildren(child));
+  if (isNil(childes)) {
     return null;
   }
 
-  const passProps = omit(oterProps, [
+  const passProps = omit(otherProps, [
     'label',
     'help',
     'showHelp',
@@ -88,10 +90,10 @@ const ItemGroup: FC<ItemGroupProps> = props => {
       className={cls}
       {...passProps}
     >
-      {childs}
+      {childes}
     </span>
   );
-}
+};
 
 ItemGroup.displayName = 'ItemGroup';
 
