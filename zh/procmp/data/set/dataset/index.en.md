@@ -7,7 +7,7 @@ abstract: true
 
 **注意事项**
 
-> 初次使用该组件库建议阅读[引导教程](https://huihuawk.gitee.io/c7n-ui/en/tutorials/introduction)。
+> 初次使用该组件库建议阅读[引导教程](/en/tutorials/introduction)。
 
 ## API
 
@@ -48,6 +48,7 @@ abstract: true
 | parentField | 树形数据当前父节点 id 字段名，与 idField 组合使用。适用于平铺数据；变更节点层级可直接修改 idField 和 parentField 对应的值| string |  | |
 | childrenField | 树形数据子数据集字段名， 如果要异步加载子节点需设置 idField 和 parentField 或者使用 appendData 方法。适用于树形数据；变更节点层级需要操作 record.parent 和 record.children | string |  | 1.4.5 |
 | expandField | 树形数据标记节点是否展开的字段名 | string |  |  |
+| treeCheckStrictly | 树形数据节点选中状态是否独自控制（父子节点选中状态不再关联） | boolean | | 1.5.3 |
 | checkField | 树形数据标记节点是否为选中的字段名，在展开按钮后面会显示 checkbox | string |  |  |
 | fields | 字段属性数组，详见[Field Props](#field-props) | object\[\] |  |  |
 | record | 记录属性，详见[Record Props](#record-props) | object |  |
@@ -106,6 +107,7 @@ abstract: true
 | query(page, params, cache) | 查询 | `page`&lt;optional,default:1&gt; - 指定页码 `params`&lt;optional&gt; - 临时查询参数  `cache`&lt;optional&gt;(1.5.0-beta.0) - 是否保留缓存的变更记录  | Promise&lt;any&gt; | |
 | queryMore(page, params) | 查询更多， 保留原数据 | page&lt;optional,default:1&gt; - 指定页码 params&lt;optional&gt; - 临时查询参数  | Promise&lt;any&gt; | 1.1.0 |
 | submit() | 将数据集中的增删改的记录先进行校验再进行远程提交。submit 会抛出请求的异常，请用 promise.catch 或 try-await-catch 来处理异常。 |  | Promise&lt;any&gt; false - 校验失败，undefined - 无数据提交或提交相关配置不全，如没有 submitUrl。 | |
+| forceSubmit() | 强制提交，绕过校验。 | | Promise&lt;any&gt; undefined - 无数据提交或提交相关配置不全，如没有 submitUrl。 | 1.5.2 |
 | reset() | 重置更改, 并清除校验状态 |  |  |    |
 | locate(index) | 定位到指定记录, 如果paging 为 true和server，则做远程查询 为server指代的是根节点节点的index坐标| index - 记录索引 | Promise&lt;Record&gt; |  |
 | page(page) | 定位到指定页码，如果paging 为 true和server，则做远程查询 | page - 页码 | Promise&lt;any&gt; |    |
@@ -188,6 +190,8 @@ abstract: true
 | unSelectAll | <废弃>撤销全选记录事件 | ({ dataSet }) =&gt; void | dataSet - 数据集 | 是 |   |
 | batchSelect | 批量选择记录事件, 由 select, selectAll, batchSelect 和 treeSelect 方法触发 | ({ dataSet, records }) =&gt; void | dataSet - 数据集 records - 选择的记录集 | 是 | |
 | batchUnSelect | 批量取消选择记录事件, 由 unSelect, unSelectAll, batchUnSelect 和 treeUnSelect 方法触发 | ({ dataSet, records }) =&gt; void | dataSet - 数据集 records - 选择的记录集 | 是 | 1.4.2  |
+| selectAllPage | 跨页全选事件 | ({ dataSet }) =&gt; void | `dataSet` - 数据集  | 是 | 1.5.3 |
+| unSelectAllPage | 取消跨页全选事件 | ({ dataSet }) =&gt; void | `dataSet` - 数据集 | 是 | 1.5.3 |
 | indexChange | 当前记录变更事件 | ({ dataSet, record, previous }) =&gt; void | dataSet - 数据集 record - 新当前记录 previous - 旧当前记录 | 是 | |
 | fieldChange | 字段属性变更事件 | ({ dataSet, record, name, propsName, value, oldValue }) =&gt; void | dataSet - 数据集 record - 字段所属记录，dataSet 的字段无 record name - 字段名 propsName - 属性名 value - 新值 oldValue - 旧值 | 是 |    |
 | create | 记录创建事件 | ({ dataSet, record }) =&gt; void | dataSet - 数据集 record - 创建的记录 | 是 |    |
@@ -224,6 +228,7 @@ abstract: true
 | status         | 状态， 可选值 add \| update \| delete \| sync    | observable&lt;string&gt;  |
 | disabled(1.5.0)       | 禁用                                            | observable&lt;boolean&gt; |
 | selectable     | 可选                                            | observable&lt;boolean&gt; |
+| selectedTimestamp（1.5.3） | 选中时间戳, 可用于排序 | observable&lt;number&gt; |
 | isSelected     | 是否选中                                        | observable&lt;boolean&gt; |
 | isCurrent      | 是否当前记录                                    | observable&lt;boolean&gt; |
 | isExpanded | 树形节点是否展开 | observable&lt;boolean&gt; |
@@ -309,7 +314,7 @@ abstract: true
 | lovDefineUrl | lov 配置请求地址 | string \| (code) => string |  | |
 | lovQueryUrl | lov 查询请求地址 | string \| (code, config, { dataSet, params, data }) => string |  |   |
 | lookupAxiosConfig | 值列表请求配置或返回配置的钩子，详见[AxiosRequestConfig](/en/procmp/configure/configure/#axiosrequestconfig)。配置中默认 url 为 lookupUrl， method 为 post。 | AxiosRequestConfig\| ({ dataSet, record, params, lookupCode }) => AxiosRequestConfig |  |  |
-| lovDefineAxiosConfig | lov 配置的请求配置或返回配置的钩子，详见[AxiosRequestConfig](/en/procmp/configure/configure/#axiosrequestconfig)。 配置中默认 url 为 lovDefineUrl， method 为 post。 | AxiosRequestConfig\| (code) => AxiosRequestConfig |  |  |
+| lovDefineAxiosConfig | lov 配置的请求配置或返回配置的钩子，详见[AxiosRequestConfig](/en/procmp/configure/configure/#axiosrequestconfig)。 配置中默认 url 为 lovDefineUrl， method 为 post。 | AxiosRequestConfig\| (code: string, field?: Field) => AxiosRequestConfig |  |  |
 | lovQueryAxiosConfig | lov 查询的请求配置或返回配置的钩子，详见[AxiosRequestConfig](/en/procmp/configure/configure/#axiosrequestconfig)。 配置中默认 url 为 lovQueryUrl， method 为 post。 | AxiosRequestConfig\| (code, config, { dataSet, params, data }) => AxiosRequestConfig |  | |
 | lookupBatchAxiosConfig | 返回 lookup 批量查询配置的钩子，优先级高于全局配置的lookupBatchAxiosConfig，根据返回配置的url的不同分别做批量查询，详见[AxiosRequestConfig](/components/configure/#axiosrequestconfig)。 | (codes: string[]) => AxiosRequestConfig | - | 1.0.0 |
 | bind | 内部字段别名绑定 | string |  | |
@@ -328,6 +333,11 @@ abstract: true
 | bucketDirectory | 附件上传的桶目录 | string |  | 1.4.4 |
 | storageCode | 附件存储编码 | string |  | 1.4.4 |
 | attachmentCount | 附件数量， 一般使用 dynamicProps 来获取 record 中某个字段值作为附件数量， 优先级低于attachments.length | string |  | 1.4.4 |
+| fileKey | 附件上传属性名 | string | [AttachmentConfig.defaultFileKey](zh/procmp/configure/configure#attachmentconfig) | 1.5.2 |
+| fileSize | 附件大小限制 | number | [AttachmentConfig.defaultFileSize](zh/procmp/configure/configure#attachmentconfig) | 1.5.2 |
+| useChunk | 附件开启分片上传 | string |  | 1.5.2 |
+| chunkSize | 附件分片大小 | number | [AttachmentConfig.defaultChunkSize](zh/procmp/configure/configure#attachmentconfig)  | 1.5.2 |
+| chunkThreads | 附件分片上传并发数 | number | [AttachmentConfig.defaultChunkThreads](zh/procmp/configure/configure#attachmentconfig) | 1.5.2 |
 | processValue | 值变更时，拦截并返回一个新的值 | (value: any, range?: 0 \| 1) => any |   | 1.4.4 |
 
 ### Field Values
@@ -358,6 +368,7 @@ abstract: true
 | getLookupData(lookupValue, record) | 根据 lookup 值获取 lookup 数据对象 | `lookupValue` - lookup 值，默认本字段值 `record` - 记录 | object |
 | fetchLookup(noCache, record) | 请求 lookup 数据，若有缓存直接返回缓存数据。 |  `noCache` - 是否禁用缓存 `record` - 记录 | Promise&lt;object[]&gt; |
 | isValid(record) | 是否校验通过 |  `record` - 记录 | boolean |
+| isDirty(record) | 值是否变更 |  `record` - 记录 | boolean ||
 | getValidationMessage(record) | 获取校验信息 |  `record` - 记录 | string |
 | getValidationErrorValues(record) | 获取校验结果 |  `record` - 记录 | ValidationResult[] | 1.5.0-beta.0 |
 | getAttachments(record) | 获取附件列表 |  `record` - 记录 | AttachmentFile[] | 1.5.0-beta.0 |
@@ -452,12 +463,28 @@ abstract: true
 | invalid   | 检验失败，如果为true, 则无法重新上传  | boolean |
 | originFileObj   | 原始文件对象，只有通过上传按钮选择的附件才有该对象  | File |
 
+### AttachmentFileChunk
+
+> 1.5.2 版本新增属性
+
+| 属性                | 说明                                       | 类型     |
+| ------------------- | ------------------------------------------ | -------- |
+| file   | AttachmentFile对象    | AttachmentFile |
+| total   | 文件总大小    | number |
+| start   | 分片起始位置    | number |
+| end   | 分片结束位置    | number |
+| index   | 分片索引    | number |
+| status   | 状态 `error` `success` `uploading`    | string |
+| percent   | 上传进度, 0 至 100   | number |
+
 ### ValidationRule
 
 > 1.5.1 版本新增属性
 
 | 属性                | 说明                                       | 类型     |
 | ------------------- | ------------------------------------------ | -------- |
-| name | 校验的名称，可选值：`minLength` `maxLength` | string |
+| name | 校验的名称，可选值：minLength \| maxLength | string |
 | value | 校验值 | number |
 | message | 校验提示内容  | string |
+| disabled(1.5.2) | 禁用  | boolean \| ({ dataSet }) => boolean |
+

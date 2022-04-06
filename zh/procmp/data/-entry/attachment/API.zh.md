@@ -14,6 +14,9 @@ title: API
 | sortable | 是否可排序, 只读模式下不可拖拽 | boolean | true |
 | fileKey | 上传文件的参数名 | string | [attachment.defaultFileKey](/zh/procmp/configure/configure#attachmentconfig) |
 | fileSize | 上传文件的大小限制, 单位 `B` | number | [attachment.defaultFileSize](/zh/procmp/configure/configure#attachmentconfig) |
+| useChunk(1.5.2) | 是否开启分片上传 | boolean |  |
+| chunkSize(1.5.2) | 分片大小 | number | [attachment.defaultChunkSize](/zh/procmp/configure/configure#attachmentconfig) |
+| chunkThreads(1.5.2) | 分片上传并发数 | number | [attachment.defaultChunkThreads](/zh/procmp/configure/configure#attachmentconfig) |
 | pictureWidth | 图片尺寸， 只适用于 listType 为 picture 和 picture-card | number |  |
 | count | 自定义附件数量 | number |  |
 | max | 同时上传文件的最大数量, `0` 表示无限制 | number |  |
@@ -23,10 +26,12 @@ title: API
 | bucketName | 附件上传的桶名 | string |  |
 | bucketDirectory | 附件上传的桶目录 | string |  |
 | storageCode | 附件存储编码 | string |  |
+| showSize(1.5.3) | 显示文件大小信息 | boolean | true |
 | previewTarget(1.5.1) | 预览链接跳转对象， 如要在iframe内预览， 可给 iframe 指定 name={previewTarget} | string | 'attachment-preview'  |
 | isPublic(1.5.0) | 是否是公共的， [attachment](/zh/procmp/configure/configure#attachmentconfig)配置中相关钩子会使用该属性 | boolean | |
 | attachments | 附件列表 | (AttachmentFile \| FileLike)[] |  |
 | showValidation | 校验信息展示方式 | newLine \| tooltip | viewMode == popup ? tooltip : newLine |
+| getUUID(1.5.3) | 获取 uuid | () => Promise<string> \| string | [attachment.getAttachmentUUID](/zh/procmp/configure/#Attachment) |
 | onAttachmentsChange | 附件列表变更事件 | (AttachmentFile[]) => void |  |
 | beforeUpload | 上传文件之前的钩子，参数为上传的文件，可对文件在上传之前进行校验操作若返回 false 则停止上传并从列表充删除。支持返回一个 Promise 对象，Promise 对象 reject 或 resolve(false) 时则停止上传，resolve 时开始上传。 | (attachment: AttachmentFile, list: AttachmentFile[]) => (boolean \| Promise) | - |
 | onUploadProgress | 上传进度变化的回调 | (percent: number, attachment: AttachmentFile) => void | 无 |
@@ -47,8 +52,12 @@ title: API
 
 | 属性 | 说明 | 类型 | 默认值 |
 | --- | --- | --- | --- |
-| viewMode | 上传列表的显示模式，支持两种基本样式  list 和 popup | string | popup |
+| viewMode | 上传列表的显示模式，可选  list \| popup | string | popup |
 | text | 按钮文字 | ReactNode |  |
 | count | 自定义附件数量, 未设置时会自动获取组内的附件数量 | number |  |
 
 更多属性请参考 [Button](/zh/procmp/general/button#API)。
+
+### Attachment.Dragger
+
+> 1.5.2 版本新增组件。
