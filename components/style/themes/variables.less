@@ -3,16 +3,451 @@
 @import '@{iconfont}/style/theme';
 @import '../color/colors';
 
+// 基础 less 变量
+// -------- Colors -----------
+@primary-color-base0: @blue-6;
+
+// Color used by default to control hover and active backgrounds and for
+// alert info backgrounds.
+@primary-1-base0: color(~`colorPalette('@{primary-color-base0}', 1) `); // replace tint(@primary-color, 90%)
+@primary-2-base0: color(~`colorPalette('@{primary-color-base0}', 2) `); // replace tint(@primary-color, 80%)
+@primary-3-base0: color(~`colorPalette('@{primary-color-base0}', 3) `); // unused
+@primary-4-base0: color(~`colorPalette('@{primary-color-base0}', 4) `); // unused
+@primary-5-base0: color(~`colorPalette('@{primary-color-base0}', 5) `); // color used to control the text color in many active and hover states, replace tint(@primary-color, 20%)
+@primary-6-base0: @primary-color-base0; // color used to control the text color of active buttons, don't use, use @primary-color
+@primary-7-base0: color(~`colorPalette('@{primary-color-base0}', 7) `); // replace shade(@primary-color, 5%)
+@primary-8-base0: color(~`colorPalette('@{primary-color-base0}', 8) `); // unused
+@primary-9-base0: color(~`colorPalette('@{primary-color-base0}', 9) `); // unused
+@primary-10-base0: color(~`colorPalette('@{primary-color-base0}', 10) `); // unused
+
+@primary-fade-1-base0: fade(@primary-color-base0, 10%);
+@primary-fade-2-base0: fade(@primary-color-base0, 20%);
+@primary-fade-3-base0: fade(@primary-color-base0, 30%);
+@primary-fade-4-base0: fade(@primary-color-base0, 40%);
+@primary-fade-5-base0: fade(@primary-color-base0, 50%);
+@primary-fade-6-base0: fade(@primary-color-base0, 60%);
+@primary-fade-7-base0: fade(@primary-color-base0, 70%);
+@primary-fade-8-base0: fade(@primary-color-base0, 80%);
+@primary-fade-9-base0: fade(@primary-color-base0, 90%);
+@primary-fade-10-base0: fade(@primary-color-base0, 100%);
+
+@primary-tint-1-base0: tint(@primary-color-base0, 10%);
+@primary-tint-2-base0: tint(@primary-color-base0, 20%);
+@primary-tint-3-base0: tint(@primary-color-base0, 30%);
+@primary-tint-4-base0: tint(@primary-color-base0, 40%);
+@primary-tint-5-base0: tint(@primary-color-base0, 50%);
+@primary-tint-6-base0: tint(@primary-color-base0, 60%);
+@primary-tint-7-base0: tint(@primary-color-base0, 70%);
+@primary-tint-8-base0: tint(@primary-color-base0, 80%);
+@primary-tint-9-base0: tint(@primary-color-base0, 90%);
+@primary-tint-10-base0: tint(@primary-color-base0, 100%);
+
+// Base Scaffolding Variables
+@component-background-base0: #fff;
+@text-color-base0: fade(#000, 100%);
+@text-color-secondary-base0: fade(#000, 45%);
+@text-color-dark-base0: fade(#fff, 100%);
+@font-size-lg-base0: 0.16rem;
+@font-size-sm-base0: 0.12rem;
+@font-weight-base-base0: 400;
+@border-radius-base-base0: 0.02rem;
+
+// paddings
+@padding-vertical-sm-base0: 0.01rem;
+
+// The background colors for active and hover states for things like
+// list items or table cells.
+@item-hover-bg-base0: @background-color-light;
+
+// Border color
+@border-color-base-base0: #e0e0e0; // base border outline a component
+
+// Outline
+@background-color-base-base0: hsv(0, 0, 96%);
+@outline-color-base0: @primary-color-base0;
+
+// Disabled states
+@disabled-color-base0: fade(#000, 25%);
+
+// Shadow
+@shadow-4-base0: 0 0.05rem 0.05rem -0.03rem rgba(0, 0, 0, 0.2),
+0 0.08rem 0.1rem 0.01rem rgba(0, 0, 0, 0.14), 0 0.03rem 0.14rem 0.02rem rgba(0, 0, 0, 0.12);
+
+// Buttons
+@btn-hover-default-color-base0: rgba(0, 0, 0, 0.08);
+@btn-hover-other-color-base0: rgba(255, 255, 255, 0.08);
+@btn-danger-bg-base0: rgba(0, 0, 0, 0);
+@btn-disable-bg-base0: transparent;
+@btn-line-height-base0: 1.5;
+@btn-padding-vertical-base-base0: 0;
+@btn-padding-horizontal-base-base0: 0.12rem;
+@btn-padding-horizontal-sm-base0: 0.06rem;
+
+@btn-height-base-base0: 0.3rem;
+@btn-height-lg-base0: 0.4rem;
+@btn-height-sm-base0: 0.24rem;
+
+@btn-group-spacing-base0: 0.1rem;
+
+@btn-box-shadow-base0: 0 0.03rem 0.01rem -0.02rem rgba(0, 0, 0, 0.2),
+0 0.02rem 0.02rem 0 rgba(0, 0, 0, 0.14), 0 0.01rem 0.05rem 0 rgba(0, 0, 0, 0.12);
+@btn-focus-box-shadow-base0: 0 0.04rem 0.03rem -0.02rem rgba(0, 0, 0, 0.2),
+0 0.03rem 0.03rem 0 rgba(0, 0, 0, 0.14), 0 0.03rem 0.08rem 0 rgba(0, 0, 0, 0.12);
+@btn-icon-size-base0: 0.14rem;
+@btn-icon-only-size-base0: 0.2rem;
+@btn-icon-only-size-sm-base0: 0.14rem;
+@btn-icon-only-size-lg-base0: 0.24rem;
+@btn-icon-font-weight-base0: inherit;
+
+// raised button
+@btn-raised-border-width-base-base0: 0;
+@btn-raised-border-style-base-base0: solid;
+
+// button gray
+@btn-gray-bg-base0: #f5f5f5;
+@btn-gray-focus-bg-base0: #e6e6e6;
+@btn-gray-flat-color-base0: #d0d0d0;
+
+// Checkbox
+@checkbox-shadow-color-base0: fade(@outline-color-base0, 20%);
+
+// Radio
+@radio-shadow-color-base0: fade(@outline-color-base0, 20%);
+
+// Input
+@input-info-color-base0: fade(@text-color-base0, 54%);
+
+// tree
+@tree-bg-base0: @component-background;
+@tree-title-height-base0: 24px;
+@tree-child-padding-base0: 18px; // 全局未使用
+@tree-directory-selected-color-base0: #fff; // 使用了，但是directory的渲染不会走
+@tree-directory-selected-bg-base0: @primary-color; // 全局未使用
+@tree-node-hover-bg-base0: @background-color-light;
+@tree-node-selected-bg-base0: #b6bfdb;
+@tree-node-padding-base0: @padding-xs / 2;
+@primary-color-base0: @blue-6;
+@border-radius-base-base0: 0.02rem;
+@disabled-color-base0: fade(#000, 25%);
+@btn-dark-bg-base0: @dark-4;
+
+// css 变量
+:root {
+  // -------- Colors -----------
+  --primary-color: @primary-color-base0;
+  --error-color: @red-6;
+
+  // Color used by default to control hover and active backgrounds and for
+  // alert info backgrounds.
+  --primary-1: @primary-1-base0; // replace tint(@primary-color, 90%)
+  --primary-2: @primary-2-base0; // replace tint(@primary-color, 80%)
+  --primary-3: @primary-3-base0; // unused
+  --primary-4: @primary-4-base0; // unused
+  --primary-5: @primary-5-base0; // color used to control the text color in many active and hover states, replace tint(@primary-color, 20%)
+  --primary-6: @primary-6-base0; // color used to control the text color of active buttons, don't use, use @primary-color
+  --primary-7: @primary-7-base0; // replace shade(@primary-color, 5%)
+  --primary-8: @primary-8-base0; // unused
+  --primary-9: @primary-9-base0; // unused
+  --primary-10: @primary-10-base0; // unused
+  --primary-fade-1: @primary-fade-1-base0;
+  --primary-fade-2: @primary-fade-2-base0;
+  --primary-fade-3: @primary-fade-3-base0;
+  --primary-fade-4: @primary-fade-4-base0;
+  --primary-fade-5: @primary-fade-5-base0;
+  --primary-fade-6: @primary-fade-6-base0;
+  --primary-fade-7: @primary-fade-7-base0;
+  --primary-fade-8: @primary-fade-8-base0;
+  --primary-fade-9: @primary-fade-9-base0;
+  --primary-fade-10: @primary-fade-10-base0;
+  --primary-tint-1: @primary-tint-1-base0;
+  --primary-tint-2: @primary-tint-2-base0;
+  --primary-tint-3: @primary-tint-3-base0;
+  --primary-tint-4: @primary-tint-4-base0;
+  --primary-tint-5: @primary-tint-5-base0;
+  --primary-tint-6: @primary-tint-6-base0;
+  --primary-tint-7: @primary-tint-7-base0;
+  --primary-tint-8: @primary-tint-8-base0;
+  --primary-tint-9: @primary-tint-9-base0;
+  --primary-tint-10: @primary-tint-10-base0;
+
+  // Base Scaffolding Variables
+  --component-background: @component-background-base0; // 有效
+  --text-color: @text-color-base0;
+  --text-color-secondary: @text-color-secondary-base0;
+  --text-color-dark: @text-color-dark-base0;
+  --font-size-lg: @font-size-lg-base0;
+  --font-size-sm: @font-size-sm-base0;
+  --font-weight-base: @font-weight-base-base0;
+  --border-radius-base: @border-radius-base-base0;
+
+  // paddings
+  --padding-vertical-sm: @padding-vertical-sm-base0;
+
+  // The background colors for active and hover states for things like
+  // list items or table cells.
+  --item-hover-bg: @item-hover-bg-base0; // 无效 存在于Tree组件的directory.less中，改样式文件没有引入使用
+
+  // Border color
+  --border-color-base: @border-color-base-base0;
+  --border-width-base: 0.01rem;
+  --border-style-base: solid;
+
+  // Outline
+  --outline-color: var(--primary-color);
+  --background-color-base: @background-color-base-base0;
+  --outline-blur-size: 0;
+  --outline-width: 0.02rem;
+
+  // Disabled states
+  --disabled-color: @disabled-color-base0;
+  --disabled-bg: var(--background-color-base);
+
+  // Shadow
+  --shadow-4: @shadow-4-base0;
+
+  // Buttons
+  --btn-font-weight: var(--font-weight-base);
+  --btn-border-radius-base: var(--border-radius-base);
+  --btn-border-radius-sm: var(--border-radius-base);
+  //
+  --btn-hover-default-color: @btn-hover-default-color-base0;
+  --btn-hover-other-color: @btn-hover-other-color-base0;
+  //
+  --btn-danger-color: var(--error-color);
+  --btn-danger-bg: @btn-danger-bg-base0;
+  --btn-danger-border: var(--border-color-base);
+  //
+  --btn-disable-color: var(--disabled-color);
+  --btn-disable-bg: @btn-disable-bg-base0;
+  --btn-disable-border: var(--border-color-base);
+  //
+  --btn-line-height: @btn-line-height-base0;
+  --btn-padding-vertical-base: @btn-padding-vertical-base-base0;
+  --btn-padding-horizontal-base: @btn-padding-horizontal-base-base0;
+  --btn-padding-base: var(--btn-padding-vertical-base) var(--btn-padding-horizontal-base);
+  --btn-padding-vertical-lg: var(--btn-padding-vertical-base);
+  --btn-padding-horizontal-lg: var(--btn-padding-horizontal-base);
+  --btn-padding-lg: var(--btn-padding-vertical-lg) var(--btn-padding-horizontal-lg);
+  --btn-padding-vertical-sm: var(--padding-vertical-sm);
+  --btn-padding-horizontal-sm: @btn-padding-horizontal-sm-base0;
+  --btn-padding-sm: var(--padding-vertical-sm) var(--btn-padding-horizontal-sm);
+  --btn-font-size-lg: var(--font-size-lg);
+  --btn-font-size-sm: var(--font-size-sm);
+  //
+  --btn-height-base: @btn-height-base-base0;
+  --btn-height-lg: @btn-height-lg-base0;
+  --btn-height-sm: @btn-height-sm-base0;
+  //
+  --btn-circle-size: var(--btn-height-base);
+  --btn-circle-size-lg: var(--btn-height-lg);
+  --btn-circle-size-sm: var(--btn-height-sm);
+  //
+  --btn-group-border: var(--primary-5);
+  --btn-group-spacing: @btn-group-spacing-base0;
+  //
+  --btn-box-shadow: @btn-box-shadow-base0;
+  --btn-focus-box-shadow: @btn-focus-box-shadow-base0;
+  --btn-active-box-shadow: var(--shadow-4);
+  --btn-icon-size: @btn-icon-size-base0;
+  --btn-icon-size-lg: var(--font-size-lg);
+  --btn-icon-size-sm: var(--font-size-sm);
+  --btn-icon-only-size: @btn-icon-only-size-base0;
+  --btn-icon-only-size-sm: @btn-icon-only-size-sm-base0;
+  --btn-icon-only-size-lg: @btn-icon-only-size-lg-base0;
+  --btn-icon-font-weight: @btn-icon-font-weight-base0;
+
+  // raised button
+  --btn-raised-border-width-base: @btn-raised-border-width-base-base0;
+  --btn-raised-border-style-base: @btn-raised-border-style-base-base0;
+
+  // link button
+  --btn-link-font-weight: var(--btn-font-weight);
+
+  // button primary
+  --btn-primary-color: var(--text-color-dark);
+  --btn-primary-bg: var(--primary-color);
+  --btn-primary-border: var(--btn-primary-bg);
+  --btn-primary-focus-color: var(--btn-primary-color);
+  --btn-primary-focus-bg: var(--primary-7);
+  --btn-primary-hover-color: var(--btn-primary-focus-color);
+  --btn-primary-hover-bg: var(--btn-primary-focus-bg);
+  --btn-primary-disabled-color: var(--btn-primary-color);
+  --btn-primary-flat-color: var(--btn-primary-bg);
+
+  // button secondary
+  --btn-secondary-color: var(--text-color-dark);
+  --btn-secondary-bg: var(--primary-4);
+  --btn-secondary-border: var(--primary-color);
+  --btn-secondary-focus-color: var(--btn-secondary-color);
+  --btn-secondary-focus-bg: var(--primary-7);
+  --btn-secondary-hover-color: var(--btn-secondary-color);
+  --btn-secondary-hover-bg: var(--btn-secondary-focus-bg);
+  --btn-secondary-disabled-color: var(--btn-secondary-color);
+  --btn-secondary-flat-color: var(--btn-secondary-bg);
+
+  // button gray
+  --btn-gray-color: var(--text-color);
+  --btn-gray-bg: @btn-gray-bg-base0;
+  --btn-gray-border: var(--btn-gray-bg);
+  --btn-gray-focus-color: var(--btn-gray-color);
+  --btn-gray-focus-bg: @btn-gray-focus-bg-base0;
+  --btn-gray-hover-color: var(--btn-gray-focus-color);
+  --btn-gray-hover-bg: var(--btn-gray-focus-bg);
+  --btn-gray-disabled-color: var(--btn-gray-color);
+  --btn-gray-flat-color: @btn-gray-flat-color-base0;
+
+  // button blue
+  --btn-blue-color: var(--text-color-dark);
+  --btn-blue-bg: @blue-6;
+  --btn-blue-border: var(--btn-blue-bg);
+  --btn-blue-focus-color: var(--btn-blue-color);
+  --btn-blue-focus-bg: @blue-7;
+  --btn-blue-hover-color: var(--btn-blue-focus-color);
+  --btn-blue-hover-bg: var(--btn-blue-focus-bg);
+  --btn-blue-disabled-color: var(--btn-blue-color);
+  --btn-blue-flat-color: var(--btn-blue-bg);
+
+  // --
+  // button green
+  --btn-green-color: var(--text-color-dark);
+  --btn-green-bg: @green-6;
+  --btn-green-border: var(--btn-green-bg);
+  --btn-green-focus-color: var(--btn-green-color);
+  --btn-green-focus-bg: @green-7;
+  --btn-green-hover-color: var(--btn-green-focus-color);
+  --btn-green-hover-bg: var(--btn-green-focus-bg);
+  --btn-green-disabled-color: var(--btn-green-color);
+  --btn-green-flat-color: var(--btn-green-bg);
+
+  // button red
+  --btn-red-color: var(--text-color-dark);
+  --btn-red-bg: @red-6;
+  --btn-red-border: var(--btn-red-bg);
+  --btn-red-focus-color: var(--btn-red-color);
+  --btn-red-focus-bg: @red-7;
+  --btn-red-hover-color: var(--btn-red-focus-color);
+  --btn-red-hover-bg: var(--btn-red-focus-bg);
+  --btn-red-disabled-color: var(--btn-red-color);
+  --btn-red-flat-color: var(--btn-red-bg);
+
+  // button yellow
+  --btn-yellow-color: var(--text-color-dark);
+  --btn-yellow-bg: @yellow-6;
+  --btn-yellow-border: var(--btn-yellow-bg);
+  --btn-yellow-focus-color: var(--btn-yellow-color);
+  --btn-yellow-focus-bg: @yellow-7;
+  --btn-yellow-hover-color: var(--btn-yellow-focus-color);
+  --btn-yellow-hover-bg: var(--btn-yellow-focus-bg);
+  --btn-yellow-disabled-color: var(--btn-yellow-color);
+  --btn-yellow-flat-color: var(--btn-yellow-bg);
+
+  // button purple
+  --btn-purple-color: var(--text-color-dark);
+  --btn-purple-bg: @purple-6;
+  --btn-purple-border: var(--btn-purple-bg);
+  --btn-purple-focus-color: var(--btn-purple-color);
+  --btn-purple-focus-bg: @purple-7;
+  --btn-purple-hover-color: var(--btn-purple-focus-color);
+  --btn-purple-hover-bg: var(--btn-purple-focus-bg);
+  --btn-purple-disabled-color: var(--btn-purple-color);
+  --btn-purple-flat-color: var(--btn-purple-bg);
+
+  // button dark
+  --btn-dark-color: var(--text-color-dark);
+  --btn-dark-bg: @dark-4;
+  --btn-dark-border: var(--btn-dark-bg);
+  --btn-dark-focus-color: var(--btn-dark-color);
+  --btn-dark-focus-bg: @dark-5;
+  --btn-dark-hover-color: var(--btn-dark-focus-color);
+  --btn-dark-hover-bg: var(--btn-dark-focus-bg);
+  --btn-dark-disabled-color: var(--btn-dark-color);
+  --btn-dark-flat-color: @dark-6;
+
+  // button default
+  --btn-default-color: var(--text-color);
+  --btn-default-bg: transparent;
+  --btn-default-border: var(--border-color-base);
+  --btn-default-focus-color: var(--btn-primary-bg);
+  --btn-default-focus-bg: var(--btn-default-bg);
+  --btn-default-hover-color: var(--btn-default-color);
+  --btn-default-hover-bg: var(--btn-default-focus-bg);
+  --btn-default-disabled-color: var(--btn-default-color);
+  --btn-default-flat-color: var(--btn-default-color);
+  // --
+
+  // Radio 
+  --radio-size: 0.14rem;
+  --radio-border-width: var(--border-width-base);
+  --radio-border-color: rgba(0, 0, 0, 0.24);
+  --radio-uncheck-hover-border-color: var(--primary-color);
+  --radio-shadow-color: @radio-shadow-color-base0;
+  --radio-disabled-color: var(--disabled-color);
+  --radio-disabled-bg: var(--input-disabled-bg);
+  --radio-disabled-border-color: var(--disabled-color);
+  --radio-disabled-check-color: var(--radio-disabled-color);
+  --radio-disabled-check-bg: var(--radio-disabled-bg);
+  --radio-disabled-check-border-color: var(--radio-disabled-border-color);
+  --radio-line-height: 1;
+  --radio-label-white-space: var(--label-white-space);
+  --radio-dot-color: var(--primary-color);
+
+  // Radio buttons
+  --radio-button-bg: var(--btn-default-bg);
+  --radio-button-color: var(--btn-default-color);
+  --radio-button-hover-color: var(--primary-5);
+  --radio-button-active-color: var(--primary-7);
+
+  // Form
+  --label-white-space: nowrap;
+
+  // Input
+  --input-disabled-bg: var(--disabled-bg);
+  --input-icon-width-base: 0.24rem;
+  --input-highlight-border-color: #47B881;
+  --input-info-color: @input-info-color-base0;
+
+  // Table
+  // --
+  --table-combo-add-fields-hover-bg: var(--primary-fade-1);
+  --table-combo-filter-name-select-hover-bg: var(--primary-fade-1);
+
+  // tree
+	// --primary-color: @primary-color-base0; // 有效
+	// --border-radius-base: @border-radius-base-base0; // 有效
+	// --disabled-color: @disabled-color-base0; // 有效
+	// --btn-dark-bg: @btn-dark-bg-base0; // 有效
+	--tree-bg: @tree-bg-base0; // 有效
+	--tree-title-height: @tree-title-height-base0; // 有效
+	--tree-child-padding: @tree-child-padding-base0; // 定义了，但全局未使用
+	--tree-directory-selected-color: @tree-directory-selected-color-base0; // 使用了，但是directory样式文件完全没引入使用
+	--tree-directory-selected-bg: @tree-directory-selected-bg-base0; // 定义了，但全局未使用
+	--tree-node-hover-bg: @tree-node-hover-bg-base0; // 有效
+	--tree-node-selected-bg: @tree-node-selected-bg-base0; // 有效
+  --tree-node-padding: @tree-node-padding-base0; // 有效
+
+  // Switch
+  // ---
+  --switch-box-shadow: 0 0 0 0.02rem fade(@primary-3-base0, 20%);
+
+  //Ripple
+  // ---
+  --ripple-dark-color: fade(#000, 10%);
+  --ripple-light-color: fade(#fff, 10%);
+}
+
+
+// -- TEST -- //
+
 // The prefix to use on all css classes from c7n.
 @c7n-prefix: c7n;
 @c7n-pro-prefix: c7n-pro;
 
 // -------- Colors -----------
-@primary-color: @blue-6;
+@primary-color: var(--primary-color);
 @info-color: @blue-6;
 @success-color: @green-6;
 @processing-color: @primary-color;
-@error-color: @red-6;
+@error-color: var(--error-color);
 @error-bg-color: #fcebeb;
 @highlight-color: @red-6;
 @warning-color: @gold-6;
@@ -21,16 +456,16 @@
 
 // Color used by default to control hover and active backgrounds and for
 // alert info backgrounds.
-@primary-1: color(~`colorPalette('@{primary-color}', 1) `); // replace tint(@primary-color, 90%)
-@primary-2: color(~`colorPalette('@{primary-color}', 2) `); // replace tint(@primary-color, 80%)
-@primary-3: color(~`colorPalette('@{primary-color}', 3) `); // unused
-@primary-4: color(~`colorPalette('@{primary-color}', 4) `); // unused
-@primary-5: color(~`colorPalette('@{primary-color}', 5) `); // color used to control the text color in many active and hover states, replace tint(@primary-color, 20%)
-@primary-6: @primary-color; // color used to control the text color of active buttons, don't use, use @primary-color
-@primary-7: color(~`colorPalette('@{primary-color}', 7) `); // replace shade(@primary-color, 5%)
-@primary-8: color(~`colorPalette('@{primary-color}', 8) `); // unused
-@primary-9: color(~`colorPalette('@{primary-color}', 9) `); // unused
-@primary-10: color(~`colorPalette('@{primary-color}', 10) `); // unused
+@primary-1: var(--primary-1); // replace tint(@primary-color, 90%)
+@primary-2: var(--primary-2); // replace tint(@primary-color, 80%)
+@primary-3: var(--primary-3); // unused
+@primary-4: var(--primary-4); // unused
+@primary-5: var(--primary-5); // color used to control the text color in many active and hover states, replace tint(@primary-color, 20%)
+@primary-6: var(--primary-6); // color used to control the text color of active buttons, don't use, use @primary-color
+@primary-7: var(--primary-7); // replace shade(@primary-color, 5%)
+@primary-8: var(--primary-8); // unused
+@primary-9: var(--primary-9); // unused
+@primary-10: var(--primary-10); // unused
 
 // Base Scaffolding Variables
 // ---
@@ -38,25 +473,25 @@
 // Background color for `<body>`
 @body-background: #fff;
 // Base background color for most components
-@component-background: #fff;
+@component-background: var(--component-background);
 @font-family-no-number: 'Chinese Quote', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Helvetica Neue', Helvetica, Arial,
 sans-serif;
 @font-family: 'Monospaced Number', @font-family-no-number;
 @code-family: Consolas, Menlo, Courier, monospace;
 @heading-color: fade(#000, 85%);
-@text-color: fade(#000, 100%);
-@text-color-secondary: fade(#000, 45%);
+@text-color: var(--text-color);
+@text-color-secondary: var(--text-color-secondary);
 @heading-color-dark: fade(#fff, 100%);
-@text-color-dark: fade(#fff, 100%);
+@text-color-dark: var(--text-color-dark);
 @text-color-secondary-dark: fade(#fff, 65%);
 @font-size-base: 0.13rem;
-@font-size-lg: 0.16rem;
-@font-size-sm: 0.12rem;
-@font-weight-base: 400;
+@font-size-lg: var(--font-size-lg);
+@font-size-sm: var(--font-size-sm);
+@font-weight-base: var(--font-weight-base);
 @line-height-base: 1.5;
 @border-radius-lg: 0.1rem;
-@border-radius-base: 0.02rem;
+@border-radius-base: var(--border-radius-base);
 @border-radius-sm: 0.02rem;
 
 // paddings
@@ -65,7 +500,7 @@ sans-serif;
 @padding-sm: 0.12rem; // Form controls and items
 @padding-xs: 0.08rem; // small items
 @padding-vertical-base: 0.01rem;
-@padding-vertical-sm: 0.01rem;
+@padding-vertical-sm: var(--padding-vertical-sm);
 @padding-vertical-lg: 0.06rem;
 
 // vertical padding for all form controls
@@ -82,7 +517,7 @@ sans-serif;
 // The background colors for active and hover states for things like
 // list items or table cells.
 @item-active-bg: rgba(140, 158, 255, 0.12);
-@item-hover-bg: @background-color-light;
+@item-hover-bg: var(--item-hover-bg);
 @item-focus-bg: @background-color-light;
 @item-active-color: @text-color;
 @item-focus-color: @text-color;
@@ -122,22 +557,22 @@ sans-serif;
 @ease-in-out-quint: cubic-bezier(0.86, 0, 0.07, 1);
 
 // Border color
-@border-color-base: #e0e0e0; // base border outline a component
+@border-color-base: var(--border-color-base); // base border outline a component
 @border-color-split: hsv(0, 0, 91%); // split border inside a component
-@border-width-base: 0.01rem; // width of the border for a component
-@border-style-base: solid; // style of a components border
+@border-width-base: var(--border-width-base); // width of the border for a component
+@border-style-base: var(--border-style-base); // style of a components border
 
 // Outline
-@outline-blur-size: 0;
-@outline-width: 0.02rem;
-@outline-color: @primary-color;
+@outline-blur-size: var(--outline-blur-size);
+@outline-width: var(--outline-width);
+@outline-color: var(--outline-color);
 
 @background-color-light: fade(#000, 4%); // background of header and selected item
-@background-color-base: hsv(0, 0, 96%); // Default grey background color
+@background-color-base: var(--background-color-base); // Default grey background color
 
 // Disabled states
-@disabled-color: fade(#000, 25%);
-@disabled-bg: @background-color-base;
+@disabled-color: var(--disabled-color);
+@disabled-bg: var(--disabled-bg);
 @disabled-color-dark: fade(#fff, 35%);
 
 // Shadow
@@ -149,179 +584,176 @@ sans-serif;
 @shadow-1-right: 0.02rem 0 0.08rem @shadow-color;
 @shadow-2: 0 0.04rem 0.12rem @shadow-color;
 @shadow-3: 0 0 0 0.01rem @component-background;
-@shadow-4: 0 0.05rem 0.05rem -0.03rem rgba(0, 0, 0, 0.2),
-0 0.08rem 0.1rem 0.01rem rgba(0, 0, 0, 0.14), 0 0.03rem 0.14rem 0.02rem rgba(0, 0, 0, 0.12);
+@shadow-4: var(--shadow-4);
 
 // Buttons
-@btn-font-weight: @font-weight-base;
-@btn-border-radius-base: @border-radius-base;
-@btn-border-radius-sm: @border-radius-base;
+@btn-font-weight: var(--btn-font-weight);
+@btn-border-radius-base: var(--btn-border-radius-base);
+@btn-border-radius-sm: var(--btn-border-radius-sm);
 
-@btn-hover-default-color: rgba(0, 0, 0, 0.08);
-@btn-hover-other-color: rgba(255, 255, 255, 0.08);
+@btn-hover-default-color: var(--btn-hover-default-color);
+@btn-hover-other-color: var(--btn-hover-other-color);
 
 
-@btn-danger-color: @error-color;
-@btn-danger-bg: rgba(0, 0, 0, 0);
-@btn-danger-border: @border-color-base;
+@btn-danger-color: var(--btn-danger-color);
+@btn-danger-bg: var(--btn-danger-bg);
+@btn-danger-border: var(--btn-danger-border);
 
-@btn-disable-color: @disabled-color;
-@btn-disable-bg: transparent;
-@btn-disable-border: @border-color-base;
+@btn-disable-color: var(--btn-disable-color);
+@btn-disable-bg: var(--btn-disable-bg);
+@btn-disable-border: var(--btn-disable-border);
 
-@btn-line-height: 1.5;
-@btn-padding-vertical-base: 0;
-@btn-padding-horizontal-base: 0.12rem;
-@btn-padding-base: @btn-padding-vertical-base @btn-padding-horizontal-base;
-@btn-padding-vertical-lg: @btn-padding-vertical-base;
-@btn-padding-horizontal-lg: @btn-padding-horizontal-base;
-@btn-padding-lg: @btn-padding-vertical-lg @btn-padding-horizontal-lg;
-@btn-padding-vertical-sm: @padding-vertical-sm;
-@btn-padding-horizontal-sm: 0.06rem;
-@btn-padding-sm: @padding-vertical-sm @btn-padding-horizontal-sm;
-@btn-font-size-lg: @font-size-lg;
-@btn-font-size-sm: @font-size-sm;
+@btn-line-height: var(--btn-line-height);
+@btn-padding-vertical-base: var(--btn-padding-vertical-base);
+@btn-padding-horizontal-base: var(--btn-padding-horizontal-base);
+@btn-padding-base: var(--btn-padding-base);
+@btn-padding-vertical-lg: var(--btn-padding-vertical-lg);
+@btn-padding-horizontal-lg: var(--btn-padding-horizontal-lg);
+@btn-padding-lg: var(--btn-padding-lg);
+@btn-padding-vertical-sm: var(--btn-padding-vertical-sm);
+@btn-padding-horizontal-sm: var(--btn-padding-horizontal-sm);
+@btn-padding-sm: var(--btn-padding-sm);
+@btn-font-size-lg: var(--btn-font-size-lg);
+@btn-font-size-sm: var(--btn-font-size-sm);
 
-@btn-height-base: 0.3rem;
-@btn-height-lg: 0.4rem;
-@btn-height-sm: 0.24rem;
+@btn-height-base: var(--btn-height-base);
+@btn-height-lg: var(--btn-height-lg);
+@btn-height-sm: var(--btn-height-sm);
 
-@btn-circle-size: @btn-height-base;
-@btn-circle-size-lg: @btn-height-lg;
-@btn-circle-size-sm: @btn-height-sm;
+@btn-circle-size: var(--btn-circle-size);
+@btn-circle-size-lg: var(--btn-circle-size-lg);
+@btn-circle-size-sm: var(--btn-circle-size-sm);
 
-@btn-group-border: @primary-5;
-@btn-group-spacing: 0.1rem;
+@btn-group-border: var(--btn-group-border);
+@btn-group-spacing: var(--btn-group-spacing);
 
-@btn-box-shadow: 0 0.03rem 0.01rem -0.02rem rgba(0, 0, 0, 0.2),
-0 0.02rem 0.02rem 0 rgba(0, 0, 0, 0.14), 0 0.01rem 0.05rem 0 rgba(0, 0, 0, 0.12);
-@btn-focus-box-shadow: 0 0.04rem 0.03rem -0.02rem rgba(0, 0, 0, 0.2),
-0 0.03rem 0.03rem 0 rgba(0, 0, 0, 0.14), 0 0.03rem 0.08rem 0 rgba(0, 0, 0, 0.12);
-@btn-active-box-shadow: @shadow-4;
-@btn-icon-size: 0.14rem;
-@btn-icon-size-lg: @font-size-lg;
-@btn-icon-size-sm: @font-size-sm;
-@btn-icon-only-size: 0.2rem;
-@btn-icon-only-size-sm: 0.14rem;
-@btn-icon-only-size-lg: 0.24rem;
-@btn-icon-font-weight: inherit;
+@btn-box-shadow: var(--btn-box-shadow);
+@btn-focus-box-shadow: var(--btn-focus-box-shadow);
+@btn-active-box-shadow: var(--btn-active-box-shadow);
+@btn-icon-size: var(--btn-icon-size);
+@btn-icon-size-lg: var(--btn-icon-size-lg);
+@btn-icon-size-sm: var(--btn-icon-size-sm);
+@btn-icon-only-size: var(--btn-icon-only-size);
+@btn-icon-only-size-sm: var(--btn-icon-only-size-sm);
+@btn-icon-only-size-lg: var(--btn-icon-only-size-lg);
+@btn-icon-font-weight: var(--btn-icon-font-weight);
 
 // raised button
-@btn-raised-border-width-base: 0;
-@btn-raised-border-style-base: solid;
+@btn-raised-border-width-base: var(--btn-raised-border-width-base);
+@btn-raised-border-style-base: var(--btn-raised-border-style-base);
 
 // link button
-@btn-link-font-weight: @btn-font-weight;
+@btn-link-font-weight: var(--btn-link-font-weight);
 
 // button primary
-@btn-primary-color: @text-color-dark;
-@btn-primary-bg: @primary-color;
-@btn-primary-border: @btn-primary-bg;
-@btn-primary-focus-color: @btn-primary-color;
-@btn-primary-focus-bg: @primary-7;
-@btn-primary-hover-color: @btn-primary-focus-color;
-@btn-primary-hover-bg: @btn-primary-focus-bg;
-@btn-primary-disabled-color: @btn-primary-color;
-@btn-primary-flat-color: @btn-primary-bg;
+@btn-primary-color: var(--btn-primary-color);
+@btn-primary-bg: var(--btn-primary-bg);
+@btn-primary-border: var(--btn-primary-border);
+@btn-primary-focus-color: var(--btn-primary-focus-color);
+@btn-primary-focus-bg: var(--btn-primary-focus-bg);
+@btn-primary-hover-color: var(--btn-primary-hover-color);
+@btn-primary-hover-bg: var(--btn-primary-hover-bg);
+@btn-primary-disabled-color: var(--btn-primary-disabled-color);
+@btn-primary-flat-color: var(--btn-primary-flat-color);
 
 // button secondary
-@btn-secondary-color: @text-color-dark;
-@btn-secondary-bg: @primary-4;
-@btn-secondary-border: @primary-color;
-@btn-secondary-focus-color: @btn-secondary-color;
-@btn-secondary-focus-bg: @primary-7;
-@btn-secondary-hover-color: @btn-secondary-color;
-@btn-secondary-hover-bg: @btn-secondary-focus-bg;
-@btn-secondary-disabled-color: @btn-secondary-color;
-@btn-secondary-flat-color: @btn-secondary-bg;
+@btn-secondary-color: var(--btn-secondary-color);
+@btn-secondary-bg: var(--btn-secondary-bg);
+@btn-secondary-border: var(--btn-secondary-border);
+@btn-secondary-focus-color: var(--btn-secondary-focus-color);
+@btn-secondary-focus-bg: var(--btn-secondary-focus-bg);
+@btn-secondary-hover-color: var(--btn-secondary-hover-color);
+@btn-secondary-hover-bg: var(--btn-secondary-hover-bg);
+@btn-secondary-disabled-color: var(--btn-secondary-disabled-color);
+@btn-secondary-flat-color: var(--btn-secondary-flat-color);
 
 // button gray
-@btn-gray-color: @text-color;
-@btn-gray-bg: #f5f5f5;
-@btn-gray-border: @btn-gray-bg;
-@btn-gray-focus-color: @btn-gray-color;
-@btn-gray-focus-bg: #e6e6e6;
-@btn-gray-hover-color: @btn-gray-focus-color;
-@btn-gray-hover-bg: @btn-gray-focus-bg;
-@btn-gray-disabled-color: @btn-gray-color;
-@btn-gray-flat-color: #d0d0d0;
+@btn-gray-color: var(--btn-gray-color);
+@btn-gray-bg: var(--btn-gray-bg);
+@btn-gray-border: var(--btn-gray-border);
+@btn-gray-focus-color: var(--btn-gray-focus-color);
+@btn-gray-focus-bg: var(--btn-gray-focus-bg);
+@btn-gray-hover-color: var(--btn-gray-hover-color);
+@btn-gray-hover-bg: var(--btn-gray-hover-bg);
+@btn-gray-disabled-color: var(--btn-gray-disabled-color);
+@btn-gray-flat-color: var(--btn-gray-flat-color);
 
 // button blue
-@btn-blue-color: @text-color-dark;
-@btn-blue-bg: @blue-6;
-@btn-blue-border: @btn-blue-bg;
-@btn-blue-focus-color: @btn-blue-color;
-@btn-blue-focus-bg: @blue-7;
-@btn-blue-hover-color: @btn-blue-focus-color;
-@btn-blue-hover-bg: @btn-blue-focus-bg;
-@btn-blue-disabled-color: @btn-blue-color;
-@btn-blue-flat-color: @btn-blue-bg;
+@btn-blue-color: var(--btn-blue-color);
+@btn-blue-bg: var(--btn-blue-bg);
+@btn-blue-border: var(--btn-blue-border);
+@btn-blue-focus-color: var(--btn-blue-focus-color);
+@btn-blue-focus-bg: var(--btn-blue-focus-bg);
+@btn-blue-hover-color: var(--btn-blue-hover-color);
+@btn-blue-hover-bg: var(--btn-blue-hover-bg);
+@btn-blue-disabled-color: var(--btn-blue-disabled-color);
+@btn-blue-flat-color: var(--btn-blue-flat-color);
 
 // button green
-@btn-green-color: @text-color-dark;
-@btn-green-bg: @green-6;
-@btn-green-border: @btn-green-bg;
-@btn-green-focus-color: @btn-green-color;
-@btn-green-focus-bg: @green-7;
-@btn-green-hover-color: @btn-green-focus-color;
-@btn-green-hover-bg: @btn-green-focus-bg;
-@btn-green-disabled-color: @btn-green-color;
-@btn-green-flat-color: @btn-green-bg;
+@btn-green-color: var(--btn-green-color);
+@btn-green-bg: var(--btn-green-bg);
+@btn-green-border: var(--btn-green-border);
+@btn-green-focus-color: var(--btn-green-focus-color);
+@btn-green-focus-bg: var(--btn-green-focus-bg);
+@btn-green-hover-color: var(--btn-green-hover-color);
+@btn-green-hover-bg: var(--btn-green-hover-bg);
+@btn-green-disabled-color: var(--btn-green-disabled-color);
+@btn-green-flat-color: var(--btn-green-flat-color);
 
 // button red
-@btn-red-color: @text-color-dark;
-@btn-red-bg: @red-6;
-@btn-red-border: @btn-red-bg;
-@btn-red-focus-color: @btn-red-color;
-@btn-red-focus-bg: @red-7;
-@btn-red-hover-color: @btn-red-focus-color;
-@btn-red-hover-bg: @btn-red-focus-bg;
-@btn-red-disabled-color: @btn-red-color;
-@btn-red-flat-color: @btn-red-bg;
+@btn-red-color: var(--btn-red-color);
+@btn-red-bg: var(--btn-red-bg);
+@btn-red-border: var(--btn-red-border);
+@btn-red-focus-color: var(--btn-red-focus-color);
+@btn-red-focus-bg: var(--btn-red-focus-bg);
+@btn-red-hover-color: var(--btn-red-hover-color);
+@btn-red-hover-bg: var(--btn-red-hover-bg);
+@btn-red-disabled-color: var(--btn-red-disabled-color);
+@btn-red-flat-color: var(--btn-red-flat-color);
 
 // button yellow
-@btn-yellow-color: @text-color-dark;
-@btn-yellow-bg: @yellow-6;
-@btn-yellow-border: @btn-yellow-bg;
-@btn-yellow-focus-color: @btn-yellow-color;
-@btn-yellow-focus-bg: @yellow-7;
-@btn-yellow-hover-color: @btn-yellow-focus-color;
-@btn-yellow-hover-bg: @btn-yellow-focus-bg;
-@btn-yellow-disabled-color: @btn-yellow-color;
-@btn-yellow-flat-color: @btn-yellow-bg;
+@btn-yellow-color: var(--btn-yellow-color);
+@btn-yellow-bg: var(--btn-yellow-bg);
+@btn-yellow-border: var(--btn-yellow-border);
+@btn-yellow-focus-color: var(--btn-yellow-focus-color);
+@btn-yellow-focus-bg: var(--btn-yellow-focus-bg);
+@btn-yellow-hover-color: var(--btn-yellow-hover-color);
+@btn-yellow-hover-bg: var(--btn-yellow-hover-bg);
+@btn-yellow-disabled-color: var(--btn-yellow-disabled-color);
+@btn-yellow-flat-color: var(--btn-yellow-flat-color);
 
 // button purple
-@btn-purple-color: @text-color-dark;
-@btn-purple-bg: @purple-6;
-@btn-purple-border: @btn-purple-bg;
-@btn-purple-focus-color: @btn-purple-color;
-@btn-purple-focus-bg: @purple-7;
-@btn-purple-hover-color: @btn-purple-focus-color;
-@btn-purple-hover-bg: @btn-purple-focus-bg;
-@btn-purple-disabled-color: @btn-purple-color;
-@btn-purple-flat-color: @btn-purple-bg;
+@btn-purple-color: var(--btn-purple-color);
+@btn-purple-bg: var(--btn-purple-bg);
+@btn-purple-border: var(--btn-purple-border);
+@btn-purple-focus-color: var(--btn-purple-focus-color);
+@btn-purple-focus-bg: var(--btn-purple-focus-bg);
+@btn-purple-hover-color: var(--btn-purple-hover-color);
+@btn-purple-hover-bg: var(--btn-purple-hover-bg);
+@btn-purple-disabled-color: var(--btn-purple-disabled-color);
+@btn-purple-flat-color: var(--btn-purple-flat-color);
 
 // button dark
-@btn-dark-color: @text-color-dark;
-@btn-dark-bg: @dark-4;
-@btn-dark-border: @btn-dark-bg;
-@btn-dark-focus-color: @btn-dark-color;
-@btn-dark-focus-bg: @dark-5;
-@btn-dark-hover-color: @btn-dark-focus-color;
-@btn-dark-hover-bg: @btn-dark-focus-bg;
-@btn-dark-disabled-color: @btn-dark-color;
-@btn-dark-flat-color: @dark-6;
+@btn-dark-color: var(--btn-dark-color);
+@btn-dark-bg: var(--btn-dark-bg);
+@btn-dark-border: var(--btn-dark-border);
+@btn-dark-focus-color: var(--btn-dark-focus-color);
+@btn-dark-focus-bg: var(--btn-dark-focus-bg);
+@btn-dark-hover-color: var(--btn-dark-hover-color);
+@btn-dark-hover-bg: var(--btn-dark-hover-bg);
+@btn-dark-disabled-color: var(--btn-dark-disabled-color);
+@btn-dark-flat-color: var(--btn-dark-flat-color);
 
 // button default
-@btn-default-color: @text-color;
-@btn-default-bg: transparent;
-@btn-default-border: @border-color-base;
-@btn-default-focus-color: @btn-primary-bg;
-@btn-default-focus-bg: @btn-default-bg;
-@btn-default-hover-color: @btn-default-color;
-@btn-default-hover-bg: @btn-default-focus-bg;
-@btn-default-disabled-color: @btn-default-color;
-@btn-default-flat-color: @btn-default-color;
+@btn-default-color: var(--btn-default-color);
+@btn-default-bg: var(--btn-default-bg);
+@btn-default-border: var(--btn-default-border);
+@btn-default-focus-color: var(--btn-default-focus-color);
+@btn-default-focus-bg: var(--btn-default-focus-bg);
+@btn-default-hover-color: var(--btn-default-hover-color);
+@btn-default-hover-bg: var(--btn-default-hover-bg);
+@btn-default-disabled-color: var(--btn-default-disabled-color);
+@btn-default-flat-color: var(--btn-default-flat-color);
 
 // Checkbox
 @checkbox-size: 0.16rem;
@@ -335,31 +767,31 @@ sans-serif;
 @checkbox-disabled-check-border-color: @checkbox-disabled-border-color;
 @checkbox-disabled-check-color: @checkbox-disabled-color;
 @checkbox-uncheck-hover-border-color: @primary-color;
-@checkbox-shadow-color: fade(@outline-color, 20%);
+@checkbox-shadow-color: var(--primary-fade-2);
 @checkbox-indeterminate-bg: @primary-color;
 @checkbox-indeterminate-color: #fff;
 
 // Radio
-@radio-border-color: rgba(0, 0, 0, 0.24);
-@radio-border-width: @border-width-base;
-@radio-disabled-color: @disabled-color;
-@radio-disabled-bg: @input-disabled-bg;
-@radio-disabled-border-color: @disabled-color;
-@radio-disabled-check-bg: @radio-disabled-bg;
-@radio-disabled-check-border-color: @radio-disabled-border-color;
-@radio-disabled-check-color: @radio-disabled-color;
-@radio-uncheck-hover-border-color: @primary-color;
-@radio-size: 0.14rem;
-@radio-dot-color: @primary-color;
-@radio-line-height: 1;
-@radio-label-white-space: @label-white-space;
-@radio-shadow-color: fade(@outline-color, 20%);
+@radio-border-color: var(--radio-border-color);
+@radio-border-width: var(--radio-border-width);
+@radio-disabled-color: var(--radio-disabled-color);
+@radio-disabled-bg: var(--radio-disabled-bg);
+@radio-disabled-border-color: var(--radio-disabled-border-color);
+@radio-disabled-check-bg: var(--radio-disabled-check-bg);
+@radio-disabled-check-border-color: var(--radio-disabled-check-border-color);
+@radio-disabled-check-color: var(--radio-disabled-check-color);
+@radio-uncheck-hover-border-color: var(--radio-uncheck-hover-border-color);
+@radio-size: var(--radio-size);
+@radio-dot-color: var(--radio-dot-color);
+@radio-line-height: var(--radio-line-height);
+@radio-label-white-space: var(--radio-label-white-space);
+@radio-shadow-color: var(--primary-fade-2);
 
 // Radio buttons
-@radio-button-bg: @btn-default-bg;
-@radio-button-color: @btn-default-color;
-@radio-button-hover-color: @primary-5;
-@radio-button-active-color: @primary-7;
+@radio-button-bg: var(--radio-button-bg);
+@radio-button-color: var(--radio-button-color);
+@radio-button-hover-color: var(--radio-button-hover-color);
+@radio-button-active-color: var(--radio-button-active-color);
 
 // Media queries breakpoints
 // Extra small screen / phone
@@ -434,7 +866,7 @@ sans-serif;
 @label-font-weight: @font-weight-base;
 @label-colon-color: inherit;
 @label-line-height: @input-height-base;
-@label-white-space: nowrap;
+@label-white-space: var(--label-white-space);
 @label-wrapper-padding-vertical: 0.1rem;
 @label-wrapper-padding-horizontal: 0.04rem;
 @label-wrapper-padding: @label-wrapper-padding-vertical @label-wrapper-padding-horizontal;
@@ -481,7 +913,7 @@ sans-serif;
 @input-padding-vertical-sm: @padding-vertical-sm;
 @input-padding-vertical-lg: @padding-vertical-lg;
 @input-placeholder-color: hsv(0, 0, 75%);
-@input-info-color: fade(@text-color, 54%);
+@input-info-color: var(--input-info-color);
 @input-active-color: @text-color;
 //@input-active-box-shadow: 0 0 @outline-blur-size @outline-width fade(@color, 20%);
 @input-active-box-shadow: none;
@@ -492,7 +924,7 @@ sans-serif;
 @input-border-radius: @border-radius-base;
 @input-error-border-color: @error-color;
 @input-required-border-color: @input-border-color;
-@input-highlight-border-color: #47B881;
+@input-highlight-border-color: var(--input-highlight-border-color);
 @input-wrapper-bg: @component-background;
 @input-bg: transparent;
 @input-required-bg: @yellow-1;
@@ -512,10 +944,10 @@ sans-serif;
 @input-float-focus-border-color: @input-focus-border-color;
 @input-float-hover-border-color: @input-color;
 @input-float-required-hover-border-color: @input-float-hover-border-color;
-@input-disabled-bg: @disabled-bg;
+@input-disabled-bg: var(--input-disabled-bg);
 @input-disabled-color: rgba(0, 0, 0, 0.54);
 @input-disabled-icon-color: @input-disabled-color;
-@input-icon-width-base: 0.24rem;
+@input-icon-width-base: var(--input-icon-width-base);
 @input-icon-width-lg: 0.3rem;
 @input-icon-width-sm: 0.2rem;
 @input-icon-color: inherit;
@@ -709,6 +1141,8 @@ sans-serif;
 @table-icon-help-content: '\e8fd';
 @table-icon-help-size: @icon-font-size-base;
 @table-icon-help-font-weight: inherit;
+@table-combo-add-fields-hover-bg: var(--table-combo-add-fields-hover-bg);
+@table-combo-filter-name-select-hover-bg: var(--table-combo-filter-name-select-hover-bg);
 
 // PerformanceTable
 @performance-table-header-bg: #f5f5f5;
@@ -718,7 +1152,7 @@ sans-serif;
 // Loader
 
 @loader-spin-ring-wide: 3px;
-@loader-spin-ring-color: fade(@primary-color, 80);
+@loader-spin-ring-color: var(--primary-fade-8);
 @loader-spin-ring-active-color: @B500;
 @loader-duration-normal: 0.6s;
 
@@ -729,13 +1163,14 @@ sans-serif;
 
 // Tree
 // ---
-@tree-bg: @component-background;
-@tree-title-height: 24px;
-@tree-child-padding: 18px;
-@tree-directory-selected-color: #fff;
-@tree-directory-selected-bg: @primary-color;
-@tree-node-hover-bg: @item-hover-bg;
-@tree-node-selected-bg: @primary-2;
+@tree-bg: var(--tree-bg); // 有效
+@tree-title-height: var(--tree-title-height); // 有效
+@tree-child-padding: var(--tree-child-padding); // 全局未使用
+@tree-directory-selected-color: var(--tree-directory-selected-color); //Pro Tree 不支持 directory 全局未使用
+@tree-directory-selected-bg: var(--tree-directory-selected-bg); //Pro Tree 不支持 directory 全局未使用
+@tree-node-hover-bg: var(--tree-node-hover-bg); // 有效
+@tree-node-selected-bg: var(--tree-node-selected-bg); // 有效
+@tree-node-padding: var(--tree-node-padding); // 有效
 
 
 // Tag
@@ -867,7 +1302,7 @@ sans-serif;
 @switch-checked-button-bg: @switch-checked-color;
 @switch-bg: rgba(0, 0, 0, 0.38);
 @switch-button-bg: @component-background;
-@switch-box-shadow: 0 0 0 0.02rem fade(@switch-color, 20%);
+@switch-box-shadow: var(--switch-box-shadow);
 @switch-button-box-shadow: 0 0.02rem 0.01rem -0.01rem rgba(0, 0, 0, 0.2),
 0 0.01rem 0.01rem 0 rgba(0, 0, 0, 0.14), 0 0.01rem 0.03rem 0 rgba(0, 0, 0, 0.12);
 @switch-lg-loading-inner-size: 0.2rem;
@@ -908,18 +1343,18 @@ sans-serif;
 @slider-track-background-color-hover: @primary-7;
 @slider-handle-color: @primary-color;
 @slider-handle-color-hover: @primary-7;
-@slider-handle-color-focus: tint(@primary-color, 20%);
-@slider-handle-color-focus-shadow: tint(@primary-color, 50%);
+@slider-handle-color-focus: var(--primary-tint-2);
+@slider-handle-color-focus-shadow: var(--primary-tint-5);
 @slider-handle-color-tooltip-open: @primary-color;
 @slider-dot-border-color: @border-color-split;
-@slider-dot-border-color-active: tint(@primary-color, 50%);
+@slider-dot-border-color-active: var(--primary-tint-5);
 @slider-disabled-color: @disabled-color;
 @slider-disabled-background-color: @component-background;
 
 //Ripple
 // ---
-@ripple-dark-color: fade(#000, 10%);
-@ripple-light-color: fade(#fff, 10%);
+@ripple-dark-color: var(--ripple-dark-color);
+@ripple-light-color: var(--ripple-light-color);
 
 // CodeArea
 // ---
