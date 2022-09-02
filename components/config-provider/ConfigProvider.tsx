@@ -1,3 +1,4 @@
+import cssVars from 'css-vars-ponyfill';
 import React, { FunctionComponent, memo, ReactNode, useCallback, useContext, useMemo } from 'react';
 import { observable } from 'mobx';
 import { useLocalStore } from 'mobx-react-lite';
@@ -7,12 +8,47 @@ import ConfigContext, { ConfigContextValue } from './ConfigContext';
 import { Config } from '../configure';
 import { getConfig, getCustomizable, getPrefixCls, getProPrefixCls, isCustomizable } from '../configure/utils';
 import { getTooltip, getTooltipTheme, getUsefulTooltip, getTooltipPlacement } from '../_util/TooltipUtils';
+import { updateCSS, canUseDom } from './dynamicCSS';
 
 export interface ConfigProviderProps extends Config {
   children?: ReactNode;
 }
 
-const ConfigProvider: FunctionComponent<ConfigProviderProps> = function ConfigProvider(props) {
+const dynamicStyleMark = `-c7n-ui-${Date.now()}-${Math.random()}`;
+
+const registerTheme = (props: object) => {
+  // 如果是primary等颜色，可以使用色阶库，生成色阶后赋值给对应的变量
+
+  // 赋值
+  const cssList = Object.keys(props).map(
+    key => `--${key}: ${props[key]};`,
+  );
+  
+  const cssStr = `
+  :root {
+    ${cssList.join('\n')}
+  }
+  `.trim();
+
+  if (canUseDom()) {
+    updateCSS(cssStr, `${dynamicStyleMark}-dynamic-theme`);
+
+    if (!!window.ActiveXObject || "ActiveXObject" in window) {
+      cssVars({
+        onlyLegacy: false,
+      });
+    }
+  }
+}
+
+const setGlobalConfig = (props: object) => {
+  if (props) {
+    registerTheme(props);
+  }
+}
+
+// @ts-ignore
+const ConfigProvider: FunctionComponent<ConfigProviderProps> & { config: typeof setGlobalConfig } = function ConfigProvider(props) {
   const { getConfig: getParentConfig } = useContext(ConfigContext);
   const { children, ...localConfig } = props;
   const configStore = useLocalStore((config) => ({
@@ -106,4 +142,8 @@ const ConfigProvider: FunctionComponent<ConfigProviderProps> = function ConfigPr
 
 ConfigProvider.displayName = 'ConfigProvider';
 
-export default memo(ConfigProvider);
+// @ts-ignore
+const MemoConfigProvider: typeof ConfigProvider = memo(ConfigProvider);
+MemoConfigProvider.config = setGlobalConfig;
+
+export default MemoConfigProvider;

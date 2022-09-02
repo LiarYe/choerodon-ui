@@ -16,12 +16,29 @@ Button Size.
 
 
 ````jsx
+import { ConfigProvider } from 'choerodon-ui';
 import { Button } from 'choerodon-ui/pro';
 
 class App extends React.PureComponent {
+  changeHeight = () => {
+    ConfigProvider.config({
+      'btn-height-base': 'calc(0.2rem + 0.23rem)',
+    });
+  }
+
+  changeBackground = () => {
+    ConfigProvider.config({
+      'btn-default-bg': 'green',
+    });
+  }
+
   render() {
     return (
       <div>
+        <div>
+          <Button onClick={this.changeHeight}>改变高度</Button>
+          <Button onClick={this.changeBackground}>改变背景</Button>
+        </div>
         <div>
           <Button icon="search">默认raised按钮</Button>
           <Button icon="search" size="large">大raised按钮</Button>

@@ -11,6 +11,7 @@ import {
   ReactNode,
 } from 'react';
 import { findDOMNode } from 'react-dom';
+import cssVars from 'css-vars-ponyfill';
 import classNames from 'classnames';
 import { action, computed, observable } from 'mobx';
 import omit from 'lodash/omit';
@@ -24,6 +25,12 @@ import { Size } from './enum';
 import normalizeLanguage from '../_util/normalizeLanguage';
 import { Lang } from '../locale-context/enum';
 import localeContext from '../locale-context';
+
+class SetCssVars {
+  isSet: boolean;
+}
+
+const setCssVars = new SetCssVars();
 
 //
 // 组件对外开放的事件函数名以 onXXX 命名. 尽量减少对外开放的事件，统一由数据来关联
@@ -542,6 +549,15 @@ export default class ViewComponent<P extends ViewComponentProps, C extends Confi
     const { tabIndex, autoFocus } = this.props;
     if (autoFocus && (tabIndex === undefined || tabIndex > -1) && !this.disabled) {
       defer(() => this.focus());
+    }
+
+    // css vars 兼容 IE
+    if ((!!window.ActiveXObject || "ActiveXObject" in window) &&
+      !setCssVars.isSet) {
+      cssVars({
+        onlyLegacy: false,
+      });
+      setCssVars.isSet = true;
     }
   }
 

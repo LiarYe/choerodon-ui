@@ -6,7 +6,7 @@
 @tree-prefix-cls: ~'@{c7n-prefix}-tree';
 @tree-node-prefix-cls: ~'@{tree-prefix-cls}-treenode';
 @tree-motion: ~'@{c7n-prefix}-motion-collapse';
-@tree-node-padding: @padding-xs / 2;
+// @tree-node-padding: @padding-xs / 2;
 
 .antCheckboxFn(@checkbox-prefix-cls: ~'@{c7n-prefix}-tree-checkbox');
 
@@ -18,6 +18,7 @@
     transition: background-color @animation-duration-slow;
 
     &-focused:not(:hover):not(&-active-focused) {
+      // TODO: 无效样式 不存在这种focused类名的添加
       background: @primary-1;
     }
 
@@ -128,15 +129,15 @@
         &::before {
           position: absolute;
           top: 0;
-          bottom: -@tree-node-padding;
+          bottom: calc(0 - @tree-node-padding);
           margin-left: -1px;
           border-left: 1px solid @normal-color;
           content: ' ';
         }
         &::after {
           position: absolute;
-          width: @tree-title-height - 14px;
-          height: @tree-title-height - 10px;
+          width: calc(@tree-title-height - 14px);
+          height: calc(@tree-title-height - 10px);
           margin-left: -1px;
           border-bottom: 1px solid @normal-color;
           content: ' ';
@@ -205,7 +206,7 @@
 
     // ==================== Draggable =====================
     &-node-content-wrapper[draggable='true'] {
-      line-height: @tree-title-height - 4px;
+      line-height: calc(@tree-title-height - 4px);
       border-top: 2px transparent solid;
       border-bottom: 2px transparent solid;
       user-select: none;
@@ -240,8 +241,8 @@
           &::before {
             position: absolute;
             top: 0;
-            right: @tree-title-height / 2;
-            bottom: -@tree-node-padding;
+            right: calc(@tree-title-height / 2);
+            bottom: calc(0 - @tree-node-padding);
             border-right: 1px solid @border-color-base;
             content: '';
           }
@@ -275,3 +276,4 @@
 .antTreeFn(@tree-prefix-cls);
 
 @import './rtl.less';
+// @import './directory.less';
