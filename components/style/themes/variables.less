@@ -110,6 +110,8 @@
 
 // Checkbox
 @checkbox-shadow-color-base0: fade(@outline-color-base0, 20%);
+@checkbox-border-width-base0: 0.02rem;
+@checkbox-border-color-base0: fade(#000, 65%);
 
 // Radio
 @radio-shadow-color-base0: fade(@outline-color-base0, 20%);
@@ -117,19 +119,19 @@
 // Input
 @input-info-color-base0: fade(@text-color-base0, 54%);
 
+
 // tree
 @tree-bg-base0: @component-background;
 @tree-title-height-base0: 24px;
 @tree-child-padding-base0: 18px; // 全局未使用
 @tree-directory-selected-color-base0: #fff; // 使用了，但是directory的渲染不会走
-@tree-directory-selected-bg-base0: @primary-color; // 全局未使用
+@tree-directory-selected-bg-base0: @primary-color-base0; // 全局未使用
 @tree-node-hover-bg-base0: @background-color-light;
 @tree-node-selected-bg-base0: #b6bfdb;
 @tree-node-padding-base0: @padding-xs / 2;
-@primary-color-base0: @blue-6;
-@border-radius-base-base0: 0.02rem;
-@disabled-color-base0: fade(#000, 25%);
-@btn-dark-bg-base0: @dark-4;
+@tree-checkbox-width-base0: 24px;
+@tree-active-font-color-base0: inherit;
+@tree-node-drag-over-bg-base0: @primary-color-base0;
 
 // css 变量
 :root {
@@ -415,7 +417,6 @@
 	// --primary-color: @primary-color-base0; // 有效
 	// --border-radius-base: @border-radius-base-base0; // 有效
 	// --disabled-color: @disabled-color-base0; // 有效
-	// --btn-dark-bg: @btn-dark-bg-base0; // 有效
 	--tree-bg: @tree-bg-base0; // 有效
 	--tree-title-height: @tree-title-height-base0; // 有效
 	--tree-child-padding: @tree-child-padding-base0; // 定义了，但全局未使用
@@ -424,6 +425,14 @@
 	--tree-node-hover-bg: @tree-node-hover-bg-base0; // 有效
 	--tree-node-selected-bg: @tree-node-selected-bg-base0; // 有效
   --tree-node-padding: @tree-node-padding-base0; // 有效
+  --tree-checkbox-width: @tree-checkbox-width-base0;
+  --tree-checkbox-height: @tree-checkbox-width;
+  --tree-active-font-color: @tree-active-font-color-base0;
+  --tree-node-drag-over-bg: @tree-node-drag-over-bg-base0;
+
+  // Checkbox
+  --checkbox-border-width: @checkbox-border-width-base0;
+  --checkbox-border-color: @checkbox-border-color-base0;
 
   // Switch
   // ---
@@ -758,8 +767,8 @@ sans-serif;
 // Checkbox
 @checkbox-size: 0.16rem;
 @checkbox-color: @primary-color;
-@checkbox-border-color: fade(#000, 65%);
-@checkbox-border-width: 0.02rem;
+@checkbox-border-color: var(--checkbox-border-color);
+@checkbox-border-width: var(--checkbox-border-width);
 @checkbox-disabled-bg: @input-disabled-bg;
 @checkbox-disabled-color: @disabled-color;
 @checkbox-disabled-border-color: @disabled-color;
@@ -1171,6 +1180,10 @@ sans-serif;
 @tree-node-hover-bg: var(--tree-node-hover-bg); // 有效
 @tree-node-selected-bg: var(--tree-node-selected-bg); // 有效
 @tree-node-padding: var(--tree-node-padding); // 有效
+@tree-checkbox-width: var(--tree-checkbox-width);
+@tree-checkbox-height: var(--tree-checkbox-height);
+@tree-active-font-color: var(--tree-active-font-color);
+@tree-node-drag-over-bg: var(--tree-node-drag-over-bg);
 
 
 // Tag
