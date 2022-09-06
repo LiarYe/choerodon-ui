@@ -53,7 +53,13 @@
 @border-radius-base-base0: 0.02rem;
 
 // paddings
+@padding-sm-base0: 0.12rem;
+@padding-xs-base0: 0.08rem;
 @padding-vertical-sm-base0: 0.01rem;
+
+// vertical padding for all form controls
+@control-padding-horizontal-base0: @padding-sm-base0;
+@control-padding-horizontal-sm-base0: @padding-xs-base0;
 
 // The background colors for active and hover states for things like
 // list items or table cells.
@@ -65,6 +71,7 @@
 // Outline
 @background-color-base-base0: hsv(0, 0, 96%);
 @outline-color-base0: @primary-color-base0;
+@background-color-light-base0: fade(#000, 4%);
 
 // Disabled states
 @disabled-color-base0: fade(#000, 25%);
@@ -118,26 +125,31 @@
 
 // Input
 @input-info-color-base0: fade(@text-color-base0, 54%);
+@input-padding-horizontal-base0: @control-padding-horizontal-base0 - 0.02rem;
+@input-padding-horizontal-sm-base0: @control-padding-horizontal-sm-base0 - 0.02rem;
+@input-placeholder-color-base0: hsv(0, 0, 75%);
+@input-focus-border-color-base0: color(~`colorPalette('@{outline-color-base0}', 5) `);
+@input-hover-border-color-base0: color(~`colorPalette('@{primary-color-base0}', 5) `);
 
 
 // tree
-@tree-bg-base0: @component-background;
+@tree-bg-base0: @component-background-base0;
 @tree-title-height-base0: 24px;
 @tree-child-padding-base0: 18px; // 全局未使用
 @tree-directory-selected-color-base0: #fff; // 使用了，但是directory的渲染不会走
 @tree-directory-selected-bg-base0: @primary-color-base0; // 全局未使用
-@tree-node-hover-bg-base0: @background-color-light;
+@tree-node-hover-bg-base0: @background-color-light-base0;
 @tree-node-selected-bg-base0: #b6bfdb;
-@tree-node-padding-base0: @padding-xs / 2;
-@tree-checkbox-width-base0: 24px;
-@tree-active-font-color-base0: inherit;
-@tree-node-drag-over-bg-base0: @primary-color-base0;
+@tree-node-padding-base0: @padding-xs-base0 / 2;
+@btn-dark-bg-base0: @dark-4;
 
 // css 变量
 :root {
   // -------- Colors -----------
   --primary-color: @primary-color-base0;
   --error-color: @red-6;
+  --error-bg-color: #fcebeb;
+  --highlight-color: @red-6;
 
   // Color used by default to control hover and active backgrounds and for
   // alert info backgrounds.
@@ -181,9 +193,21 @@
   --font-size-sm: @font-size-sm-base0;
   --font-weight-base: @font-weight-base-base0;
   --border-radius-base: @border-radius-base-base0;
+  --font-size-base: 0.13rem;
+  --line-height-base: 1.5;
 
   // paddings
+  --padding-lg: 0.24rem; // containers
+  --padding-md: 0.16rem; // small containers and buttons
+  --padding-sm: 0.12rem;
+  --padding-xs: 0.08rem; // small items
+  --padding-vertical-base: 0.01rem;
   --padding-vertical-sm: @padding-vertical-sm-base0;
+  --padding-vertical-lg: 0.06rem;
+
+  // vertical padding for all form controls
+  --control-padding-horizontal: var(--padding-sm);
+  --control-padding-horizontal-sm: var(--padding-xs);
 
   // The background colors for active and hover states for things like
   // list items or table cells.
@@ -199,6 +223,7 @@
   --background-color-base: @background-color-base-base0;
   --outline-blur-size: 0;
   --outline-width: 0.02rem;
+  --background-color-light: @background-color-light-base0;
 
   // Disabled states
   --disabled-color: @disabled-color-base0;
@@ -400,13 +425,108 @@
   --radio-button-active-color: var(--primary-7);
 
   // Form
+  --label-required-color: var(--highlight-color);
+  --label-color: inherit;
+  --label-font-weight: var(--font-weight-base);
   --label-white-space: nowrap;
+  --field-icon-help-color: var(--text-color-secondary);
+  --float-label-color: var(--label-color);
+  --float-label-font-size: .15rem;
+  --float-label-font-weight: 500;
+  --float-label-height-base: 0.36rem;
+  --float-label-height-lg: 0.4rem;
+  --float-label-height-sm: 0.3rem;
+  --float-label-autofill-margin: 0.02rem;
+  --float-label-line-height: 0.34rem;
+  --float-label-line-height-lg: 0.38rem;
+  --float-label-line-height-sm: 0.28rem;
 
   // Input
+  --input-height-base: 0.3rem;
+  --input-height-lg: 0.4rem;
+  --input-height-sm: 0.24rem;
+  --input-font-size-base: var(--font-size-base);
+  --input-line-height-base: var(--line-height-base);
   --input-disabled-bg: var(--disabled-bg);
   --input-icon-width-base: 0.24rem;
   --input-highlight-border-color: #47B881;
   --input-info-color: @input-info-color-base0;
+  --input-padding-vertical-lg: var(--padding-vertical-lg);
+  --input-padding-horizontal: @input-padding-horizontal-base0;
+  --input-padding-horizontal-base: var(--input-padding-horizontal);
+  --input-padding-horizontal-sm: @input-padding-horizontal-sm-base0;
+  --input-padding-horizontal-lg: var(--input-padding-horizontal);
+  --input-padding-vertical-base: var(--padding-vertical-base);
+  --input-padding-vertical-sm: var(--padding-vertical-sm);
+  --input-padding-vertical-lg: var(--padding-vertical-lg);
+  --input-placeholder-color: @input-placeholder-color-base0;
+  --input-active-color: var(--text-color);
+  //@input-active-box-shadow: 0 0 @outline-blur-size @outline-width fade(@color, 20%);
+  --input-active-box-shadow: none;
+  --input-color: rgb(0, 0, 0);
+  // @input-border-color: @border-color-base;
+  --input-baseline-color: rgba(0, 0, 0, 0.54);
+  --input-border-color: #d9d9d9;
+  --input-border-radius: var(--border-radius-base);
+  --input-error-border-color: var(--error-color);
+  --input-required-border-color: var(--input-border-color);
+  --input-wrapper-bg: var(--component-background);
+  --input-bg: transparent;
+  --input-required-bg: @yellow-1;
+  --input-error-bg: var(--error-bg-color);
+  --input-addon-bg: var(--background-color-light);
+  --input-focus-border-color: @input-focus-border-color-base0;
+  --input-hover-border-color: @input-hover-border-color-base0;
+  --input-required-hover-border-color: var(--input-hover-border-color);
+  --input-float-border-color: var(--input-border-color);
+  --input-float-border-radius: 0.05rem;
+  --input-float-border-active-width: 0.02rem;
+  --input-float-required-border-color: var(--input-required-border-color);
+  --input-float-highlight-border-color: var(--input-highlight-border-color);
+  --input-float-required-bg: var(--component-background);
+  --input-float-error-bg: var(--component-background);
+  --input-float-disabled-bg: var(--component-background);
+  --input-float-focus-border-color: var(--input-focus-border-color);
+  --input-float-hover-border-color: var(--input-color);
+  --input-float-required-hover-border-color: var(--input-float-hover-border-color);
+  --input-disabled-color: rgba(0, 0, 0, 0.54);
+  --input-disabled-icon-color: var(--input-disabled-color);
+  --input-icon-width-lg: 0.3rem;
+  --input-icon-width-sm: 0.2rem;
+  --input-icon-color: inherit;
+  --input-prefix-width-base: var(--input-icon-width-base);
+  --input-suffix-width-base: var(--input-icon-width-base);
+  --input-button-width: var(--input-suffix-width-base);
+  --input-addon-bg: #eee;
+  --input-tag-default-color: var(--tag-default-color);
+  --input-tag-default-bg: var(--tag-default-bg);
+  --input-tag-error-color: var(--tag-default-color);
+  --input-tag-error-bg: var(--error-color);
+  --input-tag-disabled-color: var(--tag-default-color);
+  --input-tag-disabled-bg: var(--disabled-color);
+  --input-tag-close-color: inherit;
+  --input-tag-close-hover-color: inherit;
+  --input-tag-height-base: 0.24rem;
+  --input-tag-line-height-base: 0.22rem;
+  --input-tag-margin-vertical: 0.01rem;
+  --input-tag-border-radius: var(--input-border-radius);
+  --input-float-tag-height-base: 0.2rem;
+  --input-float-tag-line-height-base: 0.2rem;
+  --input-float-tag-margin-vertical: var(--input-tag-margin-vertical);
+  --input-float-tag-padding: 0 0.02rem 0 0.08rem;
+  --input-float-tag-border-radius: 0.12rem;
+  --input-float-tag-error-bg: var(--error-color);
+  --input-float-tag-close-color: var(--tag-multiple-color);
+  --input-float-tag-close-line-height: 0.2rem;
+  --input-float-tag-close-font-size: 0.16rem;
+  --input-float-tag-close-vertical-align: top;
+  --input-multiple-height-base: auto;
+  --input-multiple-height-lg: var(--input-multiple-height-base);
+  --input-multiple-height-sm: var(--input-multiple-height-base);
+  --input-multiple-margin: 0;
+  --input-multiple-padding: 0.01rem 0;
+  --input-float-multiple-margin: 0 0 0 0.03rem;
+  --input-float-multiple-padding: 0.07rem 0;
 
   // Table
   // --
@@ -434,6 +554,16 @@
   --checkbox-border-width: @checkbox-border-width-base0;
   --checkbox-border-color: @checkbox-border-color-base0;
 
+  // Tag
+  // --
+  --tag-default-bg: var(--primary-color);
+  --tag-default-color: var(--text-color-dark);
+  --tag-multiple-color: rgba(255, 255, 255, 0.72);
+  --tag-font-size: var(--font-size-sm);
+  --tag-font-weight: inherit;
+  --tag-margin: 0 0.02rem;
+  --tag-padding: 0 0.08rem;
+
   // Switch
   // ---
   --switch-box-shadow: 0 0 0 0.02rem fade(@primary-3-base0, 20%);
@@ -457,8 +587,8 @@
 @success-color: @green-6;
 @processing-color: @primary-color;
 @error-color: var(--error-color);
-@error-bg-color: #fcebeb;
-@highlight-color: @red-6;
+@error-bg-color: var(--error-bg-color);
+@highlight-color: var(--highlight-color);
 @warning-color: @gold-6;
 @normal-color: #d9d9d9;
 @B500: #a6a6a6;
@@ -504,17 +634,17 @@ sans-serif;
 @border-radius-sm: 0.02rem;
 
 // paddings
-@padding-lg: 0.24rem; // containers
-@padding-md: 0.16rem; // small containers and buttons
-@padding-sm: 0.12rem; // Form controls and items
-@padding-xs: 0.08rem; // small items
-@padding-vertical-base: 0.01rem;
+@padding-lg: var(--padding-lg); // containers
+@padding-md: var(--padding-md); // small containers and buttons
+@padding-sm: var(--padding-sm); // Form controls and items
+@padding-xs: var(--padding-xs); // small items
+@padding-vertical-base: var(--padding-vertical-base);
 @padding-vertical-sm: var(--padding-vertical-sm);
-@padding-vertical-lg: 0.06rem;
+@padding-vertical-lg: var(--padding-vertical-lg);
 
 // vertical padding for all form controls
-@control-padding-horizontal: @padding-sm;
-@control-padding-horizontal-sm: @padding-xs;
+@control-padding-horizontal: var(--control-padding-horizontal);
+@control-padding-horizontal-sm: var(--control-padding-horizontal-sm);
 
 // vertical margins
 @margin-lg: 24px; // containers
@@ -868,11 +998,11 @@ sans-serif;
 
 // Form
 // ---
-@label-required-color: @highlight-color;
-@label-color: inherit;
+@label-required-color: var(--label-required-color);
+@label-color: var(--label-color);
 @label-color-horizontal: @label-color;
 @label-color-vertical: @label-color;
-@label-font-weight: @font-weight-base;
+@label-font-weight: var(--label-font-weight);
 @label-colon-color: inherit;
 @label-line-height: @input-height-base;
 @label-white-space: var(--label-white-space);
@@ -882,7 +1012,7 @@ sans-serif;
 @label-vertical-wrapper-padding-vertical: 0;
 @label-output-wrapper-padding-vertical: 0.01rem;
 @field-help-color: @text-color-secondary;
-@field-icon-help-color: @text-color-secondary;
+@field-icon-help-color: var(--field-icon-help-color);
 @form-item-wrapper-padding-vertical: 0.1rem;
 @form-item-wrapper-padding-horizontal: 0.05rem;
 @form-item-wrapper-padding: @form-item-wrapper-padding-vertical @form-item-wrapper-padding-horizontal;
@@ -893,106 +1023,106 @@ sans-serif;
 @form-vertical-label-padding: 0 0 0.08rem;
 @form-vertical-label-margin: 0;
 @float-label-transform-origin-high: 0.1rem -330%; // SelectBox, Range, CheckBox, Switch
-@float-label-height-base: 0.36rem;
-@float-label-height-lg: 0.4rem;
-@float-label-height-sm: 0.3rem;
-@float-label-autofill-margin: 0.02rem;
-@float-label-line-height: 0.34rem;
-@float-label-line-height-lg: 0.38rem;
-@float-label-line-height-sm: 0.28rem;
-@float-label-color: @label-color;
-@float-label-font-size: .15rem;
-@float-label-font-weight: 500;
+@float-label-height-base: var(--float-label-height-base);
+@float-label-height-lg: var(--float-label-height-lg);
+@float-label-height-sm: var(--float-label-height-sm);
+@float-label-autofill-margin: var(--float-label-autofill-margin);
+@float-label-line-height: var(--float-label-line-height);
+@float-label-line-height-lg: var(--float-label-line-height-lg);
+@float-label-line-height-sm: var(--float-label-line-height-sm);
+@float-label-color: var(--float-label-color);
+@float-label-font-size: var(--float-label-font-size);
+@float-label-font-weight: var(--float-label-font-weight);
 @float-form-item-margin-top: @form-item-margin-top;
 @float-form-item-margin-bottom: @form-item-margin-bottom;
 @float-form-item-wrapper-padding-vertical: 0;
 
 // Input
 // ---
-@input-height-base: 0.3rem;
-@input-height-lg: 0.4rem;
-@input-height-sm: 0.24rem;
-@input-font-size-base: @font-size-base;
-@input-line-height-base: @line-height-base;
-@input-padding-horizontal: @control-padding-horizontal - 0.02rem;
-@input-padding-horizontal-base: @input-padding-horizontal;
-@input-padding-horizontal-sm: @control-padding-horizontal-sm - 0.02rem;
-@input-padding-horizontal-lg: @input-padding-horizontal;
-@input-padding-vertical-base: @padding-vertical-base;
-@input-padding-vertical-sm: @padding-vertical-sm;
-@input-padding-vertical-lg: @padding-vertical-lg;
-@input-placeholder-color: hsv(0, 0, 75%);
+@input-height-base: var(--input-height-base);
+@input-height-lg: var(--input-height-lg);
+@input-height-sm: var(--input-height-sm);
+@input-font-size-base: var(--input-font-size-base);
+@input-line-height-base: var(--input-line-height-base);
+@input-padding-horizontal: var(--input-padding-horizontal);
+@input-padding-horizontal-base: var(--input-padding-horizontal-base);
+@input-padding-horizontal-sm: var(--input-padding-horizontal-sm);
+@input-padding-horizontal-lg: var(--input-padding-horizontal-lg);
+@input-padding-vertical-base: var(--input-padding-vertical-base);
+@input-padding-vertical-sm: var(--input-padding-vertical-sm);
+@input-padding-vertical-lg: var(--input-padding-vertical-lg);
+@input-placeholder-color: var(--input-placeholder-color);
 @input-info-color: var(--input-info-color);
-@input-active-color: @text-color;
+@input-active-color:var(--input-active-color);
 //@input-active-box-shadow: 0 0 @outline-blur-size @outline-width fade(@color, 20%);
-@input-active-box-shadow: none;
-@input-color: rgb(0, 0, 0);
+@input-active-box-shadow: var(--input-active-box-shadow);
+@input-color: var(--input-color);
 // @input-border-color: @border-color-base;
-@input-baseline-color: rgba(0, 0, 0, 0.54);
-@input-border-color: #d9d9d9;
-@input-border-radius: @border-radius-base;
-@input-error-border-color: @error-color;
-@input-required-border-color: @input-border-color;
+@input-baseline-color: var(--input-baseline-color);
+@input-border-color: var(--input-border-color);
+@input-border-radius: var(--input-border-radius);
+@input-error-border-color: var(--input-error-border-color);
+@input-required-border-color: var(--input-required-border-color);
 @input-highlight-border-color: var(--input-highlight-border-color);
-@input-wrapper-bg: @component-background;
-@input-bg: transparent;
-@input-required-bg: @yellow-1;
-@input-error-bg: @error-bg-color;
-@input-addon-bg: @background-color-light;
-@input-focus-border-color: color(~`colorPalette('@{outline-color}', 5) `);
-@input-hover-border-color: color(~`colorPalette('@{primary-color}', 5) `);
-@input-required-hover-border-color: @input-hover-border-color;
-@input-float-border-color: @input-border-color;
-@input-float-border-radius: 0.05rem;
-@input-float-border-active-width: 0.02rem;
-@input-float-required-border-color: @input-required-border-color;
-@input-float-highlight-border-color: @input-highlight-border-color;
-@input-float-required-bg: @component-background;
-@input-float-error-bg: @component-background;
-@input-float-disabled-bg: @component-background;
-@input-float-focus-border-color: @input-focus-border-color;
-@input-float-hover-border-color: @input-color;
-@input-float-required-hover-border-color: @input-float-hover-border-color;
+@input-wrapper-bg: var(--input-wrapper-bg);
+@input-bg: var(--input-bg);
+@input-required-bg: var(--input-required-bg);
+@input-error-bg: var(--input-error-bg);
+@input-addon-bg: var(--input-addon-bg);
+@input-focus-border-color: var(--input-focus-border-color);
+@input-hover-border-color: var(--input-hover-border-color);
+@input-required-hover-border-color: var(--input-required-hover-border-color);
+@input-float-border-color: var(--input-float-border-color);
+@input-float-border-radius: var(--input-float-border-radius);
+@input-float-border-active-width: var(--input-float-border-active-width);
+@input-float-required-border-color: var(--input-float-required-border-color);
+@input-float-highlight-border-color: var(--input-float-highlight-border-color);
+@input-float-required-bg: var(--input-float-required-bg);
+@input-float-error-bg: var(--input-float-error-bg);
+@input-float-disabled-bg: var(--input-float-disabled-bg);
+@input-float-focus-border-color: var(--input-float-focus-border-color);
+@input-float-hover-border-color: var(--input-float-hover-border-color);
+@input-float-required-hover-border-color: var(--input-float-required-hover-border-color);
 @input-disabled-bg: var(--input-disabled-bg);
-@input-disabled-color: rgba(0, 0, 0, 0.54);
-@input-disabled-icon-color: @input-disabled-color;
+@input-disabled-color: var(--input-disabled-color);
+@input-disabled-icon-color: var(--input-disabled-icon-color);
 @input-icon-width-base: var(--input-icon-width-base);
-@input-icon-width-lg: 0.3rem;
-@input-icon-width-sm: 0.2rem;
-@input-icon-color: inherit;
-@input-prefix-width-base: @input-icon-width-base;
-@input-suffix-width-base: @input-icon-width-base;
-@input-button-width: @input-suffix-width-base;
-@input-addon-bg: #eee;
-@input-tag-default-color: @tag-default-color;
-@input-tag-default-bg: @tag-default-bg;
-@input-tag-error-color: @tag-default-color;
-@input-tag-error-bg: @error-color;
-@input-tag-disabled-color: @tag-default-color;
-@input-tag-disabled-bg: @disabled-color;
-@input-tag-close-color: inherit;
-@input-tag-close-hover-color: inherit;
-@input-tag-height-base: 0.24rem;
-@input-tag-line-height-base: 0.22rem;
-@input-tag-margin-vertical: 0.01rem;
-@input-tag-border-radius: @input-border-radius;
-@input-float-tag-height-base: 0.2rem;
-@input-float-tag-line-height-base: 0.2rem;
-@input-float-tag-margin-vertical: @input-tag-margin-vertical;
-@input-float-tag-padding: 0 0.02rem 0 0.08rem;
-@input-float-tag-border-radius: 0.12rem;
-@input-float-tag-error-bg: @error-color;
-@input-float-tag-close-color: @tag-multiple-color;
-@input-float-tag-close-line-height: 0.2rem;
-@input-float-tag-close-font-size: 0.16rem;
-@input-float-tag-close-vertical-align: top;
-@input-multiple-height-base: auto;
-@input-multiple-height-lg: @input-multiple-height-base;
-@input-multiple-height-sm: @input-multiple-height-base;
-@input-multiple-margin: 0;
-@input-multiple-padding: 0.01rem 0;
-@input-float-multiple-margin: 0 0 0 0.03rem;
-@input-float-multiple-padding: 0.07rem 0;
+@input-icon-width-lg: var(--input-icon-width-lg);
+@input-icon-width-sm: var(--input-icon-width-sm);
+@input-icon-color: var(--input-icon-color);
+@input-prefix-width-base: var(--input-prefix-width-base);
+@input-suffix-width-base: var(--input-suffix-width-base);
+@input-button-width: var(--input-button-width);
+@input-addon-bg: var(--input-addon-bg);
+@input-tag-default-color: var(--input-tag-default-color);
+@input-tag-default-bg: var(--input-tag-default-bg);
+@input-tag-error-color: var(--input-tag-error-color);
+@input-tag-error-bg: var(--input-tag-error-bg);
+@input-tag-disabled-color: var(--input-tag-disabled-color);
+@input-tag-disabled-bg: var(--input-tag-disabled-bg);
+@input-tag-close-color: var(--input-tag-close-color);
+@input-tag-close-hover-color: var(--input-tag-close-hover-color);
+@input-tag-height-base: var(--input-tag-height-base);
+@input-tag-line-height-base: var(--input-tag-line-height-base);
+@input-tag-margin-vertical: var(--input-tag-margin-vertical);
+@input-tag-border-radius: var(--input-tag-border-radius);
+@input-float-tag-height-base: var(--input-float-tag-height-base);
+@input-float-tag-line-height-base: var(--input-float-tag-line-height-base);
+@input-float-tag-margin-vertical: var(--input-float-tag-margin-vertical);
+@input-float-tag-padding: var(--input-float-tag-padding);
+@input-float-tag-border-radius: var(--input-float-tag-border-radius);
+@input-float-tag-error-bg: var(--input-float-tag-error-bg);
+@input-float-tag-close-color: var(--input-float-tag-close-color);
+@input-float-tag-close-line-height: var(--input-float-tag-close-line-height);
+@input-float-tag-close-font-size: var(--input-float-tag-close-font-size);
+@input-float-tag-close-vertical-align: var(--input-float-tag-close-vertical-align);
+@input-multiple-height-base: var(--input-multiple-height-base);
+@input-multiple-height-lg: var(--input-multiple-height-lg);
+@input-multiple-height-sm: var(--input-multiple-height-sm);
+@input-multiple-margin: var(--input-multiple-margin);
+@input-multiple-padding: var(--input-multiple-padding);
+@input-float-multiple-margin: var(--input-float-multiple-margin);
+@input-float-multiple-padding: var(--input-float-multiple-padding);
 
 // Output
 // ---
@@ -1188,13 +1318,13 @@ sans-serif;
 
 // Tag
 // --
-@tag-default-bg: @primary-color;
-@tag-default-color: @text-color-dark;
-@tag-multiple-color: rgba(255, 255, 255, 0.72);
-@tag-font-size: @font-size-sm;
-@tag-font-weight: inherit;
-@tag-margin: 0 0.02rem;
-@tag-padding: 0 0.08rem;
+@tag-default-bg: var(--tag-default-bg);
+@tag-default-color: var(--tag-default-color);
+@tag-multiple-color: var(--tag-multiple-color);
+@tag-font-size: var(--tag-font-size);
+@tag-font-weight: var(--tag-font-weight);
+@tag-margin: var(--tag-margin);
+@tag-padding: var(--tag-padding);
 
 // TimePicker
 // ---

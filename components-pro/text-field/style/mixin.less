@@ -96,7 +96,7 @@
   transition-property: opacity, color, background-color, border;
 
   &-compact:not(:last-child) {
-    margin-right: calc(0 - @border-width-base);
+    margin-right: calc(-1 * @border-width-base);
     border-right-width: @border-width-base;
   }
 
@@ -690,7 +690,7 @@
   /* stylelint-disable */
   &-underline {
     position: absolute;
-    bottom: calc(0 - @border-width-base);
+    bottom: calc(-1 * @border-width-base);
     width: 100%;
     height: 0;
     border-bottom: @border-width-base @border-style-base @input-baseline-color;
