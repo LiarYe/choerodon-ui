@@ -123,21 +123,21 @@
 
 // Input
 @input-info-color-base0: fade(@text-color-base0, 54%);
-@input-padding-horizontal-base0: calc(@control-padding-horizontal-base0 - 0.02rem);
-@input-padding-horizontal-sm-base0: calc(@control-padding-horizontal-sm-base0 - 0.02rem);
+@input-padding-horizontal-base0: @control-padding-horizontal-base0 - 0.02rem;
+@input-padding-horizontal-sm-base0: @control-padding-horizontal-sm-base0 - 0.02rem;
 @input-placeholder-color-base0: hsv(0, 0, 75%);
 @input-focus-border-color-base0: color(~`colorPalette('@{outline-color-base0}', 5) `);
 @input-hover-border-color-base0: color(~`colorPalette('@{primary-color-base0}', 5) `);
 
 // tree
-@tree-bg-base0: @component-background;
+@tree-bg-base0: @component-background-base0;
 @tree-title-height-base0: 24px;
 @tree-child-padding-base0: 18px; // 全局未使用
 @tree-directory-selected-color-base0: #fff; // 使用了，但是directory的渲染不会走
-@tree-directory-selected-bg-base0: @primary-color; // 全局未使用
-@tree-node-hover-bg-base0: @background-color-light;
+@tree-directory-selected-bg-base0: @primary-color-base0; // 全局未使用
+@tree-node-hover-bg-base0: @background-color-light-base0;
 @tree-node-selected-bg-base0: #b6bfdb;
-@tree-node-padding-base0: calc(@padding-xs / 2);
+@tree-node-padding-base0: @padding-xs-base0 / 2;
 @primary-color-base0: @blue-6;
 @border-radius-base-base0: 0.02rem;
 @disabled-color-base0: fade(#000, 25%);
