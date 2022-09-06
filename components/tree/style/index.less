@@ -129,7 +129,7 @@
         &::before {
           position: absolute;
           top: 0;
-          bottom: calc(0 - @tree-node-padding);
+          bottom: calc(-1 * @tree-node-padding);
           margin-left: -1px;
           border-left: 1px solid @normal-color;
           content: ' ';
@@ -242,7 +242,7 @@
             position: absolute;
             top: 0;
             right: calc(@tree-title-height / 2);
-            bottom: calc(0 - @tree-node-padding);
+            bottom: calc(-1 * @tree-node-padding);
             border-right: 1px solid @border-color-base;
             content: '';
           }
