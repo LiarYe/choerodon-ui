@@ -51,6 +51,7 @@
 @font-size-sm-base0: 0.12rem;
 @font-weight-base-base0: 400;
 @border-radius-base-base0: 0.02rem;
+@border-radius-sm-base0: 0.02rem;
 
 // paddings
 @padding-sm-base0: 0.12rem;
@@ -64,6 +65,9 @@
 // The background colors for active and hover states for things like
 // list items or table cells.
 @item-hover-bg-base0: @background-color-light;
+
+// LINK
+@link-hover-color-base0: color(~`colorPalette('@{link-color}', 5) `);
 
 // Border color
 @border-color-base-base0: #e0e0e0; // base border outline a component
@@ -120,6 +124,18 @@
 @checkbox-border-width-base0: 0.02rem;
 @checkbox-border-color-base0: fade(#000, 65%);
 
+// DatePicker
+@date-picker-width-base0: 2.8rem;
+@datetime-picker-width-base0: 4.3rem;
+@date-picker-horizontal-padding-base0: 0.12rem;
+@date-time-list-item-height-base0: 0.29rem;
+@date-picker-calendar-header-height-base0: 0.4rem;
+@date-picker-calendar-header-padding-base0: 0 0.07rem;
+@date-picker-calendar-body-table-font-size-base0: @font-size-lg-base0;
+@date-picker-calendar-cell-inner-height-base0: 0.24rem;
+@date-picker-calendar-cell-inner-line-height-base0: 0.22rem;
+@date-picker-calendar-footer-height-base0: 0.39rem;
+
 // Radio
 @radio-shadow-color-base0: fade(@outline-color-base0, 20%);
 
@@ -142,6 +158,9 @@
 @tree-node-selected-bg-base0: #b6bfdb;
 @tree-node-padding-base0: @padding-xs-base0 / 2;
 @btn-dark-bg-base0: @dark-4;
+@tree-checkbox-width-base0: 24px;
+@tree-active-font-color-base0: inherit;
+@tree-node-drag-over-bg-base0: @primary-color-base0;
 
 // css 变量
 :root {
@@ -193,6 +212,7 @@
   --font-size-sm: @font-size-sm-base0;
   --font-weight-base: @font-weight-base-base0;
   --border-radius-base: @border-radius-base-base0;
+  --border-radius-sm: @border-radius-sm-base0;
   --font-size-base: 0.13rem;
   --line-height-base: 1.5;
 
@@ -208,6 +228,9 @@
   // vertical padding for all form controls
   --control-padding-horizontal: var(--padding-sm);
   --control-padding-horizontal-sm: var(--padding-xs);
+
+  // LINK
+  --link-hover-color: @link-hover-color-base0;
 
   // The background colors for active and hover states for things like
   // list items or table cells.
@@ -564,6 +587,23 @@
   --tag-margin: 0 0.02rem;
   --tag-padding: 0 0.08rem;
 
+  // DatePicker
+  // 从组件内部迁移的变量
+  --date-picker-width: @date-picker-width-base0;
+  --datetime-picker-width: @datetime-picker-width-base0;
+  --date-picker-horizontal-padding: @date-picker-horizontal-padding-base0;
+  --date-time-list-item-height: @date-time-list-item-height-base0;
+  // 新增
+  --date-picker-calendar-header-height: @date-picker-calendar-header-height-base0;
+  --date-picker-calendar-header-line-height: var(--date-picker-calendar-header-height);
+  --date-picker-calendar-header-padding: @date-picker-calendar-header-padding-base0;
+  --date-picker-calendar-body-table-font-size: @date-picker-calendar-body-table-font-size-base0;
+  --date-picker-calendar-cell-inner-height: @date-picker-calendar-cell-inner-height-base0;
+  --date-picker-calendar-cell-inner-line-height: @date-picker-calendar-cell-inner-line-height-base0;
+  --date-picker-calendar-cell-inner-width: @date-picker-calendar-cell-inner-height-base0;
+  --date-picker-calendar-footer-height: @date-picker-calendar-footer-height-base0;
+  --date-picker-calendar-footer-line-height: var(--date-picker-calendar-footer-height);
+
   // Switch
   // ---
   --switch-box-shadow: 0 0 0 0.02rem fade(@primary-3-base0, 20%);
@@ -631,7 +671,7 @@ sans-serif;
 @line-height-base: 1.5;
 @border-radius-lg: 0.1rem;
 @border-radius-base: var(--border-radius-base);
-@border-radius-sm: 0.02rem;
+@border-radius-sm: var(--border-radius-sm);
 
 // paddings
 @padding-lg: var(--padding-lg); // containers
@@ -672,7 +712,7 @@ sans-serif;
 
 // LINK
 @link-color: @primary-color;
-@link-hover-color: color(~`colorPalette('@{link-color}', 5) `);
+@link-hover-color: var(--link-hover-color);
 @link-active-color: color(~`colorPalette('@{link-color}', 7) `);
 @link-decoration: none;
 @link-hover-decoration: none;
@@ -706,8 +746,8 @@ sans-serif;
 @outline-width: var(--outline-width);
 @outline-color: var(--outline-color);
 
-@background-color-light: fade(#000, 4%); // background of header and selected item
 @background-color-base: var(--background-color-base); // Default grey background color
+@background-color-light: var(--background-color-light); // background of header and selected item
 
 // Disabled states
 @disabled-color: var(--disabled-color);
@@ -909,6 +949,23 @@ sans-serif;
 @checkbox-shadow-color: var(--primary-fade-2);
 @checkbox-indeterminate-bg: @primary-color;
 @checkbox-indeterminate-color: #fff;
+
+// DatePicker
+// 从组件内部迁移的变量
+@date-picker-width: var(--date-picker-width);
+@datetime-picker-width: var(--datetime-picker-width);
+@date-picker-horizontal-padding: var(--date-picker-horizontal-padding);
+@date-time-list-item-height: var(--date-time-list-item-height);
+// 新增
+@date-picker-calendar-header-height: var(--date-picker-calendar-header-height);
+@date-picker-calendar-header-line-height: var(--date-picker-calendar-header-line-height);
+@date-picker-calendar-header-padding: var(--date-picker-calendar-header-padding);
+@date-picker-calendar-body-table-font-size: var(--date-picker-calendar-body-table-font-size);
+@date-picker-calendar-cell-inner-height: var(--date-picker-calendar-cell-inner-height);
+@date-picker-calendar-cell-inner-line-height: var(--date-picker-calendar-cell-inner-line-height);
+@date-picker-calendar-cell-inner-width: var(--date-picker-calendar-cell-inner-width);
+@date-picker-calendar-footer-height: var(--date-picker-calendar-footer-height);
+@date-picker-calendar-footer-line-height: var(--date-picker-calendar-footer-line-height);
 
 // Radio
 @radio-border-color: var(--radio-border-color);
