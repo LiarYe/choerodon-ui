@@ -88,7 +88,7 @@
       height: @date-picker-calendar-cell-inner-height;
       margin: 0 auto;
       padding: 0;
-      line-height: @date-picker-calendar-cell-inner-line-height;
+      line-height: calc(@date-picker-calendar-cell-inner-height - 2 * @border-width-base);
       text-align: center;
       background-color: transparent;
       border: @border-width-base @border-style-base transparent;
@@ -101,7 +101,7 @@
       }
 
       &:active {
-        color: #fff;
+        color: @date-picker-calendar-active-color;
         background-color: @primary-5;
       }
     }
@@ -165,7 +165,7 @@
   }
 
   &-day-panel &-cell-inner {
-    width: @date-picker-calendar-cell-inner-width;
+    width: @date-picker-calendar-cell-inner-height;
   }
 
   &-month-panel &-cell,
@@ -188,7 +188,7 @@
   &-header {
     height: @date-picker-calendar-header-height;
     padding: @date-picker-calendar-header-padding;
-    line-height: @date-picker-calendar-header-line-height;
+    line-height: calc(@date-picker-calendar-header-height - 2 * @border-width-base);
     text-align: center;
     border-bottom: @border-width-base @border-style-base @border-color-split;
     user-select: none;
@@ -228,7 +228,7 @@
   &-footer-extra, &-footer {
     position: relative;
     height: @date-picker-calendar-footer-height;
-    line-height: @date-picker-calendar-footer-line-height;
+    line-height: @date-picker-calendar-footer-height;
     text-align: center;
     border-top: @border-width-base @border-style-base @border-color-split;
 
