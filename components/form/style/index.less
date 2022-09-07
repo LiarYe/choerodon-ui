@@ -79,7 +79,7 @@ input[type='checkbox'] {
   // nested FormItem
   &-control > &:last-child,
   & [class^='@{c7n-prefix}-col-'] > &:only-child {
-    margin-bottom: -@form-item-margin-bottom;
+    margin-bottom: calc(-1 * @form-item-margin-bottom);
   }
 
   &-control {

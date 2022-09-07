@@ -450,9 +450,29 @@
   // Form
   --label-required-color: var(--highlight-color);
   --label-color: inherit;
+  --label-color-horizontal: var(--label-color);
+  --label-color-vertical: var(--label-color);
   --label-font-weight: var(--font-weight-base);
+  --label-colon-color: inherit;
+  --label-line-height: var(--input-height-base);
   --label-white-space: nowrap;
+  --label-wrapper-padding-vertical: 0.1rem;
+  --label-wrapper-padding-horizontal: 0.04rem;
+  --label-wrapper-padding: var(--label-wrapper-padding-vertical) var(--label-wrapper-padding-horizontal);
+  --label-vertical-wrapper-padding-vertical: 0;
+  --label-output-wrapper-padding-vertical: 0.01rem;
+  --field-help-color: var(--text-color-secondary);
   --field-icon-help-color: var(--text-color-secondary);
+  --form-item-wrapper-padding-vertical: 0.1rem;
+  --form-item-wrapper-padding-horizontal: 0.05rem;
+  --form-item-wrapper-padding: var(--form-item-wrapper-padding-vertical) var(--form-item-wrapper-padding-horizontal);
+  --form-item-wrapper-output-padding-vertical: 0.01rem;
+  --form-item-margin-top: 0.07rem;
+  --form-item-margin-bottom: 0.2rem;
+  --form-item-trailing-colon: true;
+  --form-vertical-label-padding: 0 0 0.08rem;
+  --form-vertical-label-margin: 0;
+  --float-label-transform-origin-high: 0.1rem -330%; // SelectBox, Range, CheckBox, Switch
   --float-label-color: var(--label-color);
   --float-label-font-size: .15rem;
   --float-label-font-weight: 500;
@@ -463,6 +483,9 @@
   --float-label-line-height: 0.34rem;
   --float-label-line-height-lg: 0.38rem;
   --float-label-line-height-sm: 0.28rem;
+  --float-form-item-margin-top: var(--form-item-margin-top);
+  --float-form-item-margin-bottom: var(--form-item-margin-bottom);
+  --float-form-item-wrapper-padding-vertical: 0;
 
   // Input
   --input-height-base: 0.3rem;
@@ -1057,29 +1080,29 @@ sans-serif;
 // ---
 @label-required-color: var(--label-required-color);
 @label-color: var(--label-color);
-@label-color-horizontal: @label-color;
-@label-color-vertical: @label-color;
+@label-color-horizontal: var(--label-color-horizontal);
+@label-color-vertical: var(--label-color-vertical);
 @label-font-weight: var(--label-font-weight);
-@label-colon-color: inherit;
-@label-line-height: @input-height-base;
+@label-colon-color: var(--label-colon-color);
+@label-line-height: var(--label-line-height);
 @label-white-space: var(--label-white-space);
-@label-wrapper-padding-vertical: 0.1rem;
-@label-wrapper-padding-horizontal: 0.04rem;
-@label-wrapper-padding: @label-wrapper-padding-vertical @label-wrapper-padding-horizontal;
-@label-vertical-wrapper-padding-vertical: 0;
-@label-output-wrapper-padding-vertical: 0.01rem;
-@field-help-color: @text-color-secondary;
+@label-wrapper-padding-vertical: var(--label-wrapper-padding-vertical);
+@label-wrapper-padding-horizontal: var(--label-wrapper-padding-horizontal);
+@label-wrapper-padding: var(--label-wrapper-padding);
+@label-vertical-wrapper-padding-vertical: var(--label-vertical-wrapper-padding-vertical);
+@label-output-wrapper-padding-vertical: var(--label-output-wrapper-padding-vertical);
+@field-help-color: var(--field-help-color);
 @field-icon-help-color: var(--field-icon-help-color);
-@form-item-wrapper-padding-vertical: 0.1rem;
-@form-item-wrapper-padding-horizontal: 0.05rem;
-@form-item-wrapper-padding: @form-item-wrapper-padding-vertical @form-item-wrapper-padding-horizontal;
-@form-item-wrapper-output-padding-vertical: 0.01rem;
-@form-item-margin-top: 0.07rem;
-@form-item-margin-bottom: 0.2rem;
-@form-item-trailing-colon: true;
-@form-vertical-label-padding: 0 0 0.08rem;
-@form-vertical-label-margin: 0;
-@float-label-transform-origin-high: 0.1rem -330%; // SelectBox, Range, CheckBox, Switch
+@form-item-wrapper-padding-vertical: var(--form-item-wrapper-padding-vertical);
+@form-item-wrapper-padding-horizontal: var(--form-item-wrapper-padding-horizontal);
+@form-item-wrapper-padding: var(--form-item-wrapper-padding);
+@form-item-wrapper-output-padding-vertical: var(--form-item-wrapper-output-padding-vertical);
+@form-item-margin-top: var(--form-item-margin-top);
+@form-item-margin-bottom: var(--form-item-margin-bottom);
+@form-item-trailing-colon: var(--form-item-trailing-colon);
+@form-vertical-label-padding: var(--form-vertical-label-padding);
+@form-vertical-label-margin: var(--form-vertical-label-margin);
+@float-label-transform-origin-high: var(--float-label-transform-origin-high); // SelectBox, Range, CheckBox, Switch
 @float-label-height-base: var(--float-label-height-base);
 @float-label-height-lg: var(--float-label-height-lg);
 @float-label-height-sm: var(--float-label-height-sm);
@@ -1090,9 +1113,9 @@ sans-serif;
 @float-label-color: var(--float-label-color);
 @float-label-font-size: var(--float-label-font-size);
 @float-label-font-weight: var(--float-label-font-weight);
-@float-form-item-margin-top: @form-item-margin-top;
-@float-form-item-margin-bottom: @form-item-margin-bottom;
-@float-form-item-wrapper-padding-vertical: 0;
+@float-form-item-margin-top: var(--float-form-item-margin-top);
+@float-form-item-margin-bottom: var(--float-form-item-margin-bottom);
+@float-form-item-wrapper-padding-vertical: var(--float-form-item-wrapper-padding-vertical);
 
 // Input
 // ---
