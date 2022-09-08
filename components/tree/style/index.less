@@ -17,11 +17,6 @@
     border-radius: @border-radius-base;
     transition: background-color @animation-duration-slow;
 
-    &-focused:not(:hover):not(&-active-focused) {
-      // TODO: 无效样式 不存在这种focused类名的添加
-      background: @primary-1;
-    }
-
     // =================== Virtual List ===================
     &-list-holder-inner {
       align-items: flex-start;
@@ -149,7 +144,7 @@
     & &-checkbox {
       top: 0;
       flex: none;
-      width: @tree-checkbox-width;
+      width: @tree-checkbox-height;
       height: @tree-checkbox-height;
       margin: 0;
       line-height: @tree-checkbox-height;

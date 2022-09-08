@@ -64,7 +64,7 @@
 
 // The background colors for active and hover states for things like
 // list items or table cells.
-@item-hover-bg-base0: @background-color-light;
+@item-hover-bg-base0: @background-color-light-base0;
 
 // LINK
 @link-hover-color-base0: color(~`colorPalette('@{link-color}', 5) `);
@@ -131,10 +131,9 @@
 @date-time-list-item-height-base0: 0.29rem;
 @date-picker-calendar-header-height-base0: 0.4rem;
 @date-picker-calendar-header-padding-base0: 0 0.07rem;
-@date-picker-calendar-body-table-font-size-base0: @font-size-lg-base0;
 @date-picker-calendar-cell-inner-height-base0: 0.24rem;
-@date-picker-calendar-cell-inner-line-height-base0: 0.22rem;
 @date-picker-calendar-footer-height-base0: 0.39rem;
+@date-picker-calendar-active-color-base0: #fff;
 
 // Radio
 @radio-shadow-color-base0: fade(@outline-color-base0, 20%);
@@ -154,11 +153,11 @@
 @tree-child-padding-base0: 18px; // 全局未使用
 @tree-directory-selected-color-base0: #fff; // 使用了，但是directory的渲染不会走
 @tree-directory-selected-bg-base0: @primary-color-base0; // 全局未使用
-@tree-node-hover-bg-base0: @background-color-light-base0;
+@tree-node-hover-bg-base0: @item-hover-bg-base0; // TODO: 后续该变量需要删除，将样式模板中的状态颜色改为通用变量即可。
 @tree-node-selected-bg-base0: #b6bfdb;
 @tree-node-padding-base0: @padding-xs-base0 / 2;
 @btn-dark-bg-base0: @dark-4;
-@tree-checkbox-width-base0: 24px;
+@tree-checkbox-height-base0: @tree-title-height-base0;
 @tree-active-font-color-base0: inherit;
 @tree-node-drag-over-bg-base0: @primary-color-base0;
 
@@ -588,11 +587,10 @@
 	--tree-child-padding: @tree-child-padding-base0; // 定义了，但全局未使用
 	--tree-directory-selected-color: @tree-directory-selected-color-base0; // 使用了，但是directory样式文件完全没引入使用
 	--tree-directory-selected-bg: @tree-directory-selected-bg-base0; // 定义了，但全局未使用
-	--tree-node-hover-bg: @tree-node-hover-bg-base0; // 有效
-	--tree-node-selected-bg: @tree-node-selected-bg-base0; // 有效
+	--tree-node-hover-bg: @tree-node-hover-bg-base0; // 有效 TODO: 后续该变量需要删除，将样式模板中的状态颜色改为通用变量即可。
+	--tree-node-selected-bg: @tree-node-selected-bg-base0; // 有效 同上
   --tree-node-padding: @tree-node-padding-base0; // 有效
-  --tree-checkbox-width: @tree-checkbox-width-base0;
-  --tree-checkbox-height: @tree-checkbox-width;
+  --tree-checkbox-height: @tree-checkbox-height-base0;
   --tree-active-font-color: @tree-active-font-color-base0;
   --tree-node-drag-over-bg: @tree-node-drag-over-bg-base0;
 
@@ -618,14 +616,11 @@
   --date-time-list-item-height: @date-time-list-item-height-base0;
   // 新增
   --date-picker-calendar-header-height: @date-picker-calendar-header-height-base0;
-  --date-picker-calendar-header-line-height: var(--date-picker-calendar-header-height);
   --date-picker-calendar-header-padding: @date-picker-calendar-header-padding-base0;
-  --date-picker-calendar-body-table-font-size: @date-picker-calendar-body-table-font-size-base0;
+  --date-picker-calendar-body-table-font-size: var(--font-size-lg);
   --date-picker-calendar-cell-inner-height: @date-picker-calendar-cell-inner-height-base0;
-  --date-picker-calendar-cell-inner-line-height: @date-picker-calendar-cell-inner-line-height-base0;
-  --date-picker-calendar-cell-inner-width: @date-picker-calendar-cell-inner-height-base0;
   --date-picker-calendar-footer-height: @date-picker-calendar-footer-height-base0;
-  --date-picker-calendar-footer-line-height: var(--date-picker-calendar-footer-height);
+  --date-picker-calendar-active-color: @date-picker-calendar-active-color-base0;
 
   // Switch
   // ---
@@ -986,9 +981,8 @@ sans-serif;
 @date-picker-calendar-body-table-font-size: var(--date-picker-calendar-body-table-font-size);
 @date-picker-calendar-cell-inner-height: var(--date-picker-calendar-cell-inner-height);
 @date-picker-calendar-cell-inner-line-height: var(--date-picker-calendar-cell-inner-line-height);
-@date-picker-calendar-cell-inner-width: var(--date-picker-calendar-cell-inner-width);
 @date-picker-calendar-footer-height: var(--date-picker-calendar-footer-height);
-@date-picker-calendar-footer-line-height: var(--date-picker-calendar-footer-line-height);
+@date-picker-calendar-active-color: var(--date-picker-calendar-active-color);
 
 // Radio
 @radio-border-color: var(--radio-border-color);
@@ -1390,7 +1384,6 @@ sans-serif;
 @tree-node-hover-bg: var(--tree-node-hover-bg); // 有效
 @tree-node-selected-bg: var(--tree-node-selected-bg); // 有效
 @tree-node-padding: var(--tree-node-padding); // 有效
-@tree-checkbox-width: var(--tree-checkbox-width);
 @tree-checkbox-height: var(--tree-checkbox-height);
 @tree-active-font-color: var(--tree-active-font-color);
 @tree-node-drag-over-bg: var(--tree-node-drag-over-bg);
