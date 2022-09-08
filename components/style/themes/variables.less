@@ -47,11 +47,13 @@
 @text-color-base0: fade(#000, 100%);
 @text-color-secondary-base0: fade(#000, 45%);
 @text-color-dark-base0: fade(#fff, 100%);
+@font-size-base-base0: 0.13rem;
 @font-size-lg-base0: 0.16rem;
 @font-size-sm-base0: 0.12rem;
 @font-weight-base-base0: 400;
 @border-radius-base-base0: 0.02rem;
 @border-radius-sm-base0: 0.02rem;
+@heading-color-base0: fade(#000, 85%);
 
 // paddings
 @padding-sm-base0: 0.12rem;
@@ -65,6 +67,10 @@
 // The background colors for active and hover states for things like
 // list items or table cells.
 @item-hover-bg-base0: @background-color-light-base0;
+@item-active-bg-base0: rgba(140, 158, 255, 0.12);
+
+// Icon
+@icon-font-size-base-base0: .18rem;
 
 // LINK
 @link-hover-color-base0: color(~`colorPalette('@{link-color}', 5) `);
@@ -147,7 +153,7 @@
 @input-hover-border-color-base0: color(~`colorPalette('@{primary-color-base0}', 5) `);
 
 
-// tree
+// Tree
 @tree-bg-base0: @component-background-base0;
 @tree-title-height-base0: 24px;
 @tree-child-padding-base0: 18px; // 全局未使用
@@ -160,6 +166,8 @@
 @tree-checkbox-height-base0: @tree-title-height-base0;
 @tree-active-font-color-base0: inherit;
 @tree-node-drag-over-bg-base0: @primary-color-base0;
+
+// Table
 
 // css 变量
 :root {
@@ -207,6 +215,7 @@
   --text-color: @text-color-base0;
   --text-color-secondary: @text-color-secondary-base0;
   --text-color-dark: @text-color-dark-base0;
+  --font-size-base: @font-size-base-base0;
   --font-size-lg: @font-size-lg-base0;
   --font-size-sm: @font-size-sm-base0;
   --font-weight-base: @font-weight-base-base0;
@@ -214,6 +223,7 @@
   --border-radius-sm: @border-radius-sm-base0;
   --font-size-base: 0.13rem;
   --line-height-base: 1.5;
+  --heading-color: @heading-color-base0;
 
   // paddings
   --padding-lg: 0.24rem; // containers
@@ -228,12 +238,16 @@
   --control-padding-horizontal: var(--padding-sm);
   --control-padding-horizontal-sm: var(--padding-xs);
 
+  // Icon
+  --icon-font-size-base: @icon-font-size-base-base0;
+
   // LINK
   --link-hover-color: @link-hover-color-base0;
 
   // The background colors for active and hover states for things like
   // list items or table cells.
   --item-hover-bg: @item-hover-bg-base0; // 无效 存在于Tree组件的directory.less中，改样式文件没有引入使用
+  --item-active-bg: @item-active-bg-base0;
 
   // Border color
   --border-color-base: @border-color-base-base0;
@@ -577,8 +591,54 @@
   // --
   --table-combo-add-fields-hover-bg: var(--primary-fade-1);
   --table-combo-filter-name-select-hover-bg: var(--primary-fade-1);
+  --table-header-bg: var(--background-color-light);
+  --table-header-color: var(--heading-color);
+  --table-header-sort-bg: var(--background-color-base);
+  --table-row-hover-bg: var(--item-hover-bg);
+  --table-current-row-bg: var(--item-active-bg);
+  --table-even-row-bg: fade(#000, 2%);
+  --table-cell-focus-bg: fade(#000, 8%);
+  --table-selected-row-bg: fade(#a1c2fa, 16%);
+  --table-expanded-row-bg: #fbfbfb;
+  --table-mouse-batch-choose-bg: var(--table-selected-row-bg);
+  --table-header-font-weight: 700;
+  --table-cell-padding-vertical-base: 0.01rem;
+  --table-cell-padding-horizontal-base: 0.01rem;
+  --table-cell-padding-vertical-sm: var(--table-cell-padding-horizontal-base);
+  --table-cell-padding-horizontal-sm: var(--table-cell-padding-horizontal-base);
+  --table-cell-font-weight: 400;
+  --table-padding-vertical: 0.05rem;
+  --table-padding-horizontal: var(--input-padding-horizontal);
+  --table-header-cell-padding-vertical-base: var(--table-cell-padding-vertical-base);
+  --table-header-cell-padding-horizontal-base: var(--table-cell-padding-horizontal-base);
+  --table-header-cell-padding-vertical-sm: var(--table-cell-padding-vertical-sm);
+  --table-header-cell-padding-horizontal-sm: var(--table-cell-padding-horizontal-sm);
+  --table-footer-cell-padding-vertical-base: var(--table-cell-padding-vertical-base);
+  --table-footer-cell-padding-horizontal-base: var(--table-cell-padding-horizontal-base);
+  --table-footer-cell-padding-vertical-sm: var(--table-cell-padding-vertical-sm);
+  --table-footer-cell-padding-horizontal-sm: var(--table-cell-padding-horizontal-sm);
+  --table-split-color: var(--primary-color);
+  --table-editable-cell-border-radius-base: 0;
+  --table-editable-cell-border-color: var(--input-border-color);
+  --table-editable-cell-required-bg: var(--input-required-bg);
+  --table-editable-cell-required-border-color: var(--input-required-border-color);
+  --table-editable-cell-highlight-border-color: var(--input-highlight-border-color);
+  --table-editable-cell-error-bg: var(--error-bg-color);
+  --table-editable-cell-error-border-color: var(--input-error-border-color);
+  --table-editable-cell-disabled-bg: var(--input-disabled-bg);
+  --table-editable-cell-disabled-border-color: var(--input-disabled-color);
+  --table-customization-select-view-option-bg: fade(#000, 8%);
+  --table-customization-form-padding-vertical: 0.05rem;
+  --table-border-color: var(--border-color-base);
+  --table-row-group-title-bg: #f5f5f5;
+  --table-row-group-title-color: inherit;
+  --table-cell-group-font-weight: var(--table-header-font-weight);
+  --table-icon-help-color: var(--primary-color);
+  --table-icon-help-content: '\e8fd';
+  --table-icon-help-size: var(--icon-font-size-base);
+  --table-icon-help-font-weight: inherit;
 
-  // tree
+  // Tree
 	// --primary-color: @primary-color-base0; // 有效
 	// --border-radius-base: @border-radius-base-base0; // 有效
 	// --disabled-color: @disabled-color-base0; // 有效
@@ -676,13 +736,13 @@
 sans-serif;
 @font-family: 'Monospaced Number', @font-family-no-number;
 @code-family: Consolas, Menlo, Courier, monospace;
-@heading-color: fade(#000, 85%);
+@heading-color: var(--heading-color);
 @text-color: var(--text-color);
 @text-color-secondary: var(--text-color-secondary);
 @heading-color-dark: fade(#fff, 100%);
 @text-color-dark: var(--text-color-dark);
 @text-color-secondary-dark: fade(#fff, 65%);
-@font-size-base: 0.13rem;
+@font-size-base: var(--font-size-base);
 @font-size-lg: var(--font-size-lg);
 @font-size-sm: var(--font-size-sm);
 @font-weight-base: var(--font-weight-base);
@@ -713,7 +773,7 @@ sans-serif;
 
 // The background colors for active and hover states for things like
 // list items or table cells.
-@item-active-bg: rgba(140, 158, 255, 0.12);
+@item-active-bg: var(--item-active-bg);
 @item-hover-bg: var(--item-hover-bg);
 @item-focus-bg: @background-color-light;
 @item-active-color: @text-color;
@@ -724,7 +784,7 @@ sans-serif;
 //@iconfont-css-prefix: icon;
 //@icon-url: "~choerodon-ui-font/fonts/icomoon";
 //Icon
-//@icon-font-size-base: .18rem;
+@icon-font-size-base: var(--icon-font-size-base);
 //@icon-font-size-sm: .16rem;
 //@icon-font-size-lg: .2rem;
 
@@ -1250,7 +1310,7 @@ sans-serif;
 @popover-arrow-outer-color: @popover-bg;
 // Popover distance with trigger
 @popover-distance: @popover-arrow-width + 0.04rem;
-@popover-message-title-padding: 0 0 0 @font-size-base + 0.08rem;
+@popover-message-title-padding: 0 0 0 calc(@font-size-base + 0.08rem);
 
 // Modal
 // --
@@ -1308,54 +1368,55 @@ sans-serif;
 
 // Table
 // --
-@table-header-bg: @background-color-light;
-@table-header-color: @heading-color;
-@table-header-font-weight: 700;
-@table-header-sort-bg: @background-color-base;
-@table-row-hover-bg: @item-hover-bg;
-@table-current-row-bg: @item-active-bg;
-@table-even-row-bg: fade(#000, 2%);
-@table-cell-focus-bg: fade(#000, 8%);
-@table-selected-row-bg: fade(#a1c2fa, 16%);
-@table-expanded-row-bg: #fbfbfb;
-@table-mouse-batch-choose-bg: @table-selected-row-bg;
-@table-padding-vertical: 0.05rem;
-@table-padding-horizontal: @input-padding-horizontal;
-@table-cell-font-weight: 400;
-@table-cell-padding-vertical-base: 0.01rem;
-@table-cell-padding-horizontal-base: 0.01rem;
-@table-cell-padding-vertical-sm: @table-cell-padding-vertical-base;
-@table-cell-padding-horizontal-sm: @table-cell-padding-horizontal-base;
-@table-header-cell-padding-vertical-base: @table-cell-padding-vertical-base;
-@table-header-cell-padding-horizontal-base: @table-cell-padding-horizontal-base;
-@table-header-cell-padding-vertical-sm: @table-cell-padding-vertical-sm;
-@table-header-cell-padding-horizontal-sm: @table-cell-padding-horizontal-sm;
-@table-footer-cell-padding-vertical-base: @table-cell-padding-vertical-base;
-@table-footer-cell-padding-horizontal-base: @table-cell-padding-horizontal-base;
-@table-footer-cell-padding-vertical-sm: @table-cell-padding-vertical-sm;
-@table-footer-cell-padding-horizontal-sm: @table-cell-padding-horizontal-sm;
-@table-split-color: @primary-color;
-@table-editable-cell-border-radius-base: 0;
-@table-editable-cell-border-color: @input-border-color;
-@table-editable-cell-required-bg: @input-required-bg;
-@table-editable-cell-required-border-color: @input-required-border-color;
-@table-editable-cell-highlight-border-color: @input-highlight-border-color;
-@table-editable-cell-error-bg: @error-bg-color;
-@table-editable-cell-error-border-color: @input-error-border-color;
-@table-editable-cell-disabled-bg: @input-disabled-bg;
-@table-editable-cell-disabled-border-color: @input-disabled-color;
-@table-customization-select-view-option-bg: fade(#000, 8%);
-@table-customization-form-padding-vertical: 0.05rem;
-@table-border-color: @border-color-base;
-@table-row-group-title-bg: #f5f5f5;
-@table-row-group-title-color: inherit;
-@table-cell-group-font-weight: @table-header-font-weight;
-@table-icon-help-color: @primary-color;
-@table-icon-help-content: '\e8fd';
-@table-icon-help-size: @icon-font-size-base;
-@table-icon-help-font-weight: inherit;
+@table-header-bg: var(--table-header-bg);
+@table-header-color: var(--table-header-color);
+@table-header-font-weight: var(--table-header-font-weight);
+@table-header-sort-bg: var(--table-header-sort-bg);
+@table-row-hover-bg: var(--table-row-hover-bg);
+@table-current-row-bg: var(--table-current-row-bg);
+@table-even-row-bg: var(--table-even-row-bg);
+@table-cell-focus-bg: var(--table-cell-focus-bg);
+@table-selected-row-bg: var(--table-selected-row-bg);
+@table-expanded-row-bg: var(--table-expanded-row-bg);
+@table-mouse-batch-choose-bg: var(--table-mouse-batch-choose-bg);
+@table-padding-vertical: var(--table-padding-vertical);
+@table-padding-horizontal: var(--table-padding-horizontal);
+@table-cell-font-weight: var(--table-cell-font-weight);
+@table-cell-padding-vertical-base: var(--table-cell-padding-vertical-base);
+@table-cell-padding-horizontal-base: var(--table-cell-padding-horizontal-base);
+@table-cell-padding-vertical-sm: var(--table-cell-padding-vertical-sm);
+@table-cell-padding-horizontal-sm: var(--table-cell-padding-horizontal-sm);
+@table-header-cell-padding-vertical-base: var(--table-header-cell-padding-vertical-base);
+@table-header-cell-padding-horizontal-base: var(--table-header-cell-padding-horizontal-base);
+@table-header-cell-padding-vertical-sm: var(--table-header-cell-padding-vertical-sm);
+@table-header-cell-padding-horizontal-sm: var(--table-header-cell-padding-horizontal-sm);
+@table-footer-cell-padding-vertical-base: var(--table-footer-cell-padding-vertical-base);
+@table-footer-cell-padding-horizontal-base: var(--table-footer-cell-padding-horizontal-base);
+@table-footer-cell-padding-vertical-sm: var(--table-footer-cell-padding-vertical-sm);
+@table-footer-cell-padding-horizontal-sm: var(--table-footer-cell-padding-horizontal-sm);
+@table-split-color: var(--table-split-color);
+@table-editable-cell-border-radius-base: var(--table-editable-cell-border-radius-base);
+@table-editable-cell-border-color: var(--table-editable-cell-border-color);
+@table-editable-cell-required-bg: var(--table-editable-cell-required-bg);
+@table-editable-cell-required-border-color: var(--table-editable-cell-required-border-color);
+@table-editable-cell-highlight-border-color: var(--table-editable-cell-highlight-border-color);
+@table-editable-cell-error-bg: var(--table-editable-cell-error-bg);
+@table-editable-cell-error-border-color: var(--table-editable-cell-error-border-color);
+@table-editable-cell-disabled-bg: var(--table-editable-cell-disabled-bg);
+@table-editable-cell-disabled-border-color: var(--table-editable-cell-disabled-border-color);
+@table-customization-select-view-option-bg: var(--table-customization-select-view-option-bg);
+@table-customization-form-padding-vertical: var(--table-customization-form-padding-vertical);
+@table-border-color: var(--table-border-color);
+@table-row-group-title-bg: var(--table-row-group-title-bg);
+@table-row-group-title-color: var(--table-row-group-title-color);
+@table-cell-group-font-weight: var(--table-cell-group-font-weight);
+@table-icon-help-color: var(--table-icon-help-color);
+@table-icon-help-content: var(--table-icon-help-content);
+@table-icon-help-size: var(--table-icon-help-size);
+@table-icon-help-font-weight: var(--table-icon-help-font-weight);
 @table-combo-add-fields-hover-bg: var(--table-combo-add-fields-hover-bg);
 @table-combo-filter-name-select-hover-bg: var(--table-combo-filter-name-select-hover-bg);
+@table-border: @border-width-base @border-style-base @table-border-color;
 
 // PerformanceTable
 @performance-table-header-bg: #f5f5f5;
@@ -1625,18 +1686,18 @@ sans-serif;
 @dropdown-menu-padding-horizontal-base: 0;
 
 // Alert
-@alert-icon-top: 0.05rem + @font-size-base * @line-height-base / 2 - @font-size-base / 2;
+@alert-icon-top: calc(0.05rem + @font-size-base * @line-height-base / 2 - @font-size-base / 2);
 @alert-icon-left: 0.16rem;
 
 // Lov
 @lov-selection-list-bg: transparent;
 
 // Typography
-@heading-1-size: @font-size-base * 2.71;
-@heading-2-size: @font-size-base * 2.14;
-@heading-3-size: @font-size-base * 1.71;
-@heading-4-size: @font-size-base * 1.42;
-@heading-5-size: @font-size-base * 1.14;
+@heading-1-size: calc(@font-size-base * 2.71);
+@heading-2-size: calc(@font-size-base * 2.14);
+@heading-3-size: calc(@font-size-base * 1.71);
+@heading-4-size: calc(@font-size-base * 1.42);
+@heading-5-size: calc(@font-size-base * 1.14);
 @typography-title-font-weight: 600;
 @typography-title-margin-top: 0.3rem;
 @typography-title-margin-bottom: 0.2rem;

@@ -126,7 +126,7 @@ class App extends React.Component {
   render() {
     const buttons = [this.createButton, 'save', 'delete', 'reset'];
     return (
-      <Table queryBar="none" key="user" buttons={buttons} dataSet={this.userDs} buttonsLimit={2} pristine>
+      <Table queryBar="none" key="user" buttons={buttons} dataSet={this.userDs} buttonsLimit={2} pristine parityRow>
         <Column name="userid" sortable />
         <Column name="age" sortable width={200} />
         <Column name="enable" width={200} />
