@@ -234,7 +234,7 @@
 // circle button: the content only contains icon
 .btn-circle(@btnClassName: btn) {
   .square(@btn-circle-size);
-  .button-size(@btn-circle-size; 0; @font-size-base + .02rem; 50%);
+  .button-size(@btn-circle-size; 0; calc(@font-size-base + 0.02rem); 50%);
 
   &.@{btnClassName}-lg {
     .square(@btn-circle-size-lg);
