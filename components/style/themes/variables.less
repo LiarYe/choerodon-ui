@@ -438,6 +438,14 @@
   --btn-default-flat-color: var(--btn-default-color);
   // --
 
+  // Collapse
+  --collapse-header-padding: 0.12rem;
+  --collapse-header-padding-extra: .4rem;
+  --collapse-header-bg: var(--background-color-light);
+  --collapse-content-padding: var(--padding-md);
+  --collapse-content-bg: var(--component-background);
+  --collapse-panel-border-radius: var(--border-radius-base);
+
   // Radio 
   --radio-size: 0.14rem;
   --radio-border-width: var(--border-width-base);
@@ -1655,14 +1663,15 @@ sans-serif;
 
 // Collapse
 // ---
-@collapse-header-padding: 0.12rem;
-@collapse-header-padding-extra: .4rem;
-@collapse-header-bg: @background-color-light;
-@collapse-content-padding: @padding-md;
-@collapse-content-bg: @component-background;
+@collapse-header-padding: var(--collapse-header-padding);
+@collapse-header-padding-extra: var(--collapse-header-padding-extra);
+@collapse-header-bg: var(--collapse-header-bg);
+@collapse-content-padding: var(--collapse-content-padding);
+@collapse-content-bg: var(--collapse-content-bg);
+@collapse-active-bg: var(--background-color-base);
 
 //CollapsePanel
-@collapse-panel-border-radius: @border-radius-base;
+@collapse-panel-border-radius: var(--collapse-panel-border-radius);
 
 //  Result
 // ---
