@@ -35,7 +35,8 @@ function getPreviewItem(item: string | PictureRef): PictureRef {
 
 const PictureViewer: FunctionComponent<PictureViewerProps & { modal?: ModalChildrenProps }> = function PictureViewer(props) {
   const { list, defaultIndex = 0, prefixCls, modal } = props;
-  const { getProPrefixCls } = useContext(ConfigContext);
+  const { getProPrefixCls, getConfig } = useContext(ConfigContext);
+  const isRTL = getConfig('direction') === 'rtl';
   const pictureRef = useRef<PictureForwardRef | null>(null);
   const transformTargetRef = useRef<HTMLDivElement | null>(null);
   const [index, setIndex] = useState<number>(defaultIndex);
@@ -155,11 +156,11 @@ const PictureViewer: FunctionComponent<PictureViewerProps & { modal?: ModalChild
   if (length) {
     const { src, downloadUrl } = getPreviewItem(list[index]);
     return (
-      <div className={customizedPrefixCls} onWheel={handleWheel}>
+      <div className={`${customizedPrefixCls} ${isRTL ? `${customizedPrefixCls}-rtl` : ''}`} onWheel={handleWheel}>
         {
           length > 1 && (
             <Button
-              icon="navigate_before"
+              icon={isRTL ? 'navigate_next' : 'navigate_before'}
               disabled={index === 0}
               funcType={FuncType.link}
               onClick={handlePrev}
@@ -204,7 +205,7 @@ const PictureViewer: FunctionComponent<PictureViewerProps & { modal?: ModalChild
         {
           length > 1 && (
             <Button
-              icon="navigate_next"
+              icon={isRTL ? 'navigate_before' : 'navigate_next'}
               disabled={index === length - 1}
               funcType={FuncType.link}
               onClick={handleNext}

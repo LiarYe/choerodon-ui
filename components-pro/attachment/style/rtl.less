@@ -1,0 +1,49 @@
+@import '../../../components/style/themes/default';
+
+@pro-attachment-prefix-cls: ~'@{c7n-pro-prefix}-attachment';
+
+.@{pro-attachment-prefix-cls}-wrapper-rtl {
+  direction: rtl;
+
+  .@{pro-attachment-prefix-cls} {
+    &-list {
+      &-item {
+        &-size {
+          margin-right: .02rem;
+          margin-left: 0;
+        }
+
+        &-drag-icon {
+          margin-right: 0;
+          margin-left: .08rem;
+        }
+      }
+
+      &-card .@{pro-attachment-prefix-cls}-list-item {
+        margin-right: 0;
+        margin-left: .08rem;
+
+        &-buttons {
+          .@{c7n-pro-prefix}-btn {
+            & + .@{c7n-pro-prefix}-btn {
+              margin-right: 0;
+              margin-left: 0;
+              border-right: @border-width-base @border-style-base rgba(255, 255, 255, .65);
+              border-left: none;
+            }
+          }
+        }
+      }
+    }
+
+    &-required::after {
+      margin-right: 0.04rem;
+      margin-left: 0;
+    }
+
+    &-popup .@{pro-attachment-prefix-cls}-list-card {
+      padding-right: .08rem;
+      padding-left: 0;
+    }
+  }
+}

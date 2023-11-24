@@ -1,0 +1,30 @@
+@import "../../../components/style/themes/default";
+
+@dropdown-button-prefix-cls: ~"@{c7n-pro-prefix}-dropdown-button";
+
+.@{dropdown-button-prefix-cls}-rtl {
+  direction: rtl;
+
+  &.@{dropdown-button-prefix-cls} {
+    > .@{c7n-pro-prefix}-btn {
+      &:first-child {
+        border-top-left-radius: 0;
+        border-top-right-radius: @btn-border-radius-base;
+        border-bottom-right-radius: @btn-border-radius-base;
+        border-bottom-left-radius: 0;
+      }
+
+      &:last-child {
+        border-top-left-radius: @btn-border-radius-base;
+        border-top-right-radius: 0;
+        border-bottom-right-radius: 0;
+        border-bottom-left-radius: @btn-border-radius-base;
+      }
+    }
+
+    .@{c7n-pro-prefix}-btn+.@{c7n-pro-prefix}-btn {
+      margin-right: @dropdown-button-group-spacing;
+      margin-left: 0;
+    }
+  }
+}

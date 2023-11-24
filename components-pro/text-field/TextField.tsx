@@ -786,10 +786,12 @@ export class TextField<T extends TextFieldProps> extends FormField<T> {
     const { text: startText, placeholder: startPlaceholder, width: startWidth } = this.getEditorTextInfo(0);
     const { text: endText, placeholder: endPlaceholder, width: endWidth } = this.getEditorTextInfo(1);
     const editorStyle = {} as CSSProperties;
+    const startDirectionName = this.isRTL ? 'right' : 'left';
+    const endDirectionName = this.isRTL ? 'left' : 'right';
     if (rangeTarget === 1) {
-      editorStyle.right = 0;
+      editorStyle[endDirectionName] = 0;
     } else {
-      editorStyle.left = 0;
+      editorStyle[startDirectionName] = 0;
     }
     if (!editable) {
       editorStyle.textIndent = -1000;
@@ -1068,17 +1070,19 @@ export class TextField<T extends TextFieldProps> extends FormField<T> {
         paddingRight += toPx('0.03rem')!;
       }
       if (paddingRight >= toPx('0.25rem')!) {
+        const suffixPaddingDirectionName = this.isRTL ? 'paddingLeft' : 'paddingRight';
         const pr = `${Number(pxToRem(paddingRight + 2, true)?.split('rem')[0]).toFixed(3)}rem`;
         otherProps.style = {
           ...otherProps.style,
-          paddingRight: pr,
+          [suffixPaddingDirectionName]: pr,
         };
       }
     }
     if (this.prefixWidth && this.prefixWidth > toPx('0.24rem')!) {
+      const prefixPaddingDirectionName = this.isRTL ? 'paddingRight' : 'paddingLeft';
       otherProps.style = {
         ...otherProps.style,
-        paddingLeft: pxToRem(this.prefixWidth + toPx('0.02rem')!, true),
+        [prefixPaddingDirectionName]: pxToRem(this.prefixWidth + toPx('0.02rem')!, true),
       };
     }
   }
@@ -1150,10 +1154,11 @@ export class TextField<T extends TextFieldProps> extends FormField<T> {
       [`${prefixCls}-allow-clear`]: clearButton && !isSuffixClick,
     });
     const right = pxToRem(this.lengthInfoWidth ? this.lengthInfoWidth + toPx('0.03rem')! : undefined, true);
+    const directionName = this.isRTL ? 'left' : 'right';
     return (
       <div
         className={classString}
-        style={{ ...divStyle, right }}
+        style={{ ...divStyle, [directionName]: right }}
         onMouseDown={preventDefault}
         {...props}
         ref={this.saveSuffixRef}
@@ -1298,6 +1303,7 @@ export class TextField<T extends TextFieldProps> extends FormField<T> {
           ? defaultTo(this.lengthInfoWidth, 0) + defaultTo(this.getSuffixWidth(), 0)
           : this.lengthInfoWidth;
       }
+      const directionName = this.isRTL ? 'left' : 'right';
       return this.wrapperInnerSpanButton(
         <Icon
           type="close"
@@ -1306,7 +1312,7 @@ export class TextField<T extends TextFieldProps> extends FormField<T> {
         />,
         {
           className: `${prefixCls}-clear-button`,
-          style: { right: pxToRem(right, true) },
+          style: { [directionName]: pxToRem(right, true) },
         },
       );
     }

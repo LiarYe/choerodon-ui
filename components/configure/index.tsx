@@ -120,6 +120,8 @@ export interface AttachmentConfig extends DataSetAttachmentConfig {
   renderHistory?: (props: { attachment: AttachmentFile; bucketName?: string; bucketDirectory?: string; storageCode?: string; attachmentUUID: string }) => ReactNode;
 }
 
+export type DirectionType = 'ltr' | 'rtl' | undefined;
+
 export interface Config extends DataSetConfig {
   prefixCls?: string;
   proPrefixCls?: string;
@@ -335,6 +337,10 @@ export interface Config extends DataSetConfig {
    * 输入框 range 分隔符
    */
   rangeSeparator?: string;
+  /**
+   * 组件布局方向
+   */
+  direction?: DirectionType;
   /**
    * @deprecated
    */

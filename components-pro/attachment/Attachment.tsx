@@ -1008,6 +1008,7 @@ export default class Attachment extends FormField<AttachmentProps> {
       {
         [`${prefixCls}-sm`]: size === Size.small,
         [`${prefixCls}-lg`]: size === Size.large,
+        [`${prefixCls}-wrapper-rtl`]: this.isRTL,
       },
     );
   }
@@ -1168,7 +1169,7 @@ export default class Attachment extends FormField<AttachmentProps> {
             popupContent={this.renderWrapper}
             action={[Action.hover, Action.focus]}
             builtinPlacements={BUILT_IN_PLACEMENTS}
-            popupPlacement="bottomLeft"
+            popupPlacement={this.isRTL ? 'bottomRight' : 'bottomLeft'}
             popupHidden={hidden || !this.popup}
             onPopupHiddenChange={this.handlePopupHiddenChange}
           >

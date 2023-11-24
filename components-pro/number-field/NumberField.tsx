@@ -351,6 +351,7 @@ export class NumberField<T extends NumberFieldProps> extends TextField<T & Numbe
       if (this.suffixWidth && this.isSuffixClick) {
         right = defaultTo(this.suffixWidth, 0);
       }
+      const directionName = this.isRTL ? 'left' : 'right';
       return this.wrapperInnerSpanButton(
         <Icon
           type="close"
@@ -359,7 +360,7 @@ export class NumberField<T extends NumberFieldProps> extends TextField<T & Numbe
         />,
         {
           className: `${prefixCls}-clear-button`,
-          style: { right },
+          style: { [directionName]: right },
         },
       )
     }

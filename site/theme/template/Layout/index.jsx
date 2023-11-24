@@ -26,6 +26,7 @@ UIconfigure({
       url: `/common/lov/dataset/${code}${code === 'LOV_CODE' && params ? `/${params.pagesize}/${params.page}` : ''}`,
     };
   },
+  // direction: 'rtl',
 });
 
 export const uiConfigure = {
@@ -40,6 +41,8 @@ export const uiConfigure = {
       });
     }
   },
+  // direction: 'rtl',
+  // dateTimePickerOkButton: true,
 };
 
 if (typeof window !== 'undefined') {
@@ -86,6 +89,11 @@ export default class Layout extends React.Component {
   }
 
   componentDidMount() {
+    if (typeof document !== 'undefined' && document && document.documentElement) {
+      if (!document.documentElement.classList.contains('c7n-rtl')) {
+        // document.documentElement.classList.add('c7n-rtl');
+      }
+    }
     const nprogressHiddenStyle = document.getElementById('nprogress-style');
     if (nprogressHiddenStyle) {
       this.timer = setTimeout(() => {

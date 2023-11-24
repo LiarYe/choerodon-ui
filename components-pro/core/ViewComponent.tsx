@@ -19,7 +19,7 @@ import noop from 'lodash/noop';
 import isElement from 'lodash/isElement';
 import classes from 'component-classes';
 import ConfigContext, { ConfigContextValue } from 'choerodon-ui/lib/config-provider/ConfigContext';
-import { Config, ConfigKeys, DefaultConfig } from 'choerodon-ui/lib/configure';
+import { Config, ConfigKeys, DefaultConfig, DirectionType } from 'choerodon-ui/lib/configure';
 import autobind from '../_util/autobind';
 import { Size } from './enum';
 import normalizeLanguage from '../_util/normalizeLanguage';
@@ -286,6 +286,14 @@ export default class ViewComponent<P extends ViewComponentProps, C extends Confi
     return this.isDisabled();
   }
 
+  get direction(): DirectionType {
+    return this.getContextConfig('direction');
+  }
+
+  get isRTL(): boolean {
+    return this.direction === 'rtl';
+  }
+
   constructor(props, context) {
     super(props, context);
     // why the props is undefined ?
@@ -446,6 +454,7 @@ export default class ViewComponent<P extends ViewComponentProps, C extends Confi
         [`${prefixCls}-lg`]: size === Size.large,
         [`${prefixCls}-disabled`]: this.disabled,
         [`${prefixCls}-focused`]: this.useFocusedClassName() && this.isFocus,
+        [`${prefixCls}-wrapper-rtl`]: this.isRTL,
       },
       ...args,
     );

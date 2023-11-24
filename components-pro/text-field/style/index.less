@@ -1,7 +1,12 @@
 @import "../../../components/style/themes/default";
 @import "../../../components/style/mixins/index";
 @import "mixin";
+@import './rtl.less';
+
+@input-prefix-cls: ~'@{c7n-pro-prefix}-input';
 
 .@{c7n-pro-prefix}-input {
   .input;
 }
+
+.input-rtl(@input-prefix-cls);

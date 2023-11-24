@@ -1,0 +1,14 @@
+@import '../../../components/style/themes/default';
+
+@picture-prefix-cls: ~'@{c7n-pro-prefix}-picture';
+
+.@{picture-prefix-cls}-viewer-rtl {
+  direction: rtl;
+
+  &.@{picture-prefix-cls}-viewer {
+    .@{picture-prefix-cls}-viewer-btn-close {
+      right: initial;
+      left: 0.4rem;
+    }
+  }
+}

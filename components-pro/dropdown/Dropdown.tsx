@@ -48,11 +48,12 @@ interface DropdownInterface extends FunctionComponent<DropDownProps> {
 }
 
 const Dropdown: DropdownInterface = function Dropdown(props) {
-  const { getProPrefixCls } = useContext(ConfigContext);
+  const { getProPrefixCls, getConfig } = useContext(ConfigContext);
   const {
-    onOverlayClick, hidden: propsHidden, visible: propsVisible, trigger, overlay, children, placement, popupClassName, disabled,
+    onOverlayClick, hidden: propsHidden, visible: propsVisible, trigger, overlay, children, placement: placementProp, popupClassName, disabled,
     getPopupContainer, onHiddenBeforeChange, suffixCls, prefixCls: customizePrefixCls, onHiddenChange, onVisibleChange,
   } = props;
+  const placement = !placementProp && getConfig('direction') === 'rtl' ? Placements.bottomRight : placementProp || Placements.bottomLeft;
   const prefixCls = getProPrefixCls(suffixCls!, customizePrefixCls);
   const [hidden, setHidden] = useState<boolean>(() => {
     if ('hidden' in props) {
@@ -140,7 +141,6 @@ Dropdown.Button = DropdownButton;
 
 Dropdown.defaultProps = {
   suffixCls: 'dropdown',
-  placement: Placements.bottomLeft,
   trigger: [Action.hover, Action.focus],
   defaultHidden: true,
 };

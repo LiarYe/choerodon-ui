@@ -1,0 +1,23 @@
+@import "../../../components/style/themes/default";
+@import '../../text-field/style/rtl.less';
+
+@input-number-prefix-cls: ~'@{c7n-pro-prefix}-input-number';
+
+.input-rtl(@input-number-prefix-cls);
+
+.@{input-number-prefix-cls}-wrapper-rtl {
+  &.@{input-number-prefix-cls}-suffix-button .@{input-number-prefix-cls}-inner-button {
+    right: initial;
+    left: @input-suffix-width-base;
+  }
+
+  &.@{input-number-prefix-cls}-suffix-button .@{input-number-prefix-cls}-clear-button {
+    right: initial;
+    left: 0.01rem;
+  }
+
+  &.@{input-number-prefix-cls}-step-suffix .@{input-number-prefix-cls}.@{input-number-prefix-cls} {
+    padding-right: @input-padding-horizontal;
+    padding-left: calc(@input-suffix-width-base * 2);
+  }
+}

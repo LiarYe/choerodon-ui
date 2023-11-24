@@ -8,6 +8,7 @@ import isString from 'lodash/isString';
 import noop from 'lodash/noop';
 import KeyCode from 'choerodon-ui/lib/_util/KeyCode';
 import { Size } from 'choerodon-ui/lib/_util/enum';
+import { DirectionType } from 'choerodon-ui/lib/configure';
 import DataSetComponent, { DataSetComponentProps } from '../data-set/DataSetComponent';
 import ObserverSelect from '../select/Select';
 import ObserverNumberField from '../number-field/NumberField';
@@ -30,7 +31,7 @@ export interface PaginationProps extends DataSetComponentProps {
   maxPageSize?: number;
   onChange?: (page: number, pageSize: number) => void;
   beforeChange?:  (page: number, pageSize: number) => Promise<boolean | undefined> | boolean | undefined | void; // apaas event test
-  itemRender?: (page: number, type: PagerType) => ReactNode;
+  itemRender?: (page: number, type: PagerType, direction?: DirectionType) => ReactNode;
   pageSizeOptions?: string[];
   pageSizeEditable?: boolean;
   sizeChangerPosition?: SizeChangerPosition;
@@ -45,16 +46,17 @@ export interface PaginationProps extends DataSetComponentProps {
   quickJumperPosition?: QuickJumperPosition;
 }
 
-function defaultItemRender(page: number, type: PagerType) {
+function defaultItemRender(page: number, type: PagerType, direction?: DirectionType) {
+  const isRTL = direction === 'rtl';
   switch (type) {
     case 'first':
-      return <Icon type="first_page" />;
+      return isRTL ? <Icon type="last_page" /> : <Icon type="first_page" />;
     case 'last':
-      return <Icon type="last_page" />;
+      return isRTL ? <Icon type="first_page" /> : <Icon type="last_page" />;
     case 'prev':
-      return <Icon type="navigate_before" />;
+      return isRTL ? <Icon type="navigate_next" /> : <Icon type="navigate_before" />;
     case 'next':
-      return <Icon type="navigate_next" />;
+      return isRTL ? <Icon type="navigate_before" /> : <Icon type="navigate_next" />;
     case 'jump-prev':
     case 'jump-next':
       return '•••';
@@ -279,6 +281,7 @@ export default class Pagination extends DataSetComponent<PaginationProps> {
     const {
       prefixCls,
       props: { itemRender = defaultItemRender, disabled = false },
+      direction,
     } = this;
     const disabledValue = disabledSender || disabled;
     const classNamePager = isString(type) ? `${prefixCls}-pager-${type}` : ``;
@@ -292,6 +295,7 @@ export default class Pagination extends DataSetComponent<PaginationProps> {
         renderer={itemRender}
         disabled={disabledValue}
         className={`${prefixCls}-pager ${classNamePager}`}
+        direction={direction}
       />
     );
   }

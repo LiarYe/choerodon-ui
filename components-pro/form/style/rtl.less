@@ -1,0 +1,25 @@
+@import '../../../components/style/themes/default';
+
+@form-prefix-cls: ~'@{c7n-pro-prefix}-form';
+@field-prefix-cls: ~'@{c7n-pro-prefix}-field';
+
+.@{form-prefix-cls}-wrapper-rtl {
+  direction: rtl;
+}
+
+.@{form-prefix-cls}-item-group-rtl {
+  direction: rtl;
+
+  .@{form-prefix-cls}-item-group-item:not(:last-child) {
+    margin-right: 0;
+    margin-left: 0.05rem;
+  }
+
+  &.@{form-prefix-cls}-item-group-compact {
+    .@{form-prefix-cls}-item-group-item:not(:last-child) {
+      margin-right: 0;
+      margin-left: -0.01rem;
+    }
+  }
+}
+

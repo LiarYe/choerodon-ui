@@ -1,0 +1,38 @@
+@import '../../../components/style/themes/default';
+
+@modal-prefix-cls: ~'@{c7n-pro-prefix}-modal';
+
+.@{modal-prefix-cls}-wrapper-rtl {
+  direction: rtl;
+
+  .@{modal-prefix-cls}-footer {
+    text-align: left;
+
+    button+button {
+      margin-right: 0.08rem;
+      margin-left: 0;
+    }
+  }
+
+  .@{modal-prefix-cls}-header-buttons {
+    right: initial;
+    left: 0;
+  }
+
+  .@{modal-prefix-cls}-header-button {
+    &-navigate {
+      margin-right: 0;
+      margin-left: 0.08rem;
+    }
+  }
+
+  .@{modal-prefix-cls}-drawer-footer {
+    text-align: right;
+  }
+
+  .@{c7n-pro-prefix}-confirm {
+    &-icon {
+      padding: @modal-confirm-icon-padding-rtl;
+    }
+  }
+}

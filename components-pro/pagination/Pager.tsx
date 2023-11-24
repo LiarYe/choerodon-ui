@@ -1,4 +1,5 @@
 import React, { PureComponent, ReactNode } from 'react';
+import { DirectionType } from 'choerodon-ui/lib/configure';
 import Button from '../button/Button';
 import { ButtonColor, FuncType } from '../button/enum';
 import { PagerType } from './Pagination';
@@ -9,8 +10,9 @@ export interface PagerProps {
   disabled?: boolean;
   type: PagerType;
   className?: string;
-  renderer: (page: number, type: PagerType) => ReactNode;
+  renderer: (page: number, type: PagerType, direction?: DirectionType) => ReactNode;
   onClick?: (page: number) => void;
+  direction?: DirectionType;
 }
 
 export default class Pager extends PureComponent<PagerProps> {
@@ -24,7 +26,7 @@ export default class Pager extends PureComponent<PagerProps> {
   };
 
   render() {
-    const { active, renderer, page, type, disabled, className } = this.props;
+    const { active, renderer, page, type, disabled, className, direction } = this.props;
     return (
       <Button
         className={className}
@@ -33,7 +35,7 @@ export default class Pager extends PureComponent<PagerProps> {
         color={active ? ButtonColor.primary : undefined}
         disabled={disabled}
       >
-        {renderer(page, type)}
+        {renderer(page, type, direction)}
       </Button>
     );
   }

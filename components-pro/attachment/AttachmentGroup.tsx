@@ -51,6 +51,7 @@ const AttachmentGroup: FunctionComponent<AttachmentGroupProps> = function Attach
   const { getProPrefixCls, getConfig } = useContext(ConfigContext);
   const listRef = useRef<ObservableMap<number, Attachment>>(observable.map());
   const prefixCls = getProPrefixCls('attachment');
+  const direction = getConfig('direction');
   const computedCount = hasCount ? count : iteratorReduce<Attachment, number>(listRef.current.values(), (sum, attachment) => sum + (attachment.count || 0), 0);
   const attachments = useMemo((): ReactElement | undefined => children ? (
     <div className={`${prefixCls}-group`}>
@@ -93,7 +94,7 @@ const AttachmentGroup: FunctionComponent<AttachmentGroupProps> = function Attach
         popupContent={content}
         action={[Action.hover, Action.focus]}
         builtinPlacements={BUILT_IN_PLACEMENTS}
-        popupPlacement="bottomLeft"
+        popupPlacement={direction === 'rtl' ? 'bottomRight' : 'bottomLeft'}
         forceRender={!hasCount}
       >
         <Button

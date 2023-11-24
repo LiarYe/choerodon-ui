@@ -1,0 +1,55 @@
+@import '../../../components/style/themes/default';
+@import '../../text-field/style/rtl.less';
+
+@date-picker-prefix: ~'@{c7n-pro-prefix}-calendar';
+
+.input-rtl(~'@{date-picker-prefix}-picker');
+
+.@{c7n-pro-prefix}-popup-wrapper-rtl {
+  .@{date-picker-prefix}-datetime-wrapper {
+    .@{date-picker-prefix}-time {
+      border-right: @date-picker-datetime-time-border-left;
+      border-left: none;
+    }
+  }
+
+  .@{date-picker-prefix}-prev-year,
+  .@{date-picker-prefix}-prev-month {
+    float: right;
+  }
+
+  .@{date-picker-prefix}-next-year,
+  .@{date-picker-prefix}-next-month {
+    float: left;
+  }
+
+  .@{date-picker-prefix}-footer-now-btn {
+    right: 0.12rem;
+    left: initial;
+  }
+
+  .@{date-picker-prefix}-footer {
+    & > .@{date-picker-prefix}-footer-view-select {
+      right: initial;
+      left: 0.12rem;
+    }
+  }
+
+  .@{date-picker-prefix}-week-panel {
+    .@{date-picker-prefix}-cell {
+      &:first-child .@{date-picker-prefix}-cell-inner {
+        border-top-left-radius: 0;
+        border-top-right-radius: @date-picker-week-edge-cell-inner-border-radius;
+        border-bottom-right-radius: @date-picker-week-edge-cell-inner-border-radius;
+        border-bottom-left-radius: 0;
+      }
+
+      &:last-child .@{date-picker-prefix}-cell-inner {
+        border-top-left-radius: @date-picker-week-edge-cell-inner-border-radius;
+        border-top-right-radius: 0;
+        border-bottom-right-radius: 0;
+        border-bottom-left-radius: @date-picker-week-edge-cell-inner-border-radius;
+      }
+    }
+  }
+}

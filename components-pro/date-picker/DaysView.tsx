@@ -178,14 +178,15 @@ export default class DaysView<T extends DateViewProps> extends ViewComponent<T>
     const {
       prefixCls,
       props: { date },
+      isRTL,
     } = this;
     return (
       <div className={`${prefixCls}-header`}>
         <a className={`${prefixCls}-prev-year`} onClick={this.handlePrevYearClick}>
-          <Icon type="first_page" />
+          <Icon type={isRTL ? 'last_page' : 'first_page'} />
         </a>
         <a className={`${prefixCls}-prev-month`} onClick={this.handlePrevMonthClick}>
-          <Icon type="navigate_before" />
+          <Icon type={isRTL ? 'navigate_next' : 'navigate_before'} />
         </a>
         <a className={`${prefixCls}-view-select`} onClick={this.handleMonthSelect}>
           {date.localeData().monthsShort(date)}
@@ -193,11 +194,11 @@ export default class DaysView<T extends DateViewProps> extends ViewComponent<T>
         <a className={`${prefixCls}-view-select`} onClick={this.handleYearSelect}>
           {date.year()}
         </a>
-        <a className={`${prefixCls}-next-year`}>
-          <Icon type="last_page" onClick={this.handleNextYearClick} />
+        <a className={`${prefixCls}-next-year`} onClick={this.handleNextYearClick}>
+          <Icon type={isRTL ? 'first_page' : 'last_page'} />
         </a>
         <a className={`${prefixCls}-next-month`} onClick={this.handleNextMonthClick}>
-          <Icon type="navigate_next" />
+          <Icon type={isRTL ? 'navigate_before' : 'navigate_next'} />
         </a>
       </div>
     );

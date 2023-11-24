@@ -35,10 +35,11 @@ const ItemGroup: FunctionComponent<ItemGroupProps> = props => {
     compact,
     ...otherProps
   } = props;
-  const { getProPrefixCls } = useContext(ConfigContext);
+  const { getProPrefixCls, getConfig } = useContext(ConfigContext);
   const prefixCls = getProPrefixCls('form-item-group');
   const cls = classNames(className, prefixCls, {
     [`${prefixCls}-compact`]: compact,
+    [`${prefixCls}-rtl`]: getConfig('direction') === 'rtl',
   });
 
   const mapChildren = (child: ReactNode): ReactNode => {

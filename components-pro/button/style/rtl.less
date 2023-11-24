@@ -1,0 +1,39 @@
+@import '../../../components/style/themes/default';
+
+@btn-prefix-cls: ~'@{c7n-pro-prefix}-btn';
+
+@progress-cls: ~'@{c7n-prefix}-progress';
+
+.@{btn-prefix-cls}-wrapper-rtl {
+  direction: rtl;
+
+  &.@{btn-prefix-cls} {
+    > button > .@{iconfont-css-prefix},
+    > .@{iconfont-css-prefix} {
+      margin: @btn-icon-margin-rtl;
+    }
+
+    &-icon-only {
+      > button > .@{iconfont-css-prefix},
+      > .@{iconfont-css-prefix} {
+        margin-right: 0;
+        margin-left: 0;
+      }
+    }
+
+    .@{progress-cls}.@{progress-cls}-loading {
+      margin-right: 0;
+      margin-left: 0.01rem;
+
+      & + span {
+        margin-right: 0.05rem;
+        margin-left: 0;
+      }
+    }
+
+    & + .@{btn-prefix-cls}:not(.@{btn-prefix-cls}-block) {
+      margin-right: @btn-group-spacing;
+      margin-left: 0;
+    }
+  }
+}

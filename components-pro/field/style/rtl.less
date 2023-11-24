@@ -1,0 +1,65 @@
+@import '../../../components/style/themes/default';
+
+@form-prefix-cls: ~'@{c7n-pro-prefix}-form';
+@field-prefix-cls: ~'@{c7n-pro-prefix}-field';
+
+.@{form-prefix-cls}-wrapper-rtl {
+  .@{field-prefix-cls}-label {
+    &-left {
+      text-align: right;
+    }
+
+    &-right {
+      text-align: left;
+    }
+  }
+
+  label.@{field-prefix-cls}-label-right,
+  .@{field-prefix-cls}-label-right label {
+    justify-content: flex-end;
+  }
+
+  label.@{field-prefix-cls}-label-vertical {
+    direction: rtl;
+    text-align: right;
+  }
+
+  .@{field-prefix-cls}-row .@{field-prefix-cls}-label-required-mark-right,
+  .@{field-prefix-cls}-label-required-mark-right label {
+    > span {
+      padding-right: 0;
+      padding-left: 0.12rem;
+    }
+  }
+
+  .@{field-prefix-cls}-row .@{field-prefix-cls}-required.@{field-prefix-cls}-label-required-mark-right > span::after,
+  .@{field-prefix-cls}-required.@{field-prefix-cls}-label-required-mark-right label > span::after {
+    right: initial;
+    left: 0.02rem;
+  }
+
+  .@{field-prefix-cls}-row .@{field-prefix-cls}-label.@{field-prefix-cls}-label-useColon::after,
+  .@{field-prefix-cls}-label.@{field-prefix-cls}-label-useColon label::after {
+    margin-right: 0.02rem;
+    margin-left: 0;
+  }
+
+  .@{field-prefix-cls}-label-help {
+    .icon-help {
+      margin-right: 0.02rem;
+      margin-left: 0;
+    }
+
+    & + .icon-help {
+      margin-right: 0.02rem;
+      margin-left: 0;
+    }
+  }
+
+  .@{field-prefix-cls}-row .@{field-prefix-cls}-required.@{field-prefix-cls}-label-required-mark-left::before,
+  .@{field-prefix-cls}-label-vertical.@{field-prefix-cls}-required.@{field-prefix-cls}-label::before,
+  .@{field-prefix-cls}-required.@{field-prefix-cls}-label.@{field-prefix-cls}-label-required-mark-left label > span::before {
+    margin-right: 0;
+    margin-left: 0.04rem;
+  }
+}

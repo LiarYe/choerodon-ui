@@ -83,7 +83,6 @@ export default abstract class TriggerField<T extends TriggerFieldProps = Trigger
     ...TextField.defaultProps,
     suffixCls: 'trigger',
     clearButton: true,
-    popupPlacement: 'bottomLeft',
     triggerShowDelay: 150,
     triggerHiddenDelay: 50,
     viewMode: TriggerViewMode.popup,
@@ -97,6 +96,13 @@ export default abstract class TriggerField<T extends TriggerFieldProps = Trigger
 
   get popup(): boolean {
     return this.statePopup;
+  }
+
+  get popupPlacement(): string | undefined {
+    if (this.isRTL && !this.props.popupPlacement) {
+      return 'bottomRight';
+    }
+    return this.props.popupPlacement || 'bottomLeft';
   }
 
   constructor(props, context) {
@@ -215,7 +221,6 @@ export default abstract class TriggerField<T extends TriggerFieldProps = Trigger
       props: {
         popupCls,
         popupStyle,
-        popupPlacement,
         hidden,
         trigger = this.getDefaultAction(),
         triggerShowDelay,
@@ -224,6 +229,7 @@ export default abstract class TriggerField<T extends TriggerFieldProps = Trigger
         tabIntoPopupContent,
         getPopupAlignTarget = this.getRootDomNode,
       },
+      popupPlacement,
     } = this;
     return (
       <Trigger

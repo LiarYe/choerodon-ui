@@ -1,0 +1,34 @@
+@import '../../../components/style/themes/default';
+
+.@{c7n-pro-prefix}-pagination-wrapper-rtl {
+  display: flex;
+  direction: rtl;
+
+  .@{c7n-pro-prefix}-pagination {
+    &-size-changer {
+      + .@{c7n-pro-prefix}-btn-wrapper {
+        margin-right: 0.1rem;
+        margin-left: 0;
+      }
+    }
+
+    &-quick-jumper {
+      margin: @pagination-quick-jumper-margin-rtl;
+
+      &-input {
+        padding-right: 0;
+        padding-left: .05rem;
+      }
+    }
+
+    &-simple-pager {
+      margin-right: 0;
+      margin-left: 0.08rem;
+    }
+
+    &-go-button {
+      margin-right: 0.1rem;
+      margin-left: 0;
+    }
+  }
+}

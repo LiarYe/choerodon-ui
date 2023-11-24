@@ -72,17 +72,18 @@ export default class MonthsView<T extends DateViewProps> extends DaysView<T> {
     const {
       prefixCls,
       props: { date },
+      isRTL,
     } = this;
     return (
       <div className={`${prefixCls}-header`}>
         <a className={`${prefixCls}-prev-year`} onClick={this.handlePrevYearClick}>
-          <Icon type="first_page" />
+          <Icon type={isRTL ? 'last_page' : 'first_page'} />
         </a>
         <a className={`${prefixCls}-view-select`} onClick={this.handleYearSelect}>
           {date.year()}
         </a>
-        <a className={`${prefixCls}-next-year`}>
-          <Icon type="last_page" onClick={this.handleNextYearClick} />
+        <a className={`${prefixCls}-next-year`} onClick={this.handleNextYearClick}>
+          <Icon type={isRTL ? 'first_page' : 'last_page'} />
         </a>
       </div>
     );

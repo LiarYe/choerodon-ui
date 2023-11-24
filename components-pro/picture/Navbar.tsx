@@ -1,7 +1,8 @@
-import React, { FunctionComponent, memo, useCallback, useEffect, useRef, useState } from 'react';
+import React, { FunctionComponent, memo, useCallback, useEffect, useRef, useState, useContext } from 'react';
 import classNames from 'classnames';
 import isString from 'lodash/isString';
 import scrollTo from 'choerodon-ui/lib/_util/scrollTo';
+import ConfigContext from 'choerodon-ui/lib/config-provider/ConfigContext';
 import Button from '../button/Button';
 import { FuncType } from '../button/enum';
 import Picture, { PictureRef } from './Picture';
@@ -54,6 +55,8 @@ NavItem.displayName = 'NavItem';
 const MemoNavItem = memo(NavItem);
 
 const Navbar: FunctionComponent<NavbarProps> = function Navbar(props) {
+  const { getConfig } = useContext(ConfigContext);
+  const isRTL = getConfig('direction') === 'rtl';
   const { prefixCls, value, list, onChange } = props;
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [currentIndex, setCurrentIndex] = useState(value);
@@ -95,7 +98,7 @@ const Navbar: FunctionComponent<NavbarProps> = function Navbar(props) {
   return (
     <div className={navBarPrefixCls}>
       <Button
-        icon="navigate_before"
+        icon={isRTL ? 'navigate_next' : 'navigate_before'}
         disabled={disabled || currentIndex === 0}
         funcType={FuncType.link}
         onClick={handlePrev}
@@ -113,7 +116,7 @@ const Navbar: FunctionComponent<NavbarProps> = function Navbar(props) {
         </div>
       </div>
       <Button
-        icon="navigate_next"
+        icon={isRTL ? 'navigate_before' : 'navigate_next'}
         disabled={disabled || currentIndex > length - MAX}
         funcType={FuncType.link}
         onClick={handleNext}

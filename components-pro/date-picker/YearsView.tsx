@@ -89,6 +89,7 @@ export default class YearsView<T extends DateViewProps> extends DaysView<T> {
     const {
       prefixCls,
       props: { date },
+      isRTL,
     } = this;
     const year = date.year() % 10;
     const from = date.clone().subtract(year, 'y');
@@ -96,13 +97,13 @@ export default class YearsView<T extends DateViewProps> extends DaysView<T> {
     return (
       <div className={`${prefixCls}-header`}>
         <a className={`${prefixCls}-prev-year`} onClick={this.handlePrevYearClick}>
-          <Icon type="first_page" />
+          <Icon type={isRTL ? 'last_page' : 'first_page'} />
         </a>
         <a className={`${prefixCls}-view-select`} onClick={this.handleYearSelect}>
           {from.year()} - {to.year()}
         </a>
-        <a className={`${prefixCls}-next-year`}>
-          <Icon type="last_page" onClick={this.handleNextYearClick} />
+        <a className={`${prefixCls}-next-year`} onClick={this.handleNextYearClick}>
+          <Icon type={isRTL ? 'first_page' : 'last_page'} />
         </a>
       </div>
     );

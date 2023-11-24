@@ -57,7 +57,7 @@ const DropdownButton: DropdownButtonInterface = function DropdownButton(props) {
     loading: btnPropsLoading,
     ...restButtonProps
   } = buttonProps || {};
-  const { getProPrefixCls } = useContext(ConfigContext);
+  const { getProPrefixCls, getConfig } = useContext(ConfigContext);
   const prefixCls = getProPrefixCls('dropdown', customizePrefixCls);
   const dropdownProps: DropDownProps = {
     trigger: disabled ? [] : trigger,
@@ -92,6 +92,7 @@ const DropdownButton: DropdownButtonInterface = function DropdownButton(props) {
             [`${prefixCls}-button-flat`]: funcType === FuncType.flat,
             [`${prefixCls}-button-link`]: funcType === FuncType.link,
             [`${prefixCls}-button-block`]: block,
+            [`${prefixCls}-button-rtl`]: getConfig('direction') === 'rtl',
           },
         )
       }
