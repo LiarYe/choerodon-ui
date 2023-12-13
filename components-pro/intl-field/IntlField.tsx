@@ -275,8 +275,12 @@ export default class IntlField extends TextArea<IntlFieldProps> {
   }
 
   getWrapperClassNames(...args): string {
+    const wrapperClassNames = [`${this.prefixCls}-intl`];
+    if (this.isRTL) {
+      wrapperClassNames.push(`${this.prefixCls}-intl-rtl`)
+    }
     return super.getWrapperClassNames(
-      `${this.prefixCls}-intl`,
+      ...wrapperClassNames,
       ...args,
     );
   }

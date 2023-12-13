@@ -1,0 +1,218 @@
+@import '../../style/themes/default';
+
+.input-rtl(@com-prefix-cls) {
+  .@{com-prefix-cls}-wrapper-rtl {
+    direction: rtl;
+
+    .@{com-prefix-cls}-has-copy {
+      padding-right: @input-padding-horizontal;
+      padding-left: calc(@icon-font-size-base + 0.02rem);
+    }
+
+    &.@{com-prefix-cls}-has-value .@{com-prefix-cls}-icon {
+      right: unset;
+      left: 0;
+    }
+
+    .@{com-prefix-cls}-suffix {
+      right: unset;
+      left: 0;
+    }
+    .@{com-prefix-cls}-prefix {
+      right: 0;
+      left: unset;
+    }
+
+    &.@{com-prefix-cls}-has-prefix .@{com-prefix-cls} {
+      padding-right: 0;
+      padding-left: @input-padding-horizontal;
+    }
+
+    .@{com-prefix-cls}-placeholder {
+      right: 0;
+      left: unset;
+    }
+
+    .@{com-prefix-cls}-length-info {
+      right: unset;
+      left: 0;
+    }
+
+    .@{com-prefix-cls}-ripple {
+      right: 0;
+      left: unset;
+    }
+
+    .@{com-prefix-cls}-lg.@{com-prefix-cls}-has-copy {
+      padding-right: @input-padding-horizontal;
+      padding-left: calc(@icon-font-size-lg + 0.02rem);
+    }
+    .@{com-prefix-cls}-sm.@{com-prefix-cls}-has-copy {
+      padding-right: @input-padding-horizontal;
+      padding-left: calc(@icon-font-size-sm + 0.02rem);
+    }
+  }
+
+  .label-rtl(@com-prefix-cls);
+}
+
+.label-rtl(@com-prefix-cls) {
+  .is-required .@{com-prefix-cls}-wrapper-rtl .@{com-prefix-cls}-label::after {
+    margin-right: 0.04rem;
+    margin-left: unset;
+  }
+
+  .@{com-prefix-cls}-wrapper-rtl {
+    .@{com-prefix-cls}-label-wrapper {
+      right: @input-padding-horizontal-base;
+      left: unset;
+      margin-right: -0.05rem;
+      margin-left: unset;
+    }
+
+    &.@{com-prefix-cls}-has-prefix .@{com-prefix-cls}-label-wrapper {
+      right: 0;
+      left: unset;
+    }
+  }
+}
+
+.input-group-rtl(@com-prefix-cls) {
+  .@{com-prefix-cls}-wrapper-rtl {
+    &.@{com-prefix-cls}-group {
+      > .@{com-prefix-cls}:first-child,
+      .@{com-prefix-cls}-group-addon:first-child {
+        .first-child-radius-rtl;
+
+        .@{c7n-prefix}-select .@{c7n-prefix}-select-selection {
+          .first-child-radius-rtl;
+        }
+      }
+
+      > .@{com-prefix-cls}-affix-wrapper {
+        &:not(:first-child) .@{com-prefix-cls} {
+          .not-first-child-radius-rtl(@input-basic-border-radius);
+        }
+  
+        &:not(:last-child) .@{com-prefix-cls} {
+          .not-last-child-radius-rtl(@input-basic-border-radius);
+        }
+      }
+
+      > .@{com-prefix-cls}-has-border:not(:first-child)::before,
+      > *:not(:first-child) .@{com-prefix-cls}-has-border::before {
+        border-top-right-radius: 0;
+        border-bottom-right-radius: 0;
+      }
+
+      > .@{com-prefix-cls}-has-border:not(:last-child)::before,
+      > *:not(:last-child) .@{com-prefix-cls}-has-border::before {
+        border-top-left-radius: 0;
+        border-bottom-left-radius: 0;
+      }
+
+      > .@{com-prefix-cls}-has-border:first-child::before,
+      > *:first-child .@{com-prefix-cls}-has-border::before {
+        border-top-right-radius: @input-basic-has-border-border-radius;
+        border-bottom-right-radius: @input-basic-has-border-border-radius;
+      }
+      > .@{com-prefix-cls}-has-border:last-child::before,
+      > *:last-child .@{com-prefix-cls}-has-border::before {
+        border-top-left-radius: @input-basic-has-border-border-radius;
+        border-bottom-left-radius: @input-basic-has-border-border-radius;
+      }
+
+      > .@{com-prefix-cls}:last-child,
+      .@{com-prefix-cls}-group-addon:last-child {
+        .last-child-radius-rtl;
+        border-right: 0;
+        border-left: @border-width-base @border-style-base @input-border-color;
+
+        .@{c7n-prefix}-select .@{c7n-prefix}-select-selection {
+          .last-child-radius-rtl;
+        }
+      }
+    }
+
+    .@{com-prefix-cls}-group-addon:first-child {
+      border-right: @border-width-base @border-style-base @input-border-color;
+      border-left: 0;
+    }
+
+    .@{com-prefix-cls}-affix-wrapper {
+      float: right;
+    }
+  }
+
+  .@{com-prefix-cls}-group-rtl {
+    &.@{com-prefix-cls}-group-compact {
+      > * {
+        &:not(:first-child) {
+          .@{c7n-prefix}-input-has-border,
+          .@{c7n-prefix}-select-has-border,
+          &.@{c7n-prefix}-input-has-border,
+          &.@{c7n-prefix}-select-has-border {
+            margin-right: -0.01rem;
+            margin-left: unset;
+
+            &::before {
+              border-top-right-radius: 0;
+              border-bottom-right-radius: 0;
+            }
+          }
+        }
+
+        &:not(:last-child) {
+          .@{c7n-prefix}-input-has-border::before,
+          .@{c7n-prefix}-select-has-border::before,
+          &.@{c7n-prefix}-input-has-border::before,
+          &.@{c7n-prefix}-select-has-border::before {
+            border-top-left-radius: 0;
+            border-bottom-left-radius: 0;
+          }
+        }
+
+        &:first-child {
+          .@{c7n-prefix}-input-has-border::before,
+          .@{c7n-prefix}-select-has-border::before,
+          &.@{c7n-prefix}-input-has-border::before,
+          &.@{c7n-prefix}-select-has-border::before {
+            border-top-right-radius: @input-basic-has-border-border-radius;
+            border-bottom-right-radius: @input-basic-has-border-border-radius;
+          }
+        }
+        &:last-child {
+          .@{c7n-prefix}-input-has-border::before,
+          .@{c7n-prefix}-select-has-border::before,
+          &.@{c7n-prefix}-input-has-border::before,
+          &.@{c7n-prefix}-select-has-border::before {
+            border-top-left-radius: @input-basic-has-border-border-radius;
+            border-bottom-left-radius: @input-basic-has-border-border-radius;
+          }
+        }
+      }
+    }
+  }
+}
+
+.first-child-radius-rtl(@border-radius: @input-basic-has-border-border-radius) {
+  border-top-left-radius: 0;
+  border-top-right-radius: @border-radius;
+  border-bottom-right-radius: @border-radius;
+  border-bottom-left-radius: 0;
+}
+
+.last-child-radius-rtl(@border-radius: @input-basic-has-border-border-radius) {
+  border-top-left-radius: @border-radius;
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+  border-bottom-left-radius: @border-radius;
+}
+
+.not-first-child-radius-rtl(@border-radius: @input-basic-has-border-border-radius) {
+  .last-child-radius-rtl(@border-radius);
+}
+
+.not-last-child-radius-rtl(@border-radius: @input-basic-has-border-border-radius) {
+  .first-child-radius-rtl(@border-radius);
+}

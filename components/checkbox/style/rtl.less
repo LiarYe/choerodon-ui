@@ -1,0 +1,34 @@
+@import '../../style/themes/default';
+
+.antCheckboxFn-rtl(@checkbox-prefix-cls: ~'@{c7n-prefix}-checkbox') {
+  @checkbox-inner-prefix-cls: ~'@{checkbox-prefix-cls}-inner';
+
+  .@{checkbox-prefix-cls}-wrapper-rtl {
+    direction: rtl;
+
+    & + &.@{checkbox-prefix-cls}-wrapper {
+      margin-right: 0.08rem;
+      margin-left: unset;
+    }
+
+    // 半选状态
+    .@{checkbox-prefix-cls}-indeterminate .@{checkbox-inner-prefix-cls}::after {
+      right: @checkbox-basic-indeterminate-left;
+      left: unset;
+    }
+  }
+
+  .@{checkbox-prefix-cls}-group-rtl {
+    direction: rtl;
+
+    .@{checkbox-prefix-cls}-group-item.@{checkbox-prefix-cls}-group-item {
+      margin-right: unset;
+      margin-left: 0.08rem;
+
+      &:last-child {
+        margin-right: unset;
+        margin-left: 0;
+      }
+    }
+  }
+}

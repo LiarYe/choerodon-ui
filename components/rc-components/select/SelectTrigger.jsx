@@ -141,11 +141,13 @@ export default class SelectTrigger extends Component {
       filterValue,
       checkAll,
       footer,
+      isRTL,
     } = props;
     const dropdownPrefixCls = this.getDropdownPrefixCls();
     const popupClassName = {
       [dropdownClassName]: !!dropdownClassName,
       [`${dropdownPrefixCls}--${multiple ? 'multiple' : 'single'}`]: 1,
+      [`${dropdownPrefixCls}-rtl`]: isRTL,
     };
     const popupElement = this.getDropdownElement({
       menuItems: props.options,

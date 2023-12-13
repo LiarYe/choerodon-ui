@@ -14,14 +14,16 @@ export interface GroupProps {
 
 const Group: FunctionComponent<GroupProps> = function Group(props) {
   const { prefixCls: customizePrefixCls, className = '', size, compact, style, children } = props;
-  const { getPrefixCls } = useContext(ConfigContext);
+  const { getPrefixCls, getConfig } = useContext(ConfigContext);
   const prefixCls = getPrefixCls('input-group', customizePrefixCls);
+  const isRTL = getConfig('direction') === 'rtl';
   const cls = classNames(
     prefixCls,
     {
       [`${prefixCls}-lg`]: size === Size.large,
       [`${prefixCls}-sm`]: size === Size.small,
       [`${prefixCls}-compact`]: compact,
+      [`${prefixCls}-rtl`]: isRTL,
     },
     className,
   );

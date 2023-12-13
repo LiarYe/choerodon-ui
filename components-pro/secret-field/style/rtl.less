@@ -1,0 +1,33 @@
+@import "../../../components/style/themes/default";
+@import '../../text-field/style/rtl';
+
+@secretField-prefix-cls: ~'@{c7n-pro-prefix}-secret-field';
+@input-prefix-cls: ~'@{c7n-pro-prefix}-input';
+@modal-prefix-cls: ~'@{c7n-pro-prefix}-modal';
+
+.@{input-prefix-cls}-wrapper-rtl {
+  .@{input-prefix-cls}-secret-empty {
+    margin-right: calc(-1 * @input-padding-horizontal);
+    margin-left: unset;
+  }
+}
+
+.@{modal-prefix-cls}-wrapper-rtl {
+  .@{secretField-prefix-cls}-modal {
+    &-validate {
+      float: right;
+    }
+
+    &-btns {
+      margin-right: 0.07rem;
+      margin-left: unset;
+      text-align: left;
+    }
+    &-edit-btns {
+      margin-right: 0.07rem;
+      margin-left: unset;
+      text-align: left;
+    }
+  }
+}
+

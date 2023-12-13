@@ -1,12 +1,15 @@
 @import '../../style/themes/default';
 @import '../../style/mixins/index';
 @import './mixin';
+@import './rtl';
 
 // Input styles
 .@{c7n-prefix}-input {
   .reset-component;
   .input;
 }
+
+.input-rtl(~'@{c7n-prefix}-input');
 
 .@{c7n-prefix}-input-textarea {
   .@{c7n-prefix}-input-rendered {
@@ -32,6 +35,8 @@
     vertical-align: top;
   }
 }
+
+.input-group-rtl(~'@{c7n-prefix}-input');
 
 // Input with affix: prefix or suffix
 .@{c7n-prefix}-input-affix-wrapper {

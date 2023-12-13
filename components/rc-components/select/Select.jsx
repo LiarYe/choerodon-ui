@@ -1617,6 +1617,7 @@ export default class Select extends Component {
         builtinPlacements={this.getBuiltinPlacements()}
         footer={props.footer}
         ref={this.saveSelectTriggerRef}
+        isRTL={props.isRTL}
       >
         <div
           id={props.id}

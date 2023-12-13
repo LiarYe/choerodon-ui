@@ -3,6 +3,7 @@ import classNames from 'classnames';
 import shallowEqual from 'shallowequal';
 import Checkbox from './Checkbox';
 import ConfigContext, { ConfigContextValue } from '../config-provider/ConfigContext';
+import { Config, DefaultConfig } from '../configure/index';
 import { CheckboxContextProvider } from './CheckboxContext';
 
 export type CheckboxValueType = string | number | boolean;
@@ -41,6 +42,7 @@ export interface CheckboxGroupContext {
   };
 
   getPrefixCls(suffixCls: string, customizePrefixCls?: string): string;
+  getConfig<T extends keyof Config>(key: T): T extends keyof DefaultConfig ? DefaultConfig[T] : Config[T];
 }
 
 export default class CheckboxGroup extends Component<CheckboxGroupProps, CheckboxGroupState> {
@@ -75,6 +77,11 @@ export default class CheckboxGroup extends Component<CheckboxGroupProps, Checkbo
     };
   }
 
+  get isRTL(): boolean {
+    const { getConfig } = this.context;
+    return getConfig('direction') === 'rtl';
+  }
+
   componentWillReceiveProps(nextProps: CheckboxGroupProps) {
     if ('value' in nextProps) {
       this.setState({
@@ -85,7 +92,10 @@ export default class CheckboxGroup extends Component<CheckboxGroupProps, Checkbo
 
   shouldComponentUpdate(nextProps: CheckboxGroupProps, nextState: CheckboxGroupState, nextContext: ConfigContextValue) {
     const { context } = this;
-    return !shallowEqual(this.props, nextProps) || !shallowEqual(this.state, nextState) || context.getPrefixCls !== nextContext.getPrefixCls;
+    return !shallowEqual(this.props, nextProps) ||
+      !shallowEqual(this.state, nextState) ||
+      context.getPrefixCls !== nextContext.getPrefixCls ||
+      context.getConfig !== nextContext.getConfig;
   }
 
   getOptions() {
@@ -123,7 +133,7 @@ export default class CheckboxGroup extends Component<CheckboxGroupProps, Checkbo
   render() {
     const { props, state } = this;
     const { prefixCls: customizePrefixCls, className, style, options, checkboxPrefixCls, label } = props;
-    const { getPrefixCls } = this.context;
+    const { getPrefixCls, getConfig } = this.context;
     const prefixCls = getPrefixCls('checkbox-group', customizePrefixCls);
     let children = props.children;
     if (options && options.length > 0) {
@@ -142,16 +152,19 @@ export default class CheckboxGroup extends Component<CheckboxGroupProps, Checkbo
       ));
     }
 
-    const classString = classNames(prefixCls, className);
+    const classString = classNames(prefixCls, className, {
+      [`${prefixCls}-rtl`]: this.isRTL,
+    });
     const wrapperClassString = classNames({
       [`${prefixCls}-wrapper`]: true,
       [`${prefixCls}-has-label`]: label,
+      [`${prefixCls}-wrapper-rtl`]: this.isRTL,
     });
     const labelClassString = classNames(`${prefixCls}-label`, {
       'label-disabled': props.disabled,
     });
     return (
-      <CheckboxContextProvider {...this.getContextValue()} getPrefixCls={getPrefixCls}>
+      <CheckboxContextProvider {...this.getContextValue()} getPrefixCls={getPrefixCls} getConfig={getConfig}>
         {
           label ? (
             <div className={wrapperClassString} style={style}>

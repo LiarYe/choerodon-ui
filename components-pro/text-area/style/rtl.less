@@ -1,0 +1,25 @@
+@import '../../../components/style/themes/default';
+@import '../../text-field/style/rtl';
+
+@textarea-prefix: ~'@{c7n-pro-prefix}-textarea';
+
+.input-rtl(@textarea-prefix);
+
+.@{textarea-prefix}-wrapper-rtl {
+  label {
+    .@{textarea-prefix} {
+      padding-right: @input-padding-horizontal;
+      padding-left: 0.13rem;
+    }
+
+    .@{textarea-prefix}-clear-button {
+      right: unset;
+      left: 0.03rem;
+    }
+
+    .@{textarea-prefix}-length-info {
+      right: unset;
+      left: 0;
+    }
+  }
+}

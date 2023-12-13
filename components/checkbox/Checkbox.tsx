@@ -60,11 +60,13 @@ export default class Checkbox extends Component<CheckboxProps, {}> {
     nextState: {},
     nextContext: CheckboxGroupContext,
   ) {
-    const { checkboxGroup, getPrefixCls } = this.context;
+    const { checkboxGroup, getPrefixCls, getConfig } = this.context;
     return (
       !shallowEqual(this.props, nextProps) ||
       !shallowEqual(this.state, nextState) ||
-      !shallowEqual(checkboxGroup, nextContext.checkboxGroup) || getPrefixCls !== nextContext.getPrefixCls
+      !shallowEqual(checkboxGroup, nextContext.checkboxGroup) ||
+      getPrefixCls !== nextContext.getPrefixCls ||
+      getConfig !== nextContext.getConfig
     );
   }
 
@@ -74,6 +76,11 @@ export default class Checkbox extends Component<CheckboxProps, {}> {
 
   blur() {
     this.rcCheckbox.blur();
+  }
+
+  get isRTL(): boolean {
+    const { getConfig } = this.context;
+    return getConfig('direction') === 'rtl';
   }
 
   saveCheckbox = (node: any) => {
@@ -103,6 +110,7 @@ export default class Checkbox extends Component<CheckboxProps, {}> {
     }
     const classString = classNames(className, {
       [`${prefixCls}-wrapper`]: true,
+      [`${prefixCls}-wrapper-rtl`]: this.isRTL,
     });
     const checkboxClass = classNames({
       [`${prefixCls}-indeterminate`]: indeterminate,

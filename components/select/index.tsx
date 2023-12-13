@@ -145,6 +145,11 @@ export default class Select extends Component<SelectProps, {}> {
     this.rcSelect.blur();
   }
 
+  get isRTL(): boolean {
+    const { getConfig } = this.context;
+    return getConfig('direction') === 'rtl';
+  }
+
   saveSelect = (node: any) => {
     this.rcSelect = node;
   };
@@ -171,6 +176,7 @@ export default class Select extends Component<SelectProps, {}> {
       {
         [`${prefixCls}-lg`]: size === Size.large,
         [`${prefixCls}-sm`]: size === Size.small,
+        [`${prefixCls}-wrapper-rtl`]: this.isRTL,
       },
       className,
     );
@@ -198,6 +204,7 @@ export default class Select extends Component<SelectProps, {}> {
         filterPlaceholder={locale.filterPlaceholder}
         notFoundContent={this.getNotFoundContent(locale)}
         ref={this.saveSelect}
+        isRTL={this.isRTL}
       />
     );
   };

@@ -1,0 +1,48 @@
+@import '../../../components/style/themes/default';
+
+@range-prefix-cls: ~'@{c7n-pro-prefix}-range';
+
+.@{range-prefix-cls}-wrapper-rtl {
+  .@{range-prefix-cls} {
+    &-vertical {
+      .@{range-prefix-cls}-handle {
+        margin-right: -0.05rem;
+        margin-left: unset;
+      }
+
+      .@{range-prefix-cls}-mark {
+        right: 0.12rem;
+        left: unset;
+      }
+
+      .@{range-prefix-cls}-mark-text {
+        right: 0.04rem;
+        left: unset;
+      }
+
+      .@{range-prefix-cls}-dot {
+        right: 0.02rem;
+        left: unset;
+      }
+    }
+
+    &-mark {
+      right: 0;
+      left: unset;
+    }
+
+    &-dot {
+      margin-right: -0.04rem;
+      margin-left: unset;
+
+      &:first-child {
+        margin-right: -0.04rem;
+        margin-left: unset;
+      }
+      &:last-child {
+        margin-right: -0.04rem;
+        margin-left: unset;
+      }
+    }
+  }
+}

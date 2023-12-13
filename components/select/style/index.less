@@ -2,6 +2,7 @@
 @import '../../style/mixins/index';
 @import '../../input/style/mixin';
 @import '../../checkbox/style/mixin';
+@import '../../input/style/rtl';
 
 @select-prefix-cls: ~'@{c7n-prefix}-select';
 @checkbox-prefix-cls: ~'@{c7n-prefix}-checkbox';
@@ -476,6 +477,9 @@
     .@{select-prefix-cls}-arrow::before {
       transform: rotate(180deg);
     }
+    .@{select-prefix-cls}-arrow .@{iconfont-css-prefix} {
+      transform: rotate(180deg);
+    }
     .@{select-prefix-cls}-selection {
       .active();
     }
@@ -720,3 +724,7 @@
     }
   }
 }
+
+.label-rtl(@select-prefix-cls);
+
+@import './rtl';

@@ -257,12 +257,16 @@ export default class Input extends Component<InputProps, any> {
         width = `calc(100% - ${prefixWidth})`;
       }
       if (rendered) {
-        rendered.style.marginRight = marginRight;
-        rendered.style.marginLeft = marginLeft;
+        const marginEndName = this.isRTL ? 'marginLeft' : 'marginRight';
+        const marginStartName = this.isRTL ? 'marginRight' : 'marginLeft';
+        rendered.style[marginEndName] = marginRight;
+        rendered.style[marginStartName] = marginLeft;
         rendered.style.width = width;
       } else if (input) {
-        input.style.paddingRight = marginRight;
-        input.style.paddingLeft = marginLeft;
+        const paddingEndName = this.isRTL ? 'paddingLeft' : 'paddingRight';
+        const paddingStartName = this.isRTL ? 'paddingRight' : 'paddingLeft';
+        input.style[paddingEndName] = marginRight;
+        input.style[paddingStartName] = marginLeft;
       }
     }
   }
@@ -406,6 +410,11 @@ export default class Input extends Component<InputProps, any> {
 
   blur() {
     this.input.blur();
+  }
+
+  get isRTL(): boolean {
+    const { getConfig } = this.context;
+    return getConfig('direction') === 'rtl';
   }
 
   getPrefixCls() {
@@ -664,6 +673,7 @@ export default class Input extends Component<InputProps, any> {
       [`${prefixCls}-has-label`]: !!label,
       [`${prefixCls}-has-prefix`]: !!prefix,
       [`${prefixCls}-has-suffix`]: !!suffix,
+      [`${prefixCls}-wrapper-rtl`]: this.isRTL,
     });
   }
 

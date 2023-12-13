@@ -1,5 +1,6 @@
 @import '../../style/themes/default';
 @import '../../style/mixins/index';
+@import './rtl';
 
 .checked(@checkbox-prefix-cls, @color) {
   .@{checkbox-prefix-cls}-checked,
@@ -207,6 +208,8 @@
     .@{checkbox-inner-prefix-cls}::after {
     border-color: @disabled-color;
   }
+
+  .antCheckboxFn-rtl(@checkbox-prefix-cls);
 }
 
 @keyframes antCheckboxEffect {
