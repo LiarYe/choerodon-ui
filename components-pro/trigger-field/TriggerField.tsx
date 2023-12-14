@@ -92,6 +92,8 @@ export default abstract class TriggerField<T extends TriggerFieldProps = Trigger
 
   trigger: Trigger | null;
 
+  domNode: Element | Text | null;
+
   @observable statePopup: boolean;
 
   get popup(): boolean {
@@ -110,6 +112,15 @@ export default abstract class TriggerField<T extends TriggerFieldProps = Trigger
     runInAction(() => {
       this.statePopup = false;
     });
+  }
+
+  componentDidMount(): void {
+    this.domNode = this.getRootDomNode();
+    super.componentDidMount();
+  }
+
+  componentDidUpdate() {
+    this.domNode = this.getRootDomNode();
   }
 
   @autobind
@@ -147,7 +158,23 @@ export default abstract class TriggerField<T extends TriggerFieldProps = Trigger
 
   @autobind
   getRootDomNode() {
+    if (this.domNode) {
+      return this.domNode;
+    }
     return findDOMNode(this);
+  }
+
+  @autobind
+  getPopupContainer(target: HTMLElement): HTMLElement | undefined {
+    if (target) {
+      let containerNode = target as HTMLElement;
+      while (containerNode && containerNode.tagName.toLowerCase() !== 'body') {
+        containerNode = containerNode.parentNode as HTMLElement;
+      }
+      if (containerNode) {
+        return containerNode as HTMLElement;
+      }
+    }
   }
 
   getOmitPropsKeys(): string[] {
@@ -225,7 +252,7 @@ export default abstract class TriggerField<T extends TriggerFieldProps = Trigger
         trigger = this.getDefaultAction(),
         triggerShowDelay,
         triggerHiddenDelay,
-        getPopupContainer,
+        getPopupContainer = this.getPopupContainer,
         tabIntoPopupContent,
         getPopupAlignTarget = this.getRootDomNode,
       },

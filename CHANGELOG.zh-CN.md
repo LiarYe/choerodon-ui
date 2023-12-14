@@ -23,6 +23,7 @@ timeline: true
 - 💄 `ImageCrop`: 优化支持留白裁剪和不限制裁剪区域。
 - 💄 `<pro>Table`: 优化个性化面板列分组无数据时展示占位符。
 - 💄 `<pro>Output`: 当 Output 内部渲染有弹窗时，优化 tooltip 显示逻辑。
+- 💄 `<pro>Lov`: 优化 drawer 模式下显示已选记录的样式。
 - 🐞 `<pro>PerformanceTable`: 修复个性化导致固定组合列在第一列错位的问题。
 - 🐞 `<pro>PerformanceTable`: 修复合并行层级问题。
 - 🐞 `<pro>PerformanceTable`: 修复滚动后无法选中表格内容的问题。
@@ -34,6 +35,7 @@ timeline: true
 - 🐞 `<pro>Attachment`: 修复缓存附件个数未即时更新的问题。
 - 🐞 `<pro>Table`: 修复汇总条数据未即时更新的问题。
 - 🐞 `<pro>Table`: 修复 professionalBar 更多查询条件无法收起的问题。
+- 🐞 `<pro>TriggerField`: 修复弹出框在 iframe 中定位错误的问题。
 
 ## 1.6.4
 
