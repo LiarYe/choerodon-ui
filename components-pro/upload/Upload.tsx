@@ -1,6 +1,7 @@
 import React, { ReactNode } from 'react';
 import { action, observable, runInAction } from 'mobx';
 import { observer } from 'mobx-react';
+import classNames from 'classnames';
 import uniqBy from 'lodash/uniqBy';
 import isEmpty from 'lodash/isEmpty';
 import isPromise from 'is-promise';
@@ -338,8 +339,12 @@ export default class Upload extends FormField<UploadProps> {
      */
     const IeStyle = isIE() ? { display: '-ms-inline-flexbox' } : {};
 
+    const wraperCls = classNames(`${prefixCls}`, {
+      [`${prefixCls}-wrapper-rtl`]: this.isRTL,
+    });
+
     return (
-      <div className={`${prefixCls}`} style={IeStyle}>
+      <div className={wraperCls} style={IeStyle}>
         <div className="flex-wrapper">
           <div className={`${prefixCls}-select`}>
             {inputWrapperBtn}

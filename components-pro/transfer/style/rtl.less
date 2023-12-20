@@ -1,0 +1,87 @@
+@import '../../../components/style/themes/default';
+
+@transfer-prefix-cls: ~'@{c7n-pro-prefix}-transfer';
+@checkbox-prefix-cls: ~'@{c7n-prefix}-checkbox';
+
+.@{transfer-prefix-cls}-wrapper-rtl {
+  direction: rtl;
+
+  &.@{transfer-prefix-cls}-sortable {
+    .@{transfer-prefix-cls}-operation {
+      margin-right: 0.08rem;
+      margin-left: 0.08rem;
+    }
+  }
+
+  .@{transfer-prefix-cls} {
+    &:last-child {
+      margin-right: 0.08rem;
+      margin-left: unset;
+    }
+
+    &-search {
+      &-action {
+        right: unset;
+        left: 0.04rem;
+      }
+    }
+
+    &-header {
+      right: 0;
+      left: unset;
+
+      &-title {
+        right: unset;
+        left: 0.12rem;
+      }
+    }
+
+    &-body {
+      &-search-wrapper {
+        right: 0;
+        left: unset;
+      }
+    }
+
+    &-content {
+      &-item-group-list > .@{transfer-prefix-cls}-content-item {
+        padding-right: 0.2rem;
+        padding-left: @control-padding-horizontal;
+      }
+      &-item-group-no-title > .@{transfer-prefix-cls}-content-item {
+        padding-right: @control-padding-horizontal;
+        padding-left: @control-padding-horizontal;
+      }
+    
+      &-item .@{checkbox-prefix-cls}-wrapper {
+        margin-right: unset;
+        margin-left: 0.08rem;
+      }
+    }
+
+    &-footer {
+      right: 0;
+      left: unset;
+    }
+
+    &-operation,
+    &-sort {
+      margin-right: 0.08rem;
+      margin-left: unset;
+
+      .@{c7n-pro-prefix}-btn {
+        + .@{c7n-pro-prefix}-btn {
+          margin-right: 0;
+          margin-left: unset;
+        }
+      }
+    }
+  }
+
+  .@{transfer-prefix-cls}-operation {
+    .icon-navigate_before,
+    .icon-navigate_next {
+      transform: rotateY(180deg);
+    }
+  }
+}

@@ -30,7 +30,8 @@ const Typography: ITypographyProps = React.forwardRef<HTMLElement, TypographyPro
     children,
     ...restProps
   } = props;
-  const { getProPrefixCls } = React.useContext(ConfigContext);
+  const { getProPrefixCls, getConfig } = React.useContext(ConfigContext);
+  const isRTL = getConfig('direction') === 'rtl';
 
   let mergedRef = ref;
   if (setContentRef) {
@@ -43,6 +44,9 @@ const Typography: ITypographyProps = React.forwardRef<HTMLElement, TypographyPro
   const componentClassName = classNames(
     prefixCls,
     className,
+    {
+      [`${prefixCls}-wrapper-rtl`]: isRTL,
+    },
   );
   return (
     <Component className={componentClassName} aria-label={ariaLabel} ref={mergedRef} {...restProps}>

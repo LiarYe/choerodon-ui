@@ -1,0 +1,21 @@
+@import '../../../components/style/themes/default';
+@import '../../field/style/mixin';
+
+@pro-rate-prefix-cls: ~'@{c7n-pro-prefix}-rate';
+@basic-rate-prefix-cls: ~'@{c7n-prefix}-rate';
+
+.@{pro-rate-prefix-cls}-wrapper-rtl {
+  direction: rtl;
+
+  &.@{pro-rate-prefix-cls}-float-label + .@{c7n-pro-prefix}-validation-message {
+    padding-right: 0;
+    padding-left: unset;
+  }
+
+  &.@{pro-rate-prefix-cls}-float-label {
+    .icon-help {
+      margin-right: 0.05rem;
+      margin-left: unset;
+    }
+  }
+}

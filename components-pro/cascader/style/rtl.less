@@ -1,0 +1,25 @@
+@import '../../../components/style/themes/default';
+@import '../../text-field/style/rtl';
+@import './mixin';
+
+@cascader-prefix-cls: ~'@{c7n-pro-prefix}-cascader';
+@popup-prefix-cls: ~'@{c7n-pro-prefix}-popup';
+
+.input-rtl(@cascader-prefix-cls);
+
+.@{popup-prefix-cls}-wrapper-rtl {
+  &.@{cascader-prefix-cls}-popup {
+    direction: ltr;
+  }
+  .cascader-dropdown-menu-item-rtl(@cascader-prefix-cls);
+
+  .@{cascader-prefix-cls}-select-all-none {
+    direction: rtl;
+
+    span + span {
+      margin-right: 0.2rem;
+      margin-left: unset;
+    }
+  }
+}
+

@@ -1,8 +1,20 @@
 @import '../../../components/style/themes/default';
 @import '../../text-field/style/rtl';
+@import '../../../components/select/style/mixin';
 
 @select-prefix-cls: ~'@{c7n-pro-prefix}-select';
+@popup-prefix-cls: ~'@{c7n-pro-prefix}-popup';
 
 .input-rtl(@select-prefix-cls);
 
-// TODO: 下拉部分待实现
+.@{popup-prefix-cls}-wrapper-rtl {
+  .dropdown-menu-item-rtl(@select-prefix-cls);
+
+  .select-all-rtl(@select-prefix-cls);
+}
+
+.@{select-prefix-cls}-wrapper-rtl {
+  & + .@{select-prefix-cls}-common-item-wrapper {
+    .common-item-rtl(@select-prefix-cls);
+  }
+}

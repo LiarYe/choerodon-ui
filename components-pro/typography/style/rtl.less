@@ -1,0 +1,30 @@
+@import '../../../components/style/themes/default';
+
+@typography-prefix-cls: ~'@{c7n-pro-prefix}-typography';
+
+.@{typography-prefix-cls}-wrapper-rtl {
+  direction: rtl;
+
+  .@{typography-prefix-cls} {
+    &-expand,
+    &-copy {
+      margin-right: @typography-operation-margin-left;
+      margin-left: @typography-operation-margin-left;
+    }
+
+    ul,
+    ol {
+      li {
+        margin: 0 0.20rem 0 0;
+        padding: 0 0.04rem 0 0;
+      }
+    }
+
+    blockquote {
+      padding: @typography-blockquote-padding-rtl;
+      border-right: 0.04rem solid rgba(100, 100, 100, 0.2);
+      border-left: none;
+    }
+  }
+
+}

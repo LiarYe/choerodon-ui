@@ -1,0 +1,23 @@
+@import '../../style/themes/default';
+
+@rate-prefix-cls: ~'@{c7n-prefix}-rate';
+
+.@{rate-prefix-cls}-wrapper-rtl {
+  direction: rtl;
+
+  .@{rate-prefix-cls} {
+    &-star {
+      margin: 0 0 0 0.08rem;
+
+      &-first {
+        right: 0;
+        left: unset;
+      }
+    }
+
+    &-text {
+      margin-right: 0.08rem;
+      margin-left: unset;
+    }
+  }
+}

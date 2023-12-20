@@ -1,0 +1,85 @@
+@import '../../../components/style/themes/default';
+
+@modal-prefix-cls: ~'@{c7n-pro-prefix}-modal';
+@table-prefix-cls: ~'@{c7n-pro-prefix}-table';
+@select-prefix-cls: ~'@{c7n-pro-prefix}-select';
+@progress-prefix-cls: ~'@{c7n-prefix}-progress';
+@lov-prefix-cls: ~'@{select-prefix-cls}-lov';
+@lov-select-prefix-cls: ~'@{modal-prefix-cls}-selection-list-below';
+@drawer-prefix-cls: ~'@{modal-prefix-cls}-selection-list';
+
+.@{modal-prefix-cls}-wrapper-rtl {
+  .@{modal-prefix-cls} {
+    &-body {
+      .@{table-prefix-cls} {
+        &-professional-query-bar {
+          &-button {
+            padding: @lov-table-professional-query-button-padding-rtl;
+
+            &-vertical {
+              padding: @lov-table-professional-query-button-vertical-padding-rtl;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  &.@{modal-prefix-cls} {
+    .@{drawer-prefix-cls}-container {
+      right: unset;
+      left: 0;
+      border-right: @border-width-base @border-style-base @border-color-base;
+      border-left: none;
+    }
+
+    .@{lov-select-prefix-cls} {
+      &-intro {
+        padding-right: 0.08rem;
+        padding-left: unset;
+        border-right: 0.03rem solid @primary-color;
+        border-left: none;
+      }
+
+      &-list {
+        padding-right: unset;
+        padding-left: unset;
+      }
+    }
+  }
+}
+
+.@{select-prefix-cls}-wrapper-rtl {
+  .@{lov-prefix-cls}-spin {
+    .@{progress-prefix-cls} {
+      &-inner {
+        margin-right: unset;
+        margin-left: 0.03rem;
+      }
+    }
+  }
+}
+
+.@{c7n-pro-prefix}-popup-wrapper-rtl {
+  &.@{lov-prefix-cls}-popup {
+    .@{table-prefix-cls} {
+      &-pagination {
+        .@{c7n-pro-prefix}-pagination-page-info {
+          float: right;
+        }
+      }
+    }
+
+    .@{c7n-pro-prefix}-btn+.@{c7n-pro-prefix}-btn:not(.@{c7n-pro-prefix}-btn-block) {
+      margin-right: 0;
+      margin-left: unset;
+    }
+  }
+
+  .@{lov-prefix-cls}-search-option {
+    &-divide {
+      margin-right: unset;
+      margin-left: .03rem;
+    }
+  }
+}

@@ -1,0 +1,14 @@
+@import '../../../components/style/themes/default';
+@import '../../text-field/style/rtl';
+@import '../../../components/select/style/mixin';
+
+@tree-select-prefix: ~'@{c7n-pro-prefix}-tree-select';
+@popup-prefix-cls: ~'@{c7n-pro-prefix}-popup';
+
+.input-rtl(@tree-select-prefix);
+
+.@{popup-prefix-cls}-wrapper-rtl {
+  .dropdown-menu-item-rtl(@tree-select-prefix);
+
+  .select-all-rtl(@tree-select-prefix);
+}

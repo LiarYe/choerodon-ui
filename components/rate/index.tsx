@@ -46,7 +46,8 @@ export default class Rate extends Component<RateProps, any> {
   };
 
   render() {
-    const { getPrefixCls } = this.context;
-    return <RcRate ref={this.saveRate} prefixCls={getPrefixCls('rate')} {...this.props} />;
+    const { getPrefixCls, getConfig } = this.context;
+    const isRTL = getConfig('direction') === 'rtl';
+    return <RcRate ref={this.saveRate} prefixCls={getPrefixCls('rate')} {...this.props} isRTL={isRTL} />;
   }
 }

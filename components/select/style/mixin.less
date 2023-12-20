@@ -193,3 +193,39 @@
     width: 100%;
   }
 }
+
+.dropdown-menu-item-rtl(@com-prefix-cls) {
+  .@{com-prefix-cls}-dropdown-menu-item-group-list > .@{com-prefix-cls}-dropdown-menu-item {
+    padding-right: 0.2rem;
+    padding-left: @control-padding-horizontal;
+  }
+  .@{com-prefix-cls}-dropdown-menu-item-group-no-title > .@{com-prefix-cls}-dropdown-menu-item {
+    padding-right: @control-padding-horizontal;
+    padding-left: @control-padding-horizontal;
+  }
+
+  .@{com-prefix-cls}-dropdown-menu-item .@{checkbox-prefix-cls}-wrapper {
+    margin-right: unset;
+    margin-left: 0.08rem;
+  }
+}
+
+.select-all-rtl(@com-prefix-cls) {
+  .@{com-prefix-cls}-select-all-none {
+    padding: 0.08rem @control-padding-horizontal 0 0;
+
+    span {
+      margin-right: unset;
+      margin-left: 0.2rem;
+    }
+  }
+}
+
+.common-item-rtl(@com-prefix-cls) {
+  .@{com-prefix-cls}-common-item {
+    &-label {
+      margin-right: unset;
+      margin-left: 0.04rem;
+    }
+  }
+}

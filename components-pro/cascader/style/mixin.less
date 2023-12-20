@@ -98,3 +98,14 @@
   .cascader-dropdown-menu-item;
   .checked(@checkbox-prefix-cls, @select-primary-color);
 }
+
+.cascader-dropdown-menu-item-rtl(@com-prefix-cls) {
+  .@{com-prefix-cls}-dropdown-menu-item-group-list > .@{com-prefix-cls}-dropdown-menu-item {
+    padding-right: 0.2rem;
+    padding-left: @control-padding-horizontal;
+  }
+  .@{com-prefix-cls}-dropdown-menu-item-group-no-title > .@{com-prefix-cls}-dropdown-menu-item {
+    padding-right: @control-padding-horizontal;
+    padding-left: @control-padding-horizontal;
+  }
+}

@@ -196,3 +196,32 @@
     left: @prefix-width;
   }
 }
+
+.float-label-rtl(@com-prefix-cls, @prefix-width: @input-prefix-width-base) {
+  &.@{com-prefix-cls}-float-label .@{field-label-prefix-cls} {
+    &-wrapper {
+      right: @input-padding-horizontal-base;
+      left: initial;
+      margin-right: -0.05rem;
+      margin-left: 0;
+    }
+  }
+
+  &.@{com-prefix-cls}-float-label .@{field-label-prefix-cls}.@{field-prefix-cls}-required::after {
+    margin-right: 0.04rem;
+    margin-left: 0;
+  }
+
+  &.@{com-prefix-cls}-float-label .@{com-prefix-cls} > ul {
+    margin: @input-float-multiple-margin-rtl;
+  }
+
+  &.@{com-prefix-cls}-float-label .@{com-prefix-cls}-multiple-block {
+    padding: @input-float-tag-padding-rtl;
+  }
+
+  &.@{com-prefix-cls}-prefix-button.@{com-prefix-cls}-float-label .@{field-label-prefix-cls}-wrapper {
+    right: @prefix-width;
+    left: initial;
+  }
+}

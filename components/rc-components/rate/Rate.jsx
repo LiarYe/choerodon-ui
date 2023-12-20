@@ -143,7 +143,11 @@ export default class Rate extends Component {
       const starEle = this.getStarDOM(index);
       const leftDis = getOffsetLeft(starEle);
       const width = starEle.clientWidth;
-      if ((x - leftDis) < width / 2) {
+      if (this.props.isRTL) {
+        if ((x - leftDis) >= width / 2) {
+          value -= 0.5;
+        }
+      } else if ((x - leftDis) < width / 2) {
         value -= 0.5;
       }
     }
@@ -189,6 +193,7 @@ export default class Rate extends Component {
       className,
       character,
       tabIndex,
+      isRTL,
     } = this.props;
     const { value, hoverValue, focused } = this.state;
     const stars = [];
@@ -211,9 +216,12 @@ export default class Rate extends Component {
         />,
       );
     }
+    const cls = classNames(prefixCls, disabledClass, className, {
+      [`${prefixCls}-wrapper-rtl`]: isRTL,
+    });
     return (
       <ul
-        className={classNames(prefixCls, disabledClass, className)}
+        className={cls}
         style={style}
         onMouseLeave={disabled ? null : this.onMouseLeave}
         tabIndex={disabled ? -1 : tabIndex}

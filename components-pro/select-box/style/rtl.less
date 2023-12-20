@@ -1,0 +1,79 @@
+@import '../../../components/style/themes/default';
+@import '../../field/style/mixin';
+@import '../../../components/select/style/mixin';
+
+@select-box-prefix: ~'@{c7n-pro-prefix}-select-box';
+@pro-checkbox-prefix-cls: ~'@{c7n-pro-prefix}-checkbox';
+@pro-radio-prefix-cls: ~'@{c7n-pro-prefix}-radio';
+
+.@{select-box-prefix}-wrapper-rtl {
+  direction: rtl;
+
+  .float-label-rtl(@select-box-prefix, @input-prefix-width-base);
+
+  &.@{select-box-prefix}-float-label > .@{field-label-prefix-cls}-wrapper {
+    right: 0;
+    left: unset;
+  }
+
+  .@{select-box-prefix} {
+    .@{pro-radio-prefix-cls}-button {
+      margin-right: 0;
+      margin-left: unset;
+
+      + .@{pro-radio-prefix-cls}-button {
+        margin-right: 0;
+        margin-left: unset;
+      }
+
+      &:first-child {
+        & .@{pro-radio-prefix-cls}-inner,
+        & {
+          border-top-left-radius: 0;
+          border-top-right-radius: @border-radius-base;
+          border-bottom-right-radius: @border-radius-base;
+          border-bottom-left-radius: 0;
+        }
+      }
+      &:last-child {
+        & .@{pro-radio-prefix-cls}-inner,
+        & {
+          border-top-left-radius: @border-radius-base;
+          border-top-right-radius: 0;
+          border-bottom-right-radius: 0;
+          border-bottom-left-radius: @border-radius-base;
+        }
+      }
+    }
+
+    &-vertical {
+      .@{pro-checkbox-prefix-cls}-button {
+        margin-right: 0;
+        margin-left: unset;
+      }
+
+      .@{pro-radio-prefix-cls}-button {
+        &:first-child {
+          & .@{pro-radio-prefix-cls}-inner,
+          & {
+            border-top-left-radius: @border-radius-base;
+            border-top-right-radius: @border-radius-base;
+            border-bottom-right-radius: 0;
+            border-bottom-left-radius: 0;
+          }
+        }
+        &:last-child {
+          & .@{pro-radio-prefix-cls}-inner,
+          & {
+            border-top-left-radius: 0;
+            border-top-right-radius: 0;
+            border-bottom-right-radius: @border-radius-base;
+            border-bottom-left-radius: @border-radius-base;
+          }
+        }
+      }
+    }
+  }
+
+  .select-all-rtl(@select-box-prefix);
+}

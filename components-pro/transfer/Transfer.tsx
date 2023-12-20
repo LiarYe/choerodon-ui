@@ -270,6 +270,7 @@ export default class Transfer extends Select<TransferProps> {
     }
     const classNameString = classNames(`${prefixCls}-wrapper`, {
       [`${prefixCls}-sortable`]: sortable,
+      [`${prefixCls}-wrapper-rtl`]: this.isRTL,
     });
     let oneWayProps = {};
     if (oneWay) {

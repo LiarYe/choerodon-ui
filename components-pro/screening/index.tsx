@@ -1,6 +1,7 @@
 import React, { Children, ReactElement, cloneElement } from 'react';
 import { observer } from 'mobx-react';
 import { observable, computed, action, runInAction, toJS } from 'mobx';
+import classNames from 'classnames';
 import Tag from 'choerodon-ui/lib/tag';
 import isNumber from 'lodash/isNumber';
 import isString from 'lodash/isString';
@@ -205,8 +206,11 @@ export default class Screening extends DataSetComponent<ScreeningProps> {
     let mergeValue = toJS(this.mergeValue);
     mergeValue = omit(mergeValue, ['__dirty']);
     const filteredChildren = Children.toArray(children).filter(c => !!c);
+    const wrapperCls = classNames(`${this.prefixCls}`, {
+      [`${this.prefixCls}-wrapper-rtl`]: this.isRTL,
+    });
     return (
-      <div className={`${this.prefixCls}`}>
+      <div className={wrapperCls}>
         {this.renderTag(mergeValue)}
         {Children.map(filteredChildren, (child: ReactElement, _index) => {
           const name = child.props.name;

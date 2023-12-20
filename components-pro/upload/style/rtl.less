@@ -1,0 +1,39 @@
+@import '../../../components/style/themes/default';
+
+@upload-prefix-cls: ~'@{c7n-pro-prefix}-upload';
+@uploadlist-prefix-cls: ~'@{c7n-pro-prefix}-upload-list';
+
+.@{upload-prefix-cls}-wrapper-rtl {
+  direction: rtl;
+
+  .@{upload-prefix-cls} {
+    &-select {
+      margin-right: unset;
+      margin-left: 0.1rem;
+    }
+
+    &-name {
+      margin-right: 0.05rem;
+      margin-left: unset;
+    }
+  }
+
+  .@{uploadlist-prefix-cls} {
+    &-item {
+      &-name {
+        padding-right: 0.2rem;
+        padding-left: unset;
+      }
+
+      &-progress {
+        padding-right: 0.2rem;
+        padding-left: unset;
+      }
+
+      &-remove {
+        right: unset;
+        left: 0.1rem;
+      }
+    }
+  }
+}

@@ -1,0 +1,28 @@
+@import '../../../components/style/themes/default';
+
+@screening-prefix-cls: ~'@{c7n-pro-prefix}-screening';
+
+.@{screening-prefix-cls}-wrapper-rtl {
+  direction: rtl;
+
+  .@{screening-prefix-cls} {
+    &-item {
+      &-label {
+        padding-right: .1rem;
+        padding-left: unset;
+      }
+
+      &-operation {
+        right: unset;
+        left: .15rem;
+      }
+    }
+
+    &-choosed {
+      &-label {
+        padding-right: .1rem;
+        padding-left: unset;
+      }
+    }
+  }
+}
