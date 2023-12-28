@@ -283,6 +283,14 @@ export default class Attachment extends FormField<AttachmentProps> {
   }
 
   @autobind
+  updateCacheCount() {
+    const attachmentUUID = this.getValue();
+    if (attachmentUUID && this.count) {
+      attachmentStore.updateCacheCount(attachmentUUID, this.count);
+    }
+  }
+
+  @autobind
   handleDataSetLoad() {
     this.fetchCount();
   }
@@ -444,6 +452,7 @@ export default class Attachment extends FormField<AttachmentProps> {
         this.removeAttachment(attachment);
       } else if (attachment.status !== 'error' && !attachment.invalid) {
         const config = this.getUploadAxiosConfig(attachment, attachmentUUID);
+        this.updateCacheCount();
         if (config) {
           await this.handleSuccess(await this.axios(config), attachment);
         }
@@ -606,6 +615,7 @@ export default class Attachment extends FormField<AttachmentProps> {
         attachments.splice(index, 1);
         this.attachments = attachments;
         this.checkValidity();
+        this.updateCacheCount();
       }
     }
     return undefined;
