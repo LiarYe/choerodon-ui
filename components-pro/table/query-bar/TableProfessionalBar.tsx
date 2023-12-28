@@ -5,7 +5,8 @@ import isFunction from 'lodash/isFunction';
 import noop from 'lodash/noop';
 import classNames from 'classnames';
 import Icon from 'choerodon-ui/lib/icon';
-import { getProPrefixCls as getProPrefixClsDefault, getConfig } from 'choerodon-ui/lib/configure/utils';
+import { getProPrefixCls as getProPrefixClsDefault, getConfig as getConfigDefault } from 'choerodon-ui/lib/configure/utils';
+import { Config, ConfigKeys, DefaultConfig } from 'choerodon-ui/lib/configure';
 import TableButtons from './TableButtons';
 import DataSet from '../../data-set';
 import Button from '../../button';
@@ -58,6 +59,16 @@ export default class TableProfessionalBar extends Component<TableProfessionalBar
     const { prefixCls } = this.props;
     const { tableStore: { getProPrefixCls = getProPrefixClsDefault } } = this.context;
     return getProPrefixCls('table', prefixCls);
+  }
+
+  get isRTL(): boolean {
+    return this.getConfig('direction') === 'rtl';
+  }
+
+  @autobind
+  getConfig<T extends ConfigKeys>(key: T): T extends keyof DefaultConfig ? DefaultConfig[T] : Config[T] {
+    const { tableStore: { getConfig = getConfigDefault } } = this.context;
+    return getConfig(key);
   }
 
   componentDidMount(): void {
@@ -200,13 +211,16 @@ export default class TableProfessionalBar extends Component<TableProfessionalBar
       const moreFields = this.createFields(this.queryFields.slice(queryFieldsLimit));
       const moreFieldsButton: ReactElement | undefined = this.getMoreFieldsButton(moreFields);
       let noVerticalFlag = false;
-      const labelLayout  = (formProps && formProps.labelLayout) || getConfig('labelLayout');
+      const labelLayout  = (formProps && formProps.labelLayout) || this.getConfig('labelLayout');
       if(labelLayout !== LabelLayout.vertical){
         noVerticalFlag = true;
       }
 
+      const cls = classNames(`${prefixCls}-professional-query-bar`, {
+        [`${prefixCls}-professional-query-bar-rtl`]: this.isRTL,
+      });
       return (
-        <div key="query_bar" className={`${prefixCls}-professional-query-bar`}>
+        <div key="query_bar" className={cls}>
           {currentFields}
           <span
             className={classNames(`${prefixCls}-professional-query-bar-button`, {
@@ -239,22 +253,37 @@ export default class TableProfessionalBar extends Component<TableProfessionalBar
     }
   }
 
-  render() {
+  getTableButtons(): ReactNode {
     const { buttons, summaryBar } = this.props;
     const { prefixCls } = this;
-    const queryBar = this.getQueryBar();
-    const tableButtons = buttons.length ? (
-      <div key="professional_toolbar" className={`${prefixCls}-professional-toolbar`}>
-        <TableButtons key="table_buttons" prefixCls={prefixCls} buttons={buttons}>
+    if (buttons.length) {
+      const cls = classNames(`${prefixCls}-professional-toolbar`, {
+        [`${prefixCls}-professional-toolbar-rtl`]: this.isRTL,
+      });
+      return (
+        <div key="professional_toolbar" className={cls}>
+          <TableButtons key="table_buttons" prefixCls={prefixCls} buttons={buttons}>
+            {summaryBar}
+          </TableButtons>
+        </div>
+      );
+    }
+    if (summaryBar) {
+      const cls = classNames(`${prefixCls}-toolbar`, {
+        [`${prefixCls}-toolbar-rtl`]: this.isRTL,
+      });
+      return (
+        <div className={cls} key="professional_toolbar">
           {summaryBar}
-        </TableButtons>
-      </div>
-    ) : (
-      <div className={`${prefixCls}-toolbar`} key="professional_toolbar">
-        {summaryBar}
-      </div>
-    );
+        </div>
+      );
+    }
+    return null;
+  }
 
+  render() {
+    const queryBar = this.getQueryBar();
+    const tableButtons = this.getTableButtons();
     return [queryBar, tableButtons];
   }
 }

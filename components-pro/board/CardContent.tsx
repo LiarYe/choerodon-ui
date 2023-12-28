@@ -51,6 +51,7 @@ const CardContent: FunctionComponent<CardContentProps> = function CardContent(pr
   const viewProps = customizedDS!.current!.get(ViewField.viewProps);
   const [cardHeight, setCardHeight] = useState(0);
   const oldDSRef = useRef(null);
+  const isRTL = getConfig('direction') === 'rtl';
 
   const modal = useModal();
   const openCustomizationModal = useCallback(() => {
@@ -114,6 +115,7 @@ const CardContent: FunctionComponent<CardContentProps> = function CardContent(pr
   const cls = classnames(
     `${prefixCls}-card-wrapper`,
     {
+      [`${prefixCls}-card-wrapper-rtl`]: isRTL,
     },
     // className,
   );

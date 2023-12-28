@@ -23,7 +23,7 @@ import difference from 'lodash/difference';
 import pullAllWith from 'lodash/pullAllWith';
 import classNames from 'classnames';
 import { TableFilterAdapterProps } from 'choerodon-ui/lib/configure';
-import { getProPrefixCls as getProPrefixClsDefault } from 'choerodon-ui/lib/configure/utils';
+import { getProPrefixCls as getProPrefixClsDefault, getConfig as getConfigDefault } from 'choerodon-ui/lib/configure/utils';
 import Icon from 'choerodon-ui/lib/icon';
 import { Action } from 'choerodon-ui/lib/trigger/enum';
 import ReactResizeObserver from 'choerodon-ui/lib/_util/resizeObserver';
@@ -127,6 +127,11 @@ export default class TableComboBar extends Component<TableComboBarProps> {
       tableStore: { getProPrefixCls = getProPrefixClsDefault },
     } = this.context;
     return getProPrefixCls('table', prefixCls);
+  }
+
+  get isRTL(): boolean {
+    const { tableStore: { getConfig = getConfigDefault } } = this.context;
+    return getConfig('direction') === 'rtl';
   }
 
   get queryFields(): React.ReactElement<any>[] {
@@ -1126,9 +1131,12 @@ export default class TableComboBar extends Component<TableComboBarProps> {
         {advancedFilter}
       </>
     );
+    const wrapperCls = classNames(`${prefixCls}-combo-filter-bar`, {
+      [`${prefixCls}-combo-filter-bar-rtl`]: this.isRTL,
+    });
     return (
       <ReactResizeObserver key="query_bar" resizeProp="height" onResize={this.handleResize}>
-        <div className={`${prefixCls}-combo-filter-bar`}>
+        <div className={wrapperCls}>
           {this.getFilterMenu() && !singleLineMode && (
             <>
               {this.getFilterMenu()}

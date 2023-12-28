@@ -1,0 +1,51 @@
+@import '../../style/themes/default';
+
+@collapse-prefix-cls: ~'@{c7n-prefix}-collapse';
+
+.@{collapse-prefix-cls}-wrapper-rtl {
+  &.@{collapse-prefix-cls} {
+    > .@{collapse-prefix-cls}-item {
+      > .@{collapse-prefix-cls}-header {
+        .@{collapse-prefix-cls}-extra {
+          float: left;
+        }
+
+        .@{collapse-prefix-cls}-expand-icon.@{collapse-prefix-cls}-collapsed {
+          transform: rotate(90deg);
+        }
+
+        .@{collapse-prefix-cls}-expand-text {
+          padding-right: unset;
+          padding-left: 0.1rem;
+        }
+      }
+    }
+
+    &-icon-position-right {
+      & > .@{collapse-prefix-cls}-item {
+        > .@{collapse-prefix-cls}-header {
+          .@{collapse-prefix-cls}-expand-icon-wrapper {
+            float: left;
+          }
+
+          .@{collapse-prefix-cls}-expand-icon.@{collapse-prefix-cls}-collapsed {
+            transform: rotate(-90deg);
+          }
+
+          .@{collapse-prefix-cls}-expand-text {
+            text-align: left;
+          }
+        }
+      }
+    }
+
+    &-icon-position-text-right {
+      & > .@{collapse-prefix-cls}-item {
+        .@{collapse-prefix-cls}-expand-icon-wrapper {
+          margin-right: 10px;
+          margin-left: unset;
+        }
+      }
+    }
+  }
+}

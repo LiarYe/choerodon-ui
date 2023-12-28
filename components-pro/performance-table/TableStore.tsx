@@ -135,6 +135,11 @@ export default class TableStore {
 
   @observable selectedRowKeys: string[] | number[];
 
+  get isRTL(): boolean {
+    const direction = this.getConfig('direction');
+    return direction === 'rtl';
+  }
+
   get queryBar(): TableQueryBarProps | false | undefined {
     return this.node.props.queryBar;
   }

@@ -1,0 +1,370 @@
+@import '../../../components/style/themes/default';
+
+@table-prefix-cls: ~'@{c7n-pro-prefix}-table';
+@modal-prefix-cls: ~'@{c7n-pro-prefix}-modal';
+@checkbox-prefix-cls: ~'@{c7n-prefix}-checkbox';
+
+.@{table-prefix-cls}-wrapper-rtl {
+  direction: rtl;
+
+  .@{table-prefix-cls} {
+    table {
+      text-align: right;
+    }
+
+    &-error-content {
+      .icon-cancel {
+        float: right;
+        margin-right: unset;
+        margin-left: 0.1rem;
+      }
+    }
+
+    &-footer {
+      text-align: right;
+    }
+
+    &-cell {
+      &-inner {
+        &-row-height-fixed&-multi {
+          .@{c7n-pro-prefix}-validation-message {
+            padding-right: 0;
+            padding-left: unset;
+          }
+        }
+
+        &-dirty::after {
+          right: 0;
+          left: unset;
+          border-right: none;
+          border-left: 0.06rem solid transparent;
+        }
+      }
+
+      &-prefix {
+        float: right;
+      }
+
+      &-fix-left,
+      &-fix-right {
+        background-image: linear-gradient(to left, @component-background 0%, @component-background 100%);
+      }
+
+      &-tree {
+        &-switcher {
+          &_close .@{iconfont-css-prefix}-arrow_drop_down {
+            transform: rotate(90deg);
+          }
+        }
+      }
+
+      &-label:not(:empty) {
+        margin-right: unset;
+        margin-left: .04rem;
+      }
+
+      &-expand {
+        &-menu-btn {
+          margin-right: .05rem;
+          margin-left: unset;
+        }
+      }
+    }
+
+    // border 相关
+    /* stylelint-disable-next-line no-duplicate-selectors */
+    &-cell {
+      border-right: none;
+      border-left: @table-cell-border-right;
+    }
+
+    &:not(.@{table-prefix-cls}-bordered) .@{table-prefix-cls}-thead.@{table-prefix-cls}-column-resizable {
+      &:hover,
+      &.@{table-prefix-cls}-thead-hover {
+        .@{table-prefix-cls}-cell:not(.@{table-prefix-cls}-cell-last) {
+          border-right-color: transparent;
+          border-left-color: @table-notbordered-thead-hover-border-right-color;
+        }
+      }
+    }
+
+    &-bordered {
+      .@{table-prefix-cls}-thead .@{table-prefix-cls}-cell-last,
+      .@{table-prefix-cls}-tbody .@{table-prefix-cls}-cell:last-child,
+      .@{table-prefix-cls}-tfoot .@{table-prefix-cls}-cell:last-child {
+        border-right-color: transparent;
+        border-left-color: transparent;
+      }
+
+      .@{table-prefix-cls}-cell,
+      .@{table-prefix-cls}-body .@{table-prefix-cls}-cell:last-child,
+      .@{table-prefix-cls}-fixed-left .@{table-prefix-cls}-tfoot .@{table-prefix-cls}-cell:last-child {
+        border-right-color: transparent;
+        border-left-color: @border-color-base;
+      }
+
+      .@{table-prefix-cls}-row.dragging-row > .@{table-prefix-cls}-cell:first-child {
+        border-right: @table-border;
+        // TODO: 待确认
+        // border-left: @table-border;
+      }
+      .@{table-prefix-cls}-row.dragging-row > .@{table-prefix-cls}-cell:last-child {
+        // TODO: 待确认
+        // border-right: @table-border;
+        border-left: @table-border;
+      }
+
+      .@{table-prefix-cls}-page-all-select {
+        margin-right: unset;
+        margin-left: -0.17rem;
+      }
+    }
+    // border 相关
+
+    &-cell-command + .@{table-prefix-cls}-cell-command {
+      margin-right: @btn-group-spacing;
+      margin-left: unset;
+    }
+
+    &-aggregation {
+      &-groups {
+        &-tree {
+          &:not(:first-child) {
+            margin-right: .1rem;
+            margin-left: unset;
+          }
+        }
+      }
+    }
+
+    &-aggregation .@{table-prefix-cls}-cell {
+      &-command {
+        margin-right: 0 !important;
+        margin-left: unset !important;
+      }
+    }
+
+    &-editor {
+      // TODO: 待确认
+      // right: 0;
+      // left: unset;
+      transform: translateX(1000rem);
+    }
+    
+    &-fixed-left {
+      right: 0;
+      left: unset;
+    }
+  
+    &-fixed-right {
+      right: unset;
+      left: 0;
+    }
+
+    &-sticky-left.@{table-prefix-cls}-fixed-left {
+      box-shadow: -0.06rem 0 0.06rem -0.04rem @shadow-color;
+    }
+
+    &-sticky-right.@{table-prefix-cls}-fixed-right {
+      box-shadow: 0.06rem 0 0.06rem -0.04rem @shadow-color;
+    }
+
+    &-sticky-left.@{table-prefix-cls}-sticky-shadow {
+      border-right: @table-border;
+      border-left: none;
+      box-shadow: inset -0.06rem 0 0.06rem -0.04rem @shadow-color;
+    }
+
+    &-sticky-right.@{table-prefix-cls}-sticky-shadow {
+      border-right: none;
+      border-left: @table-border;
+    }
+
+    &-sticky-right.@{table-prefix-cls}-sticky-shadow,
+    &-cell-sticky-shadow::after {
+      box-shadow: inset 0.06rem 0 0.06rem -0.04rem @shadow-color;
+    }
+
+    &-cell-sticky-shadow::after {
+      right: 0;
+      left: unset;
+      transform: translateX(100%);
+    }
+
+    &-resizer {
+      &-left {
+        right: calc(@border-width-base / -2);
+        left: unset;
+      }
+  
+      &-right {
+        right: unset;
+        left: calc(@border-width-base / -2);
+      }
+    }
+
+    &-empty-row .@{table-prefix-cls}-empty-text-wrapper {
+      transform: translateX(50%);
+    }
+
+    &-cell-prefix + .@{table-prefix-cls}-cell-inner:not(.@{table-prefix-cls}-cell-inner-editable) {
+      padding-right: 0;
+      padding-left: unset;
+    }
+
+    &-row-group {
+      &-title {
+        &-content {
+          right: 0;
+          left: unset;
+          float: right;
+        }
+      }
+    }
+
+    &-summary-col {
+      &-label {
+        text-align: right;
+      }
+
+      &-value {
+        text-align: left;
+      }
+    }
+
+    &-pagination {
+      justify-content: flex-end;
+      text-align: left;
+    }
+
+    &-selection-tips {
+      text-align: right;
+
+      .@{table-prefix-cls}-switch {
+        margin-right: .1rem;
+        margin-left: unset;
+      }
+    }
+
+    &-switch {
+      float: right;
+    }
+
+    &-expand-icon {
+      &:not(.@{table-prefix-cls}-expand-icon-expanded) {
+        transform: rotate(180deg);
+      }
+
+      & + .@{c7n-pro-prefix}-checkbox {
+        margin-right: @table-padding-horizontal;
+        margin-left: unset;
+      }
+    }
+
+    &-columns-chooser {
+      // TODO: 待确认
+      border-right: @table-border;
+      border-left: none;
+    }
+
+    &-page-all-select {
+      margin-right: unset;
+      margin-left: -0.18rem;
+    }
+
+    &-combine-sort {
+      &-trigger-button.@{c7n-pro-prefix}-btn {
+        &:not(:first-child) {
+          margin-right: 0;
+          margin-left: -0.08rem;
+        }
+      }
+    }
+
+    .@{table-prefix-cls}-filter-search-divide {
+      ~ .@{table-prefix-cls}-combine-sort-trigger-button.@{c7n-pro-prefix}-btn {
+        margin-right: 0;
+        margin-left: 0.08rem;
+      }
+    }
+  }
+}
+
+
+.@{modal-prefix-cls}-wrapper-rtl {
+  .@{table-prefix-cls} {
+    &-export-modal-footer {
+      &-radio {
+        label:first-child {
+          margin-right: unset;
+          margin-left: .24rem;
+        }
+      }
+
+      &-operation {
+        margin-right: .4rem;
+        margin-left: unset;
+      }
+    }
+  }
+}
+
+.@{c7n-pro-prefix}-popup-wrapper-rtl {
+  .@{table-prefix-cls} {
+    &-dropdown-menu {
+      &-item-group-list > .@{c7n-pro-prefix}-dropdown-menu-item {
+        padding-right: 0.2rem;
+        padding-left: @control-padding-horizontal;
+      }
+      &-item-group-no-title > .@{c7n-pro-prefix}-dropdown-menu-item {
+        padding-right: @control-padding-horizontal;
+        padding-left: @control-padding-horizontal;
+      }
+
+      &-item .@{checkbox-prefix-cls}-wrapper {
+        margin-right: unset;
+        margin-left: 0.08rem;
+      }
+    }
+  }
+}
+
+.@{c7n-prefix}-popover-wrapper-rtl {
+  // 组合排序
+  .@{table-prefix-cls}-combine-sort {
+    &-list {
+      align-items: flex-start;
+
+      &-item {
+        & .@{table-prefix-cls}-combine-sort-list-item-index {
+          margin: 0 0.04rem 0 0;
+        }
+
+        &-sortName {
+          margin: 0 0.08rem 0 0;
+        }
+
+        &-sortOrder {
+          margin: 0 0.24rem 0 0;
+
+          .@{c7n-pro-prefix}-radio-wrapper:not(:first-child) {
+            margin: 0 0.24rem 0 0;
+          }
+        }
+
+        &-delete {
+          float: left;
+        }
+      }
+    }
+
+    &-add-button {
+      float: right;
+    }
+
+    &-footer {
+      clear: both;
+      text-align: left;
+    }
+  }
+}

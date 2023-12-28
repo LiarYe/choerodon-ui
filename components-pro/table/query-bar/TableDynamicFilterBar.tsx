@@ -329,6 +329,11 @@ export default class TableDynamicFilterBar extends Component<TableDynamicFilterB
     return getProPrefixCls('table', prefixCls);
   }
 
+  get isRTL(): boolean {
+    const { getConfig } = this.context;
+    return getConfig('direction') === 'rtl';
+  }
+
   get queryFields(): React.ReactElement<any>[] {
     const { queryFields, queryDataSet, dataSet } = this.props;
     const menuDataSet = dataSet.getState(MENUDATASET);
@@ -1761,9 +1766,12 @@ export default class TableDynamicFilterBar extends Component<TableDynamicFilterB
     }
     const { prefixCls } = this;
     const selectFields = dataSet.getState(SELECTFIELDS) || [];
+    const wrapperCls = classNames(`${prefixCls}-dynamic-filter-bar`, {
+      [`${prefixCls}-dynamic-filter-bar-rtl`]: this.isRTL,
+    });
     if (fuzzyQueryOnly) {
       return (
-        <div key="query_bar" className={`${prefixCls}-dynamic-filter-bar`}>
+        <div key="query_bar" className={wrapperCls}>
           {this.getFilterMenu()}
         </div>
       );
@@ -1775,7 +1783,7 @@ export default class TableDynamicFilterBar extends Component<TableDynamicFilterB
           {this.getExpandNode(false)}
         </div> : null;
       return (
-        <div key="query_bar" className={`${prefixCls}-dynamic-filter-bar`}>
+        <div key="query_bar" className={wrapperCls}>
           {this.getFilterMenu()}
           <div className={`${prefixCls}-dynamic-filter-single-wrapper`} ref={(node) => this.refSingleWrapper = node}>
             <div className={`${prefixCls}-filter-wrapper`}>

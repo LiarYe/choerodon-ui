@@ -1,0 +1,33 @@
+@import '../../../../components/style/themes/default';
+
+@table--combo-customization-prefix-cls: ~'@{c7n-pro-prefix}-table-combo-customization';
+
+.@{c7n-prefix}-popover-wrapper-rtl {
+  &.@{table--combo-customization-prefix-cls} {
+    .@{c7n-prefix}-popover-title {
+      text-align: right;
+    }
+  }
+
+  .@{table--combo-customization-prefix-cls} {
+    &-footer {
+      text-align: left;
+    }
+
+    &-tree {
+      &-treenode {
+        &-content {
+          border-radius: 0 .02rem .02rem 0;
+        }
+
+        &-switcher {
+          &-icon {
+            &-close {
+              transform: rotate(90deg);
+            }
+          }
+        }
+      }
+    }
+  }
+}

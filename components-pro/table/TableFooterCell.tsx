@@ -81,9 +81,11 @@ const TableFooterCell: FunctionComponent<TableFooterCellProps> = function TableF
 
   if (columnLock) {
     if (columnLock === ColumnLock.left) {
-      cellStyle.left = pxToRem(columnGroup.left, true)!;
+      const directionName = tableStore.isRTL ? 'right' : 'left';
+      cellStyle[directionName] = pxToRem(columnGroup.left, true)!;
     } else if (columnLock === ColumnLock.right) {
-      cellStyle.right = pxToRem(colSpan && colSpan > 1 ? right : columnGroup.right + right, true)!;
+      const directionName = tableStore.isRTL ? 'left' : 'right';
+      cellStyle[directionName] = pxToRem(colSpan && colSpan > 1 ? right : columnGroup.right + right, true)!;
     }
   }
   const getFooter = (): ReactNode => {

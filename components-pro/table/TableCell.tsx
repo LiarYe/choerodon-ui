@@ -311,15 +311,17 @@ const TableCell: FunctionComponent<TableCellProps> = function TableCell(props) {
   const baseStyle: CSSProperties | undefined = (() => {
     if (columnLock) {
       if (columnLock === ColumnLock.left) {
+        const directionName = tableStore.isRTL ? 'right' : 'left';
         return {
           ...style,
-          left: pxToRem(columnGroup.left, true)!,
+          [directionName]: pxToRem(columnGroup.left, true)!,
         };
       }
       if (columnLock === ColumnLock.right) {
+        const directionName = tableStore.isRTL ? 'left' : 'right';
         return {
           ...style,
-          right: pxToRem(colSpan && colSpan > 1 ? 0 : columnGroup.right, true)!,
+          [directionName]: pxToRem(colSpan && colSpan > 1 ? 0 : columnGroup.right, true)!,
         };
       }
     }

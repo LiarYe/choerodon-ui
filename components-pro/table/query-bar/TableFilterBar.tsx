@@ -1,7 +1,8 @@
 import React, { Component, ReactElement, ReactNode } from 'react';
 import { observer } from 'mobx-react';
 import noop from 'lodash/noop';
-import { getProPrefixCls as getProPrefixClsDefault } from 'choerodon-ui/lib/configure/utils';
+import classNames from 'classnames';
+import { getProPrefixCls as getProPrefixClsDefault, getConfig as getConfigDefault } from 'choerodon-ui/lib/configure/utils';
 import FilterSelect from './FilterSelect';
 import ColumnFilter from './ColumnFilter';
 import TableContext, { TableContextValue } from '../TableContext';
@@ -45,6 +46,11 @@ export default class TableFilterBar extends Component<FilterBarProps, any> {
     return getProPrefixCls('table', prefixCls);
   }
 
+  get isRTL(): boolean {
+    const { tableStore: { getConfig = getConfigDefault } } = this.context;
+    return getConfig('direction') === 'rtl';
+  }
+
   renderSuffix() {
     const { prefixCls } = this;
     return <ColumnFilter prefixCls={prefixCls} />;
@@ -54,8 +60,11 @@ export default class TableFilterBar extends Component<FilterBarProps, any> {
     const { buttons } = this.props;
     const { prefixCls } = this;
     if (buttons.length) {
+      const cls = classNames(`${prefixCls}-toolbar`, {
+        [`${prefixCls}-toolbar-rtl`]: this.isRTL,
+      });
       return (
-        <div key="toolbar" className={`${prefixCls}-toolbar`}>
+        <div key="toolbar" className={cls}>
           <span className={`${prefixCls}-toolbar-button-group`}>{buttons}</span>
         </div>
       );

@@ -64,6 +64,11 @@ export default class Collapse extends Component<CollapseProps, any> {
 
   context: ConfigContextValue;
 
+  get isRTL(): boolean {
+    const { getConfig } = this.context;
+    return getConfig('direction') === 'rtl';
+  }
+
   renderExpandTextContent = (panelProps: PanelProps = {}, locale, localeCode, expandIconPositionCof) => {
     const {
       prefixCls: customizePrefixCls,
@@ -137,6 +142,7 @@ export default class Collapse extends Component<CollapseProps, any> {
         [`${prefixCls}-trigger`]: triggerCof === 'header',
         [`${prefixCls}-ghost`]: ghost,
         [`${prefixCls}-icon-position-${expandIconPositionCof}`]: true,
+        [`${prefixCls}-wrapper-rtl`]: this.isRTL,
       },
       className,
     );

@@ -57,6 +57,7 @@ const KanbanContent: FunctionComponent<KanbanContentProps> = function KanbanCont
   const totalKey = kanbanProps.columnDsProps ? kanbanProps.columnDsProps.totalKey || getConfig('totalKey') : getConfig('dataKey');
   const dsField = useMemo(() => dataSet.fields.get(groupField), [dataSet, groupField]);
   const oldDSRef = useRef(null);
+  const isRTL = getConfig('direction') === 'rtl';
 
   const modal = useModal();
   const openCustomizationModal = useCallback(() => {
@@ -177,6 +178,7 @@ const KanbanContent: FunctionComponent<KanbanContentProps> = function KanbanCont
   const cls = classnames(
     `${prefixCls}-wrapper`,
     {
+      [`${prefixCls}-wrapper-rtl`]: isRTL,
     },
     // className,
   );

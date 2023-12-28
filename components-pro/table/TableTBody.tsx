@@ -485,10 +485,11 @@ function generateRows(
 
 function getEmptyRow(props: GenerateSimpleRowsProps): ReactElement {
   const { tableStore, columnGroups, lock } = props;
-  const { emptyText, width, prefixCls, dataSet } = tableStore;
+  const { emptyText, width, prefixCls, dataSet, isRTL } = tableStore;
+  const directionName = isRTL ? 'right' : 'left';
   const styles: CSSProperties = width ? {
     position: isStickySupport() ? 'sticky' : 'relative',
-    left: pxToRem(width / 2, true)!,
+    [directionName]: pxToRem(width / 2, true)!,
   } : {
     transform: 'none',
     display: 'inline-block',

@@ -3232,6 +3232,7 @@ export default class PerformanceTable extends React.Component<TableProps, TableS
       [this.addPrefix('column-resizing')]: isColumnResizing,
       [this.addPrefix('hover')]: hover,
       [this.addPrefix('loading')]: loading,
+      [this.addPrefix('rtl')]: this.tableStore.isRTL,
     });
 
     const height = this.getTableHeight();

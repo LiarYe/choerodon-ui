@@ -1,0 +1,61 @@
+@import '../../../../components/style/themes/default';
+
+@table-customization-prefix-cls: ~'@{c7n-pro-prefix}-table-customization';
+@modal-prefix-cls: ~'@{c7n-pro-prefix}-modal';
+@collapse-prefix-cls: ~'@{c7n-prefix}-collapse';
+
+.@{modal-prefix-cls}-wrapper-rtl {
+  .@{table-customization-prefix-cls} {
+    .@{collapse-prefix-cls}-header {
+      .icon-navigate_next {
+        transform: rotate(180deg);
+      }
+    }
+
+    &-header-button {
+      float: left;
+    }
+
+    &-tree {
+      &-treenode {
+        &-content {
+          border-radius: 0 .02rem .02rem 0;
+        }
+
+        &-switcher {
+          &-icon {
+            &-close {
+              transform: rotate(90deg);
+            }
+          }
+        }
+      }
+
+      &-group-placeholder {
+        &-example {
+          &::before {
+            right: @table-customization-group-placeholder-example-before-left;
+            left: unset;
+          }
+
+          .@{iconfont-css-prefix}-navigation {
+            right: @table-customization-group-placeholder-example-pointer-icon-left;
+            left: unset;
+          }
+        }
+      }
+    }
+
+    &-option {
+      &-input {
+        margin-right: .1rem;
+        margin-left: unset;
+      }
+    }
+
+    .@{table-customization-prefix-cls}-select-view-option {
+      margin-right: unset;
+      margin-left: .25rem;
+    }
+  }
+}

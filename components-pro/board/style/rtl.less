@@ -1,0 +1,82 @@
+@import '../../../components/style/themes/default';
+
+@board-prefix-cls: ~'@{c7n-pro-prefix}-board';
+@board-customization-prefix-cls: ~'@{c7n-pro-prefix}-board-customization';
+
+.@{board-prefix-cls}-wrapper-rtl {
+  direction: rtl;
+
+  .@{board-prefix-cls}-quote-container {
+    direction: rtl;
+  }
+
+  &.@{board-prefix-cls}-wrapper {
+    margin-left: 0 !important;
+  }
+
+  .@{board-prefix-cls}-quote-container-extra {
+    margin-right: auto;
+    margin-left: unset;
+    text-align: left;
+  }
+}
+
+.@{board-prefix-cls}-card-wrapper-rtl {
+  direction: rtl;
+}
+
+.@{board-prefix-cls}-wrapper-rtl,
+.@{board-prefix-cls}-card-wrapper-rtl {
+  .@{board-prefix-cls}-quote {
+    &-content {
+      &-label {
+        margin-right: unset;
+        margin-left: 4px;
+      }
+    }
+  }
+}
+
+.@{c7n-pro-prefix}-popup-wrapper-rtl {
+  .@{board-prefix-cls}-view-item {
+    .@{board-prefix-cls}-delete {
+      margin-right: auto;
+      margin-left: unset;
+    }
+  }
+
+  .@{board-prefix-cls}-view-add div {
+    margin-right: unset;
+    margin-left: 8px;
+
+    i {
+      margin-right: unset;
+      margin-left: 4px;
+    }
+  }
+}
+
+.@{c7n-pro-prefix}-modal-wrapper-rtl {
+  .@{board-customization-prefix-cls}-panel-des {
+    i {
+      margin-right: 0.04rem;
+      margin-left: unset;
+    }
+  }
+
+  .@{board-customization-prefix-cls}-combine-sort-list-item {
+    &-drag {
+      margin-right: unset;
+      margin-left: 4px;
+    }
+
+    &-sortName {
+      margin: 0 0.08rem 0 0.24rem;
+    }
+
+    &-delete {
+      margin-right: auto;
+      margin-left: unset;
+    }
+  }
+}

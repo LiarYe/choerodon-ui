@@ -2,8 +2,9 @@ import React, { cloneElement, Component, CSSProperties, ReactElement, ReactNode 
 import { observer } from 'mobx-react';
 import isFunction from 'lodash/isFunction';
 import noop from 'lodash/noop';
+import classNames from 'classnames';
 import { pxToRem } from 'choerodon-ui/lib/_util/UnitConvertor';
-import { getProPrefixCls as getProPrefixClsDefault } from 'choerodon-ui/lib/configure/utils';
+import { getProPrefixCls as getProPrefixClsDefault, getConfig as getConfigDefault } from 'choerodon-ui/lib/configure/utils';
 import Field from '../../data-set/Field';
 import DataSet from '../../data-set';
 import Button from '../../button';
@@ -52,6 +53,11 @@ export default class TableAdvancedQueryBar extends Component<TableAdvancedQueryB
     const { prefixCls } = this.props;
     const { tableStore: { getProPrefixCls = getProPrefixClsDefault } } = this.context;
     return getProPrefixCls('table', prefixCls);
+  }
+
+  get isRTL(): boolean {
+    const { tableStore: { getConfig = getConfigDefault } } = this.context;
+    return getConfig('direction') === 'rtl';
   }
 
   componentWillUnmount() {
@@ -126,8 +132,11 @@ export default class TableAdvancedQueryBar extends Component<TableAdvancedQueryB
       );
       const moreFields = this.createFields(queryFields.slice(queryFieldsLimit), queryDataSet, true);
       const moreFieldsButton: ReactElement | undefined = this.getMoreFieldsButton(moreFields);
+      const cls = classNames(`${prefixCls}-advanced-query-bar`, {
+        [`${prefixCls}-advanced-query-bar-rtl`]: this.isRTL,
+      })
       return (
-        <div key="toolbar" className={`${prefixCls}-advanced-query-bar`}>
+        <div key="toolbar" className={cls}>
           {currentFields}
           <span className={`${prefixCls}-advanced-query-bar-button`}>
             {this.getResetButton()}
@@ -143,15 +152,16 @@ export default class TableAdvancedQueryBar extends Component<TableAdvancedQueryB
     return elements.map(element => {
       const { name, style, onEnterDown } = element.props;
       const newStyle: CSSProperties = {};
+      const directionName = this.isRTL ? 'marginLeft' : 'marginRight';
       if (!isMore) {
         newStyle.width = pxToRem(260);
-        newStyle.marginRight = pxToRem(10);
+        newStyle[directionName] = pxToRem(10);
       }
       const props: any = {
         onEnterDown: isFunction(onEnterDown) ? onEnterDown : this.handleFieldEnter,
         labelLayout: LabelLayout.float,
         style: {
-          marginRight: !isMore ? pxToRem(10) : 0,
+          [directionName]: !isMore ? pxToRem(10) : 0,
           ...style,
         },
       };

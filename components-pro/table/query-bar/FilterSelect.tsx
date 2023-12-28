@@ -218,7 +218,8 @@ export default class FilterSelect extends TextField<FilterSelectProps> {
             useZeroFilledDecimal: this.getContextConfig('useZeroFilledDecimal'),
           };
           if (range) {
-            return `${this.getFieldLabel(field, current)}: ${toRangeValue(fieldValue, range).map(v => {
+            const labelText = this.getFieldLabel(field, current);
+            const valueText = toRangeValue(fieldValue, range).map(v => {
               return processFieldValue(
                 isPlainObject(v) ? v : processValue(v, processValueOptions),
                 field,
@@ -228,13 +229,18 @@ export default class FilterSelect extends TextField<FilterSelectProps> {
                   lang: this.lang,
                   getDisplayProp: (name) => this.getDisplayProp(name),
                 }, undefined, current, this.getContextConfig);
-            }).join(this.rangeSeparator)}`;
+            }).join(this.rangeSeparator);
+            if (this.isRTL) {
+              return `${valueText} :${labelText}`;
+            }
+            return `${labelText}: ${valueText}`;
           }
           if (field.get('bind', current) || isNil(fieldValue)) return;
           const text = this.processText(isNil(fieldValue)
             ? processValue(value, processValueOptions)
             : isMoment(fieldValue) ? processValue(fieldValue, processValueOptions) : fieldValue);
-          return `${this.getFieldLabel(field, current)}: ${processFieldValue(
+          const labelText = this.getFieldLabel(field, current);
+          const valueText = processFieldValue(
             isPlainObject(fieldValue) ? fieldValue : text,
             field,
             {
@@ -243,7 +249,11 @@ export default class FilterSelect extends TextField<FilterSelectProps> {
               lang: this.lang,
               getDisplayProp: (name) => this.getDisplayProp(name),
             }, undefined, current, this.getContextConfig,
-          )}`;
+          );
+          if (this.isRTL) {
+            return `${valueText} :${labelText}`;
+          }
+          return `${labelText}: ${valueText}`;
         }
         return value;
       }

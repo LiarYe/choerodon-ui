@@ -8,6 +8,7 @@ import KeyCode from 'choerodon-ui/lib/_util/KeyCode';
 import { pxToRem } from 'choerodon-ui/lib/_util/UnitConvertor';
 import Row, { RowProps } from 'choerodon-ui/lib/row';
 import Col from 'choerodon-ui/lib/col';
+import measureScrollbar from 'choerodon-ui/lib/_util/measureScrollbar';
 import { ColumnProps } from './Column';
 import { ElementProps } from '../core/ViewComponent';
 import { FormField, FormFieldProps } from '../field/FormField';
@@ -400,7 +401,10 @@ export default class TableEditor extends Component<TableEditorProps> {
           if (width !== this.width) {
             this.width = width;
           }
-          wrap.style.cssText = `width:${width};${transform(`translate(${pxToRem(left, true)}, ${pxToRem(top, true)})`)}`;
+          const caclLeft = tableStore.isRTL
+            ? tableStore.overflowY ? left - measureScrollbar() : left
+            : left;
+          wrap.style.cssText = `width:${width};${transform(`translate(${pxToRem(caclLeft, true)}, ${pxToRem(top, true)})`)}`;
           if (editor && editor.forcePositionChanged) {
             editor.forcePositionChanged();
           }

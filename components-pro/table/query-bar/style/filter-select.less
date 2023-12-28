@@ -1,6 +1,7 @@
 @import '../../../../components/style/themes/default';
 @import '../../../../components/style/mixins/index';
 @import '../../../text-field/style/mixin';
+@import '../../../text-field/style/rtl';
 @import '../../../trigger-field/style/mixin';
 @import '../../../../components/select/style/mixin';
 
@@ -109,6 +110,34 @@
 
       span {
         height: auto;
+      }
+    }
+  }
+}
+
+.input-rtl(~'@{table-prefix-cls}-filter-select', 0.5rem, 0.65rem);
+
+.@{table-prefix-cls}-filter-select-wrapper-rtl {
+  .@{table-prefix-cls}-filter-select {
+    padding-right: 0.46rem !important;
+    padding-left: 0.65rem !important;
+
+    &-select-field {
+      padding-right: 0.08rem;
+      padding-left: unset;
+    }
+
+    &-multiple-block {
+      padding: 0 0.08rem 0 0;
+
+      &-disabled {
+        padding-right: 0.08rem;
+        padding-left: 0.1rem;
+      }
+
+      .@{iconfont-css-prefix} {
+        margin-right: 0.08rem;
+        margin-left: 0.02rem;
       }
     }
   }

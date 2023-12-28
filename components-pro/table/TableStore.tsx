@@ -1044,6 +1044,11 @@ export default class TableStore {
 
   @observable autoScrollRAF: number | null;
 
+  get isRTL(): boolean {
+    const direction = this.getConfig('direction');
+    return direction === 'rtl';
+  }
+
   get styleHeight(): string | number | undefined {
     const { autoHeight, props: { style }, parentPaddingTop } = this;
     return autoHeight ? autoHeightToStyle(autoHeight, parentPaddingTop).height : style && style.height;
@@ -1307,8 +1312,10 @@ export default class TableStore {
     if (!this.width) {
       return [0, 0];
     }
-    const { columnGroups: { leafs, leftLeafs, rightLeafs, leftLeafColumnsWidth, rightLeafColumnsWidth }, columnThreshold, nextRenderColIndex } = this;
-    const scrollLeft = this.lastScrollLeft || 0;
+    const { columnGroups: { leafs, leftLeafs, rightLeafs, leftLeafColumnsWidth, rightLeafColumnsWidth },
+      columnThreshold, nextRenderColIndex, isRTL, lastScrollLeft } = this;
+    // 兼容 rtl
+    const scrollLeft = (isRTL ? Math.abs(lastScrollLeft) : lastScrollLeft ) || 0;
 
     let visibleColumnWidth = 0;
     let firstIndex = -1;

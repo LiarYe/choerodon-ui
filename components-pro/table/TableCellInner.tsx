@@ -130,19 +130,30 @@ const TableCellInner: FunctionComponent<TableCellInnerProps> = function TableCel
           const { leftLeafColumnsWidth, rightLeafColumnsWidth } = tableStore.columnGroups;
           const { offsetLeft, offsetWidth } = cell;
           const { scrollLeft } = tableBodyWrap;
-          const width = Math.round(tableBodyWrap.getBoundingClientRect().width);
-          const leftSide = offsetLeft - leftLeafColumnsWidth;
-          const rightSide =
-            offsetLeft + offsetWidth - width + rightLeafColumnsWidth + measureScrollbar();
-          let sl = scrollLeft;
-          if (sl < rightSide) {
-            sl = rightSide;
-          }
-          if (sl > leftSide) {
-            sl = leftSide;
-          }
-          if (sl !== scrollLeft) {
-            tableBodyWrap.scrollLeft = sl;
+          if (tableStore.isRTL) {
+            const leftSide = tableBodyWrap.getBoundingClientRect().right - cell.getBoundingClientRect().right - leftLeafColumnsWidth;
+            const rightSide = cell.getBoundingClientRect().left - tableBodyWrap.getBoundingClientRect().left
+              - rightLeafColumnsWidth - measureScrollbar();
+            if (leftSide < 0) {
+              tableBodyWrap.scrollLeft -= leftSide;
+            } else if (rightSide < 0) {
+              tableBodyWrap.scrollLeft += rightSide;
+            }
+          } else {
+            const width = Math.round(tableBodyWrap.getBoundingClientRect().width);
+            const leftSide = offsetLeft - leftLeafColumnsWidth;
+            const rightSide =
+              offsetLeft + offsetWidth - width + rightLeafColumnsWidth + measureScrollbar();
+            let sl = scrollLeft;
+            if (sl < rightSide) {
+              sl = rightSide;
+            }
+            if (sl > leftSide) {
+              sl = leftSide;
+            }
+            if (sl !== scrollLeft) {
+              tableBodyWrap.scrollLeft = sl;
+            }
           }
         }
       }

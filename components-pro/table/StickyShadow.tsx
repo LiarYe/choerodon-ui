@@ -32,9 +32,11 @@ const StickyShadow: FunctionComponent<StickyShadowProps> = function StickyShadow
   if (!children) {
     const scrollBarWidth = measureScrollbar();
     if (position === 'left') {
-      style.left = pxToRem(columnGroups.leftLeafColumnsWidth - 1, true)!;
+      const directionName = tableStore.isRTL ? 'right' : 'left';
+      style[directionName] = pxToRem(columnGroups.leftLeafColumnsWidth - 1, true)!;
     } else if (position === 'right') {
-      style.right = pxToRem(columnGroups.rightLeafColumnsWidth + (tableStore.overflowY ? scrollBarWidth : 0), true)!;
+      const directionName = tableStore.isRTL ? 'left' : 'right';
+      style[directionName] = pxToRem(columnGroups.rightLeafColumnsWidth + (tableStore.overflowY ? scrollBarWidth : 0), true)!;
     }
     style.bottom = pxToRem(scrollBarWidth, true)!;
   }

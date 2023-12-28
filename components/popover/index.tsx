@@ -1,4 +1,5 @@
 import React, { Component, ReactNode } from 'react';
+import classNames from 'classnames';
 import Tooltip, { AbstractTooltipProps, RenderFunction } from '../tooltip';
 import warning from '../_util/warning';
 import ConfigContext, { ConfigContextValue } from '../config-provider/ConfigContext';
@@ -27,6 +28,18 @@ export default class Popover extends Component<PopoverProps, {}> {
   context: ConfigContextValue;
 
   private tooltip: Tooltip;
+
+  get isRTL(): boolean {
+    const { getConfig } = this.context;
+    return getConfig('direction') === 'rtl';
+  }
+
+  get overlayClassName(): string | undefined {
+    const { overlayClassName } = this.props;
+    return classNames(overlayClassName, {
+      [`${this.getPrefixCls()}-wrapper-rtl`]: this.isRTL,
+    })
+  }
 
   getPopupDomNode() {
     return this.tooltip.getPopupDomNode();
@@ -67,6 +80,7 @@ export default class Popover extends Component<PopoverProps, {}> {
         prefixCls={this.getPrefixCls()}
         ref={this.saveTooltip}
         overlay={this.getOverlay}
+        overlayClassName={this.overlayClassName}
       />
     );
   }

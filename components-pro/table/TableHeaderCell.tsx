@@ -146,6 +146,7 @@ const TableHeaderCell: FunctionComponent<TableHeaderCellProps> = function TableH
   const setSplitLinePosition = useCallback(action<(left: number) => number | undefined>((left) => {
     const {
       node: { resizeLine },
+      isRTL,
     } = tableStore;
     const { bodyLeft } = globalRef.current;
     left -= bodyLeft;
@@ -153,7 +154,11 @@ const TableHeaderCell: FunctionComponent<TableHeaderCellProps> = function TableH
       left = 0;
     }
     if (resizeLine) {
-      transform(`translateX(${pxToRem(left, true) || 0})`, resizeLine.style);
+      if (isRTL) {
+        resizeLine.style.left = pxToRem(left, true) || '0';
+      } else {
+        transform(`translateX(${pxToRem(left, true) || 0})`, resizeLine.style);
+      }
     }
     return left + bodyLeft;
   }), [tableStore, globalRef]);
@@ -162,14 +167,21 @@ const TableHeaderCell: FunctionComponent<TableHeaderCellProps> = function TableH
     const { current } = globalRef;
     const { resizeColumnGroup } = current;
     if (resizeColumnGroup) {
-      const limit = current.resizeBoundary + minColumnWidth(resizeColumnGroup.column, tableStore);
       let left = e.touches ? transformZoomData(e.touches[0].clientX) : transformZoomData(e.clientX);
-      if (left < limit) {
-        left = limit;
+      if (tableStore.isRTL) {
+        const limit = current.resizeBoundary - minColumnWidth(resizeColumnGroup.column, tableStore);
+        if (left > limit) {
+          left = limit;
+        }
+      } else {
+        const limit = current.resizeBoundary + minColumnWidth(resizeColumnGroup.column, tableStore);
+        if (left < limit) {
+          left = limit;
+        }
       }
       current.resizePosition = setSplitLinePosition(left);
     }
-  }, [globalRef, setSplitLinePosition]);
+  }, [globalRef, setSplitLinePosition, tableStore]);
 
   const resizeEnd = useCallback(action<() => void>(() => {
     tableStore.columnResizing = false;
@@ -179,14 +191,17 @@ const TableHeaderCell: FunctionComponent<TableHeaderCellProps> = function TableH
       .removeEventListener('touchmove')
       .removeEventListener('mouseup')
       .removeEventListener('touchend');
-    const { node: { tableBodyWrap } } = tableStore;
+    const { node: { tableBodyWrap }, isRTL } = tableStore;
     if (tableBodyWrap) {
       tableBodyWrap.removeEventListener('scroll', stopEvent);
     }
     const { resizePosition, resizeColumnGroup } = globalRef.current;
     if (resizePosition !== undefined && resizeColumnGroup) {
       const { column: resizeColumn } = resizeColumnGroup;
-      const newWidth = Math.round(Math.max(resizePosition - globalRef.current.resizeBoundary, minColumnWidth(resizeColumn, tableStore)));
+      let newWidth = Math.round(Math.max(resizePosition - globalRef.current.resizeBoundary, minColumnWidth(resizeColumn, tableStore)));
+      if (isRTL) {
+        newWidth = Math.round(Math.max(globalRef.current.resizeBoundary - resizePosition, minColumnWidth(resizeColumn, tableStore)));
+      }
       if (newWidth !== resizeColumn.width) {
         const { width } = resizeColumn;
         let group: ColumnGroup | undefined = resizeColumnGroup;
@@ -311,9 +326,11 @@ const TableHeaderCell: FunctionComponent<TableHeaderCellProps> = function TableH
     const headerDom: Element | null = getHeaderNode();
     const node = headerDom && headerDom.querySelector(`[data-index="${group.key}"]`);
     if (node) {
-      globalRef.current.resizeBoundary = Math.round(node.getBoundingClientRect().left);
+      globalRef.current.resizeBoundary = tableStore.isRTL
+        ? Math.round(node.getBoundingClientRect().right)
+        : Math.round(node.getBoundingClientRect().left);
     }
-  }, [globalRef, getHeaderNode]);
+  }, [globalRef, getHeaderNode, tableStore]);
 
   const handleLeftResize = useCallback((e) => {
     if (prevColumnGroup) {
@@ -490,9 +507,11 @@ const TableHeaderCell: FunctionComponent<TableHeaderCellProps> = function TableH
   if (columnLock) {
     classList.push(`${prefixCls}-cell-fix-${columnLock}`);
     if (columnLock === ColumnLock.left) {
-      cellStyle.left = pxToRem(columnGroup.left, true)!;
+      const directionName = tableStore.isRTL ? 'right' : 'left';
+      cellStyle[directionName] = pxToRem(columnGroup.left, true)!;
     } else if (columnLock === ColumnLock.right) {
-      cellStyle.right = pxToRem(columnGroup.right + (rowIndex === 0 && tableStore.overflowY ? measureScrollbar() : 0), true)!;
+      const directionName = tableStore.isRTL ? 'left' : 'right';
+      cellStyle[directionName] = pxToRem(columnGroup.right + (rowIndex === 0 && tableStore.overflowY ? measureScrollbar() : 0), true)!;
     }
   }
   if (className) {

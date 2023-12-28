@@ -1,0 +1,457 @@
+@import '../../../../components/style/themes/default';
+
+@table-prefix-cls: ~'@{c7n-pro-prefix}-table';
+@select-prefix-cls: ~'@{c7n-pro-prefix}-select';
+
+.@{table-prefix-cls}-toolbar-rtl {
+  direction: rtl;
+
+  // queryBar='normal'
+  .@{table-prefix-cls}-query-bar {
+    float: left;
+
+    >*+* {
+      margin-right: 0.16rem;
+      margin-left: unset;
+    }
+
+    &-dirty-info {
+      >* {
+        &+* {
+          margin-right: 0.05rem;
+          margin-left: unset;
+        }
+      }
+    }
+  }
+}
+
+// queryBar='advancedBar'
+.@{table-prefix-cls}-advanced-query-bar-rtl {
+  direction: rtl;
+}
+.@{table-prefix-cls}-filter-select-wrapper-rtl {
+  &.@{table-prefix-cls}-advanced-query-bar-options {
+    .@{table-prefix-cls}-filter-select {
+      padding-right: 1.2rem !important;
+      padding-left: 0 !important;
+
+      &-prefix {
+        text-align: right;
+      }
+    }
+  }
+}
+
+// queryBar='filterBar'
+.@{table-prefix-cls}-dynamic-filter-bar-rtl {
+  direction: rtl;
+
+  .@{table-prefix-cls}-dynamic-filter-bar-single-action {
+    padding-right: unset;
+    padding-left: 0.06rem;
+  }
+
+  .@{table-prefix-cls}-dynamic-filter-bar-suffix {
+    margin-right: 0.1rem;
+    margin-left: unset;
+
+    .@{table-prefix-cls}-columns-chooser {
+      border-right: none;
+    }
+  }
+
+  .@{table-prefix-cls}-dynamic-filter-bar-prefix {
+    .@{table-prefix-cls}-columns-chooser {
+      border-right: none;
+    }
+  }
+
+  .@{table-prefix-cls}-filter-menu {
+    &-expand {
+      > *:last-child {
+        margin-right: unset;
+        margin-left: 0.16rem;
+      }
+    }
+  }
+
+  .@{table-prefix-cls}-filter-content {
+    margin: 0.02rem 0 0.02rem 0.12rem;
+
+    &-disabled {
+      // 禁用部分 lov 多值 和 下拉多值控制态 特殊覆盖
+      .@{select-prefix-cls}-multiple.@{select-prefix-cls}-lov .@{select-prefix-cls}:not(:last-child) {
+        padding-right: @input-padding-horizontal;
+        padding-left: @input-suffix-width-base;
+      }
+    }
+  }
+
+  .@{table-prefix-cls}-add-fields {
+    i {
+      margin: 0 0 0 0.04rem;
+    }
+  }
+
+  .@{table-prefix-cls}-filterName-select {
+    margin-right: 0.08rem;
+    margin-left: unset;
+  }
+
+  .@{table-prefix-cls}-filter-label {
+    i {
+      margin-right: 0.02rem;
+      margin-left: unset;
+    }
+  }
+
+  .@{table-prefix-cls}-filter-item {
+    .@{c7n-pro-prefix}-input-number-step-suffix {
+      &.@{c7n-pro-prefix}-input-number-wrapper .@{c7n-pro-prefix}-input-number {
+        padding-right: @input-padding-horizontal;
+        padding-left: @input-suffix-width-base; // 避免 NumberField 默认样式的影响
+      }
+    }
+
+    // 多值 placeholder 和 input 光标对齐
+    [class*="-placeholder-inner"] {
+      padding-right: 0.02rem;
+      padding-left: unset;
+    }
+
+    // 输入框类多值 placeholder 和 input 输入光标对齐默认样式覆盖
+    [class*="-multiple-input"] {
+      margin-right: 0;
+      margin-left: unset;
+    }
+
+    [class*="-multiple-value"]+[class*="-placeholder"] {
+      padding-right: 0;
+      padding-left: unset;
+    }
+
+    .@{select-prefix-cls},
+    .@{c7n-pro-prefix}-input,
+    .@{c7n-pro-prefix}-input-number,
+    .@{c7n-pro-prefix}-calendar-picker {
+      &-suffix,
+      &-inner-button {
+        right: unset;
+        left: -0.01rem;
+      }
+    }
+
+    &:not(.@{c7n-pro-prefix}-lov-click) {
+      .@{select-prefix-cls}-lov {
+        &:not(.@{select-prefix-cls}-disabled) .@{select-prefix-cls} {
+          margin-right: -0.12rem;
+          margin-left: unset;
+        }
+      }
+    }
+
+    .@{c7n-pro-prefix}-input,
+    .@{c7n-pro-prefix}-input-number {
+      margin-right: -0.28rem;
+      margin-left: unset;
+    }
+
+    [class*='-suffix-button'],
+    [class*='-prefix-button'] {
+
+      .@{c7n-pro-prefix}-input,
+      .@{c7n-pro-prefix}-input-number {
+        margin-right: 0;
+        margin-left: unset;
+      }
+    }
+
+    &-has-value,
+    &:focus-within {
+      .@{c7n-pro-prefix}-input,
+      .@{c7n-pro-prefix}-input-number,
+      .@{c7n-pro-prefix}-input-multiple,
+      .@{c7n-pro-prefix}-input-number-multiple {
+        margin-right: 0;
+        margin-left: unset;
+      }
+    }
+
+    .@{select-prefix-cls}-expand {
+      .@{select-prefix-cls} {
+        margin-right: 0 !important;
+        margin-left: unset !important;
+      }
+    }
+
+    &-has-value {
+      &:not(.@{c7n-pro-prefix}-lov-click) {
+        .@{select-prefix-cls}-lov:not(.@{c7n-pro-prefix}-select-disabled) .@{select-prefix-cls} {
+          margin-right: 0;
+          margin-left: unset;
+        }
+      }
+    }
+  }
+  i.@{table-prefix-cls}-filter-item-close {
+    right: unset;
+    left: -0.07rem;
+  }
+}
+// 动态筛选条 toolbar
+.@{table-prefix-cls}-dynamic-filter-toolbar-rtl {
+  direction: rtl;
+
+  &.@{table-prefix-cls}-dynamic-filter-toolbar {
+    margin-right: auto;
+    margin-left: unset;
+  }
+}
+// 动态筛选条 toolbar
+.@{table-prefix-cls}-dynamic-filter-buttons-toolbar-rtl {
+  direction: rtl;
+
+  &.@{table-prefix-cls}-dynamic-filter-buttons-toolbar {
+    .@{table-prefix-cls}-summary-group-wrapper {
+      margin: 0 0 0 auto;
+    }
+  }
+}
+.@{table-prefix-cls}-dynamic-filter-bar-rtl,
+.@{table-prefix-cls}-combo-filter-bar-rtl {
+  .@{table-prefix-cls}-filter-menu-query {
+    margin-right: unset;
+    margin-left: 0.08rem;
+  }
+
+  .@{table-prefix-cls}-filter-buttons {
+    button:first-child {
+      margin-right: 0.16rem;
+      margin-left: unset;
+    }
+  }
+}
+.@{c7n-pro-prefix}-popup-wrapper-rtl {
+  // 动态筛选条条件选择弹框
+  .@{table-prefix-cls}-filter-menu-option {
+    &:hover .@{table-prefix-cls}-filter-menu-option-icons {
+      margin-right: auto;
+      margin-left: unset;
+    }
+
+    &-selected {
+      margin-right: auto;
+      margin-left: unset;
+    }
+  }
+
+  // 高级筛选面板
+  .@{table-prefix-cls}-new-filter-popover {
+    &-select-icon {
+      margin-right: 0.04rem;
+      margin-left: unset;
+    }
+  }
+}
+// 高级筛选面板
+.@{c7n-prefix}-popover-wrapper-rtl {
+  .@{table-prefix-cls}-new-filter-popover-select,
+  .@{table-prefix-cls}-new-filter-popover-input {
+    float: right;
+
+    + * {
+      clear: both;
+    }
+  }
+
+  .@{table-prefix-cls}-new-filter-popover-select {
+    .@{c7n-pro-prefix}-select-placeholder,
+    .@{c7n-pro-prefix}-select-rendered-value {
+      left: 0;
+    }
+  }
+
+  .@{table-prefix-cls}-new-filter-popover {
+    &-line {
+      &::before {
+        content: none;
+      }
+    }
+
+    &-tree.@{c7n-prefix}-tree {
+      margin-right: -0.05rem;
+      margin-left: unset;
+    }
+
+    &-line + div + .@{c7n-pro-prefix}-btn {
+      float: right;
+    }
+
+    &-footer {
+      clear: both;
+      text-align: left;
+    }
+  }
+}
+
+// queryBar='professionalBar'
+.@{table-prefix-cls}-professional-query-bar-rtl {
+  direction: rtl;
+
+  .@{table-prefix-cls}-professional-query-bar {
+    &-button {
+      padding: @table-professional-query-button-padding-rtl;
+
+      &-vertical {
+        padding: @table-professional-query-button-vertical-padding-rtl;
+      }
+    }
+  }
+}
+
+// queryBar='comboBar'
+.@{table-prefix-cls}-combo-filter-bar-rtl {
+  direction: rtl;
+
+  .@{table-prefix-cls}-combo-filter-single-wrapper {
+    padding: 0 0.16rem 0 0.12rem;
+
+    .@{table-prefix-cls}-combo-filter-menu {
+      margin: 0.08rem 0 0 0.24rem;
+    }
+
+    .@{table-prefix-cls}-combo-filterName-select {
+      margin-right: 0;
+      margin-left: unset;
+    }
+  }
+
+  .@{table-prefix-cls}-combo-filter-bar-single-action {
+    padding-right: unset;
+    padding-left: 0.06rem;
+  }
+
+  .@{table-prefix-cls}-combo-filter-bar-prefix {
+    .@{table-prefix-cls}-columns-chooser {
+      border-right: none;
+    }
+  }
+
+  .@{table-prefix-cls}-combo-filter-action {
+    margin-right: auto;
+    margin-left: unset;
+
+    & + .@{table-prefix-cls}-combo-filter-bar-suffix {
+      margin-right: 0.08rem;
+      margin-left: unset;
+    }
+  }
+
+  .@{table-prefix-cls}-combo-filter-bar-suffix {
+    margin-right: auto;
+    margin-left: unset;
+
+    .@{table-prefix-cls}-columns-chooser {
+      border-right: none;
+    }
+  }
+
+  .@{table-prefix-cls}-combo-filter-menu {
+    margin: 0.08rem 0.05rem 0 0.12rem;
+  }
+
+  .@{table-prefix-cls}-combo-filter-title {
+    margin-right: 0.12rem;
+    margin-left: 0.08rem;
+  }
+
+  .@{table-prefix-cls}-combo-filter-menu-action {
+    margin-right: 0.08rem;
+    margin-left: unset;
+  }
+
+  .@{table-prefix-cls}-combo-filter-content {
+    margin: @table-combo-filter-content-margin-rtl;
+  }
+
+  .@{table-prefix-cls}-combo-add-fields {
+    margin-right: 0.08rem;
+    margin-left: unset;
+
+    .@{iconfont-css-prefix} {
+      margin-right: 0.08rem;
+      margin-left: unset;
+    }
+  }
+
+  .@{table-prefix-cls}-combo-filter-buttons {
+    button:first-child {
+      margin-right: 0.16rem;
+      margin-left: unset;
+    }
+  }
+
+  .@{table-prefix-cls}-combo-filterName-select {
+    margin-right: 0.08rem;
+    margin-left: unset;
+  }
+
+  .@{table-prefix-cls}-combo-filter-title-divide+.@{table-prefix-cls}-combo-filterName-select {
+    margin-right: 0.08rem;
+    margin-left: unset;
+  }
+
+  .@{table-prefix-cls}-combo-filter-item {
+    &-close {
+      right: unset;
+      left: -0.05rem;
+    }
+
+    input.@{select-prefix-cls},
+    input.@{c7n-pro-prefix}-input,
+    input.@{c7n-pro-prefix}-input-number,
+    input.@{c7n-pro-prefix}-calendar-picker {
+      &-required {
+        &>label::before {
+          margin-right: .04rem;
+          margin-left: unset;
+        }
+
+        .@{c7n-pro-prefix}-input-number-placeholder,
+        .@{select-prefix-cls}-placeholder {
+          &::before {
+            margin-right: .04rem;
+            margin-left: unset;
+          }
+        }
+      }
+    }
+  }
+}
+// 组合筛选条 toolbar
+.@{table-prefix-cls}-combo-filter-toolbar-rtl {
+  direction: rtl;
+
+  &.@{table-prefix-cls}-combo-filter-toolbar {
+    margin-right: auto;
+    margin-left: unset;
+  }
+
+  &.@{table-prefix-cls}-combo-filter-toolbar+.@{table-prefix-cls}-combo-filter-action,
+  &.@{table-prefix-cls}-combo-filter-toolbar+.@{table-prefix-cls}-combo-filter-bar-suffix,
+  &.@{table-prefix-cls}-combo-filter-toolbar+.@{table-prefix-cls}-combo-filter-action+.@{table-prefix-cls}-combo-filter-bar-suffix {
+    margin-right: 0.08rem;
+    margin-left: unset;
+  }
+}
+// 组合筛选条 toolbar
+.@{table-prefix-cls}-combo-filter-buttons-toolbar-rtl {
+  direction: rtl;
+
+  &.@{table-prefix-cls}-combo-filter-buttons-toolbar {
+    .@{table-prefix-cls}-summary-group-wrapper {
+      margin: 0 0 0 auto;
+    }
+  }
+}
