@@ -163,6 +163,11 @@ export default class Anchor extends Component<AnchorProps, AnchorState> {
     }
   }
 
+  get isRTL(): boolean {
+    const { getConfig } = this.context;
+    return getConfig('direction') === 'rtl';
+  }
+
   getCurrentAnchor(offsetTop = 0, bounds = 5): string {
     const { getCurrentAnchor } = this.props;
 
@@ -287,7 +292,9 @@ export default class Anchor extends Component<AnchorProps, AnchorState> {
       visible: activeLink,
     });
 
-    const wrapperClass = classNames(className, `${prefixCls}-wrapper`);
+    const wrapperClass = classNames(className, `${prefixCls}-wrapper`, {
+      [`${prefixCls}-wrapper-rtl`]: this.isRTL,
+    });
 
     const anchorClass = classNames(prefixCls, {
       fixed: !affix && !showInkInFixed,

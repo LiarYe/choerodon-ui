@@ -35,13 +35,21 @@ export default class Group extends React.Component<GroupProps> {
 
   context: ConfigContextValue;
 
+  get isRTL(): boolean {
+    const { getConfig } = this.context;
+    return getConfig('direction') === 'rtl';
+  }
+
   render() {
     const { prefixCls: customizePrefixCls, className, maxCount, maxStyle, size, style, children, maxPopoverPlacement, maxPopoverTrigger } = this.props;
-    const { getPrefixCls } = this.context;
+    const { getPrefixCls, getConfig } = this.context;
     const prefixCls = getPrefixCls('avatar-group', customizePrefixCls);
     const cls = classNames(
       prefixCls,
       className,
+      {
+        [`${prefixCls}-wrapper-rtl`]: this.isRTL,
+      },
     );
 
     const childrenWithProps = toArray(children).map((child, index) =>
@@ -75,7 +83,7 @@ export default class Group extends React.Component<GroupProps> {
         </Popover>,
       );
       return (
-        <AvatarContextProvider size={size} getPrefixCls={getPrefixCls}>
+        <AvatarContextProvider size={size} getPrefixCls={getPrefixCls} getConfig={getConfig}>
           <div className={cls} style={style}>
             {childrenShow}
           </div>
@@ -84,7 +92,7 @@ export default class Group extends React.Component<GroupProps> {
     }
 
     return (
-      <AvatarContextProvider size={size} getPrefixCls={getPrefixCls}>
+      <AvatarContextProvider size={size} getPrefixCls={getPrefixCls} getConfig={getConfig}>
         <div className={cls} style={style}>
           {childrenWithProps}
         </div>

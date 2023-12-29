@@ -77,6 +77,11 @@ export default class Avatar extends Component<AvatarProps, AvatarState> {
     }
   }
 
+  get isRTL(): boolean {
+    const { getConfig } = this.context;
+    return getConfig('direction') === 'rtl';
+  }
+
   setScale = () => {
     const childrenNode = this.avatarChildren;
     if (childrenNode) {
@@ -133,6 +138,7 @@ export default class Avatar extends Component<AvatarProps, AvatarState> {
       [`${prefixCls}-${shape}`]: shape,
       [`${prefixCls}-image`]: src && isImgExist,
       [`${prefixCls}-icon`]: icon,
+      [`${prefixCls}-wrapper-rtl`]: this.isRTL,
     });
 
     const sizeStyle: CSSProperties = isNumber(size)

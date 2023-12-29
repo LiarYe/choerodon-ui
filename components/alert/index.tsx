@@ -47,6 +47,11 @@ export default class Alert extends PureComponent<AlertProps, any> {
     closed: false,
   };
 
+  get isRTL(): boolean {
+    const { getConfig } = this.context;
+    return getConfig('direction') === 'rtl';
+  }
+
   handleClose = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
     const dom = findDOMNode(this) as HTMLElement;
@@ -145,6 +150,7 @@ export default class Alert extends PureComponent<AlertProps, any> {
         [`${prefixCls}-no-icon`]: !showIcon,
         [`${prefixCls}-banner`]: !!banner,
         [`${prefixCls}-closable`]: closable || closeText,
+        [`${prefixCls}-wrapper-rtl`]: this.isRTL,
       },
       className,
     );

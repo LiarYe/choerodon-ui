@@ -64,6 +64,11 @@ export default class Breadcrumb extends Component<BreadcrumbProps, any> {
     );
   }
 
+  get isRTL(): boolean {
+    const { getConfig } = this.context;
+    return getConfig('direction') === 'rtl';
+  }
+
   render() {
     let crumbs;
     const {
@@ -114,8 +119,12 @@ export default class Breadcrumb extends Component<BreadcrumbProps, any> {
         });
       });
     }
+    const newPrefixCls = getPrefixCls('breadcrumb', prefixCls);
+    const cls = classNames(className, newPrefixCls, {
+      [`${newPrefixCls}-wrapper-rtl`]: this.isRTL,
+    });
     return (
-      <div className={classNames(className, getPrefixCls('breadcrumb', prefixCls))} style={style}>
+      <div className={cls} style={style}>
         {crumbs}
       </div>
     );

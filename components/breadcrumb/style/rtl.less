@@ -1,0 +1,15 @@
+@import "../../style/themes/default";
+
+@breadcrumb-prefix-cls: ~"@{c7n-prefix}-breadcrumb";
+
+.@{breadcrumb-prefix-cls}-wrapper-rtl {
+  display: flex;
+  direction: rtl;
+  
+  .@{breadcrumb-prefix-cls}-link {
+    > .@{iconfont-css-prefix} + span {
+      margin-right: .04rem;
+      margin-left: unset;
+    }
+  }
+}

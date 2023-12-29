@@ -1,0 +1,22 @@
+@import '../../style/themes/default';
+
+@input-prefix-cls: ~'@{c7n-prefix}-input';
+@select-prefix-cls: ~'@{c7n-prefix}-select';
+@autocomplete-prefix-cls: ~'@{select-prefix-cls}-auto-complete';
+
+.@{select-prefix-cls}-wrapper-rtl {
+  &.@{autocomplete-prefix-cls} {
+    &.@{select-prefix-cls} {
+      .@{select-prefix-cls}-search--inline {
+        float: right;
+      }
+    }
+
+    &.@{select-prefix-cls}-allow-clear {
+      .@{select-prefix-cls}-selection:hover .@{select-prefix-cls}-selection__rendered {
+        margin-right: unset !important;
+        margin-left: 0 !important;
+      }
+    }
+  }
+}

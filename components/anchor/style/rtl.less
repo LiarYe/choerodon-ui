@@ -1,0 +1,32 @@
+@import '../../style/themes/default';
+
+.@{c7n-prefix}-anchor-wrapper-rtl {
+  direction: rtl;
+
+  .@{c7n-prefix} {
+    padding-right: @anchor-border-width;
+    padding-left: unset;
+  }
+
+  &.@{c7n-prefix}-anchor-wrapper {
+    margin-right: -0.04rem;
+    margin-left: unset;
+    padding-right: 0.04rem;
+    padding-left: unset;
+  }
+
+  .@{c7n-prefix}-anchor-ink {
+    right: 0;
+    left: unset;
+  }
+
+  .@{c7n-prefix}-anchor-ball {
+    right: 50%;
+    left: unset;
+    transform: translateX(50%);
+  }
+
+  .@{c7n-prefix}-anchor-link {
+    padding: 0.07rem 0.16rem 0.07rem 0;
+  }
+}

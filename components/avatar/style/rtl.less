@@ -1,0 +1,34 @@
+@import '../../style/themes/default';
+
+@avatar-prefix-cls: ~'@{c7n-prefix}-avatar';
+
+.@{avatar-prefix-cls}-group-wrapper-rtl {
+  direction: rtl;
+
+  &.@{avatar-prefix-cls}-group {
+    .@{avatar-prefix-cls} {
+      &:not(:first-child) {
+        margin-right: @avatar-group-overlapping;
+        margin-left: unset;
+      }
+    }
+  }
+
+  .@{avatar-prefix-cls}-group-popover-mask {
+    margin-right: -0.08rem;
+    margin-left: unset;
+  }
+}
+
+.@{avatar-prefix-cls}-wrapper-rtl {
+  direction: rtl;
+}
+
+.@{c7n-prefix}-popover-wrapper-rtl {
+  &.@{avatar-prefix-cls}-group-popover {
+    .@{c7n-prefix}-avatar + .@{c7n-prefix}-avatar {
+      margin-right: @avatar-group-space;
+      margin-left: unset;
+    }
+  }
+}

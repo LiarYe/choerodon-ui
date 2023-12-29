@@ -13,8 +13,9 @@ export interface ButtonGroupProps {
 
 const ButtonGroup: FunctionComponent<ButtonGroupProps> = function ButtonGroup(props) {
   const { prefixCls: customizePrefixCls, size, className, ...others } = props;
-  const { getPrefixCls } = useContext(ConfigContext);
+  const { getPrefixCls, getConfig } = useContext(ConfigContext);
   const prefixCls = getPrefixCls('btn-group', customizePrefixCls);
+  const isRTL = getConfig('direction') === 'rtl';
 
   // large => lg
   // small => sm
@@ -33,6 +34,7 @@ const ButtonGroup: FunctionComponent<ButtonGroupProps> = function ButtonGroup(pr
     prefixCls,
     {
       [`${prefixCls}-${sizeCls}`]: sizeCls,
+      [`${prefixCls}-wrapper-rtl`]: isRTL,
     },
     className,
   );

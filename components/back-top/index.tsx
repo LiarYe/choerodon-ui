@@ -52,6 +52,11 @@ export default class BackTop extends PureComponent<BackTopProps, any> {
     }
   }
 
+  get isRTL(): boolean {
+    const { getConfig } = this.context;
+    return getConfig('direction') === 'rtl';
+  }
+
   scrollToTop = (e: React.MouseEvent<HTMLDivElement>) => {
     const { target = getDefaultTarget, onClick } = this.props;
     scrollTo(0, {
@@ -91,7 +96,9 @@ export default class BackTop extends PureComponent<BackTopProps, any> {
     const { getPrefixCls } = this.context;
     const { visible: stateVisible } = this.state;
     const prefixCls = getPrefixCls('back-top', customizePrefixCls);
-    const classString = classNames(prefixCls, className);
+    const classString = classNames(prefixCls, className, {
+      [`${prefixCls}-wrapper-rtl`]: this.isRTL,
+    });
 
     const defaultElement = (
       <div className={`${prefixCls}-content`}>

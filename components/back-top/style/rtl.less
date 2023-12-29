@@ -1,0 +1,26 @@
+@import '../../style/themes/default';
+
+@backtop-prefix-cls: ~'@{c7n-prefix}-back-top';
+
+.@{backtop-prefix-cls}-wrapper-rtl {
+  direction: rtl;
+
+  &.@{backtop-prefix-cls} {
+    right: unset;
+    left: 1rem;
+  }
+}
+
+@media screen and (max-width: @screen-md) {
+  .@{backtop-prefix-cls}-wrapper-rtl.@{backtop-prefix-cls} {
+    right: unset;
+    left: .6rem;
+  }
+}
+
+@media screen and (max-width: @screen-xs) {
+  .@{backtop-prefix-cls}-wrapper-rtl.@{backtop-prefix-cls} {
+    right: unset;
+    left: .2rem;
+  }
+}

@@ -163,6 +163,11 @@ export default class Button extends PureComponent<ButtonProps, any> {
     }
   }
 
+  get isRTL(): boolean {
+    const { getConfig } = this.context;
+    return getConfig('direction') === 'rtl';
+  }
+
   fixTwoCNChar() {
     const { twoCNChar } = this.props;
     if (twoCNChar) {
@@ -287,6 +292,7 @@ export default class Button extends PureComponent<ButtonProps, any> {
       [`${prefixCls}-background-ghost`]: ghost,
       [`${prefixCls}-two-chinese-chars`]: hasTwoCNChar,
       [`${prefixCls}-${funcType}`]: funcType,
+      [`${prefixCls}-wrapper-rtl`]: this.isRTL,
     });
 
     const iconNode = loading ? (

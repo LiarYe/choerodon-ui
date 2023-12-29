@@ -49,7 +49,8 @@ const Badge: FunctionComponent<BadgeProps> = function Badge({
   showZero = false,
   ...restProps
 }) {
-  const { getPrefixCls } = useContext(ConfigContext);
+  const { getPrefixCls, getConfig } = useContext(ConfigContext);
+  const isRTL = getConfig('direction') === 'rtl';
   const prefixCls = getPrefixCls('badge', customizePrefixCls);
   const scrollNumberPrefixCls = getPrefixCls(
     'scroll-number',
@@ -153,6 +154,7 @@ const Badge: FunctionComponent<BadgeProps> = function Badge({
     {
       [`${prefixCls}-status`]: hasStatus,
       [`${prefixCls}-not-a-wrapper`]: !children,
+      [`${prefixCls}-wrapper-rtl`]: isRTL,
     },
     className,
   );

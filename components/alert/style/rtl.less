@@ -1,0 +1,40 @@
+@import '../../style/themes/default';
+
+@alert-prefix-cls: ~'@{c7n-prefix}-alert';
+
+.@{alert-prefix-cls}-wrapper-rtl {
+  direction: rtl;
+
+  &.@{alert-prefix-cls} {
+    padding: @alert-padding-rtl;
+  }
+  &.@{alert-prefix-cls}.@{alert-prefix-cls}-no-icon {
+    padding: @alert-no-icon-padding;
+  }
+
+  .@{alert-prefix-cls}-close-wrapper {
+    margin: @alert-close-wrapper-margin-rtl;
+  }
+
+  .@{alert-prefix-cls}-icon {
+    right: @alert-icon-left;
+    left: unset;
+  }
+
+  .@{alert-prefix-cls}-close-text {
+    right: unset;
+    left: 0.16rem;
+  }
+
+  &.@{alert-prefix-cls}-with-description {
+    padding: @alert-with-description-padding-rtl;
+  }
+  &.@{alert-prefix-cls}-with-description.@{alert-prefix-cls}-no-icon {
+    padding: @alert-with-description-no-icon-padding;
+  }
+
+  &.@{alert-prefix-cls}-with-description .@{alert-prefix-cls}-icon {
+    right: @alert-with-description-icon-left;
+    left: unset;
+  }
+}

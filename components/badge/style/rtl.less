@@ -1,0 +1,30 @@
+@import '../../style/themes/default';
+
+@badge-prefix-cls: ~'@{c7n-prefix}-badge';
+@number-prefix-cls: ~'@{c7n-prefix}-scroll-number';
+
+.@{badge-prefix-cls}-wrapper-rtl {
+  direction: rtl;
+
+  .@{badge-prefix-cls}-count {
+    transform: translateX(50%);
+    transform-origin: 110% center;
+  }
+
+  .@{badge-prefix-cls}-dot {
+    transform: translateX(50%);
+    transform-origin: 100% center;
+  }
+
+  &.@{badge-prefix-cls} .@{number-prefix-cls}-custom-component {
+    transform: translate(-50%, -50%);
+    transform-origin: 0% 0;
+  }
+
+  .@{badge-prefix-cls}-status {
+    &-text {
+      margin-right: 0.08rem;
+      margin-left: unset;
+    }
+  }
+}
