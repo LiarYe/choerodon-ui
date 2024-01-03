@@ -1,6 +1,7 @@
 import React, { Component, CSSProperties, ReactNode } from 'react';
 import moment, { Moment, isMoment } from 'moment';
 import noop from 'lodash/noop';
+import classNames from 'classnames';
 import LocaleReceiver from '../locale-provider/LocaleReceiver';
 import Header from './Header';
 import enUS from './locale/en_US';
@@ -98,6 +99,11 @@ export default class Calendar extends Component<CalendarProps, CalendarState> {
     }
   }
 
+  get isRTL(): boolean {
+    const { getConfig } = this.context;
+    return getConfig('direction') === 'rtl';
+  }
+
   getPrefixCls() {
     const { prefixCls } = this.props;
     const { getPrefixCls } = this.context;
@@ -193,10 +199,10 @@ export default class Calendar extends Component<CalendarProps, CalendarState> {
     const prefixCls = this.getPrefixCls();
     const type = mode === 'year' ? 'month' : 'date';
 
-    let cls = className || '';
-    if (fullscreen) {
-      cls += ` ${prefixCls}-fullscreen`;
-    }
+    const cls = classNames({
+      [`${prefixCls}-fullscreen`]: fullscreen,
+      [`${prefixCls}-wrapper-rtl`]: this.isRTL,
+    }, className);
 
     const monthCellRender = monthFullCellRender || this.monthCellRender;
     const dateCellRender = dateFullCellRender || this.dateCellRender;

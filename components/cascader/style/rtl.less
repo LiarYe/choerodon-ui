@@ -1,0 +1,102 @@
+@import '../../style/themes/default';
+
+@cascader-prefix-cls: ~'@{c7n-prefix}-cascader';
+
+.@{cascader-prefix-cls}-picker-wrapper-rtl {
+  direction: rtl;
+
+  .@{cascader-prefix-cls}-picker-label {
+    right: 0;
+    left: unset;
+  }
+
+  .@{cascader-prefix-cls}-picker-clear {
+    right: unset;
+    left: .01rem;
+  }
+
+  .@{cascader-prefix-cls}-picker-arrow {
+    right: unset;
+    left: .01rem;
+  }
+
+  &.@{cascader-prefix-cls}-picker-small .@{cascader-prefix-cls}-picker-clear,
+  &.@{cascader-prefix-cls}-picker-small .@{cascader-prefix-cls}-picker-arrow {
+    right: unset;
+    left: 0;
+  }
+}
+
+.@{cascader-prefix-cls}-menus-rtl {
+  direction: ltr;
+
+  &.@{cascader-prefix-cls}-menus-placement-topRight,
+  &.@{cascader-prefix-cls}-menus-placement-bottomRight {
+    direction: rtl;
+
+    .@{cascader-prefix-cls}-menu {
+      border-right: none;
+      border-left: @border-width-base @border-style-base @border-color-split;
+
+      &:first-child {
+        border-radius: 0 @border-radius-base @border-radius-base 0;
+      }
+
+      &:last-child {
+        margin-right: unset;
+        margin-left: -0.005rem;
+        border-left-color: transparent;
+        border-radius: @border-radius-base 0 0 @border-radius-base;
+      }
+
+      &-single {
+        border-right: unset;
+        border-left: 0;
+        &:last-child {
+          margin-right: unset;
+          margin-left: 0;
+        }
+      }
+
+      &-single .@{cascader-prefix-cls}-menu-item {
+        float: right;
+      }
+
+      &-tab {
+        padding: 0.08rem 0 0.04rem 0.19rem;
+        padding-bottom: 0;
+
+        &-item {
+          display: inline-block;
+          height: auto;
+          margin-right: 0.08rem;
+          margin-left: unset;
+          padding: 0.06rem @control-padding-horizontal 0.06rem 0.02rem;
+
+          &:last-child {
+            &::after {
+              right: 0;
+              left: unset;
+            }
+          }
+        }
+      }
+    }
+
+    .@{cascader-prefix-cls}-menu-item {
+      &-expand {
+        padding-right: @control-padding-horizontal;
+        padding-left: 24px;
+
+        &-icon {
+          right: unset;
+          left: @control-padding-horizontal;
+
+          .icon-navigate_next::before {
+            content: '\E408';
+          }
+        }
+      }
+    }
+  }
+}

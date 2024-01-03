@@ -1,0 +1,45 @@
+@import '../../style/themes/default';
+
+@card-prefix-cls: ~'@{c7n-prefix}-card';
+
+.@{card-prefix-cls}-wrapper-rtl {
+  direction: rtl;
+
+  .@{card-prefix-cls}-extra {
+    float: left;
+    margin-right: auto;
+    margin-left: unset;
+    text-align: left;
+  }
+
+  &.@{card-prefix-cls}-contain-grid .@{card-prefix-cls}-body {
+    margin: @card-grid-body-margin-rtl;
+  }
+
+  .@{card-prefix-cls}-grid {
+    float: right;
+  }
+
+  .@{card-prefix-cls}-actions {
+    > li {
+      float: right;
+
+      &:not(:last-child) {
+        border-right: none;
+        border-left: @card-actions-item-border-right;
+      }
+    }
+  }
+
+  .@{card-prefix-cls}-meta {
+    &-avatar {
+      float: right;
+      padding-right: unset;
+      padding-left: 0.16rem;
+    }
+  }
+
+  .@{card-prefix-cls}-loading-block {
+    margin: 0.05rem 0 0 2%;
+  }
+}

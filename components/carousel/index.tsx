@@ -157,6 +157,11 @@ export default class Carousel extends Component<CarouselProps> {
     }
   }
 
+  get isRTL(): boolean {
+    const { getConfig } = this.context;
+    return getConfig('direction') === 'rtl';
+  }
+
   bindDotsEvent() {
     if (this.wrapper) {
       this.dotsRef.forEach((dot, i) => {
@@ -236,6 +241,7 @@ export default class Carousel extends Component<CarouselProps> {
     const className = classNames(prefixCls, {
       [`${prefixCls}-vertical`]: props.vertical,
       [`${prefixCls}-theme-dark`]: props.theme === CarouselTheme.DARK,
+      [`${prefixCls}-wrapper-rtl`]: this.isRTL,
     });
 
     return (

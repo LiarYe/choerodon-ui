@@ -1,0 +1,61 @@
+@import '../../style/themes/default';
+
+@full-calendar-prefix-cls: ~'@{c7n-prefix}-fullcalendar';
+
+.@{full-calendar-prefix-cls}-wrapper-rtl {
+  direction: rtl;
+
+  .@{full-calendar-prefix-cls} {
+    &-month-select {
+      margin-right: 0.05rem;
+      margin-left: unset;
+    }
+
+    &-header {
+      padding: 0.11rem 0 0.11rem 0.16rem;
+      text-align: left;
+
+      .@{c7n-prefix}-select-dropdown {
+        text-align: right;
+      }
+
+      .@{c7n-prefix}-radio-group {
+        margin-right: 0.08rem;
+        margin-left: unset;
+        text-align: right;
+      }
+    }
+
+    &-content {
+      right: 0;
+      left: unset;
+    }
+  }
+
+  &.@{full-calendar-prefix-cls}-fullscreen .@{full-calendar-prefix-cls}-header {
+    .@{c7n-prefix}-radio-group {
+      margin-right: 0.16rem;
+      margin-left: unset;
+    }
+  }
+
+  &.@{full-calendar-prefix-cls}-fullscreen .@{full-calendar-prefix-cls}-month,
+  &.@{full-calendar-prefix-cls}-fullscreen .@{full-calendar-prefix-cls}-date {
+    text-align: right;
+  }
+
+  &.@{full-calendar-prefix-cls}-fullscreen .@{full-calendar-prefix-cls}-column-header {
+    padding-right: unset;
+    padding-left: 0.12rem;
+    text-align: left;
+  }
+
+  &.@{full-calendar-prefix-cls}-fullscreen .@{full-calendar-prefix-cls}-value {
+    text-align: left;
+  }
+
+  &.@{full-calendar-prefix-cls}-fullscreen .@{full-calendar-prefix-cls}-content {
+    right: auto;
+    left: unset;
+  }
+}

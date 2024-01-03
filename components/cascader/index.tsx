@@ -179,7 +179,6 @@ export default class Cascader extends Component<CascaderProps, CascaderState> {
   static defaultProps = {
     placeholder: 'Please select',
     transitionName: 'slide-up',
-    popupPlacement: 'bottomLeft',
     options: [],
     disabled: false,
     allowClear: true,
@@ -217,6 +216,19 @@ export default class Cascader extends Component<CascaderProps, CascaderState> {
         flattenOptions: this.flattenTree(nextProps.options, nextProps.changeOnSelect, nextProps.fieldNames),
       });
     }
+  }
+
+  get isRTL(): boolean {
+    const { getConfig } = this.context;
+    return getConfig('direction') === 'rtl';
+  }
+
+  get popupPlacement(): string | undefined {
+    const { props: { popupPlacement }, isRTL } = this;
+    if (isRTL && !popupPlacement) {
+      return 'bottomRight';
+    }
+    return popupPlacement || 'bottomLeft';
   }
 
   handleChange = (value: any, selectedOptions: CascaderOptionType[]) => {
@@ -410,6 +422,7 @@ export default class Cascader extends Component<CascaderProps, CascaderState> {
       [`${prefixCls}-picker-focused`]: inputFocused,
       [`${inputPrefixCls}-has-value`]: !!defaultValue || value.length,
       [`${inputPrefixCls}-focused`]: state.popupVisible,
+      [`${prefixCls}-picker-wrapper-rtl`]: this.isRTL,
     });
 
     // Fix bug of https://github.com/facebook/react/pull/5004
@@ -514,6 +527,8 @@ export default class Cascader extends Component<CascaderProps, CascaderState> {
           onChange={this.handleChange}
           dropdownMenuColumnStyle={dropdownMenuColumnStyle}
           locale={cascaderLocal}
+          popupPlacement={this.popupPlacement}
+          isRTL={this.isRTL}
         >
           {input}
         </RcCascader>

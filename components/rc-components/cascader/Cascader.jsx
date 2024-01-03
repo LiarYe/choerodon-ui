@@ -1,6 +1,7 @@
 import React, { cloneElement, Component } from 'react';
 import arrayTreeFilter from 'array-tree-filter';
 import isEqual from 'shallowequal';
+import classNames from 'classnames';
 import Trigger from '../trigger';
 import Icon from '../../icon';
 import Menus from './Menus';
@@ -291,7 +292,7 @@ export default class Cascader extends Component {
     const {
       prefixCls,
       transitionName,
-      popupClassName,
+      popupClassName: oriPopupClassName,
       options,
       disabled,
       builtinPlacements,
@@ -301,6 +302,7 @@ export default class Cascader extends Component {
       menuMode,
       singleMenuStyle,
       singleMenuItemStyle,
+      isRTL,
       ...restProps
     } = this.props;
     // Did not show popup when there is no options
@@ -340,6 +342,9 @@ export default class Cascader extends Component {
     } else {
       emptyMenuClassName = ` ${prefixCls}-menus-empty`;
     }
+    const popupClassName = classNames(oriPopupClassName, {
+      [`${prefixCls}-menus-rtl`]: isRTL,
+    });
     return (
       <Trigger
         ref={this.saveTrigger}

@@ -1,5 +1,6 @@
 import React, { cloneElement, Component } from 'react';
 import ReactDOM from 'react-dom';
+import classNames from 'classnames';
 import Trigger from '../trigger';
 import placements from './placements';
 import { pxToRem } from '../../_util/UnitConvertor';
@@ -133,13 +134,17 @@ export default class Dropdown extends Component {
       getPopupContainer,
       showAction,
       hideAction,
-      overlayClassName,
+      overlayClassName: oriOverlayClassName,
       overlayPlacements,
       overlayStyle,
       trigger,
+      isRTL,
       ...otherProps
     } = this.props;
     const builtinPlacements = overlayPlacements || placements;
+    const overlayClassName = classNames(oriOverlayClassName, {
+      [`${prefixCls}-popup-rtl`]: isRTL,
+    });
     return (
       <Trigger
         {...otherProps}

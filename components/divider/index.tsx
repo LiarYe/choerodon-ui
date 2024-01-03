@@ -21,12 +21,14 @@ const Divider: FunctionComponent<DividerProps> = function Divider({
   dashed,
   ...restProps
 }) {
-  const { getPrefixCls } = useContext(ConfigContext);
+  const { getPrefixCls, getConfig } = useContext(ConfigContext);
+  const isRTL = getConfig('direction') === 'rtl';
   const prefixCls = getPrefixCls('divider', customizePrefixCls);
   const orientationPrefix = orientation.length > 0 ? `-${orientation}` : orientation;
   const classString = classNames(className, prefixCls, `${prefixCls}-${type}`, {
     [`${prefixCls}-with-text${orientationPrefix}`]: children,
     [`${prefixCls}-dashed`]: !!dashed,
+    [`${prefixCls}-wrapper-rtl`]: isRTL,
   });
   return (
     <div className={classString} {...restProps}>

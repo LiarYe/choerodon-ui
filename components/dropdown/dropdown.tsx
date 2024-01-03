@@ -40,6 +40,11 @@ export default class Dropdown extends Component<DropDownProps, any> {
 
   context: ConfigContextValue;
 
+  get isRTL(): boolean {
+    const { getConfig } = this.context;
+    return getConfig('direction') === 'rtl';
+  }
+
   getTransitionName() {
     const { placement = '', transitionName } = this.props;
     if (transitionName !== undefined) {
@@ -86,7 +91,7 @@ export default class Dropdown extends Component<DropDownProps, any> {
     const child = Children.only(children) as ReactElement<any>;
 
     const dropdownTrigger = cloneElement(child, {
-      className: classNames(child.props.className, `${prefixCls}-trigger`),
+      className: classNames(child.props.className, `${prefixCls}-trigger`, { [`${prefixCls}-wrapper-rtl`]: this.isRTL }),
       disabled,
     });
 
@@ -104,6 +109,7 @@ export default class Dropdown extends Component<DropDownProps, any> {
         transitionName={this.getTransitionName()}
         trigger={triggerActions}
         overlay={this.renderOverlay}
+        isRTL={this.isRTL}
       >
         {dropdownTrigger}
       </RcDropdown>

@@ -106,6 +106,11 @@ export default class Card extends Component<CardProps, CardState> {
     (this.updateWiderPadding as any).cancel();
   }
 
+  get isRTL(): boolean {
+    const { getConfig } = this.context;
+    return getConfig('direction') === 'rtl';
+  }
+
   @throttleByAnimationFrameDecorator()
   updateWiderPadding() {
     if (!this.container) {
@@ -215,6 +220,7 @@ export default class Card extends Component<CardProps, CardState> {
       [`${selectedPrefixCls} ${selectedPrefixCls}-${cornerPlacement} ${selectedPrefixCls}-${size}`]: selected,
       [`${prefixCls}-only-title`]: !children,
       [`${prefixCls}-only-body`]: !title,
+      [`${prefixCls}-wrapper-rtl`]: this.isRTL,
     });
 
     const loadingBlock = (
