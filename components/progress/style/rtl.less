@@ -1,0 +1,36 @@
+@import '../../style/themes/default';
+
+@progress-prefix-cls: ~'@{c7n-prefix}-progress';
+
+.@{progress-prefix-cls}-wrapper-rtl {
+  direction: rtl;
+
+  .@{progress-prefix-cls}-outer {
+    margin-right: unset;
+    margin-left: 0;
+    padding-right: unset;
+    padding-left: 0;
+  }
+
+  &.@{progress-prefix-cls}-show-info .@{progress-prefix-cls}-outer {
+    margin-right: unset;
+    margin-left: ~'calc(-2em - .08rem)';
+    padding-right: unset;
+    padding-left: ~'calc(2em + .08rem)';
+  }
+
+  .@{progress-prefix-cls}-success-bg {
+    right: 0;
+    left: unset;
+  }
+
+  .@{progress-prefix-cls}-text {
+    margin-right: 0.08rem;
+    margin-left: unset;
+    text-align: right;
+  }
+
+  &.@{progress-prefix-cls}-circle .@{progress-prefix-cls}-text {
+    text-align: center;
+  }
+}

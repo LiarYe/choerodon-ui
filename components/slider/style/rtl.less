@@ -1,0 +1,14 @@
+@import '../../style/themes/default';
+
+@slider-prefix-cls: ~'@{c7n-prefix}-slider';
+
+.@{slider-prefix-cls}-wrapper-rtl {
+  direction: rtl;
+
+  &.@{slider-prefix-cls}-vertical {
+    .@{slider-prefix-cls}-handle {
+      margin-right: -0.05rem;
+      margin-left: unset;
+    }
+  }
+}

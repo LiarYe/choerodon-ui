@@ -66,6 +66,11 @@ class BasicLayout extends PureComponent<BasicProps, any> {
 
   context: ConfigContextValue;
 
+  get isRTL(): boolean {
+    const { getConfig } = this.context;
+    return getConfig('direction') === 'rtl';
+  }
+
   getContextValue() {
     const { siders } = this.state;
     const { getPrefixCls } = this.context;
@@ -91,6 +96,7 @@ class BasicLayout extends PureComponent<BasicProps, any> {
     const { siders } = this.state;
     const divCls = classNames(className, prefixCls, {
       [`${prefixCls}-has-sider`]: hasSider || siders.length > 0,
+      [`${prefixCls}-wrapper-rtl`]: this.isRTL,
     });
     return (
       <LayoutContextProvider {...this.getContextValue()}>

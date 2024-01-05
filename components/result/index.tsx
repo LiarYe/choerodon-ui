@@ -89,7 +89,10 @@ const Result = (props: ResultProps) => {
   } = props;
   const { getPrefixCls, getConfig } = useContext(ConfigContext);
   const prefixCls = getPrefixCls('result', customizePrefixCls);
-  const className = classnames(prefixCls, `${prefixCls}-${status}`, customizeClassName);
+  const isRTL = getConfig('direction') === 'rtl';
+  const className = classnames(prefixCls, `${prefixCls}-${status}`, customizeClassName, {
+    [`${prefixCls}-wrapper-rtl`]: isRTL,
+  });
   return (
     <div className={className} style={style}>
       {renderStatus(prefixCls, props, getConfig('resultStatusRenderer'))}

@@ -1,0 +1,54 @@
+@import '../../style/themes/default';
+
+@transfer-prefix-cls: ~'@{c7n-prefix}-transfer';
+
+.@{transfer-prefix-cls}-wrapper-rtl {
+  direction: rtl;
+
+  .@{transfer-prefix-cls}-list {
+    &-search {
+      &-action {
+        right: unset;
+        left: @transfer-search-action-right;
+      }
+    }
+
+    &-header {
+      right: 0;
+      left: unset;
+
+      &-title {
+        right: unset;
+        left: 0.12rem;
+      }
+    }
+
+    &-body {
+      &-search-wrapper {
+        right: 0;
+        left: unset;
+      }
+    }
+
+    &-content {
+      &-item {
+        > span {
+          padding-right: 0.08rem;
+          padding-left: 0;
+        }
+      }
+    }
+
+    &-footer {
+      right: 0;
+      left: unset;
+    }
+  }
+
+  .@{transfer-prefix-cls}-operation {
+    .icon-keyboard_arrow_left,
+    .icon-keyboard_arrow_right {
+      transform: rotateY(180deg);
+    }
+  }
+}

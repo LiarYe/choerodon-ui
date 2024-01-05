@@ -172,12 +172,13 @@ export default class Dialog extends Component<IDialogPropTypes, any> {
   }
 
   center = () => {
-    const { center } = this.props;
+    const { center, isRTL } = this.props;
     const dialogNode: any = findDOMNode(this.dialog);
     if (center && dialogNode && typeof window !== 'undefined') {
       const { clientWidth: docWidth, clientHeight: docHeight } = window.document.documentElement;
       const { offsetWidth: width, offsetHeight: height, style } = dialogNode;
-      style.left = `${Math.max((docWidth - width) / 2, 0)}px`;
+      const directionName = isRTL ? 'right' : 'left';
+      style[directionName] = `${Math.max((docWidth - width) / 2, 0)}px`;
       style.top = `${Math.max((docHeight - height) / 2, 0)}px`;
     }
   };

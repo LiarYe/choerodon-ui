@@ -61,6 +61,11 @@ export default class Progress extends Component<ProgressProps, {}> {
 
   context: ConfigContextValue;
 
+  get isRTL(): boolean {
+    const { getConfig } = this.context;
+    return getConfig('direction') === 'rtl';
+  }
+
   renderPointer = () => {
     const props = this.props;
     const {
@@ -240,6 +245,7 @@ export default class Progress extends Component<ProgressProps, {}> {
         [`${prefixCls}-status-${progressStatus}`]: true,
         [`${prefixCls}-show-info`]: showInfo,
         [`${prefixCls}-${size}`]: size,
+        [`${prefixCls}-wrapper-rtl`]: this.isRTL,
       },
       className,
     );

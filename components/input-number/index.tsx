@@ -69,6 +69,11 @@ export default class InputNumber extends Component<InputNumberProps, any> {
 
   private inputNumberRef: any;
 
+  get isRTL(): boolean {
+    const { getConfig } = this.context;
+    return getConfig('direction') === 'rtl';
+  }
+
   numberFormatter = (value: BigNumber.Value | undefined): any => {
     const { formatter } = this.props;
     const v = formatNumber(value);
@@ -89,6 +94,7 @@ export default class InputNumber extends Component<InputNumberProps, any> {
       {
         [`${prefixCls}-lg`]: size === Size.large,
         [`${prefixCls}-sm`]: size === Size.small,
+        [`${prefixCls}-wrapper-rtl`]: this.isRTL,
       },
       className,
     );

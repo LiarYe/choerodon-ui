@@ -1,0 +1,17 @@
+@import '../../style/themes/default';
+
+@message-prefix-cls: ~'@{c7n-prefix}-message';
+
+.@{message-prefix-cls}-wrapper-rtl {
+  direction: rtl;
+
+  .@{message-prefix-cls}-loading .@{c7n-prefix}-progress-loading {
+    margin-right: unset;
+    margin-left: 0.08rem;
+  }
+
+  &.@{message-prefix-cls} .@{iconfont-css-prefix} {
+    margin-right: unset;
+    margin-left: 0.08rem;
+  }
+}

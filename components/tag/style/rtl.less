@@ -1,0 +1,17 @@
+@import '../../style/themes/default';
+
+@tag-prefix-cls: ~'@{c7n-prefix}-tag';
+
+.@{tag-prefix-cls}-wrapper-rtl {
+  direction: rtl;
+
+  &.@{tag-prefix-cls} {
+    margin-right: unset;
+    margin-left: 0.08rem;
+  }
+
+  &.@{tag-prefix-cls} .@{iconfont-css-prefix}-close {
+    margin-right: 0.03rem;
+    margin-left: unset;
+  }
+}

@@ -105,6 +105,11 @@ export default class Spin extends Component<SpinProps, SpinState> {
     this.cancelExistingSpin();
   }
 
+  get isRTL(): boolean {
+    const { getConfig } = this.context;
+    return getConfig('direction') === 'rtl';
+  }
+
   debouncifyUpdateSpinning = (props?: SpinProps) => {
     const { delay } = props || this.props;
     if (delay) {
@@ -150,6 +155,7 @@ export default class Spin extends Component<SpinProps, SpinState> {
         [`${prefixCls}-lg`]: size === Size.large,
         [`${prefixCls}-spinning`]: spinning,
         [`${prefixCls}-show-text`]: !!tip,
+        [`${prefixCls}-wrapper-rtl`]: this.isRTL,
       },
       className,
     );

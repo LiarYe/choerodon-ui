@@ -104,6 +104,11 @@ export default class Tooltip extends Component<TooltipProps, any> {
     }
   }
 
+  get isRTL(): boolean {
+    const { getConfig } = this.context;
+    return getConfig('direction') === 'rtl';
+  }
+
   onVisibleChange = (visible: boolean) => {
     const { onVisibleChange } = this.props;
     if (!('visible' in this.props)) {
@@ -241,6 +246,7 @@ export default class Tooltip extends Component<TooltipProps, any> {
       getTooltipContainer,
       theme = getTooltipTheme(),
       placement = getTooltipPlacement(),
+      overlayClassName: overlayClassNameProp,
     } = props;
     const prefixCls = getPrefixCls('tooltip', customizePrefixCls);
     const children = props.children as ReactElement<any>;
@@ -257,6 +263,9 @@ export default class Tooltip extends Component<TooltipProps, any> {
     const childCls = classNames(childProps.className, {
       [openClassName || `${prefixCls}-open`]: true,
     });
+    const overlayClassName = classNames(overlayClassNameProp, {
+      [`${prefixCls}-wrapper-rtl`]: this.isRTL,
+    });
 
     return (
       <RcTooltip
@@ -271,6 +280,7 @@ export default class Tooltip extends Component<TooltipProps, any> {
         onPopupAlign={this.onPopupAlign}
         theme={theme}
         placement={placement}
+        overlayClassName={overlayClassName}
       >
         {visible ? cloneElement(child, { className: childCls }) : child}
       </RcTooltip>

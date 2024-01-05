@@ -39,4 +39,5 @@ export default interface IDialogPropTypes {
   movable?: boolean;
   autoCenter?: boolean;
   center?: boolean;
+  isRTL?: boolean;
 }

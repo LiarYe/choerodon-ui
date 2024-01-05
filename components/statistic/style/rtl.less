@@ -1,0 +1,19 @@
+@import '../../style/themes/default';
+
+@statistic-prefix-cls: ~'@{c7n-prefix}-statistic';
+
+.@{statistic-prefix-cls}-wrapper-rtl {
+  direction: rtl;
+
+  .@{statistic-prefix-cls}-content {
+    &-prefix {
+      margin-right: unset;
+      margin-left: 4px;
+    }
+
+    &-suffix {
+      margin-right: 4px;
+      margin-left: unset;
+    }
+  }
+}

@@ -1,0 +1,44 @@
+@import '../../style/themes/default';
+
+@notification-prefix-cls: ~'@{c7n-prefix}-notification';
+
+.@{notification-prefix-cls}-wrapper-rtl {
+  direction: rtl;
+
+  .@{notification-prefix-cls}-alert {
+    margin: 0 0.12rem 0.1rem 0.2rem;
+  }
+
+  .@{notification-prefix-cls}-notice {
+    &-closable .@{notification-prefix-cls}-notice-message {
+      padding-right: unset;
+      padding-left: @notification-closable-message-padding-right;
+    }
+
+    &-with-icon .@{notification-prefix-cls}-notice-message {
+      margin-right: @notification-with-icon-message-margin-left;
+      margin-left: unset;
+    }
+
+    &-with-icon .@{notification-prefix-cls}-notice-description {
+      margin-right: @notification-with-icon-description-margin-left;
+      margin-left: unset;
+    }
+
+    &-icon {
+      right: @notification-icon-left;
+      left: unset;
+      margin-right: @notification-icon-margin-left;
+      margin-left: unset;
+    }
+
+    &-close {
+      right: unset;
+      left: @notification-close-icon-right;
+    }
+
+    &-btn {
+      float: left;
+    }
+  }
+}

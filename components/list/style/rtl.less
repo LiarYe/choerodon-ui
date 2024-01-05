@@ -1,0 +1,107 @@
+@import '../../style/themes/default';
+
+@list-prefix-cls: ~'@{c7n-prefix}-list';
+
+.@{list-prefix-cls}-wrapper-rtl {
+  direction: rtl;
+
+  .@{list-prefix-cls}-pagination {
+    text-align: left;
+  }
+
+  .@{list-prefix-cls}-item {
+    &-meta {
+      &-avatar {
+        margin-right: unset;
+        margin-left: 0.16rem;
+      }
+    }
+
+    &-action {
+      margin-right: 0.48rem;
+      margin-left: unset;
+
+      & > li:first-child {
+        padding-right: 0;
+        padding-left: 0.08rem;
+      }
+
+      &-split {
+        right: unset;
+        left: 0;
+      }
+    }
+  }
+
+  .@{list-prefix-cls}-selection {
+    padding-right: 0.1rem;
+    padding-left: unset;
+
+    &-checkbox {
+      padding-right: unset;
+      padding-left: 0.1rem;
+    }
+  }
+
+  &.@{list-prefix-cls}-vertical .@{list-prefix-cls}-item {
+    &-extra {
+      margin-right: 0.58rem;
+      margin-left: unset;
+    }
+
+    &-action {
+      margin-right: auto;
+      margin-left: unset;
+      > li {
+        &:first-child {
+          padding-right: 0;
+          padding-left: 0.16rem;
+        }
+      }
+    }
+  }
+}
+
+@media screen and (max-width: @screen-md) {
+  .@{list-prefix-cls}-wrapper-rtl {
+    .@{list-prefix-cls} {
+      &-item {
+        &-action {
+          margin-right: .24rem;
+          margin-left: unset;
+        }
+      }
+    }
+  
+    &.@{list-prefix-cls}-vertical {
+      .@{list-prefix-cls}-item {
+        &-extra {
+          margin-right: .24rem;
+          margin-left: unset;
+        }
+      }
+    }
+  }
+}
+
+@media screen and (max-width: @screen-xs) {
+  .@{list-prefix-cls}-wrapper-rtl {
+    .@{list-prefix-cls} {
+      &-item {
+        &-action {
+          margin-right: .12rem;
+          margin-left: unset;
+        }
+      }
+    }
+
+    &.@{list-prefix-cls}-vertical {
+      .@{list-prefix-cls}-item {
+        &-extra {
+          margin-right: 0;
+          margin-left: unset;
+        }
+      }
+    }
+  }
+}

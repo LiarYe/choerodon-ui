@@ -89,6 +89,11 @@ class Skeleton extends React.Component<SkeletonProps, any> {
 
   context: ConfigContextValue;
 
+  get isRTL(): boolean {
+    const { getConfig } = this.context;
+    return getConfig('direction') === 'rtl';
+  }
+
   renderSkeleton = () => {
     const {
       prefixCls: customizePrefixCls,
@@ -176,7 +181,7 @@ class Skeleton extends React.Component<SkeletonProps, any> {
       const cls = classNames(prefixCls, className, {
         [`${prefixCls}-with-avatar`]: hasAvatar,
         [`${prefixCls}-active`]: active,
-        [`${prefixCls}-rtl`]:false,
+        [`${prefixCls}-rtl`]: this.isRTL,
       });
 
       return (

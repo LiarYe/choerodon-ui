@@ -1,0 +1,33 @@
+@import '../../style/themes/default';
+
+@image-crop-prefix-cls: ~'@{c7n-prefix}-image-crop';
+@image-avatar-prefix-cls: ~'@{c7n-prefix}-avatar-crop';
+@dialog-prefix-cls: ~'@{c7n-prefix}-modal';
+
+.@{dialog-prefix-cls}-rtl {
+  &.@{image-crop-prefix-cls}-modal {
+    .@{image-crop-prefix-cls}-control {
+      .@{c7n-prefix}-btn {
+        > .icon {
+          margin-left: 0;
+        }
+      }
+
+      > .@{c7n-prefix}-btn {
+        margin-right: 0.06rem;
+        margin-left: unset;
+      }
+    }
+  }
+
+  .@{image-avatar-prefix-cls} {
+    &-edit {
+      &-text {
+        .icon {
+          margin-right: 0.08rem;
+          margin-left: unset;
+        }
+      }
+    }
+  }
+}

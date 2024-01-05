@@ -1,0 +1,67 @@
+@import '../../style/themes/default';
+
+@switch-prefix-cls: ~'@{c7n-prefix}-switch';
+
+.@{switch-prefix-cls}-wrapper-rtl {
+  direction: rtl;
+
+  .@{switch-prefix-cls}-inner {
+    margin-right: 0.24rem;
+    margin-left: 0.06rem;
+  }
+
+  &.@{switch-prefix-cls}::before,
+  &.@{switch-prefix-cls}::after {
+    right: -0.01rem;
+    left: unset;
+  }
+
+  &.@{switch-prefix-cls}-small {
+    .@{switch-prefix-cls}-inner {
+      margin-right: 0.18rem;
+      margin-left: 0.03rem;
+    }
+  }
+
+  &.@{switch-prefix-cls}-small.@{switch-prefix-cls}-checked {
+    &::before,
+    &::after {
+      right: 100%;
+      left: unset;
+      margin-right: @switch-sm-checked-margin-left;
+      margin-left: unset;
+    }
+
+    .@{switch-prefix-cls}-inner {
+      margin-right: 0.03rem;
+      margin-left: 0.18rem;
+    }
+  }
+
+  &.@{switch-prefix-cls}-small:active.@{switch-prefix-cls}-checked::before,
+  &.@{switch-prefix-cls}-small:active.@{switch-prefix-cls}-checked::after {
+    margin-right: -0.165rem;
+    margin-left: 0.18rem;
+  }
+
+  &.@{switch-prefix-cls}-checked {
+    .@{switch-prefix-cls}-inner {
+      margin-right: 0.06rem;
+      margin-left: 0.24rem;
+    }
+
+    &::before,
+    &::after {
+      right: 100%;
+      left: unset;
+      margin-right: @switch-checked-margin-left;
+      margin-left: unset;
+    }
+
+    &:active::before,
+    &:active::after {
+      margin-right: -0.25rem;
+      margin-left: 0.24rem;
+    }
+  }
+}

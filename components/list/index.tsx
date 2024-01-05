@@ -124,6 +124,11 @@ export default class List extends Component<ListProps> {
 
   private keys: { [key: string]: string } = {};
 
+  get isRTL(): boolean {
+    const { getConfig } = this.context;
+    return getConfig('direction') === 'rtl';
+  }
+
   get rowSelectionKeys(): ReactText[] | undefined {
     const { rowSelection } = this.props;
     if (rowSelection && typeof rowSelection === 'object') {
@@ -393,6 +398,7 @@ export default class List extends Component<ListProps> {
       [`${prefixCls}-loading`]: isLoading,
       [`${prefixCls}-grid`]: grid,
       [`${prefixCls}-something-after-last-item`]: this.isSomethingAfterLastItem(),
+      [`${prefixCls}-wrapper-rtl`]: this.isRTL,
     });
 
     

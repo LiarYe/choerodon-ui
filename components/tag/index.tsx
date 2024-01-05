@@ -65,6 +65,11 @@ export default class Tag extends Component<TagProps, TagState> {
     }
   }
 
+  get isRTL(): boolean {
+    const { getConfig } = this.context;
+    return getConfig('direction') === 'rtl';
+  }
+
   handleIconClick = (e: React.MouseEvent<HTMLElement>) => {
     const { onClose } = this.props;
     if (onClose) {
@@ -136,6 +141,7 @@ export default class Tag extends Component<TagProps, TagState> {
         [`${prefixCls}-${color}`]: isPresetColor,
         [`${prefixCls}-has-color`]: color && !isPresetColor,
         [`${prefixCls}-close`]: closing,
+        [`${prefixCls}-wrapper-rtl`]: this.isRTL,
       },
       className,
     );

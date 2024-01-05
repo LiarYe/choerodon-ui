@@ -1,4 +1,5 @@
 import React, { Component, CSSProperties, ReactElement, ReactNode } from 'react';
+import classNames from 'classnames';
 import Tooltip from '../tooltip';
 import RcSlider, { Handle as RcHandle, Range as RcRange } from '../rc-components/slider';
 import ConfigContext, { ConfigContextValue } from '../config-provider/ConfigContext';
@@ -72,6 +73,11 @@ export default class Slider extends Component<SliderProps, SliderState> {
     };
   }
 
+  get isRTL(): boolean {
+    const { getConfig } = this.context;
+    return getConfig('direction') === 'rtl';
+  }
+
   toggleTooltipVisible = (index: number, visible: boolean) => {
     this.setState(({ visibles }) => ({
       visibles: {
@@ -120,6 +126,9 @@ export default class Slider extends Component<SliderProps, SliderState> {
     const { range, prefixCls: customizePrefixCls, ...restProps } = this.props;
     const { getPrefixCls } = this.context;
     const prefixCls = getPrefixCls('slider', customizePrefixCls);
+    const className = classNames({
+      [`${prefixCls}-wrapper-rtl`]: this.isRTL,
+    })
     if (range) {
       return (
         <RcRange
@@ -127,6 +136,7 @@ export default class Slider extends Component<SliderProps, SliderState> {
           ref={this.saveSlider}
           handle={this.handleWithTooltip}
           prefixCls={prefixCls}
+          className={className}
         />
       );
     }
@@ -136,6 +146,7 @@ export default class Slider extends Component<SliderProps, SliderState> {
         ref={this.saveSlider}
         handle={this.handleWithTooltip}
         prefixCls={prefixCls}
+        className={className}
       />
     );
   }

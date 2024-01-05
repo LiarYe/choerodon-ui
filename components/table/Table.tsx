@@ -237,6 +237,11 @@ export default class Table<T> extends Component<TableProps<T>, TableState<T>> {
     });
   }
 
+  get isRTL(): boolean {
+    const { getConfig } = this.context;
+    return getConfig('direction') === 'rtl';
+  }
+
   setElementRef = (node: RcTable) => {
     if (node && node.tableContent) {
       this.element = node.tableContent;
@@ -1706,10 +1711,13 @@ export default class Table<T> extends Component<TableProps<T>, TableState<T>> {
         getPopupContainer={this.getPopupContainer}
       />
     );
+    const cls = classNames(`${prefixCls}-wrapper`, className, {
+      [`${prefixCls}-wrapper-rtl`]: this.isRTL,
+    });
 
     return (
       <div
-        className={classNames(`${prefixCls}-wrapper`, className)}
+        className={cls}
         style={style}
         ref={this.saveRef}
       >

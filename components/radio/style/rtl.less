@@ -1,0 +1,71 @@
+@import '../../style/themes/default';
+
+@radio-prefix-cls: ~'@{c7n-prefix}-radio';
+@radio-group-prefix-cls: ~'@{radio-prefix-cls}-group';
+@radio-inner-prefix-cls: ~'@{radio-prefix-cls}-inner';
+@radio-duration: @animation-duration-slow;
+
+.@{radio-group-prefix-cls}-wrapper-rtl {
+  direction: rtl;
+
+  &.@{radio-group-prefix-cls}-wrapper .@{radio-group-prefix-cls}-label {
+    right: 0;
+    left: unset;
+    transform-origin: 100% 0;
+  }
+}
+
+.@{radio-group-prefix-cls}-rtl {
+  direction: rtl;
+}
+
+.@{radio-prefix-cls}-wrapper-rtl {
+  direction: rtl;
+
+  &.@{radio-prefix-cls}-wrapper {
+    margin-right: unset;
+    margin-left: 0.08rem;
+  }
+}
+
+.@{radio-prefix-cls}-button-wrapper-rtl {
+  direction: rtl;
+
+  &.@{radio-prefix-cls}-button-wrapper {
+    border-left: @border-width-base @border-style-base @border-color-base;
+
+    &:not(:first-child) {
+      &::before {
+        right: -0.01rem;
+        left: unset;
+      }
+    }
+
+    &:first-child {
+      border-right: @border-width-base @border-style-base @border-color-base;
+      border-radius: 0 @radio-button-radius @radio-button-radius 0;
+    }
+
+    &:last-child {
+      border-radius: @radio-button-radius 0 0 @radio-button-radius;
+    }
+
+    &:first-child:last-child {
+      border-radius: @radio-button-radius;
+    }
+
+    &.@{radio-prefix-cls}-button-wrapper-checked {
+      border-color: @radio-dot-color;
+      box-shadow: none;
+    }
+
+    &.@{radio-prefix-cls}-button-wrapper-disabled.@{radio-prefix-cls}-button-wrapper-checked {
+      border-color: @radio-basic-disabled-border-color;
+    }
+
+    & + .@{radio-prefix-cls}-button-wrapper {
+      margin-right: @radio-basic-button-group-spacing;
+      margin-left: unset;
+    }
+  }
+}

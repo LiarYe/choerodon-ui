@@ -1,4 +1,5 @@
 import React, { Component, CSSProperties, MouseEvent, ReactInstance, ReactNode } from 'react';
+import classNames from 'classnames';
 import { ModalManager } from 'choerodon-ui/shared';
 import Button from '../button';
 import { ButtonFuncType, ButtonProps, ButtonType } from '../button/Button';
@@ -159,6 +160,11 @@ export default class Modal extends Component<ModalProps, {}> {
     ModalManager.registerMousePosition();
   }
 
+  get isRTL(): boolean {
+    const { getConfig } = this.context;
+    return getConfig('direction') === 'rtl';
+  }
+
   renderFooter = (locale: ModalLocale) => {
     const {
       okText,
@@ -205,6 +211,7 @@ export default class Modal extends Component<ModalProps, {}> {
       center = getConfig('modalAutoCenter'),
       maskClosable = getConfig('modalMaskClosable'),
       keyboard = getConfig('modalKeyboard'),
+      wrapClassName: wrapClassNameProp,
     } = this.props;
     const prefixCls = getPrefixCls('modal', customizePrefixCls);
     const defaultFooter = (
@@ -212,6 +219,9 @@ export default class Modal extends Component<ModalProps, {}> {
         {this.renderFooter}
       </LocaleReceiver>
     );
+    const wrapClassName = classNames(wrapClassNameProp, {
+      [`${prefixCls}-rtl`]: this.isRTL,
+    });
 
     return (
       <Dialog
@@ -225,6 +235,8 @@ export default class Modal extends Component<ModalProps, {}> {
         visible={visible}
         mousePosition={ModalManager.mousePosition}
         onClose={this.handleCancel}
+        wrapClassName={wrapClassName}
+        isRTL={this.isRTL}
       />
     );
   }

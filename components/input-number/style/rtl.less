@@ -1,0 +1,25 @@
+@import '../../style/themes/default';
+
+@input-number-prefix-cls: ~'@{c7n-prefix}-input-number';
+
+.@{input-number-prefix-cls}-wrapper-rtl {
+  direction: rtl;
+
+  .@{input-number-prefix-cls} {
+    &-handler-up-inner {
+      right: unset;
+      left: 0.02rem;
+    }
+
+    &-handler-down-inner {
+      right: unset;
+      left: 0.02rem;
+    }
+
+    &-handler-wrap {
+      right: unset;
+      left: 0.01rem;
+      border-radius: @border-radius-base 0 0 @border-radius-base;
+    }
+  }
+}

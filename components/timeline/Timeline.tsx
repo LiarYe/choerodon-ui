@@ -28,6 +28,11 @@ export default class Timeline extends Component<TimelineProps, any> {
 
   context: ConfigContextValue;
 
+  get isRTL(): boolean {
+    const { getConfig } = this.context;
+    return getConfig('direction') === 'rtl';
+  }
+
   render() {
     const {
       prefixCls: customizePrefixCls,
@@ -47,6 +52,7 @@ export default class Timeline extends Component<TimelineProps, any> {
       {
         [`${prefixCls}-pending`]: !!pending,
         [`${prefixCls}-reverse`]: !!reverse,
+        [`${prefixCls}-wrapper-rtl`]: this.isRTL,
       },
       className,
     );

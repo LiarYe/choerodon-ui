@@ -48,6 +48,11 @@ export default class RadioGroup extends Component<RadioGroupProps, RadioGroupSta
     };
   }
 
+  get isRTL(): boolean {
+    const { getConfig } = this.context;
+    return getConfig('direction') === 'rtl';
+  }
+
   getContextValue() {
     const { disabled, name } = this.props;
     const { value } = this.state;
@@ -99,7 +104,7 @@ export default class RadioGroup extends Component<RadioGroupProps, RadioGroupSta
     const { props } = this;
     const { prefixCls: customizePrefixCls, className = '', options, buttonStyle, size, label, disabled } = props;
     const { value } = this.state;
-    const { getPrefixCls } = this.context;
+    const { getPrefixCls, getConfig } = this.context;
     const prefixCls = getPrefixCls('radio', customizePrefixCls);
     const groupPrefixCls = `${prefixCls}-group`;
     const classString = classNames(
@@ -107,6 +112,7 @@ export default class RadioGroup extends Component<RadioGroupProps, RadioGroupSta
       `${groupPrefixCls}-${buttonStyle}`,
       {
         [`${groupPrefixCls}-${size}`]: size,
+        [`${groupPrefixCls}-rtl`]: this.isRTL,
       },
       className,
     );
@@ -155,7 +161,7 @@ export default class RadioGroup extends Component<RadioGroupProps, RadioGroupSta
         onMouseLeave={props.onMouseLeave}
         id={props.id}
       >
-        <RadioContextProvider {...this.getContextValue()} getPrefixCls={getPrefixCls}>
+        <RadioContextProvider {...this.getContextValue()} getPrefixCls={getPrefixCls} getConfig={getConfig}>
           {children}
         </RadioContextProvider>
       </div>
@@ -164,6 +170,7 @@ export default class RadioGroup extends Component<RadioGroupProps, RadioGroupSta
       const wrapperClassString = classNames({
         [`${groupPrefixCls}-wrapper`]: true,
         [`${groupPrefixCls}-has-label`]: label,
+        [`${groupPrefixCls}-wrapper-rtl`]: this.isRTL,
       });
       const labelClassString = classNames(`${groupPrefixCls}-label`, {
         'label-disabled': disabled,

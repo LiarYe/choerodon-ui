@@ -25,12 +25,18 @@ export default class Radio extends Component<RadioProps, {}> {
   private rcCheckbox: any;
 
   shouldComponentUpdate(nextProps: RadioProps, nextState: {}, nextContext: RadioGroupContext) {
-    const { radioGroup, getPrefixCls } = this.context;
+    const { radioGroup, getPrefixCls, getConfig } = this.context;
     return (
       !shallowEqual(this.props, nextProps) ||
       !shallowEqual(this.state, nextState) ||
-      !shallowEqual(radioGroup, nextContext.radioGroup) || getPrefixCls !== nextContext.getPrefixCls
+      !shallowEqual(radioGroup, nextContext.radioGroup) || getPrefixCls !== nextContext.getPrefixCls ||
+      getConfig !== nextContext.getConfig
     );
+  }
+
+  get isRTL(): boolean {
+    const { getConfig } = this.context;
+    return getConfig('direction') === 'rtl';
   }
 
   saveCheckbox = (node: any) => {
@@ -72,6 +78,7 @@ export default class Radio extends Component<RadioProps, {}> {
       [`${prefixCls}-wrapper`]: true,
       [`${prefixCls}-wrapper-checked`]: radioProps.checked,
       [`${prefixCls}-wrapper-disabled`]: radioProps.disabled,
+      [`${prefixCls}-wrapper-rtl`]: this.isRTL,
     });
 
     return (

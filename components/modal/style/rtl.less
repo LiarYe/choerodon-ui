@@ -1,0 +1,53 @@
+@import "../../style/themes/default";
+
+@dialog-prefix-cls: ~'@{c7n-prefix}-modal';
+@confirm-prefix-cls: ~'@{c7n-prefix}-confirm';
+@sidebar-prefix-cls: ~'@{c7n-prefix}-modal-sidebar';
+
+.@{dialog-prefix-cls}-rtl {
+  direction: rtl;
+
+  .@{dialog-prefix-cls}-close {
+    right: unset;
+    left: 0;
+  }
+
+  .@{dialog-prefix-cls}-footer {
+    text-align: left;
+
+    button + button {
+      margin-right: 0.08rem;
+      margin-left: unset;
+    }
+  }
+
+  // confirm
+  .@{confirm-prefix-cls}-body {
+    i + span + .@{confirm-prefix-cls}-content {
+      margin-right: 0.4rem;
+      margin-left: unset;
+    }
+
+    > .@{iconfont-css-prefix} {
+      float: right;
+      padding: @modal-confirm-icon-padding-rtl;
+    }
+  }
+
+  .@{confirm-prefix-cls} .@{confirm-prefix-cls}-btns {
+    text-align: left;
+
+    button + button {
+      margin-right: 0.08rem;
+      margin-left: unset;
+    }
+  }
+
+  .@{sidebar-prefix-cls} {
+    .@{modal-prefix-cls}-header {
+      .@{modal-prefix-cls}-title {
+        margin: 0 0.16rem 0 0.56rem;
+      }
+    }
+  }
+}

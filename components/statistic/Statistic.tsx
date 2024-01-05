@@ -38,10 +38,13 @@ const Statistic = forwardRef(function Statistic(props: StatisticProps, _ref) {
     onMouseEnter,
     onMouseLeave,
   } = props;
-  const { getPrefixCls } = useContext(ConfigContext);
+  const { getPrefixCls, getConfig } = useContext(ConfigContext);
   const prefixCls = getPrefixCls('statistic', customizePrefixCls);
+  const isRTL = getConfig('direction') === 'rtl';
   const valueNode = <StatisticNumber {...props} prefixCls={prefixCls} value={value} />;
-  const cls = classNames(prefixCls, className);
+  const cls = classNames(prefixCls, className, {
+    [`${prefixCls}-wrapper-rtl`]: isRTL,
+  });
   return (
     <div className={cls} style={style} onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
       {title && <div className={`${prefixCls}-title`}>{title}</div>}

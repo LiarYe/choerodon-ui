@@ -5,7 +5,21 @@
 .@{popover-prefix-cls}-wrapper-rtl {
   direction: rtl;
 
-  .@{popover-prefix-cls}-title {
+  &.@{popover-prefix-cls} {
     text-align: right;
+  }
+
+  .@{popover-prefix-cls}-message {
+    &-title {
+      padding: @popover-message-title-padding-rtl;
+    }
+  }
+
+  .@{popover-prefix-cls}-buttons {
+    text-align: left;
+    button {
+      margin-right: 0.08rem;
+      margin-left: unset;
+    }
   }
 }

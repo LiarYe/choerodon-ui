@@ -11,6 +11,7 @@ import Notice, { NoticeProps } from './Notice';
 import { getNoticeLocale } from './locale';
 import EventManager from '../_util/EventManager';
 import { getStyle } from '../rc-components/util/Dom/css';
+import { getConfig } from '../configure/utils';
 
 export function newNotificationInstance(properties: NotificationProps & { getContainer?: (() => HTMLElement) | undefined }, callback: (api: NotificationInterface) => void) {
   const { getContainer, ...props } = properties || {};
@@ -231,11 +232,13 @@ export default class Notification extends PureComponent<NotificationProps, Notif
         totalHeight={totalHeight}
       />
     ));
+    const isRTL = getConfig('direction') === 'rtl';
     const cls = classNames(`${prefixCls}`, className, [{
       [`${prefixCls}-before-shadow`]: !!foldCount && notices.length > foldCount && offset > 0,
       [`${prefixCls}-after-shadow`]:
       foldCount && notices.length > foldCount &&
       totalHeight - (typeof scrollHeight === 'number' ? scrollHeight : 0) - offset > 15,
+      [`${prefixCls}-wrapper-rtl`]: isRTL,
     }]);
 
     const scrollCls = classNames({

@@ -29,6 +29,11 @@ export default class Switch extends Component<SwitchProps, {}> {
 
   private rcSwitch: any;
 
+  get isRTL(): boolean {
+    const { getConfig } = this.context;
+    return getConfig('direction') === 'rtl';
+  }
+
   focus() {
     if (this.rcSwitch) {
       this.rcSwitch.focus();
@@ -52,6 +57,7 @@ export default class Switch extends Component<SwitchProps, {}> {
     const classes = classNames(className, {
       [`${prefixCls}-small`]: size === Size.small,
       [`${prefixCls}-loading`]: loading,
+      [`${prefixCls}-wrapper-rtl`]: this.isRTL,
     });
     return (
       <RcSwitch

@@ -1,0 +1,33 @@
+@import '../../style/themes/default';
+
+@timeline-prefix-cls: ~'@{c7n-prefix}-timeline';
+
+.@{timeline-prefix-cls}-wrapper-rtl {
+  direction: rtl;
+
+  .@{timeline-prefix-cls}-item {
+    &-tail {
+      right: @timeline-item-tail-left;
+      left: unset;
+      border-right: 0.02rem solid @timeline-color;
+      border-left: none;
+    }
+
+    &-head-custom {
+      right: 0.05rem;
+      left: unset;
+      transform: translate(50%, -50%);
+    }
+
+    &-content {
+      padding: @timeline-item-content-padding-rtl;
+    }
+
+    &-last {
+      .@{timeline-prefix-cls}-item-tail {
+        border-right: 0.02rem dotted @timeline-color;
+        border-left: unset;
+      }
+    }
+  }
+}

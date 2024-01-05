@@ -147,6 +147,11 @@ export default class Transfer extends Component<TransferProps, any> {
     }
   }
 
+  get isRTL(): boolean {
+    const { getConfig } = this.context;
+    return getConfig('direction') === 'rtl';
+  }
+
   splitDataSource(sortKeys?: Array<string>) {
     if (this.splitedDataSource) {
       return this.splitedDataSource;
@@ -449,7 +454,9 @@ export default class Transfer extends Component<TransferProps, any> {
     const hasHighlight = !!highlightKey && mapRightKey.indexOf(highlightKey) > -1;
     const upActive = hasHighlight && mapRightKey.indexOf(highlightKey) !== 0;
     const downActive = hasHighlight && mapRightKey.indexOf(highlightKey) !== mapRightKey.length - 1;
-    const cls = classNames(className, prefixCls);
+    const cls = classNames(className, prefixCls, {
+      [`${prefixCls}-wrapper-rtl`]: this.isRTL,
+    });
 
     const titles = this.getTitles(locale);
     return (

@@ -1,4 +1,5 @@
 import React, { CSSProperties, MouseEventHandler, ReactElement, ReactNode, useContext } from 'react';
+import classNames from 'classnames';
 import RcSteps, { Step, StepGroup } from '../rc-components/steps';
 import { Size } from '../_util/enum';
 import ConfigContext from '../config-provider/ConfigContext';
@@ -37,10 +38,14 @@ export type StepsComponent = typeof Steps & {
 }
 
 const Steps = function Steps(props) {
-  const { prefixCls: customizePrefixCls } = props;
-  const { getPrefixCls } = useContext(ConfigContext);
+  const { prefixCls: customizePrefixCls, className } = props;
+  const { getPrefixCls, getConfig } = useContext(ConfigContext);
   const prefixCls = getPrefixCls('steps', customizePrefixCls);
-  return <RcSteps {...props} prefixCls={prefixCls} />;
+  const isRTL = getConfig('direction') === 'rtl';
+  const cls = classNames(className, {
+    [`${prefixCls}-wrapper-rtl`]: isRTL,
+  });
+  return <RcSteps {...props} prefixCls={prefixCls} className={cls} />;
 };
 
 Steps.displayName = 'Steps';

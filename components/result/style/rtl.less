@@ -1,0 +1,19 @@
+@import '../../style/themes/default';
+
+@result-prefix-cls: ~'@{c7n-prefix}-result';
+
+.@{result-prefix-cls}-wrapper-rtl {
+  direction: rtl;
+
+  .@{result-prefix-cls}-extra {
+    > * {
+      margin-right: 0;
+      margin-left: 8px;
+
+      &:last-child {
+        margin-right: unset;
+        margin-left: 0;
+      }
+    }
+  }
+}
