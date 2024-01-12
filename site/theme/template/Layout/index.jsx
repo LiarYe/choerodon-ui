@@ -4,7 +4,7 @@ import ReactDOM from 'react-dom';
 import PropTypes from 'prop-types';
 import { enquireScreen } from 'enquire-js';
 import { addLocaleData, IntlProvider } from 'react-intl';
-import { ConfigProvider, configure as UIconfigure, LocaleProvider } from 'choerodon-ui';
+import { ConfigProvider, configure as UIconfigure, LocaleProvider, getConfig } from 'choerodon-ui';
 import { localeContext, ModalProvider } from 'choerodon-ui/pro';
 import moment from 'moment';
 import { configure } from 'mobx';
@@ -18,6 +18,11 @@ mock();
 
 configure({ enforceActions: 'always' });
 
+const otherConfig = {};
+if (utils.isLocalStorageNameSupported()) {
+  otherConfig.direction = localStorage.getItem('direction');
+}
+
 UIconfigure({
   lovQueryUrl: undefined,
   lovQueryAxiosConfig(code, lovConfig, props) {
@@ -26,7 +31,7 @@ UIconfigure({
       url: `/common/lov/dataset/${code}${code === 'LOV_CODE' && params ? `/${params.pagesize}/${params.page}` : ''}`,
     };
   },
-  direction: 'rtl',
+  ...otherConfig,
 });
 
 export const uiConfigure = {
@@ -41,8 +46,6 @@ export const uiConfigure = {
       });
     }
   },
-  // direction: 'rtl',
-  // dateTimePickerOkButton: true,
 };
 
 if (typeof window !== 'undefined') {
@@ -90,7 +93,7 @@ export default class Layout extends React.Component {
 
   componentDidMount() {
     if (typeof document !== 'undefined' && document && document.documentElement) {
-      if (!document.documentElement.classList.contains('c7n-rtl')) {
+      if (!document.documentElement.classList.contains('c7n-rtl') && getConfig('direction') === 'rtl') {
         document.documentElement.classList.add('c7n-rtl');
       }
     }

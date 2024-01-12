@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { Link } from 'bisheng/router';
 import { FormattedMessage } from 'react-intl';
 import classNames from 'classnames';
-import { Button, Col, Icon, Menu, Popover, Row, Select } from 'choerodon-ui';
+import { Button, Col, Icon, Menu, Popover, Row, Select, getConfig } from 'choerodon-ui';
 import * as utils from '../utils';
 import { version as c7nUIVersion } from '../../../../package.json';
 import logo from '../../static/images/logo-title.svg';
@@ -39,6 +39,10 @@ export default class Header extends React.Component {
   state = {
     menuVisible: false,
   };
+
+  get isRTL() {
+    return getConfig('direction') === 'rtl';
+  }
 
   componentDidMount() {
     const { router } = this.context;
@@ -85,6 +89,13 @@ export default class Header extends React.Component {
     );
   };
 
+  handleRTLChange = () => {
+    if (utils.isLocalStorageNameSupported()) {
+      localStorage.setItem('direction', this.isRTL ? 'ltr' : 'rtl');
+    }
+    window.location.reload();
+  }
+
   render() {
     const { menuVisible } = this.state;
     const { isMobile } = this.context;
@@ -110,6 +121,9 @@ export default class Header extends React.Component {
     const menu = [
       <Button ghost size="small" onClick={this.handleLangChange} className="header-lang-button" key="lang-button">
         <FormattedMessage id="app.header.lang" />
+      </Button>,
+      <Button ghost size="small" onClick={this.handleRTLChange} className="header-lang-button" key="rtl-button">
+        {this.isRTL ? 'ltr' : 'rtl'}
       </Button>,
       <Select
         key="version"
