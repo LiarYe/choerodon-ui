@@ -84,6 +84,7 @@ const TabsWithContext: FunctionComponent<TabsWithContextProps> = function TabsWi
     restoreDefault,
     ...restProps
   } = props;
+  const isRTL = getConfig('direction') === 'rtl';
   const hasPropActiveKey = 'activeKey' in props;
   const prefixCls = getPrefixCls('tabs', customizePrefixCls);
   const saveCustomized = useCallback((newCustomized: TabsCustomized) => {
@@ -212,6 +213,7 @@ const TabsWithContext: FunctionComponent<TabsWithContextProps> = function TabsWi
     defaultChangeable,
     rippleDisabled,
     restoreDefault,
+    getConfig,
   };
   const inkBarAnimated = isAnimated(animated) ? animated.inkBar : animated;
   let tabPaneAnimated = isAnimated(animated) ? animated.tabPane : animated;
@@ -287,6 +289,7 @@ const TabsWithContext: FunctionComponent<TabsWithContextProps> = function TabsWi
       [`${prefixCls}-flex`]: flex,
       [`${prefixCls}-no-animation`]: !tabPaneAnimated,
       'no-flex': !isFlexSupported(),
+      [`${prefixCls}-wrapper-rtl`]: isRTL,
     },
     className,
   );

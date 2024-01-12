@@ -5,6 +5,8 @@ import { observable, ObservableMap } from 'mobx';
 import { GroupPanelMap, TabsCustomized } from './Tabs';
 import { TabPaneProps } from './TabPane';
 import { TabsPosition } from './enum';
+import { Config, DefaultConfig } from '../configure/index';
+import { getConfig as getConfigDefault } from '../configure/utils';
 
 export interface TabsContextValue {
   prefixCls?: string | undefined;
@@ -32,6 +34,7 @@ export interface TabsContextValue {
   defaultChangeable?: boolean | undefined;
   rippleDisabled?: boolean | undefined;
   restoreDefault?: boolean | undefined;
+  getConfig<T extends keyof Config>(key: T): T extends keyof DefaultConfig ? DefaultConfig[T] : Config[T];
 }
 
 const TabsContext = getContext<TabsContextValue>(Symbols.TabsContext, {
@@ -41,6 +44,7 @@ const TabsContext = getContext<TabsContextValue>(Symbols.TabsContext, {
   currentPanelMap: new Map<string, TabPaneProps & { type: string | JSXElementConstructor<any> }>(),
   totalPanelsMap: new Map<string, TabPaneProps & { type: string | JSXElementConstructor<any> }>(),
   validationMap: observable.map(),
+  getConfig: getConfigDefault,
 });
 
 export default TabsContext;

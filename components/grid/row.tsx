@@ -27,6 +27,11 @@ export default class Row extends PureComponent<RowProps> {
 
   context: ConfigContextValue;
 
+  get isRTL(): boolean {
+    const { getConfig } = this.context;
+    return getConfig('direction') === 'rtl';
+  }
+
   renderRow = ([gutter = defaultGutter]) => {
     const {
       type,
@@ -46,6 +51,7 @@ export default class Row extends PureComponent<RowProps> {
         [`${prefixCls}-${type}`]: type,
         [`${prefixCls}-${type}-${justify}`]: type && justify,
         [`${prefixCls}-${type}-${align}`]: type && align,
+        [`${prefixCls}-wrapper-rtl`]: this.isRTL,
       },
       className,
     );

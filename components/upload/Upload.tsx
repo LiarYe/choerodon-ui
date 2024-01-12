@@ -60,6 +60,11 @@ export default class Upload extends Component<UploadProps, UploadState> {
     this.clearProgressTimer();
   }
 
+  get isRTL(): boolean {
+    const { getConfig } = this.context;
+    return getConfig('direction') === 'rtl';
+  }
+
   onStart = (file: UploadFile) => {
     const { fileList } = this.state;
     const nextFileList = [...fileList];
@@ -414,6 +419,10 @@ export default class Upload extends Component<UploadProps, UploadState> {
       </LocaleReceiver>
     ) : null;
 
+    const wrapperCls = classNames(className, {
+      [`${prefixCls}-wrapper-rtl`]: this.isRTL,
+    });
+
     if (type === 'drag') {
       const dragCls = classNames(prefixCls, {
         [`${prefixCls}-drag`]: true,
@@ -422,7 +431,7 @@ export default class Upload extends Component<UploadProps, UploadState> {
         [`${prefixCls}-disabled`]: disabled,
       });
       return (
-        <span className={className}>
+        <span className={wrapperCls}>
           <div
             className={dragCls}
             onDrop={this.onFileDrop}
@@ -453,14 +462,14 @@ export default class Upload extends Component<UploadProps, UploadState> {
 
     if (listType === 'picture-card') {
       return (
-        <span className={className}>
+        <span className={wrapperCls}>
           {uploadList}
           {uploadButton}
         </span>
       );
     }
     return (
-      <span className={className}>
+      <span className={wrapperCls}>
         {uploadButton}
         {uploadList}
       </span>

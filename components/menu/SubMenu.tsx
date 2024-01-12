@@ -14,6 +14,11 @@ class SubMenu extends PureComponent<any, any> {
 
   private subMenu: any;
 
+  get isRTL(): boolean {
+    const { getConfig } = this.context;
+    return getConfig('direction') === 'rtl';
+  }
+
   onKeyDown: MouseEventHandler<HTMLElement> = e => {
     this.subMenu.onKeyDown(e);
   };
@@ -25,11 +30,14 @@ class SubMenu extends PureComponent<any, any> {
   render() {
     const { rootPrefixCls, className } = this.props;
     const { menuTheme } = this.context;
+    const popupCls = classNames(`${rootPrefixCls}-${menuTheme}`, className, {
+      [`${rootPrefixCls}-popup-rtl`]: this.isRTL,
+    });
     return (
       <RcSubMenu
         {...this.props}
         ref={this.saveSubMenu}
-        popupClassName={classNames(`${rootPrefixCls}-${menuTheme}`, className)}
+        popupClassName={popupCls}
       />
     );
   }

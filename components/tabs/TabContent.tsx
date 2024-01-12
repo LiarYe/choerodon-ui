@@ -13,7 +13,8 @@ export interface TabContentProps {
 
 const TabContent: FunctionComponent<TabContentProps> = function TabContent(props) {
   const { destroyInactiveTabPane, animated, animatedWithMargin, style } = props;
-  const { prefixCls, totalPanelsMap, activeKey, tabBarPosition } = useContext(TabsContext);
+  const { prefixCls, totalPanelsMap, activeKey, tabBarPosition, getConfig } = useContext(TabsContext);
+  const isRTL = getConfig('direction') === 'rtl';
   const [mergedStyle, setMergedStyle] = useState(() => animated ? ({
     ...style,
     display: 'none',
@@ -24,8 +25,8 @@ const TabContent: FunctionComponent<TabContentProps> = function TabContent(props
       const activeIndex = getActiveIndex(totalPanelsMap, activeKey);
       if (activeIndex !== -1) {
         const animatedStyle = animatedWithMargin ?
-          getMarginStyle(activeIndex, tabBarPosition) :
-          getTransformPropValue(getTransformByIndex(activeIndex, tabBarPosition));
+          getMarginStyle(activeIndex, tabBarPosition, isRTL) :
+          getTransformPropValue(getTransformByIndex(activeIndex, tabBarPosition, isRTL));
         setMergedStyle({
           ...style,
           ...animatedStyle,

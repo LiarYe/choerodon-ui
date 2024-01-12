@@ -358,6 +358,7 @@
   --btn-icon-only-size-lg: 0.24rem;
   --btn-icon-font-weight: inherit;
   --btn-icon-margin: 0 0.05rem 0 0;
+  --btn-icon-margin-rtl: 0 0 0 0.05rem;
 
   // raised button
   --btn-raised-border-width-base: 0rem;
@@ -741,6 +742,7 @@
   --input-float-tag-line-height-base: 0.2rem;
   --input-float-tag-margin-vertical: var(--input-tag-margin-vertical);
   --input-float-tag-padding: 0 0.02rem 0 0.08rem;
+  --input-float-tag-padding-rtl: 0 0.08rem 0 0.02rem;
   --input-float-tag-border-radius: 0.12rem;
   --input-float-tag-error-bg: var(--error-color);
   --input-float-tag-close-color: var(--tag-multiple-color);
@@ -753,7 +755,9 @@
   --input-multiple-margin: 0rem;
   --input-multiple-padding: 0.01rem 0;
   --input-multiple-input-margin: 0 0 0 var(--input-padding-horizontal);
+  --input-multiple-input-margin-rtl: 0 var(--input-padding-horizontal) 0 0;
   --input-float-multiple-margin: 0 0 0 0.03rem;
+  --input-float-multiple-margin-rtl: 0 0.03rem 0 0;
   --input-float-multiple-padding: 0.07rem 0;
   --textarea-padding: 0.04rem var(--input-padding-horizontal);
   // 新增
@@ -891,6 +895,7 @@
   --popover-distance: calc(var(--popover-arrow-width) + 0.04rem);
   --popover-message-padding: 0.04rem 0 0.12rem;
   --popover-message-title-padding: 0 0 0 calc(var(--font-size-base) + 0.08rem);
+  --popover-message-title-padding-rtl: 0 calc(var(--font-size-base) + 0.08rem) 0 0;
   --popover-title-padding: 0.05rem var(--padding-md) 0.04rem;
   --popover-content-under-title-padding: var(--popover-title-padding);
   --popover-title-border-bottom: var(--border-width-base) var(--border-style-base) var(--border-color-split);
@@ -923,6 +928,7 @@
   --modal-header-footer-border: var(--border-width-base) var(--border-style-base) var(--border-color-base);
   --modal-drawer-footer-text-align: left;
   --modal-confirm-icon-padding: 0 0.16rem 0 0;
+  --modal-confirm-icon-padding-rtl: 0 0 0 0.16rem;
   --modal-confirm-icon-font-size: 0.24rem;
   --modal-confirm-icon-line-height: 1.5;
   --modal-no-border-header-padding: var(--modal-header-padding);
@@ -1082,9 +1088,12 @@
   --table-dynamic-filter-required-active-box-shadow: var(--input-required-active-box-shadow);
   --table-dynamic-filter-number-step-height: 0.24rem;
   --table-professional-query-button-padding: 0.1rem 0 0.1rem 0.7rem;
+  --table-professional-query-button-padding-rtl: 0.1rem 0.7rem 0.1rem 0;
   --table-professional-query-button-vertical-padding: 0.3rem 0 0.1rem 0.7rem;
+  --table-professional-query-button-vertical-padding-rtl: 0.3rem 0.7rem 0.1rem 0;
   --table-combo-filter-wrapper-margin: 0.04rem 0 0;
   --table-combo-filter-content-margin: 0.04rem 0 0 0.08rem;
+  --table-combo-filter-content-margin-rtl: 0.04rem 0.08rem 0 0;
   --table-combo-filter-single-line-divide-margin: 0.08rem 0.08rem 0.06rem 0.08rem;
   --table-combo-filter-menu-reset-button-bg: var(--btn-secondary-bg);
   --table-filter-item-icon-line-height: var(--line-height-base);
@@ -1215,6 +1224,7 @@
   --card-actions-item-padding: unset;
   --card-grid-body-padding: 0rem;
   --card-grid-body-margin: -0.01rem 0 0 -0.01rem;
+  --card-grid-body-margin-rtl: -0.01rem -0.01rem 0 0;
   --card-loading-body-padding: 0rem;
   --card-head-color: var(--heading-color);
   --card-head-background: var(--component-background);
@@ -1248,6 +1258,7 @@
   --tab-bar-margin: 0 0 0.16rem 0;
   --tab-bar-padding: 0rem;
   --tab-horizontal-margin: 0 0.32rem 0 0;
+  --tab-horizontal-margin-rtl: 0 0 0 0.32rem;
   --tab-vertical-margin: 0 0 0.16rem 0;
   --tab-horizontal-padding-vertical: 0.08rem;
   --tab-horizontal-padding-horizontal: 0rem;
@@ -1290,6 +1301,7 @@
   --tabs-groups-group-item-selected-box-shadow: 0 0 2px 0 rgba(0, 0, 0, 0.15);
   --tabs-bar-divider-margin: auto .15rem;
   --tabs-vertical-left-content-padding: 0 0 0 0.24rem;
+  --tabs-vertical-left-content-padding-rtl: 0 0.24rem 0 0;
   --tabs-card-bar-border: var(--border-width-base) var(--border-style-base) var(--border-color-split);
   --tabs-card-min-width: var(--tabs-card-height);
   --tabs-card-active-background: var(--component-background);
@@ -1403,6 +1415,7 @@
   --pagination-size-changer-not-editable-border-color: transparent;
   --pagination-size-changer-margin: 0rem;
   --pagination-quick-jumper-margin: 0 0 0 .2rem;
+  --pagination-quick-jumper-margin-rtl: 0 .2rem 0 0;
   --pagination-quick-jumper-border-color: transparent;
   --pagination-color: unset;
   --pagination-pager-height: var(--btn-circle-size);
@@ -1565,11 +1578,14 @@
   --alert-message-line-height: unset;
   --alert-text-color: var(--text-color); // 全局未使用
   --alert-padding: 0.08rem 0.15rem 0.08rem 0.37rem;
+  --alert-padding-rtl: 0.08rem 0.37rem 0.08rem 0.15rem;
   --alert-close-wrapper-margin: 0 0 0 0.16rem;
+  --alert-close-wrapper-margin-rtl: 0 0.16rem 0 0;
   --alert-close-wrapper-padding: unset;
   --alert-no-icon-padding: 0.08rem 0.15rem;
   --alert-description-line-height: 0.22rem;
   --alert-with-description-padding: 0.15rem 0.15rem 0.15rem 0.64rem;
+  --alert-with-description-padding-rtl: 0.15rem 0.64rem 0.15rem 0.15rem;
   --alert-with-description-message-margin: 0 0 0.04rem 0;
   --alert-with-description-no-icon-padding: 0.15rem;
   --alert-with-description-icon-size: 0.24rem;
@@ -1579,7 +1595,9 @@
   // Lov
   --lov-selection-list-bg: transparent;
   --lov-table-professional-query-button-padding: 0.1rem 0 0.1rem 0.4rem;
+  --lov-table-professional-query-button-padding-rtl: 0.1rem 0.4rem 0.1rem 0;
   --lov-table-professional-query-button-vertical-padding: 0.3rem 0 0.1rem 0.4rem;
+  --lov-table-professional-query-button-vertical-padding-rtl: 0.3rem 0.4rem 0.1rem 0;
 
   // Typography
   --heading-1-size: calc(var(--font-size-base) * 2.71);
@@ -1628,6 +1646,7 @@
   --typography-color: unset;
   --typography-font-size: unset;
   --typography-blockquote-padding: 0 0 0 0.1rem;
+  --typography-blockquote-padding-rtl:0 0.1rem 0 0;
 
   // Segmented
   --segmented-color: unset;
@@ -1677,6 +1696,7 @@
   --timeline-item-header-size: 0.1rem;
   --timeline-item-content-top: calc(-1 * ((var(--font-size-base) * var(--line-height-base) - var(--font-size-base)) - 0.01rem));
   --timeline-item-content-padding: 0 0 0 0.18rem;
+  --timeline-item-content-padding-rtl: 0 0.18rem 0 0;
   --timeline-item-content-line-height: unset;
   --timeline-item-content-color: unset;
   --timeline-item-last-content-min-height: 0.48rem;

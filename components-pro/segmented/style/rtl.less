@@ -1,0 +1,32 @@
+@import '../../../components/style/themes/default';
+
+@segmented-prefix: ~'@{c7n-pro-prefix}-segmented';
+@pro-radio-prefix-cls: ~'@{c7n-pro-prefix}-radio';
+
+.@{segmented-prefix}-wrapper-rtl {
+  direction: rtl;
+
+  .@{segmented-prefix}.@{segmented-prefix}-vertical {
+    .@{pro-radio-prefix-cls}-button:not(:first-of-type) {
+      .@{pro-radio-prefix-cls}-inner {
+        border-right: none;
+      }
+    }
+  }
+
+  .@{segmented-prefix} {
+    .@{pro-radio-prefix-cls}-button {
+      + .@{pro-radio-prefix-cls}-button {
+        margin-right: 0;
+        margin-left: unset;
+      }
+
+      &:not(:first-of-type) {
+        .@{pro-radio-prefix-cls}-inner {
+          border-right: @segmented-interval-border-width @segmented-interval-border-color @segmented-interval-border-style;
+          border-left: none;
+        }
+      }
+    }
+  }
+}

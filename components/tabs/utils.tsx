@@ -127,13 +127,13 @@ export function isVertical(tabBarPosition: TabsPosition | undefined): boolean {
   return tabBarPosition === TabsPosition.left || tabBarPosition === TabsPosition.right;
 }
 
-export function getTransformByIndex(index: number, tabBarPosition: TabsPosition | undefined) {
+export function getTransformByIndex(index: number, tabBarPosition: TabsPosition | undefined, isRTL: boolean) {
   const translate = isVertical(tabBarPosition) ? 'translateY' : 'translateX';
-  return `${translate}(${-index * 100}%) translateZ(0)`;
+  return `${translate}(${(isRTL ? index : -index) * 100}%) translateZ(0)`;
 }
 
-export function getMarginStyle(index: number, tabBarPosition: TabsPosition | undefined) {
-  const marginDirection = isVertical(tabBarPosition) ? 'marginTop' : 'marginLeft';
+export function getMarginStyle(index: number, tabBarPosition: TabsPosition | undefined, isRTL: boolean) {
+  const marginDirection = isVertical(tabBarPosition) ? 'marginTop' : isRTL ? 'marginRight' : 'marginLeft';
   return {
     [marginDirection]: `${-index * 100}%`,
   };

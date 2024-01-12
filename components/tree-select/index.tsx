@@ -49,6 +49,11 @@ export default class TreeSelect extends Component<TreeSelectProps, any> {
     );
   }
 
+  get isRTL(): boolean {
+    const { getConfig } = this.context;
+    return getConfig('direction') === 'rtl';
+  }
+
   focus() {
     this.rcTreeSelect.focus();
   }
@@ -78,6 +83,7 @@ export default class TreeSelect extends Component<TreeSelectProps, any> {
       {
         [`${prefixCls}-lg`]: size === Size.large,
         [`${prefixCls}-sm`]: size === Size.small,
+        [`${prefixCls}-wrapper-rtl`]: this.isRTL,
       },
       className,
     );
@@ -86,10 +92,13 @@ export default class TreeSelect extends Component<TreeSelectProps, any> {
     if (checkable) {
       checkable = <span className={`${prefixCls}-tree-checkbox-inner`} />;
     }
+    const dropdownCls = classNames(dropdownClassName, `${prefixCls}-tree-dropdown`, {
+      [`${prefixCls}-dropdown-rtl`]: this.isRTL,
+    });
     return (
       <RcTreeSelect
         {...restProps}
-        dropdownClassName={classNames(dropdownClassName, `${prefixCls}-tree-dropdown`)}
+        dropdownClassName={dropdownCls}
         prefixCls={prefixCls}
         className={cls}
         dropdownStyle={{ maxHeight: '100vh', overflow: 'auto', ...dropdownStyle }}

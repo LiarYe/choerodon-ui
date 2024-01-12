@@ -131,11 +131,13 @@ export default class Segmented extends SelectBox<SegmentedProps> {
       if (radioInputDom && radioInputDom.element && radioInputDom.element.parentElement) {
         const radioDom = radioInputDom.element.parentElement;
         let parentDomPadding = 4;
+        let translateX = 0;
         if (radioDom.parentElement) {
           const parentDomStyle = window.getComputedStyle(radioDom.parentElement);
           const parentDomPaddingLeft = toPx(parentDomStyle.paddingLeft);
           const parentDomPaddingTop = toPx(parentDomStyle.paddingTop);
           parentDomPadding = defaultTo(vertical ? parentDomPaddingTop : parentDomPaddingLeft, parentDomPadding);
+          translateX = radioDom.parentElement.getBoundingClientRect().right - radioDom.getBoundingClientRect().right - parentDomPadding;
         }
         segActiveStyle = {
           ...segActiveStyle,
@@ -144,7 +146,7 @@ export default class Segmented extends SelectBox<SegmentedProps> {
           height: radioDom.offsetHeight,
           transform: vertical
             ? `translate(0px, ${radioDom.offsetTop - parentDomPadding}px)`
-            : `translate(${radioDom.offsetLeft - parentDomPadding}px, 0px)`,
+            : `translate(${this.isRTL ? -translateX : (radioDom.offsetLeft - parentDomPadding)}px, 0px)`,
         }
       }
     }

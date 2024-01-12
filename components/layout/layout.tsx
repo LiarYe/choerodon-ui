@@ -73,7 +73,7 @@ class BasicLayout extends PureComponent<BasicProps, any> {
 
   getContextValue() {
     const { siders } = this.state;
-    const { getPrefixCls } = this.context;
+    const { getPrefixCls, getConfig } = this.context;
     return {
       siderHook: {
         addSider: (id: string) => {
@@ -88,6 +88,7 @@ class BasicLayout extends PureComponent<BasicProps, any> {
         },
       },
       getPrefixCls,
+      getConfig,
     };
   }
 

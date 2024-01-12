@@ -227,6 +227,7 @@
 @btn-icon-only-size-lg: var(--btn-icon-only-size-lg);
 @btn-icon-font-weight: var(--btn-icon-font-weight);
 @btn-icon-margin: var(--btn-icon-margin);
+@btn-icon-margin-rtl: var(--btn-icon-margin-rtl);
 
 // raised button
 @btn-raised-border-width-base: var(--btn-raised-border-width-base);
@@ -671,6 +672,7 @@
 @input-float-tag-line-height-base: var(--input-float-tag-line-height-base);
 @input-float-tag-margin-vertical: var(--input-float-tag-margin-vertical);
 @input-float-tag-padding: var(--input-float-tag-padding);
+@input-float-tag-padding-rtl: var(--input-float-tag-padding-rtl);
 @input-float-tag-border-radius: var(--input-float-tag-border-radius);
 @input-float-tag-error-bg: var(--input-float-tag-error-bg);
 @input-float-tag-close-color: var(--input-float-tag-close-color);
@@ -683,7 +685,9 @@
 @input-multiple-margin: var(--input-multiple-margin);
 @input-multiple-padding: var(--input-multiple-padding);
 @input-multiple-input-margin: var(--input-multiple-input-margin);
+@input-multiple-input-margin-rtl: var(--input-multiple-input-margin-rtl);
 @input-float-multiple-margin: var(--input-float-multiple-margin);
+@input-float-multiple-margin-rtl: var(--input-float-multiple-margin-rtl);
 @input-float-multiple-padding: var(--input-float-multiple-padding);
 @textarea-padding: var(--textarea-padding);
 // 新增
@@ -839,6 +843,7 @@
 @popover-distance: var(--popover-distance);
 @popover-message-padding: var(--popover-message-padding);
 @popover-message-title-padding: var(--popover-message-title-padding);
+@popover-message-title-padding-rtl: var(--popover-message-title-padding-rtl);
 @popover-title-padding: var(--popover-title-padding);
 @popover-content-under-title-padding: var(--popover-content-under-title-padding);
 @popover-title-border-bottom: var(--popover-title-border-bottom);
@@ -871,6 +876,7 @@
 @modal-header-footer-border: var(--modal-header-footer-border);
 @modal-drawer-footer-text-align: var(--modal-drawer-footer-text-align);
 @modal-confirm-icon-padding: var(--modal-confirm-icon-padding);
+@modal-confirm-icon-padding-rtl: var(--modal-confirm-icon-padding-rtl);
 @modal-confirm-icon-font-size: var(--modal-confirm-icon-font-size);
 @modal-confirm-icon-line-height: var(--modal-confirm-icon-line-height);
 @modal-no-border-header-padding: var(--modal-no-border-header-padding);
@@ -1036,9 +1042,12 @@
 @table-dynamic-filter-required-active-box-shadow: var(--table-dynamic-filter-required-active-box-shadow);
 @table-dynamic-filter-number-step-height: var(--table-dynamic-filter-number-step-height);
 @table-professional-query-button-padding: var(--table-professional-query-button-padding);
+@table-professional-query-button-padding-rtl: var(--table-professional-query-button-padding-rtl);
 @table-professional-query-button-vertical-padding: var(--table-professional-query-button-vertical-padding);
+@table-professional-query-button-vertical-padding-rtl: var(--table-professional-query-button-vertical-padding-rtl);
 @table-combo-filter-wrapper-margin: var(--table-combo-filter-wrapper-margin);
 @table-combo-filter-content-margin: var(--table-combo-filter-content-margin);
+@table-combo-filter-content-margin-rtl: var(--table-combo-filter-content-margin-rtl);
 @table-combo-filter-single-line-divide-margin: var(--table-combo-filter-single-line-divide-margin);
 @table-combo-filter-menu-reset-button-bg: var(--table-combo-filter-menu-reset-button-bg);
 @table-filter-item-icon-line-height: var(--table-filter-item-icon-line-height);
@@ -1183,6 +1192,7 @@
 @card-actions-item-padding: var(--card-actions-item-padding);
 @card-grid-body-padding: var(--card-grid-body-padding);
 @card-grid-body-margin: var(--card-grid-body-margin);
+@card-grid-body-margin-rtl: var(--card-grid-body-margin-rtl);
 @card-loading-body-padding: var(--card-loading-body-padding);
 @card-head-color: var(--card-head-color);
 @card-head-background: var(--card-head-background);
@@ -1216,6 +1226,7 @@
 @tab-bar-margin: var(--tab-bar-margin);
 @tab-bar-padding: var(--tab-bar-padding);
 @tab-horizontal-margin: var(--tab-horizontal-margin);
+@tab-horizontal-margin-rtl: var(--tab-horizontal-margin-rtl);
 @tab-vertical-margin: var(--tab-vertical-margin);
 @tab-horizontal-padding-vertical: var(--tab-horizontal-padding-vertical);
 @tab-horizontal-padding-horizontal: var(--tab-horizontal-padding-horizontal);
@@ -1258,6 +1269,7 @@
 @tabs-groups-group-item-selected-box-shadow: var(--tabs-groups-group-item-selected-box-shadow);
 @tabs-bar-divider-margin: var(--tabs-bar-divider-margin);
 @tabs-vertical-left-content-padding: var(--tabs-vertical-left-content-padding);
+@tabs-vertical-left-content-padding-rtl: var(--tabs-vertical-left-content-padding-rtl);
 @tabs-card-bar-border: var(--tabs-card-bar-border);
 @tabs-card-min-width: var(--tabs-card-min-width);
 
@@ -1380,6 +1392,7 @@
 @pagination-size-changer-not-editable-border-color: var(--pagination-size-changer-not-editable-border-color);
 @pagination-size-changer-margin: var(--pagination-size-changer-margin);
 @pagination-quick-jumper-margin: var(--pagination-quick-jumper-margin);
+@pagination-quick-jumper-margin-rtl: var(--pagination-quick-jumper-margin-rtl);
 @pagination-quick-jumper-border-color: var(--pagination-quick-jumper-border-color);
 @pagination-color: var(--pagination-color);
 @pagination-pager-height: var(--pagination-pager-height);
@@ -1546,11 +1559,14 @@
 @alert-message-line-height: var(--alert-message-line-height);
 @alert-text-color: var(--alert-text-color);
 @alert-padding: var(--alert-padding);
+@alert-padding-rtl: var(--alert-padding-rtl);
 @alert-close-wrapper-margin: var(--alert-close-wrapper-margin);
+@alert-close-wrapper-margin-rtl: var(--alert-close-wrapper-margin-rtl);
 @alert-close-wrapper-padding: var(--alert-close-wrapper-padding);
 @alert-no-icon-padding: var(--alert-no-icon-padding);
 @alert-description-line-height: var(--alert-description-line-height);
 @alert-with-description-padding: var(--alert-with-description-padding);
+@alert-with-description-padding-rtl: var(--alert-with-description-padding-rtl);
 @alert-with-description-message-margin: var(--alert-with-description-message-margin);
 @alert-with-description-no-icon-padding: var(--alert-with-description-no-icon-padding);
 @alert-with-description-icon-size: var(--alert-with-description-icon-size);
@@ -1560,7 +1576,9 @@
 // Lov
 @lov-selection-list-bg: var(--lov-selection-list-bg);
 @lov-table-professional-query-button-padding: var(--lov-table-professional-query-button-padding);
+@lov-table-professional-query-button-padding-rtl: var(--lov-table-professional-query-button-padding-rtl);
 @lov-table-professional-query-button-vertical-padding: var(--lov-table-professional-query-button-vertical-padding);
+@lov-table-professional-query-button-vertical-padding-rtl: var(--lov-table-professional-query-button-vertical-padding-rtl);
 
 // Typography
 @heading-1-size: var(--heading-1-size);
@@ -1609,6 +1627,7 @@
 @typography-color: var(--typography-color);
 @typography-font-size: var(--typography-font-size);
 @typography-blockquote-padding: var(--typography-blockquote-padding);
+@typography-blockquote-padding-rtl: var(--typography-blockquote-padding-rtl);
 
 // Segmented
 @segmented-color: var(--segmented-color);
@@ -1656,6 +1675,7 @@
 @timeline-item-padding: var(--timeline-item-padding);
 @timeline-item-content-top: var(--timeline-item-content-top);
 @timeline-item-content-padding: var(--timeline-item-content-padding);
+@timeline-item-content-padding-rtl: var(--timeline-item-content-padding-rtl);
 @timeline-item-header-size: var(--timeline-item-header-size);
 @timeline-item-content-line-height: var(--timeline-item-content-line-height);
 @timeline-item-content-color: var(--timeline-item-content-color);

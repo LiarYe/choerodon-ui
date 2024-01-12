@@ -1,0 +1,27 @@
+@import "../../style/themes/default";
+
+@input-prefix-cls: ~"@{c7n-prefix}-input";
+@calendar-prefix-cls: ~"@{c7n-prefix}-calendar";
+
+.@{calendar-prefix-cls}-picker-wrapper-rtl {
+  direction: rtl;
+
+  .@{calendar-prefix-cls}-picker {
+    &-clear {
+      right: unset;
+      left: 0.2rem;
+    }
+  }
+
+  &.@{calendar-prefix-cls}-picker-small .@{calendar-prefix-cls}-picker-clear,
+  &.@{calendar-prefix-cls}-picker-small .@{calendar-prefix-cls}-picker-icon {
+    right: unset;
+    left: @control-padding-horizontal-sm;
+  }
+}
+
+// 弹窗
+.@{calendar-prefix-cls}-picker-container-rtl {
+  // TODO: 待处理 rtl
+  direction: ltr;
+}

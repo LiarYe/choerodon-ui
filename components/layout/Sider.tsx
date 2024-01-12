@@ -207,7 +207,7 @@ export default class Sider extends PureComponent<SiderProps, SiderState> {
       ...others
     } = this.props;
     const { collapsed, below } = this.state;
-    const { getPrefixCls } = this.context;
+    const { getPrefixCls, getConfig } = this.context;
     const prefixCls = getPrefixCls('layout-sider', customizePrefixCls);
     const divProps = omit(others, ['collapsed', 'defaultCollapsed', 'onCollapse', 'breakpoint', 'onBreakpoint']);
     const rawWidth = collapsed ? collapsedWidth : width;
@@ -250,7 +250,7 @@ export default class Sider extends PureComponent<SiderProps, SiderState> {
       [`${prefixCls}-zero-width`]: parseFloat(siderWidth) === 0,
     });
     return (
-      <LayoutSiderContextProvider {...this.getContextValue()} getPrefixCls={getPrefixCls}>
+      <LayoutSiderContextProvider {...this.getContextValue()} getPrefixCls={getPrefixCls} getConfig={getConfig}>
         <div className={siderCls} {...divProps} style={divStyle}>
           <div className={`${prefixCls}-children`}>{children}</div>
           {collapsible || (below && zeroWidthTrigger) ? triggerDom : null}

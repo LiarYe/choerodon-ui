@@ -1,0 +1,275 @@
+@import '../../style/themes/default';
+
+@tab-prefix-cls: ~'@{c7n-prefix}-tabs';
+@tabs-customization-prefix-cls: ~'@{c7n-prefix}-tabs-customization';
+
+.@{tab-prefix-cls}-wrapper-rtl {
+  direction: rtl;
+
+  // card
+  &.@{tab-prefix-cls} {
+    &.@{tab-prefix-cls}-card > .@{tab-prefix-cls}-bar .@{tab-prefix-cls}-tab {
+      margin-right: unset;
+      margin-left: @tabs-card-tab-margin-right;
+    }
+
+    &.@{tab-prefix-cls}-card > .@{tab-prefix-cls}-bar .@{tab-prefix-cls}-tab .@{iconfont-css-prefix}-close {
+      margin-right: 0.03rem;
+      margin-left: -0.05rem;
+    }
+  }
+
+  .@{tab-prefix-cls}-extra-content {
+    margin-right: 0.02rem;
+    margin-left: unset;
+  }
+
+  .@{tab-prefix-cls}-nav-add {
+    margin-right: unset;
+    margin-left: 0.02rem;
+  }
+
+  .@{tab-prefix-cls}-nav-vertical-add {
+    border-right: @border-width-base @border-style-base @border-color-split;
+    border-left: none;
+  }
+
+  &.@{tab-prefix-cls}-vertical.@{tab-prefix-cls}-card.@{tab-prefix-cls}-left > .@{tab-prefix-cls}-bar {
+    .@{tab-prefix-cls}-nav-wrap {
+      margin-right: unset;
+      margin-left: 0;
+    }
+
+    .@{tab-prefix-cls}-tab {
+      margin-right: 0.02rem;
+      margin-left: 0.01rem;
+      border-right: @tabs-card-tab-border;
+      border-left: 0;
+      border-radius: 0 @border-radius-base @border-radius-base 0;
+
+      &-active {
+        margin-right: unset;
+        margin-left: -0.01rem;
+      }
+    }
+  }
+
+  &.@{tab-prefix-cls}-vertical.@{tab-prefix-cls}-card.@{tab-prefix-cls}-right > .@{tab-prefix-cls}-bar {
+    .@{tab-prefix-cls}-nav-wrap {
+      margin-right: 0;
+      margin-left: unset;
+    }
+
+    .@{tab-prefix-cls}-tab {
+      margin-right: 0.01rem;
+      margin-left: 0.02rem;
+      border-right: 0;
+      border-left: @tabs-card-tab-border;
+      border-radius: @border-radius-base 0 0 @border-radius-base;
+
+      &-active {
+        margin-right: -0.01rem;
+        margin-left: unset;
+      }
+    }
+  }
+
+  // tabs
+  .@{tab-prefix-cls}-ink-bar {
+    right: 0;
+    left: unset;
+    transform-origin: 100% 0;
+  }
+
+  .@{tab-prefix-cls}-group {
+    &-item {
+      .icon {
+        margin-right: unset;
+        margin-left: 0.08rem;
+      }
+
+      .@{tab-prefix-cls}-invalid-badge.@{c7n-prefix}-badge {
+        > .@{tab-prefix-cls}-invalid-badge-content.@{c7n-prefix}-scroll-number-custom-component {
+          right: unset;
+          left: 0;
+        }
+      }
+
+      &:last-child .@{tab-prefix-cls}-invalid-badge.@{c7n-prefix}-badge > .@{tab-prefix-cls}-invalid-badge-content.@{c7n-prefix}-scroll-number-custom-component {
+        right: unset;
+        left: calc(-1 * @tab-groups-padding);
+      }
+    }
+  }
+
+  .@{tab-prefix-cls}-nav-container {
+    &-scrolling {
+      padding-right: calc(@tab-scrolling-size + 0.02rem);
+      padding-left: @tab-scrolling-size;
+    }
+  }
+
+  .@{tab-prefix-cls}-tab-prev,
+  .@{tab-prefix-cls}-tab-next {
+    &-icon {
+      right: 50%;
+      left: unset;
+      transform: translate(50%, -50%) rotateY(180deg);
+    }
+  }
+
+  .@{tab-prefix-cls}-tab-next {
+    right: unset;
+    left: 0;
+
+    &-icon::before {
+      right: 0;
+      left: unset;
+    }
+  }
+
+  .@{tab-prefix-cls}-tab-prev {
+    right: 0;
+    left: unset;
+
+    &-icon::before {
+      right: 0;
+      left: unset;
+    }
+  }
+
+  .@{tab-prefix-cls}-nav, .@{tab-prefix-cls}-second-nav {
+    padding-right: 0;
+    padding-left: unset;
+
+    .@{tab-prefix-cls}-tab {
+      margin: @tab-horizontal-margin-rtl;
+
+      &:last-child {
+        margin-right: unset;
+        margin-left: 0;
+      }
+
+      .@{iconfont-css-prefix} {
+        margin-right: unset;
+        margin-left: 0.08rem;
+      }
+
+      &-count {
+        margin-right: .05rem;
+        margin-left: unset;
+      }
+    }
+  }
+
+  &.@{tab-prefix-cls}-vertical {
+    > .@{tab-prefix-cls}-bar {
+      .@{tab-prefix-cls}-tab {
+        margin: @tab-vertical-margin;
+      }
+
+      .@{tab-prefix-cls}-ink-bar {
+        right: auto;
+        left: unset;
+      }
+    }
+  }
+
+  &.@{tab-prefix-cls}-vertical.@{tab-prefix-cls}-left {
+    > .@{tab-prefix-cls}-bar {
+      float: right;
+      margin-right: unset;
+      margin-left: -0.01rem;
+      border-right: none;
+      border-left: @tabs-bar-vertical-left-border-right;
+
+      .@{tab-prefix-cls}-tab {
+        text-align: left;
+      }
+
+      .@{tab-prefix-cls}-nav-container {
+        margin-right: unset;
+        margin-left: -0.01rem;
+      }
+
+      .@{tab-prefix-cls}-nav-wrap {
+        margin-right: unset;
+        margin-left: -0.01rem;
+      }
+
+      .@{tab-prefix-cls}-ink-bar {
+        right: unset;
+        left: 0.01rem;
+      }
+    }
+
+    > .@{tab-prefix-cls}-content {
+      padding: @tabs-vertical-left-content-padding-rtl;
+    }
+  }
+
+  &.@{tab-prefix-cls}-vertical.@{tab-prefix-cls}-right {
+    > .@{tab-prefix-cls}-bar {
+      float: left;
+      margin-right: -0.01rem;
+      margin-left: unset;
+      border-right: @tabs-bar-vertical-right-border-left;
+      border-left: none;
+
+      .@{tab-prefix-cls}-tab {
+        text-align: right;
+      }
+
+      .@{tab-prefix-cls}-nav-container {
+        margin-right: -0.01rem;
+        margin-left: unset;
+      }
+
+      .@{tab-prefix-cls}-nav-wrap {
+        margin-right: -0.01rem;
+        margin-left: unset;
+      }
+
+      .@{tab-prefix-cls}-ink-bar {
+        right: 0.01rem;
+        left: unset;
+      }
+    }
+
+    > .@{tab-prefix-cls}-content {
+      padding-right: unset;
+      padding-left: 0.24rem;
+      border-right: unset;
+      border-left: @border-width-base @border-style-base @border-color-split;
+    }
+  }
+
+  .@{tab-prefix-cls}-invalid-badge.@{c7n-prefix}-badge > .@{tab-prefix-cls}-invalid-badge-content.@{c7n-prefix}-scroll-number-custom-component {
+    right: unset;
+    left: -0.1rem;
+  }
+}
+
+.@{c7n-pro-prefix}-wrapper-rtl {
+  // customization
+  .@{tabs-customization-prefix-cls} {
+    &-group {
+      &-item {
+        &-title {
+          &-default {
+            margin-right: .16rem;
+            margin-left: unset;
+          }
+        }
+
+        &-switcher {
+          &-icon {
+            &-close {
+              transform: rotate(90deg);
+            }
+          }
+        }
+      }
+    }
+  }
+}

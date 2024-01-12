@@ -98,7 +98,9 @@ const TabBar: FunctionComponent<TabBarProps> = function TabBar(props) {
     onTabClick,
     changeActiveKey,
     rippleDisabled,
+    getConfig,
   } = useContext(TabsContext);
+  const isRTL = getConfig('direction') === 'rtl';
   const modal = useModal();
   const openCustomizationModal = useCallback(() => {
     if (customizable) {
@@ -406,12 +408,12 @@ const TabBar: FunctionComponent<TabBarProps> = function TabBar(props) {
         } else if (transformSupported) {
           const left = Math.abs(target);
           if (navScroll.scrollTo) {
-            navScroll.scrollTo({ left });
+            navScroll.scrollTo({ left : isRTL ? 0 - left : left });
           } else {
-            navScroll.scrollLeft = left;
+            navScroll.scrollLeft = isRTL ? 0 - left : left;
           }
         } else {
-          navOffset.name = 'left';
+          navOffset.name = isRTL ? 'right' : 'left';
           navOffset.value = `${target}px`;
         }
         if (transformSupported) {
@@ -424,7 +426,7 @@ const TabBar: FunctionComponent<TabBarProps> = function TabBar(props) {
         }
       }
     }
-  }, [offsetRef, navRef, tabBarPosition]);
+  }, [offsetRef, navRef, tabBarPosition, isRTL]);
 
   const setNextPrev = useCallback(() => {
     const navNode = navRef.current;
@@ -471,7 +473,7 @@ const TabBar: FunctionComponent<TabBarProps> = function TabBar(props) {
     if (navWrapNode) {
       const navWrapNodeWH = getOffsetWH(navWrapNode);
       const offset = offsetRef.current - navWrapNodeWH;
-      setOffset(offset < 0 ? 0 : 0 - offset, setNextPrev);
+      setOffset(offset < 0 ? 0 : offset, setNextPrev);
     }
   }, [getOffsetWH, setOffset, navWrapRef, setNextPrev]);
 
@@ -482,7 +484,7 @@ const TabBar: FunctionComponent<TabBarProps> = function TabBar(props) {
       const navNodeWH = getScrollWH(navNode);
       const navWrapNodeWH = getOffsetWH(navWrapNode);
       const offset = offsetRef.current + navWrapNodeWH;
-      setOffset(0 - (offset > navNodeWH ? navNodeWH - navWrapNodeWH : offset), setNextPrev);
+      setOffset(offset > navNodeWH ? navNodeWH - navWrapNodeWH : offset, setNextPrev);
     }
   }, [getOffsetWH, setOffset, navWrapRef, setNextPrev]);
 
@@ -598,9 +600,13 @@ const TabBar: FunctionComponent<TabBarProps> = function TabBar(props) {
    
     let scrollLeft = 0;
     let scrollTop = 0;
+    let offsetWidth = 0;
+    let scrollDomLeft = 0;
     if (scrollDom) {
       scrollLeft = scrollDom.scrollLeft;
       scrollTop = scrollDom.scrollTop;
+      offsetWidth = scrollDom.offsetWidth;
+      scrollDomLeft = scrollDom.getBoundingClientRect().left;
     }
     const menuList: Array<MenuKeyValue> = [];
 
@@ -617,14 +623,15 @@ const TabBar: FunctionComponent<TabBarProps> = function TabBar(props) {
         if (!vertical) {
           const domLeft = dom.offsetLeft;
           const domWidth = dom.offsetWidth;
-          if (domLeft - scrollLeft < 0 || (domLeft - scrollLeft + domWidth) > navWrapNodeWH) {
+          if ((!isRTL && (domLeft - scrollLeft < 0 || (domLeft - scrollLeft + domWidth) > navWrapNodeWH)) ||
+            (isRTL && (dom.getBoundingClientRect().left < (scrollDomLeft - 1) || (dom.getBoundingClientRect().right - scrollDomLeft) > offsetWidth))) {
             menuList.push({ key, ...value });
           }
         } else {
           const domTop = dom.offsetTop;
           const font = getComputedStyle(dom).getPropertyValue('font');
           const domHeight = getTextHeight(dom, font);
-          if (domTop - scrollLeft < 0 || (domTop - scrollTop + domHeight) > navWrapNodeWH) {
+          if (domTop - scrollTop < 0 || (domTop - scrollTop + domHeight) > navWrapNodeWH) {
             menuList.push({ key, ...value });
           }
         }
@@ -632,7 +639,7 @@ const TabBar: FunctionComponent<TabBarProps> = function TabBar(props) {
     }
     setMenuList(menuList);
     setOffset(vertical ? scrollTop : scrollLeft, setNextPrev);
-  }, [tabBarPosition]);
+  }, [tabBarPosition, isRTL]);
 
   const renderInkBar = () => {
     const inkBarNode = inkBarRef.current;
@@ -659,14 +666,16 @@ const TabBar: FunctionComponent<TabBarProps> = function TabBar(props) {
           }
           // use 3d gpu to optimize render
           if (transformSupported) {
-            setTransform(inkBarNodeStyle, `translate3d(${left}px,0,0)`);
+            setTransform(inkBarNodeStyle, `translate3d(${isRTL ? '-' : ''}${left}px,0,0)`);
             inkBarNodeStyle.width = `${width}px`;
             inkBarNodeStyle.height = '';
           } else {
-            inkBarNodeStyle.left = `${left}px`;
+            const leftStyle = `${left}px`;
+            const rightStyle = `${wrapNode.offsetWidth - left - width}px`;
+            inkBarNodeStyle.left = isRTL ? rightStyle : leftStyle;
             inkBarNodeStyle.top = '';
             inkBarNodeStyle.bottom = '';
-            inkBarNodeStyle.right = `${wrapNode.offsetWidth - left - width}px`;
+            inkBarNodeStyle.right = isRTL ? leftStyle : rightStyle;
           }
         } else {
           let top = getTop(activeTab, wrapNode);

@@ -58,6 +58,11 @@ export default function wrapPicker(Picker: ComponentClass<any>, defaultFormat?: 
       }
     }
 
+    get isRTL(): boolean {
+      const { getConfig } = this.context;
+      return getConfig('direction') === 'rtl';
+    }
+
     handleOpenChange = (open: boolean) => {
       const { onOpenChange } = this.props;
       onOpenChange(open);
@@ -108,6 +113,7 @@ export default function wrapPicker(Picker: ComponentClass<any>, defaultFormat?: 
       const { prefixCls = getPrefixCls('calendar'), inputPrefixCls = getPrefixCls('input') } = props;
       const pickerClass = classNames(`${prefixCls}-picker`, {
         [`${prefixCls}-picker-${props.size}`]: !!props.size,
+        [`${prefixCls}-picker-wrapper-rtl`]: this.isRTL,
       });
       const pickerInputClass = classNames(`${prefixCls}-picker-input`, inputPrefixCls, {
         [`${inputPrefixCls}-lg`]: props.size === Size.large,
@@ -137,6 +143,9 @@ export default function wrapPicker(Picker: ComponentClass<any>, defaultFormat?: 
           transitionName="slide-up"
         />
       ) : null;
+      const dropdownClassName = classNames(props.dropdownClassName, {
+        [`${prefixCls}-picker-container-rtl`]: this.isRTL,
+      });
 
       return (
         <Picker
@@ -151,6 +160,7 @@ export default function wrapPicker(Picker: ComponentClass<any>, defaultFormat?: 
           onOpenChange={this.handleOpenChange}
           onFocus={this.handleFocus}
           onBlur={this.handleBlur}
+          dropdownClassName={dropdownClassName}
         />
       );
     };

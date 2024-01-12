@@ -1,0 +1,157 @@
+@import '../../style/themes/default';
+
+@upload-prefix-cls: ~'@{c7n-prefix}-upload';
+@upload-item: ~'@{c7n-prefix}-upload-list-item';
+
+.@{upload-prefix-cls}-wrapper-rtl {
+  direction: rtl;
+
+  .@{upload-prefix-cls}-list {
+    &-item {
+      &-name {
+        padding-right: 0.08rem;
+        padding-left: 0.05rem;
+      }
+
+      &-info {
+        padding: 0 0.04rem 0 0.12rem;
+
+        &-filesize {
+          padding-right: unset;
+          padding-left: 0.08rem;
+        }
+      }
+
+      .@{upload-prefix-cls}-actions {
+        .@{iconfont-css-prefix} {
+          padding-right: 0.04rem;
+          padding-left: unset;
+        }
+      }
+
+      &-progress {
+        padding-right: calc(@font-size-base + 0.12rem);
+        padding-left: unset;
+      }
+    }
+
+    &-text {
+      .@{upload-item}-reupload-text {
+        padding-right: unset;
+        padding-left: 0.08rem;
+      }
+    }
+
+    &-picture,
+    &-picture-card {
+      .@{upload-item} {
+        &-error {
+          .@{upload-item}-name {
+            padding-right: unset;
+            padding-left: 0.24rem;
+          }
+        }
+      }
+
+      .@{upload-item}-info {
+        padding: 0;
+      }
+
+      .@{upload-item}-thumbnail {
+        right: 0.08rem;
+        left: unset;
+      }
+
+      .@{upload-item}-icon {
+        right: 50%;
+        left: unset;
+        margin-right: -.18rem;
+        margin-left: unset;
+      }
+
+      .@{upload-item}-name {
+        padding-right: 0.48rem;
+        padding-left: 0.2rem;
+      }
+
+      .@{upload-item}-error-reupload,
+      .@{upload-item}-done-reupload {
+        .@{upload-item}-name {
+          padding-right: unset;
+          padding-left: 0.8rem;
+        }
+      }
+
+      .@{upload-item}-progress {
+        padding-right: 0.56rem;
+        padding-left: unset;
+      }
+    }
+
+    &-picture {
+      .@{upload-item}-uploading {
+        .@{upload-item}-info {
+          .@{c7n-prefix}-progress-loading {
+            padding-right: 14px;
+            padding-left: unset;
+          }
+
+          .@{upload-item}-name {
+            padding-right: 14px;
+            padding-left: unset;
+          }
+
+          .@{upload-item}-text {
+            padding-right: unset;
+            padding-left: 0.1rem;
+          }
+        }
+      }
+
+      .@{upload-item}-name {
+        margin-right: 0.08rem;
+        margin-left: unset;
+      }
+
+      .@{upload-prefix-cls}-actions {
+        right: unset;
+        left: 0.08rem;
+      }
+
+      .@{upload-item}-reupload-picture {
+        padding-right: unset;
+        padding-left: 0.04rem;
+      }
+    }
+
+    &-picture-card {
+      .@{upload-item} {
+        float: right;
+      }
+
+      .@{upload-item}-picture-card {
+        &::before {
+          right: 0;
+          left: unset;
+        }
+      }
+
+      .@{upload-item}-actions {
+        right: 50%;
+        left: unset;
+        transform: translate(50%, -50%);
+
+        .@{upload-prefix-cls}-reupload-action {
+          right: 50%;
+          left: unset;
+          transform: translate(50%, -50%);
+        }
+      }
+
+      .@{upload-item}-progress {
+        padding-right: 0;
+        padding-left: unset;
+      }
+    }
+  }
+}

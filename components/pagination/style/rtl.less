@@ -1,0 +1,17 @@
+@import '../../style/themes/default';
+
+@pagination-prefix-cls: ~'@{c7n-prefix}-pagination';
+
+// TODO: 待处理 细节
+.@{pagination-prefix-cls}-wrapper-rtl {
+  direction: rtl;
+
+  .@{pagination-prefix-cls} {
+    &-first .icon-first_page,
+    &-last .icon-last_page,
+    &-prev .icon-navigate_before,
+    &-next .icon-navigate_next {
+      transform: rotateY(180deg);
+    }
+  }
+}

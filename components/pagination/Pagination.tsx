@@ -106,6 +106,11 @@ export default class Pagination extends Component<PaginationProps, {}> {
 
   context: ConfigContextValue;
 
+  get isRTL(): boolean {
+    const { getConfig } = this.context;
+    return getConfig('direction') === 'rtl';
+  }
+
   renderPagination = (contextLocale: PaginationLocale) => {
     const {
       className,
@@ -122,6 +127,9 @@ export default class Pagination extends Component<PaginationProps, {}> {
     const locale = { ...contextLocale, ...customLocale };
     const isSmall = size === Size.small;
     const pageProps = getConfig('pagination');
+    const cls = classNames(className, { [`${prefixCls}-${size}`]: size }, { mini: isSmall }, {
+      [`${prefixCls}-wrapper-rtl`]: this.isRTL,
+    });
     return (
       <RcPagination
         {...pageProps}
@@ -129,7 +137,7 @@ export default class Pagination extends Component<PaginationProps, {}> {
         selectProps={selectProps}
         prefixCls={prefixCls}
         size={size}
-        className={classNames(className, { [`${prefixCls}-${size}`]: size }, { mini: isSmall })}
+        className={cls}
         selectComponentClass={getSelect(size)}
         locale={locale}
       />

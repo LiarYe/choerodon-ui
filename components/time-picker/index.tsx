@@ -95,6 +95,11 @@ export default class TimePicker extends Component<TimePickerProps, any> {
     }
   }
 
+  get isRTL(): boolean {
+    const { getConfig } = this.context;
+    return getConfig('direction') === 'rtl';
+  }
+
   handleChange = (value: Moment) => {
     if (!('value' in this.props)) {
       this.setState({ value });
@@ -146,10 +151,15 @@ export default class TimePicker extends Component<TimePickerProps, any> {
     const format = this.getDefaultFormat();
     const className = classNames(props.className, {
       [`${prefixCls}-${props.size}`]: !!props.size,
+      [`${prefixCls}-wrapper-rtl`]: this.isRTL,
     });
 
     const addon = (panel: ReactElement<any>) =>
       props.addon ? <div className={`${prefixCls}-panel-addon`}>{props.addon(panel)}</div> : null;
+    
+    const popupCls = classNames(props.popupClassName, {
+      [`${prefixCls}-panel-rtl`]: this.isRTL,
+    })
 
     return (
       <RcTimePicker
@@ -165,6 +175,7 @@ export default class TimePicker extends Component<TimePickerProps, any> {
         onOpen={this.handleOpenClose}
         onClose={this.handleOpenClose}
         addon={addon}
+        popupClassName={popupCls}
       />
     );
   };

@@ -164,6 +164,11 @@ export default class Tree extends Component<TreeProps, any> {
 
   context: ConfigContextValue;
 
+  get isRTL(): boolean {
+    const { getConfig } = this.context;
+    return getConfig('direction') === 'rtl';
+  }
+
   renderSwitcherIcon = ({ isLeaf, loading }: C7nTreeNodeProps) => {
     const { showLine, switcherIcon } = this.props;
     const prefixCls = this.getPrefixCls();
@@ -225,12 +230,15 @@ export default class Tree extends Component<TreeProps, any> {
       ...props,
       showLine: Boolean(showLine),
     };
+    const cls = classNames(!showIcon && `${prefixCls}-icon-hide`, className, {
+      [`${prefixCls}-wrapper-rtl`]: this.isRTL,
+    });
     return (
       <RcTree
         itemHeight={20}
         ref={this.setTreeRef}
         {...newProps}
-        className={classNames(!showIcon && `${prefixCls}-icon-hide`, className)}
+        className={cls}
         checkable={checkable ? <span className={`${prefixCls}-checkbox-inner`} /> : 0}
         switcherIcon={this.renderSwitcherIcon}
         prefixCls={prefixCls}

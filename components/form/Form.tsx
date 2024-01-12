@@ -182,6 +182,11 @@ export default class Form extends Component<FormProps, any> {
     return PureRenderMixin.shouldComponentUpdate.apply(this, args);
   }
 
+  get isRTL(): boolean {
+    const { getConfig } = this.context;
+    return getConfig('direction') === 'rtl';
+  }
+
   render() {
     const { prefixCls: customizePrefixCls, hideRequiredMark, className = '', layout } = this.props;
     const { getPrefixCls } = this.context;
@@ -191,6 +196,7 @@ export default class Form extends Component<FormProps, any> {
       {
         [`${prefixCls}-${layout}`]: layout,
         [`${prefixCls}-hide-required-mark`]: hideRequiredMark,
+        [`${prefixCls}-wrapper-rtl`]: this.isRTL,
       },
       className,
     );

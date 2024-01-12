@@ -118,11 +118,18 @@ export default class Menu extends PureComponent<MenuProps, MenuState> {
     };
   }
 
+  get isRTL(): boolean {
+    const { getConfig } = this.context;
+    return getConfig('direction') === 'rtl';
+  }
+
   getContextValue() {
     const { theme } = this.props;
+    const { getConfig } = this.context;
     return {
       inlineCollapsed: this.getInlineCollapsed(),
       menuTheme: theme,
+      getConfig,
     };
   }
 
@@ -256,6 +263,7 @@ export default class Menu extends PureComponent<MenuProps, MenuState> {
 
     const menuClassName = classNames(className, `${prefixCls}-${theme}`, {
       [`${prefixCls}-inline-collapsed`]: this.getInlineCollapsed(),
+      [`${prefixCls}-wrapper-rtl`]: this.isRTL,
     });
 
     const menuProps: MenuProps = {
