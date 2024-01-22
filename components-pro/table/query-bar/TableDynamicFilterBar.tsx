@@ -289,6 +289,7 @@ export interface TableDynamicFilterBarProps extends ElementProps {
   advancedSearchFields?: AdvancedSearchField[];
   defaultActiveKey?: string;
   tableStore?: TableStore;
+  showSingleLine?: boolean;
 }
 
 export const CONDITIONSTATUS = '__CONDITIONSTATUS__';
@@ -1757,7 +1758,7 @@ export default class TableDynamicFilterBar extends Component<TableDynamicFilterB
    */
   getQueryBar(): ReactNode {
     const { getConfig } = this.context;
-    const { queryFieldsLimit = 3, queryFields, queryDataSet, dataSet, fuzzyQueryOnly } = this.props;
+    const { queryFieldsLimit = 3, queryFields, queryDataSet, dataSet, fuzzyQueryOnly, showSingleLine } = this.props;
     const menuDataSet = dataSet.getState(MENUDATASET);
     const isTenant = menuDataSet && menuDataSet.current && menuDataSet.current.get('isTenant');
     let fieldsLimit = queryFieldsLimit;
@@ -1766,12 +1767,13 @@ export default class TableDynamicFilterBar extends Component<TableDynamicFilterB
     }
     const { prefixCls } = this;
     const selectFields = dataSet.getState(SELECTFIELDS) || [];
-    const wrapperCls = classNames(`${prefixCls}-dynamic-filter-bar`, {
+    const filterBarCls = classNames(`${prefixCls}-dynamic-filter-bar`, {
+      [`${prefixCls}-dynamic-filter-bar-single-line`]: showSingleLine,
       [`${prefixCls}-dynamic-filter-bar-rtl`]: this.isRTL,
     });
     if (fuzzyQueryOnly) {
       return (
-        <div key="query_bar" className={wrapperCls}>
+        <div key="query_bar" className={filterBarCls}>
           {this.getFilterMenu()}
         </div>
       );
@@ -1783,7 +1785,7 @@ export default class TableDynamicFilterBar extends Component<TableDynamicFilterB
           {this.getExpandNode(false)}
         </div> : null;
       return (
-        <div key="query_bar" className={wrapperCls}>
+        <div key="query_bar" className={filterBarCls}>
           {this.getFilterMenu()}
           <div className={`${prefixCls}-dynamic-filter-single-wrapper`} ref={(node) => this.refSingleWrapper = node}>
             <div className={`${prefixCls}-filter-wrapper`}>
