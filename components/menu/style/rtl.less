@@ -2,9 +2,172 @@
 
 @menu-prefix-cls: ~'@{c7n-prefix}-menu';
 
-// TODO: 待处理 细节
 .@{menu-prefix-cls}-wrapper-rtl {
   direction: rtl;
+
+  &.@{menu-prefix-cls}-inline,
+  &.@{menu-prefix-cls}-vertical,
+  &.@{menu-prefix-cls}-vertical-left {
+    border-right: none;
+    border-left: @border-width-base @border-style-base @border-color-split;
+  }
+  &.@{menu-prefix-cls}-vertical-right {
+    border-right: @border-width-base @border-style-base @border-color-split;
+    border-left: none;
+  }
+
+  &.@{menu-prefix-cls}-vertical.@{menu-prefix-cls}-sub,
+  &.@{menu-prefix-cls}-vertical-left.@{menu-prefix-cls}-sub,
+  &.@{menu-prefix-cls}-vertical-right.@{menu-prefix-cls}-sub {
+    border-right: none;
+    border-left: 0;
+    transform-origin: 100% 0;
+
+    .@{menu-prefix-cls}-item {
+      right: 0;
+      left: unset;
+      margin-right: 0;
+      margin-left: unset;
+      border-right: none;
+      border-left: 0;
+
+      &::after {
+        border-right: none;
+        border-left: 0;
+      }
+    }
+
+    > .@{menu-prefix-cls}-item,
+    > .@{menu-prefix-cls}-submenu {
+      transform-origin: 100% 0;
+    }
+  }
+
+  .@{menu-prefix-cls}-item,
+  .@{menu-prefix-cls}-submenu-title {
+    .@{iconfont-css-prefix} {
+      margin-right: unset;
+      margin-left: 0.1rem;
+    }
+  }
+
+  .@{menu-prefix-cls}-submenu {
+    &-vertical,
+    &-vertical-left,
+    &-vertical-right,
+    &-inline {
+      > .@{menu-prefix-cls}-submenu-title .@{menu-prefix-cls}-submenu-arrow {
+        right: unset;
+        left: @menu-vertical-submenu-arrow-right;
+
+        &::before,
+        &::after {
+          background-image: linear-gradient(to left, @menu-item-color, @menu-item-color);
+        }
+        &::before {
+          transform: rotate(-45deg) translateY(-0.02rem);
+        }
+        &::after {
+          transform: rotate(45deg) translateY(0.02rem);
+        }
+      }
+    }
+
+    &-inline > .@{menu-prefix-cls}-submenu-title .@{menu-prefix-cls}-submenu-arrow {
+      &::before {
+        transform: rotate(45deg) translateX(-0.02rem);
+      }
+      &::after {
+        transform: rotate(-45deg) translateX(0.02rem);
+      }
+    }
+
+    &-open {
+      &.@{menu-prefix-cls}-submenu-inline > .@{menu-prefix-cls}-submenu-title .@{menu-prefix-cls}-submenu-arrow {
+        &::after {
+          transform: rotate(45deg) translateX(0.02rem);
+        }
+        &::before {
+          transform: rotate(-45deg) translateX(-0.02rem);
+        }
+      }
+    }
+  }
+
+  &.@{menu-prefix-cls}-horizontal {
+    > .@{menu-prefix-cls}-item,
+    > .@{menu-prefix-cls}-submenu {
+      float: right;
+    }
+  }
+
+  &.@{menu-prefix-cls}-inline,
+  &.@{menu-prefix-cls}-vertical {
+    .@{menu-prefix-cls}-submenu-title {
+      padding-right: 0.16rem;
+      padding-left: 0.34rem;
+    }
+  }
+
+  &.@{menu-prefix-cls}-inline-collapsed {
+    > .@{menu-prefix-cls}-item,
+    > .@{menu-prefix-cls}-item-group
+      > .@{menu-prefix-cls}-item-group-list
+      > .@{menu-prefix-cls}-item,
+    > .@{menu-prefix-cls}-submenu > .@{menu-prefix-cls}-submenu-title {
+      right: 0;
+      left: unset;
+    }
+  }
+
+  .@{menu-prefix-cls}-item-group-list {
+    .@{menu-prefix-cls}-item,
+    .@{menu-prefix-cls}-submenu-title {
+      padding: @menu-item-padding-rtl;
+    }
+  }
+
+  &.@{menu-prefix-cls}-sub.@{menu-prefix-cls}-inline {
+    border: 0;
+
+    .@{menu-prefix-cls}-item-group-title {
+      padding-right: 0.32rem;
+      padding-left: 0.16rem;
+    }
+  }
+
+  &.@{menu-prefix-cls}-dark.@{menu-prefix-cls}-inline,
+  &.@{menu-prefix-cls}-dark.@{menu-prefix-cls}-vertical,
+  &.@{menu-prefix-cls}-dark.@{menu-prefix-cls}-vertical-left,
+  &.@{menu-prefix-cls}-dark.@{menu-prefix-cls}-vertical-right {
+    border-right: none;
+    border-left: 0;
+  }
+
+  &.@{menu-prefix-cls}-dark.@{menu-prefix-cls}-inline .@{menu-prefix-cls}-item,
+  &.@{menu-prefix-cls}-dark.@{menu-prefix-cls}-vertical .@{menu-prefix-cls}-item,
+  &.@{menu-prefix-cls}-dark.@{menu-prefix-cls}-vertical-left .@{menu-prefix-cls}-item,
+  &.@{menu-prefix-cls}-dark.@{menu-prefix-cls}-vertical-right .@{menu-prefix-cls}-item {
+    right: 0;
+    left: unset;
+    margin-right: 0;
+    margin-left: unset;
+    border-right: none;
+    border-left: 0;
+    &::after {
+      border-right: none;
+      border-left: 0;
+    }
+  }
+
+  &.@{menu-prefix-cls}-dark .@{menu-prefix-cls}-item-selected {
+    border-right: none;
+    border-left: 0;
+    &::after {
+      border-right: none;
+      border-left: 0;
+    }
+  }
 }
 
 .@{menu-prefix-cls}-popup-rtl {

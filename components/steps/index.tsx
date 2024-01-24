@@ -45,7 +45,7 @@ const Steps = function Steps(props) {
   const cls = classNames(className, {
     [`${prefixCls}-wrapper-rtl`]: isRTL,
   });
-  return <RcSteps {...props} prefixCls={prefixCls} className={cls} />;
+  return <RcSteps {...props} prefixCls={prefixCls} className={cls} isRTL={isRTL} />;
 };
 
 Steps.displayName = 'Steps';

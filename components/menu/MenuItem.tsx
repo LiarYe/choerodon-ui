@@ -14,6 +14,11 @@ class MenuItem extends PureComponent<any, any> {
 
   private menuItem: any;
 
+  get isRTL(): boolean {
+    const { getConfig } = this.context;
+    return getConfig('direction') === 'rtl';
+  }
+
   onKeyDown: MouseEventHandler<HTMLElement> = e => {
     this.menuItem.onKeyDown(e);
   };
@@ -25,7 +30,7 @@ class MenuItem extends PureComponent<any, any> {
   render() {
     const { inlineCollapsed } = this.context;
     const props = this.props;
-    const item = <Item {...props} ref={this.saveMenuItem} />;
+    const item = <Item {...props} ref={this.saveMenuItem} isRTL={this.isRTL} />;
     if (inlineCollapsed && props.level === 1) {
       return (
         <Tooltip

@@ -19,6 +19,13 @@ const popupPlacementMap = {
   'vertical-right': 'leftTop',
 };
 
+const popupPlacementMapRTL = {
+  horizontal: 'bottomLeft',
+  vertical: 'leftTop',
+  'vertical-left': 'leftTop',
+  'vertical-right': 'rightTop',
+};
+
 const updateDefaultActiveFirst = (store, eventKey, defaultActiveFirst) => {
   const menuId = getMenuIdFromSubMenuEventKey(eventKey);
   const state = store.getState();
@@ -338,6 +345,7 @@ export class SubMenu extends Component {
       manualRef: this.saveMenuInstance,
       itemIcon: props.itemIcon,
       expandIcon: props.expandIcon,
+      isRTL: props.isRTL,
     };
 
     const haveRendered = this.haveRendered;
@@ -420,7 +428,8 @@ export class SubMenu extends Component {
 
     const style = {};
     if (isInlineMode) {
-      style.paddingLeft = props.inlineIndent * props.level;
+      const paddingDirection = props.isRTL ? 'paddingRight' : 'paddingLeft';
+      style[paddingDirection] = props.inlineIndent * props.level;
     }
 
     let ariaOwns = {};
@@ -464,7 +473,9 @@ export class SubMenu extends Component {
     const children = this.renderChildren(props.children);
 
     const getPopupContainer = props.parentMenu.isRootMenu ? props.parentMenu.props.getPopupContainer : triggerNode => triggerNode.parentNode;
-    const popupPlacement = popupPlacementMap[props.mode];
+    const popupPlacement = props.isRTL
+      ? popupPlacementMapRTL[props.mode]
+      : popupPlacementMap[props.mode];
     const popupAlign = props.popupOffset ? { offset: props.popupOffset } : {};
     const popupClassName = props.mode === 'inline' ? '' : props.popupClassName;
     const {
@@ -478,6 +489,7 @@ export class SubMenu extends Component {
     menuAllProps.forEach(key => delete props[key]);
     // Set onClick to null, to ignore propagated onClick event
     delete props.onClick;
+    delete props.isRTL;
 
     return (
       <li

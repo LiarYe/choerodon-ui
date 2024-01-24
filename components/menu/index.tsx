@@ -263,7 +263,6 @@ export default class Menu extends PureComponent<MenuProps, MenuState> {
 
     const menuClassName = classNames(className, `${prefixCls}-${theme}`, {
       [`${prefixCls}-inline-collapsed`]: this.getInlineCollapsed(),
-      [`${prefixCls}-wrapper-rtl`]: this.isRTL,
     });
 
     const menuProps: MenuProps = {
@@ -291,7 +290,7 @@ export default class Menu extends PureComponent<MenuProps, MenuState> {
 
     return (
       <MenuContextProvider {...this.getContextValue()}>
-        <RcMenu {...this.props} {...menuProps} prefixCls={prefixCls} />
+        <RcMenu {...this.props} {...menuProps} prefixCls={prefixCls} isRTL={this.isRTL} />
       </MenuContextProvider>
     );
   }

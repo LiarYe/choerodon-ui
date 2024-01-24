@@ -1,9 +1,36 @@
 @import '../../../components/style/themes/default';
+@import '../../text-field/style/rtl';
 
 @mentions-prefix: ~'@{c7n-pro-prefix}-mentions';
 
-.@{mentions-prefix}-wrapper-rtl {
-  direction: ltr;
+.input-rtl(@mentions-prefix);
 
-  // TODO: 待处理 rtl
+.@{mentions-prefix}-wrapper-rtl {
+  &.@{mentions-prefix}-wrapper {
+    label {
+      .@{mentions-prefix} {
+        padding-right: @input-padding-horizontal;
+        padding-left: 0.13rem;
+      }
+
+      .@{mentions-prefix}-clear-button {
+        right: unset;
+        left: 0.03rem;
+      }
+
+      .@{mentions-prefix}-length-info {
+        right: unset;
+        left: 0;
+      }
+    }
+  }
+
+  .@{mentions-prefix}-length-info {
+    right: unset;
+    left: 0.08rem;
+  }
+
+  .@{mentions-prefix}-measure {
+    padding: @mentions-measure-padding-rtl;
+  }
 }

@@ -60,17 +60,29 @@ export default class Steps extends Component {
     this.props.setNumberChange(0)
     this.calcStepOffsetWidth();
     // 定位到进行中的导航步骤
-    const { prefixCls, type } = this.props;
+    const { prefixCls, type, direction, isRTL } = this.props;
     if (this.navRef && type === 'navigation') {
       const processCls = `${prefixCls}-item-process`
       const processDom = this.navRef.getElementsByClassName(processCls)
       if (processDom.length) {
-        scrollIntoView(processDom[0], {
-          block: 'end',
-          behavior: 'smooth',
-          scrollMode: 'if-needed',
-          boundary: this.navRef,
-        });
+        if (isRTL && direction === 'horizontal') {
+          const navLeft = this.navRef.getBoundingClientRect().left;
+          const navRight = this.navRef.getBoundingClientRect().right;
+          const processDomLeft = processDom[0].getBoundingClientRect().left;
+          const processDomRight = processDom[0].getBoundingClientRect().right;
+          if (processDomLeft < navLeft || processDomRight > navRight) {
+            this.navRef.scrollTo({
+              left: this.navRef.scrollLeft - (navRight - processDomRight),
+            });
+          }
+        } else {
+          scrollIntoView(processDom[0], {
+            block: 'end',
+            behavior: 'smooth',
+            scrollMode: 'if-needed',
+            boundary: this.navRef,
+          });
+        }
       }
 
     }
@@ -173,6 +185,7 @@ export default class Steps extends Component {
       headerText,
       type,
       onChange,
+      isRTL,
       ...restProps
     } = this.props;
     const { lastStepOffsetWidth, flexSupported, isShowMore } = this.state;

@@ -38,6 +38,7 @@ class SubMenu extends PureComponent<any, any> {
         {...this.props}
         ref={this.saveSubMenu}
         popupClassName={popupCls}
+        isRTL={this.isRTL}
       />
     );
   }

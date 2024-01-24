@@ -3,7 +3,221 @@
 @steps-prefix-cls: ~'@{c7n-prefix}-steps';
 
 .@{steps-prefix-cls}-wrapper-rtl {
-  direction: ltr;
+  direction: rtl;
 
-  // TODO: 待处理 rtl
+  .@{steps-prefix-cls}-header {
+    right: 0;
+    left: unset;
+    border-top-left-radius: unset;
+    border-top-right-radius: 0.1rem;
+    border-bottom-right-radius: unset;
+    border-bottom-left-radius: 0.1rem;
+  }
+
+  .@{steps-prefix-cls}-dropdown {
+    &-title {
+      padding-right: unset;
+      padding-left: 0.16rem;
+    }
+  }
+
+  .@{steps-prefix-cls}-item {
+    &-icon {
+      margin-right: unset;
+      margin-left: 0.08rem;
+
+      span.@{iconfont-css-prefix} {
+        margin-right: unset;
+        margin-left: 0;
+      }
+    }
+
+    &-tail {
+      right: 0;
+      left: unset;
+    }
+
+    &-title {
+      padding-right: unset;
+      padding-left: 0.16rem;
+
+      &::after {
+        right: 100%;
+        left: unset;
+      }
+    }
+  }
+
+  &.@{steps-prefix-cls}-navigation {
+    .@{steps-prefix-cls}-item {
+      &-title {
+        padding-right: unset;
+        padding-left: 0;
+
+        &-icon {
+          margin: @steps-item-title-icon-margin-rtl;
+        }
+      }
+    }
+  }
+
+  &.@{steps-prefix-cls}-horizontal:not(.@{steps-prefix-cls}-label-vertical) {
+    .@{steps-prefix-cls}-item {
+      margin-right: unset;
+      margin-left: 0.16rem;
+
+      &:last-child {
+        margin-right: unset;
+        margin-left: 0;
+      }
+
+      &:last-child .@{steps-prefix-cls}-item-title {
+        padding-right: unset;
+        padding-left: 0;
+      }
+    }
+  }
+
+  &.@{steps-prefix-cls}-small {
+    &.@{steps-prefix-cls}-horizontal:not(.@{steps-prefix-cls}-label-vertical) .@{steps-prefix-cls}-item {
+      margin-right: unset;
+      margin-left: 0.12rem;
+
+      &:last-child {
+        margin-right: unset;
+        margin-left: 0;
+      }
+    }
+
+    .@{steps-prefix-cls}-item-title {
+      padding-right: unset;
+      padding-left: 0.12rem;
+    }
+  }
+
+  &.@{steps-prefix-cls}-vertical {
+    .@{steps-prefix-cls}-item {
+      &-icon {
+        float: right;
+        margin-right: unset;
+        margin-left: @steps-vertical-item-icon-margin-right;
+      }
+    }
+
+    > .@{steps-prefix-cls}-item > .@{steps-prefix-cls}-item-tail {
+      right: @steps-vertical-item-tail-left;
+      left: unset;
+    }
+
+    &.@{steps-prefix-cls}-small {
+      .@{steps-prefix-cls}-item-tail {
+        right: 0.12rem;
+        left: unset;
+      }
+    }
+  }
+
+  &.@{steps-prefix-cls}-label-vertical {
+    .@{steps-prefix-cls}-item {
+      &-tail {
+        margin-right: 0.48rem;
+        margin-left: unset;
+      }
+
+      &-icon {
+        margin-right: 0.36rem;
+        margin-left: unset;
+      }
+
+      &-title {
+        padding-right: unset;
+        padding-left: 0;
+      }
+
+      &-description {
+        text-align: right;
+      }
+    }
+  }
+
+  &.@{steps-prefix-cls}-dot {
+    .@{steps-prefix-cls}-item {
+      &-tail {
+        margin: 0 calc(@steps-desciption-max-width / 2) 0 0;
+
+        &::after {
+          margin-right: 0.12rem;
+          margin-left: unset;
+        }
+      }
+
+      &:first-child .@{steps-prefix-cls}-icon-dot {
+        right: 0.02rem;
+        left: unset;
+      }
+
+      &-icon {
+        margin-right: 0.67rem;
+        margin-left: unset;
+        padding-right: unset;
+        padding-left: 0;
+
+        .@{steps-prefix-cls}-icon-dot {
+          float: right;
+
+          &::after {
+            right: -0.26rem;
+            left: unset;
+          }
+        }
+      }
+    }
+  }
+
+  &.@{steps-prefix-cls}-vertical.@{steps-prefix-cls}-dot {
+    .@{steps-prefix-cls}-item-icon {
+      margin-right: 0;
+      margin-left: unset;
+    }
+
+    .@{steps-prefix-cls}-item-tail {
+      right: -0.09rem;
+      left: unset;
+    }
+
+    .@{steps-prefix-cls}-item:first-child .@{steps-prefix-cls}-icon-dot {
+      right: 0;
+      left: unset;
+    }
+    .@{steps-prefix-cls}-item-process .@{steps-prefix-cls}-icon-dot {
+      right: -0.02rem;
+      left: unset;
+    }
+  }
+}
+
+@media (max-width: @screen-xs) {
+  .@{steps-prefix-cls}-wrapper-rtl {
+    &.@{steps-prefix-cls}-horizontal.@{steps-prefix-cls}-label-horizontal {
+      .@{steps-prefix-cls}-item {
+        &-icon {
+          float: right;
+          margin-right: unset;
+          margin-left: @steps-vertical-item-icon-margin-right;
+        }
+      }
+  
+      > .@{steps-prefix-cls}-item > .@{steps-prefix-cls}-item-tail {
+        right: @steps-vertical-item-tail-left;
+        left: unset;
+      }
+  
+      &.@{steps-prefix-cls}-small {
+        .@{steps-prefix-cls}-item-tail {
+          right: 0.12rem;
+          left: unset;
+        }
+      }
+    }
+  }
 }

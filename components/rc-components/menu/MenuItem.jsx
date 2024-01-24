@@ -168,7 +168,8 @@ export class MenuItem extends React.Component {
       ...props.style,
     };
     if (props.mode === 'inline') {
-      style.paddingLeft = props.inlineIndent * props.level;
+      const paddingDirection = props.isRTL ? 'paddingRight' : 'paddingLeft';
+      style[paddingDirection] = props.inlineIndent * props.level;
     }
 
     const checkbox = props.multiple && props.checkable !== false ? (
@@ -185,7 +186,7 @@ export class MenuItem extends React.Component {
     return (
       <Ripple {...rippleProps}>
         <li
-          {...omit(props, ['tooltipPlacement', 'tooltipTheme'])}
+          {...omit(props, ['tooltipPlacement', 'tooltipTheme', 'isRTL'])}
           {...attrs}
           {...mouseEvent}
           style={style}

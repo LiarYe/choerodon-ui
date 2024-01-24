@@ -2,6 +2,97 @@
 
 .@{c7n-prefix}-row-wrapper-rtl {
   direction: rtl;
+}
 
-  // TODO: 待处理 细节
+.make-grid-rtl();
+
+.make-grid-rtl(-xs);
+
+@media (min-width: @screen-sm-min) {
+  .make-grid-rtl(-sm);
+}
+
+@media (min-width: @screen-md-min) {
+  .make-grid-rtl(-md);
+}
+
+@media (min-width: @screen-lg-min) {
+  .make-grid-rtl(-lg);
+}
+
+@media (min-width: @screen-xl-min) {
+  .make-grid-rtl(-xl);
+}
+
+@media (min-width: @screen-xxl-min) {
+  .make-grid-rtl(-xxl);
+}
+
+
+// mixin
+.make-grid-rtl(@class: ~'') {
+  .float-grid-columns-rtl(@class);
+  .loop-grid-columns-rtl(@grid-columns, @class);
+}
+
+.float-grid-columns-rtl(@class) {
+  .col(@index) {
+    // initial
+    @item: ~'.@{c7n-prefix}-col@{class}-@{index}';
+    .col((@index + 1), @item);
+  }
+  .col(@index, @list) when (@index =< @grid-columns) {
+    // general
+    @item: ~'.@{c7n-prefix}-col@{class}-@{index}';
+    .col((@index + 1), ~'@{list}, @{item}');
+  }
+  .col(@index, @list) when (@index > @grid-columns) {
+    // terminal
+    .@{c7n-prefix}-row-wrapper-rtl {
+      @{list} {
+        float: right;
+      }
+    }
+  }
+  .col(1); // kickstart it
+}
+
+// lesshint false
+.loop-grid-columns-rtl(@index, @class) when (@index > 0) {
+  .@{c7n-prefix}-row-wrapper-rtl .@{c7n-prefix}-col@{class}-push-@{index} {
+    right: percentage((@index / @grid-columns));
+    left: unset;
+  }
+  .@{c7n-prefix}-row-wrapper-rtl .@{c7n-prefix}-col@{class}-pull-@{index} {
+    right: unset;
+    left: percentage((@index / @grid-columns));
+  }
+  .@{c7n-prefix}-row-wrapper-rtl .@{c7n-prefix}-col@{class}-offset-@{index} {
+    margin-right: percentage((@index / @grid-columns));
+    margin-left: unset;
+  }
+  .loop-grid-columns-rtl((@index - 1), @class);
+}
+
+.loop-grid-columns-rtl(@index, @class) when (@index = 0) {
+  .@{c7n-prefix}-row-wrapper-rtl .@{c7n-prefix}-col-push-@{index} {
+    right: auto;
+    left: unset;
+  }
+  .@{c7n-prefix}-row-wrapper-rtl .@{c7n-prefix}-col-pull-@{index} {
+    right: unset;
+    left: auto;
+  }
+  .@{c7n-prefix}-row-wrapper-rtl .@{c7n-prefix}-col@{class}-push-@{index} {
+    right: auto;
+    left: unset;
+  }
+  .@{c7n-prefix}-row-wrapper-rtl .@{c7n-prefix}-col@{class}-pull-@{index} {
+    right: unset;
+    left: auto;
+  }
+  .@{c7n-prefix}-row-wrapper-rtl .@{c7n-prefix}-col@{class}-offset-@{index} {
+    margin-right: 0;
+    margin-left: unset;
+  }
 }

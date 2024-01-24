@@ -279,13 +279,16 @@ export class SubPopupMenu extends Component {
   };
 
   render() {
-    const { ...props } = this.props;
+    const { isRTL, ...props } = this.props;
 
     this.instanceArray = [];
     const className = classNames(
       props.prefixCls,
       props.className,
       `${props.prefixCls}-${props.mode}`,
+      {
+        [`${props.prefixCls}-wrapper-rtl`]: isRTL,
+      },
     );
     const haveRendered = this.haveRendered;
     this.haveRendered = true;
