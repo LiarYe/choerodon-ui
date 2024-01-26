@@ -169,7 +169,7 @@ const TableCell: FunctionComponent<TableCellProps> = function TableCell(props) {
 
   const autoScroll = (event) => {
     // 控制滚动条自动滚动
-    const { node, rightColumnGroups, leftColumnGroups, overflowY, overflowX, lastScrollLeft, lastScrollTop } = tableStore;
+    const { node, rightColumnGroups, leftColumnGroups, overflowY, overflowX, lastScrollLeft, lastScrollTop, isRTL } = tableStore;
     const { tableContentWrap, tableBodyWrap } = node;
     const overflowWrapper = tableBodyWrap || tableContentWrap;
     if (!overflowWrapper) return;
@@ -187,9 +187,11 @@ const TableCell: FunctionComponent<TableCellProps> = function TableCell(props) {
     const hasEnteredVerticalSensitivityArea =
      (mouseY <= AUTO_SCROLL_SENSITIVITY && lastScrollTop !== 0) || (lastScrollTop !== maxScrollHeight && mouseY >= height - AUTO_SCROLL_SENSITIVITY - (overflowX ? measureScrollbar('horizontal') : 0));
 
-    const hasEnteredHorizontalSensitivityArea =
-      (mouseX >= leftColumnGroups.width - AUTO_SCROLL_SENSITIVITY && mouseX <= AUTO_SCROLL_SENSITIVITY + leftColumnGroups.width) ||
-      (maxScrollLeft !== lastScrollLeft && mouseX >= width - rightColumnGroups.width - AUTO_SCROLL_SENSITIVITY - overflowYWidth && mouseX <= width - rightColumnGroups.width + AUTO_SCROLL_SENSITIVITY - overflowYWidth);
+    const hasEnteredHorizontalSensitivityArea = isRTL
+      ? ((maxScrollLeft - Math.abs(lastScrollLeft) > 0.4 && mouseX >= rightColumnGroups.width - AUTO_SCROLL_SENSITIVITY && mouseX <= AUTO_SCROLL_SENSITIVITY + rightColumnGroups.width) ||
+        (mouseX >= width - leftColumnGroups.width - AUTO_SCROLL_SENSITIVITY && mouseX <= width - leftColumnGroups.width + AUTO_SCROLL_SENSITIVITY))
+      : ((mouseX >= leftColumnGroups.width - AUTO_SCROLL_SENSITIVITY && mouseX <= AUTO_SCROLL_SENSITIVITY + leftColumnGroups.width) ||
+        (maxScrollLeft !== lastScrollLeft && mouseX >= width - rightColumnGroups.width - AUTO_SCROLL_SENSITIVITY - overflowYWidth && mouseX <= width - rightColumnGroups.width + AUTO_SCROLL_SENSITIVITY - overflowYWidth));
 
     const hasEnteredSensitivityArea =
       hasEnteredVerticalSensitivityArea || hasEnteredHorizontalSensitivityArea;
@@ -208,7 +210,7 @@ const TableCell: FunctionComponent<TableCellProps> = function TableCell(props) {
       return;
     }
     const execScroll = action(() => {
-      const { rightColumnGroups, leftColumnGroups, overflowX, overflowY, lastScrollLeft, lastScrollTop } = tableStore;
+      const { rightColumnGroups, leftColumnGroups, overflowX, overflowY, lastScrollLeft, lastScrollTop, isRTL } = tableStore;
       const { x: mouseX, y: mouseY } = mousePosition.current!;
       const { height, width } = overflowWrapper.getBoundingClientRect()
 
@@ -230,13 +232,21 @@ const TableCell: FunctionComponent<TableCellProps> = function TableCell(props) {
         // 向下滚动，距离越近，滚动的速度越快
         factor = (mouseY - (height - scrollHorizontalWidth - AUTO_SCROLL_SENSITIVITY)) / AUTO_SCROLL_SENSITIVITY;
         deltaY = AUTO_SCROLL_SPEED;
-      } else if (mouseX - leftColumnGroups.width <= AUTO_SCROLL_SENSITIVITY && overflowX) {
+      } else if (isRTL
+        ? mouseX - rightColumnGroups.width <= AUTO_SCROLL_SENSITIVITY && overflowX && maxScrollLeft - Math.abs(lastScrollLeft) > 0.4
+        : mouseX - leftColumnGroups.width <= AUTO_SCROLL_SENSITIVITY && overflowX) {
         // 滚动到最左边，距离越近，滚动的速度越快
-        factor = (AUTO_SCROLL_SENSITIVITY - mouseX + leftColumnGroups.width) / -AUTO_SCROLL_SENSITIVITY;
+        factor = isRTL
+          ? (AUTO_SCROLL_SENSITIVITY - mouseX + rightColumnGroups.width) / -AUTO_SCROLL_SENSITIVITY
+          : (AUTO_SCROLL_SENSITIVITY - mouseX + leftColumnGroups.width) / -AUTO_SCROLL_SENSITIVITY;
         deltaX = AUTO_SCROLL_SPEED;
-      } else if (mouseX >= width - rightColumnGroups.width - scrollVerticalWidth - AUTO_SCROLL_SENSITIVITY && overflowX && maxScrollLeft !== lastScrollLeft) {
+      } else if (isRTL
+        ? mouseX >= width - leftColumnGroups.width - AUTO_SCROLL_SENSITIVITY && overflowX
+        : mouseX >= width - rightColumnGroups.width - scrollVerticalWidth - AUTO_SCROLL_SENSITIVITY && overflowX && maxScrollLeft !== lastScrollLeft) {
         // 滚动到最右边，距离越近，滚动的速度越快
-        factor = (mouseX - (width - rightColumnGroups.width - AUTO_SCROLL_SENSITIVITY - scrollVerticalWidth)) / AUTO_SCROLL_SENSITIVITY;
+        factor = isRTL
+          ? (mouseX - (width - leftColumnGroups.width - AUTO_SCROLL_SENSITIVITY)) / AUTO_SCROLL_SENSITIVITY
+          : (mouseX - (width - rightColumnGroups.width - AUTO_SCROLL_SENSITIVITY - scrollVerticalWidth)) / AUTO_SCROLL_SENSITIVITY;
         deltaX = AUTO_SCROLL_SPEED;
       }
 

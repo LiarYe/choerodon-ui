@@ -2919,7 +2919,10 @@ export default class TableStore {
       if ((!fixLeftLength && !fixRightLength) || (fixLeftLength && fixRightLength) || (fixLeftLength > 1) || (fixRightLength > 1) || !this.overflowX) {
         // 一般选框处理
         rangeBorder.style.width = pxToRem(width)!;
-        rangeBorder.style.left = pxToRem(left)!;
+        const newLeft = this.isRTL
+          ? ((fixLeftLength && fixRightLength) || (fixLeftLength > 1) || (fixRightLength > 1) ? left - measureScrollbar() : left - maxScrollLeft)
+          : left;
+        rangeBorder.style.left = pxToRem(newLeft)!;
       } else {
         // 动态选框处理
         let extraDistance = 0;
@@ -2951,7 +2954,10 @@ export default class TableStore {
               }
             }
 
-            rangeBorder.style.left = pxToRem(fixChoosedLeft)!;
+            const maxColTarget = startChooseCell.colIndex > endChooseCell.colIndex ? startChooseCell.target : endChooseCell.target;
+            rangeBorder.style.left = this.isRTL
+              ? pxToRem(maxColTarget.offsetLeft - maxScrollLeft)!
+              : pxToRem(fixChoosedLeft)!;
             rangeBorder.style.width = pxToRem(Math.max(fixChoosedWidth, totalWidth - lastScrollLeft))!;
           } else if (fixRightLength) {
             let unFixedWidth = 0;
@@ -2971,8 +2977,12 @@ export default class TableStore {
             }
 
             extraDistance = (maxScrollLeft - lastScrollLeft) > unFixedWidth ? (maxScrollLeft - lastScrollLeft) - unFixedWidth : 0
-            rangeBorder.style.left = pxToRem(minLeft - extraDistance)!;
-            rangeBorder.style.width = pxToRem(Math.max(fixChoosedWidth, totalWidth - (maxScrollLeft - lastScrollLeft)))!;
+            rangeBorder.style.left = this.isRTL
+              ? pxToRem(left - measureScrollbar())!
+              : pxToRem(minLeft - extraDistance)!;
+            rangeBorder.style.width = this.isRTL
+              ? pxToRem(Math.max(fixChoosedWidth, totalWidth - (maxScrollLeft - Math.abs(lastScrollLeft))))!
+              : pxToRem(Math.max(fixChoosedWidth, totalWidth - (maxScrollLeft - lastScrollLeft)))!;
           }
         }
       }
