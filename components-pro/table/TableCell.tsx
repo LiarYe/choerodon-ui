@@ -40,6 +40,10 @@ function getRowSpan(group: Group, tableStore: TableStore): number {
     }
     return subGroups.reduce((rowSpan, subGroup) => rowSpan + (subGroup.subGroups.length ? getRowSpan(subGroup, tableStore) : 0) + subGroup.records.length, 0);
   }
+  if (group.records.length && group.isAllExpanded) {
+    return group.expandedRecords.length - 1;
+  }
+  return group.expandedRecords.length - 1;
   return group.expandedRecords.length;
 }
 
@@ -407,7 +411,7 @@ const TableCell: FunctionComponent<TableCellProps> = function TableCell(props) {
     }
   };
   const groupRowSpan = groupCell && group ? getRowSpan(group, tableStore) - indexInGroup : undefined;
-  const rowSpan = groupRowSpan === 1 ? undefined : groupRowSpan;
+  const rowSpan = groupRowSpan === 1 || groupRowSpan === 0 ? undefined : groupRowSpan;
   const renderInnerNode = ($aggregation, onCellStyle?: CSSProperties, tableCellFinalStyle?: CSSProperties) => {
     if (expandIconAsCell && children) {
       return (
@@ -420,7 +424,7 @@ const TableCell: FunctionComponent<TableCellProps> = function TableCell(props) {
       );
     }
     const aggregationList = getAggregationTreeGroups($aggregation);
-    if (groupCell && group && __tableGroup) {
+    if (groupCell && group && __tableGroup) { 
       return (
         <TableGroupCellInner rowSpan={rowSpan} group={group} column={column} isFixedRowHeight={isFixedRowHeight}>
           {aggregationList}
@@ -478,6 +482,9 @@ const TableCell: FunctionComponent<TableCellProps> = function TableCell(props) {
     ...cellExternalProps.style,
     ...(provided && { cursor: dragDisabled ? 'not-allowed' : 'move' }),
   };
+  if (groupCell && group && __tableGroup) {
+    cellStyle.verticalAlign = 'top';
+  }
   const classString = classNames(
     baseClassName,
     {

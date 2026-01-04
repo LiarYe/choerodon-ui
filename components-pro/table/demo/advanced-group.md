@@ -18,597 +18,594 @@ import {
   useDataSet,
   Table,
   Form,
-  TextField,
-  CheckBox,
   SelectBox,
   Switch,
-  Row,
-  Col,
-  Button,
 } from 'choerodon-ui/pro';
-import { action } from 'mobx';
+import { Record } from 'choerodon-ui/dataset';
 
 const { Option } = SelectBox;
 
 const App = () => {
-  const [bodyExpanded, setBodyExpanded] = React.useState(false);
-  // 物料
-  const itemDs = useDataSet(() => ({
-    paging: false,
+  const userDs = useDataSet(() => ({
+    strictPageSize: false,
     data: [
       {
         id: 1,
-        company: '厦门XX食品有限公司',
-        itemCode: 'A',
-        itemName: '188836-笔记本电脑',
-        itemSize: '15.9英寸',
-        unitPrice: 9000,
-        quantity: 10,
-        amount: 90000,
-        tax: 0.1,
-        totalAmount: 1965310000,
-        totalAmountNoTax: 1965000000,
-        taxAmount: 310000
+        productType: '电子产品',
+        saleArea: '华北',
+        saleTime: 'Q1',
+        clientType: '企业客户',
+        saleAmount: 5000,
+        saleQuantity: 100,
+        cost: 3000,
+        profit: 2000,
+        discount: 0.05,
       },
       {
         id: 2,
-        company: '厦门XX食品有限公司',
-        itemCode: 'B',
-        itemName: '2984-汽车',
-        itemSize: null,
-        unitPrice: 80000,
-        quantity: 20,
-        amount: 1600000,
-        tax: 0.1,
-        totalAmount: 1965310000,
-        totalAmountNoTax: 1965000000,
-        taxAmount: 310000
+        productType: '服装',
+        saleArea: '华东',
+        saleTime: 'Q1',
+        clientType: '个人客户',
+        saleAmount: 2000,
+        saleQuantity: 50,
+        cost: 1200,
+        profit: 800,
+        discount: 0.03,
       },
       {
         id: 3,
-        company: '厦门XX食品有限公司',
-        itemCode: 'C',
-        itemName: '12294-打印机',
-        itemSize: null,
-        unitPrice: 85000,
-        quantity: 20,
-        amount: 1700000,
-        tax: 0.1,
-        totalAmount: 1965310000,
-        totalAmountNoTax: 1965000000,
-        taxAmount: 310000
+        productType: '食品',
+        saleArea: '华南',
+        saleTime: 'Q1',
+        clientType: '企业客户',
+        saleAmount: 3000,
+        saleQuantity: 80,
+        cost: 1800,
+        profit: 1200,
+        discount: 0.02,
       },
       {
         id: 4,
-        company: '厦门XX食品有限公司',
-        itemCode: 'D',
-        itemName: '43996-电子芯片',
-        itemSize: null,
-        unitPrice: 96000,
-        quantity: 20,
-        amount: 1920000,
-        tax: 0.1,
-        totalAmount: 1965310000,
-        totalAmountNoTax: 1965000000,
-        taxAmount: 310000
+        productType: '电子产品',
+        saleArea: '华北',
+        saleTime: 'Q1',
+        clientType: '个人客户',
+        saleAmount: 4000,
+        saleQuantity: 80,
+        cost: 2500,
+        profit: 1500,
+        discount: 0.04,
       },
       {
         id: 5,
-        company: '厦门XX食品有限公司',
-        itemCode: 'E',
-        itemName: '09761-洗衣机',
-        itemSize: null,
-        unitPrice: 88000000,
-        quantity: 20,
-        amount: 1960000000,
-        tax: 0.1,
-        totalAmount: 1965310000,
-        totalAmountNoTax: 1965000000,
-        taxAmount: 310000
+        productType: '服装',
+        saleArea: '华东',
+        saleTime: 'Q1',
+        clientType: '企业客户',
+        saleAmount: 2500,
+        saleQuantity: 60,
+        cost: 1500,
+        profit: 1000,
+        discount: 0.03,
       },
       {
         id: 6,
-        company: '山西XX科贸有限公司',
-        itemCode: 'A',
-        itemName: '188836-笔记本电脑',
-        itemSize: '15.9英寸',
-        unitPrice: 90000000,
-        quantity: 10,
-        amount: 900000000,
-        tax: 0.1,
-        totalAmount: 2701740000,
-        totalAmountNoTax: 2701700000,
-        taxAmount: 40000
+        productType: '食品',
+        saleArea: '华南',
+        saleTime: 'Q1',
+        clientType: '个人客户',
+        saleAmount: 2200,
+        saleQuantity: 70,
+        cost: 1300,
+        profit: 900,
+        discount: 0.02,
       },
       {
         id: 7,
-        company: '山西XX科贸有限公司',
-        itemCode: 'B',
-        itemName: '2984-汽车',
-        itemSize: null,
-        unitPrice: 90000000,
-        quantity: 10,
-        amount: 900000000,
-        tax: 0.1,
-        totalAmount: 2701740000,
-        totalAmountNoTax: 2701700000,
-        taxAmount: 40000
+        productType: '电子产品',
+        saleArea: '华北',
+        saleTime: 'Q2',
+        clientType: '企业客户',
+        saleAmount: 5500,
+        saleQuantity: 110,
+        cost: 3200,
+        profit: 2300,
+        discount: 0.05,
       },
       {
         id: 8,
-        company: '山西XX科贸有限公司',
-        itemCode: 'C',
-        itemName: '12294-打印机',
-        itemSize: null,
-        unitPrice: 90000000,
-        quantity: 10,
-        amount: 900000000,
-        tax: 0.1,
-        totalAmount: 2701740000,
-        totalAmountNoTax: 2701700000,
-        taxAmount: 40000
+        productType: '服装',
+        saleArea: '华东',
+        saleTime: 'Q2',
+        clientType: '个人客户',
+        saleAmount: 2300,
+        saleQuantity: 55,
+        cost: 1300,
+        profit: 1000,
+        discount: 0.03,
       },
       {
         id: 9,
-        company: '山西XX科贸有限公司',
-        itemCode: 'D',
-        itemName: '43996-电子芯片',
-        itemSize: null,
-        unitPrice: 98000,
-        quantity: 10,
-        amount: 980000,
-        tax: 0.1,
-        totalAmount: 2701740000,
-        totalAmountNoTax: 2701700000,
-        taxAmount: 40000
+        productType: '食品',
+        saleArea: '华南',
+        saleTime: 'Q2',
+        clientType: '企业客户',
+        saleAmount: 3200,
+        saleQuantity: 90,
+        cost: 1900,
+        profit: 1300,
+        discount: 0.02,
       },
       {
         id: 10,
-        company: '山西XX科贸有限公司',
-        itemCode: 'E',
-        itemName: '09761-洗衣机',
-        itemSize: null,
-        unitPrice: 76000,
-        quantity: 10,
-        amount: 760000,
-        tax: 0.1,
-        totalAmount: 2701740000,
-        totalAmountNoTax: 2701700000,
-        taxAmount: 40000
+        productType: '电子产品',
+        saleArea: '华北',
+        saleTime: 'Q2',
+        clientType: '个人客户',
+        saleAmount: 4200,
+        saleQuantity: 85,
+        cost: 2600,
+        profit: 1600,
+        discount: 0.04,
       },
       {
         id: 11,
-        company: '上海XX商务有限公司',
-        itemCode: 'A',
-        itemName: '188836-笔记本电脑',
-        itemSize: '15.9英寸',
-        unitPrice: 90000000,
-        quantity: 10,
-        amount: 900000000,
-        tax: 0.1,
-        totalAmount: 2701880000,
-        totalAmountNoTax: 2701880000,
-        taxAmount: 80000
+        productType: '服装',
+        saleArea: '华东',
+        saleTime: 'Q2',
+        clientType: '企业客户',
+        saleAmount: 2800,
+        saleQuantity: 70,
+        cost: 1600,
+        profit: 1200,
+        discount: 0.03,
       },
       {
         id: 12,
-        company: '上海XX商务有限公司',
-        itemCode: 'B',
-        itemName: '2984-汽车',
-        itemSize: null,
-        unitPrice: 90000000,
-        quantity: 10,
-        amount: 900000000,
-        tax: 0.1,
-        totalAmount: 2701880000,
-        totalAmountNoTax: 2701880000,
-        taxAmount: 80000
+        productType: '食品',
+        saleArea: '华南',
+        saleTime: 'Q2',
+        clientType: '个人客户',
+        saleAmount: 2500,
+        saleQuantity: 80,
+        cost: 1400,
+        profit: 1100,
+        discount: 0.02,
       },
       {
         id: 13,
-        company: '上海XX商务有限公司',
-        itemCode: 'C',
-        itemName: '12294-打印机',
-        itemSize: null,
-        unitPrice: 90000000,
-        quantity: 10,
-        amount: 900000000,
-        tax: 0.1,
-        totalAmount: 2701880000,
-        totalAmountNoTax: 2701880000,
-        taxAmount: 80000
+        productType: '电子产品',
+        saleArea: '华北',
+        saleTime: 'Q3',
+        clientType: '企业客户',
+        saleAmount: 6000,
+        saleQuantity: 120,
+        cost: 3500,
+        profit: 2500,
+        discount: 0.05,
       },
       {
         id: 14,
-        company: '上海XX商务有限公司',
-        itemCode: 'D',
-        itemName: '43996-电子芯片',
-        itemSize: null,
-        unitPrice: 90000,
-        quantity: 10,
-        amount: 900000,
-        tax: 0.1,
-        totalAmount: 2701880000,
-        totalAmountNoTax: 2701880000,
-        taxAmount: 80000
+        productType: '服装',
+        saleArea: '华东',
+        saleTime: 'Q3',
+        clientType: '个人客户',
+        saleAmount: 2600,
+        saleQuantity: 60,
+        cost: 1400,
+        profit: 1200,
+        discount: 0.03,
       },
       {
         id: 15,
-        company: '上海XX商务有限公司',
-        itemCode: 'E',
-        itemName: '09761-洗衣机',
-        itemSize: null,
-        unitPrice: 98000,
-        quantity: 10,
-        amount: 980000,
-        tax: 0.1,
-        totalAmount: 2701880000,
-        totalAmountNoTax: 2701880000,
-        taxAmount: 80000
+        productType: '食品',
+        saleArea: '华南',
+        saleTime: 'Q3',
+        clientType: '企业客户',
+        saleAmount: 3500,
+        saleQuantity: 100,
+        cost: 2000,
+        profit: 1500,
+        discount: 0.02,
+      },
+      {
+        id: 16,
+        productType: '电子产品',
+        saleArea: '华北',
+        saleTime: 'Q3',
+        clientType: '个人客户',
+        saleAmount: 4500,
+        saleQuantity: 90,
+        cost: 2800,
+        profit: 1700,
+        discount: 0.04,
+      },
+      {
+        id: 17,
+        productType: '服装',
+        saleArea: '华东',
+        saleTime: 'Q3',
+        clientType: '企业客户',
+        saleAmount: 3000,
+        saleQuantity: 75,
+        cost: 1700,
+        profit: 1300,
+        discount: 0.03,
+      },
+      {
+        id: 18,
+        productType: '食品',
+        saleArea: '华南',
+        saleTime: 'Q3',
+        clientType: '个人客户',
+        saleAmount: 2800,
+        saleQuantity: 90,
+        cost: 1500,
+        profit: 1300,
+        discount: 0.02,
+      },
+      {
+        id: 19,
+        productType: '电子产品',
+        saleArea: '华北',
+        saleTime: 'Q4',
+        clientType: '企业客户',
+        saleAmount: 6500,
+        saleQuantity: 130,
+        cost: 3800,
+        profit: 3800,
+        discount: 0.05,
+      },
+      {
+        id: 20,
+        productType: '服装',
+        saleArea: '华东',
+        saleTime: 'Q4',
+        clientType: '个人客户',
+        saleAmount: 2900,
+        saleQuantity: 65,
+        cost: 1500,
+        profit: 1400,
+        discount: 0.03,
+      },
+      {
+        id: 21,
+        productType: '食品',
+        saleArea: '华南',
+        saleTime: 'Q4',
+        clientType: '企业客户',
+        saleAmount: 3800,
+        saleQuantity: 110,
+        cost: 2200,
+        profit: 1600,
+        discount: 0.02,
+      },
+      {
+        id: 22,
+        productType: '电子产品',
+        saleArea: '华北',
+        saleTime: 'Q4',
+        clientType: '个人客户',
+        saleAmount: 4800,
+        saleQuantity: 95,
+        cost: 3000,
+        profit: 1800,
+        discount: 0.04,
+      },
+      {
+        id: 23,
+        productType: '服装',
+        saleArea: '华东',
+        saleTime: 'Q4',
+        clientType: '企业客户',
+        saleAmount: 3200,
+        saleQuantity: 80,
+        cost: 1800,
+        profit: 1400,
+        discount: 0.03,
+      },
+      {
+        id: 24,
+        productType: '食品',
+        saleArea: '华南',
+        saleTime: 'Q4',
+        clientType: '个人客户',
+        saleAmount: 3000,
+        saleQuantity: 100,
+        cost: 1600,
+        profit: 1400,
+        discount: 0.02,
+      },
+      {
+        id: 25,
+        productType: '电子产品',
+        saleArea: '华南',
+        saleTime: 'Q1',
+        clientType: '企业客户',
+        saleAmount: 4900,
+        saleQuantity: 98,
+        cost: 2900,
+        profit: 2000,
+        discount: 0.05,
+      },
+      {
+        id: 26,
+        productType: '服装',
+        saleArea: '华北',
+        saleTime: 'Q1',
+        clientType: '个人客户',
+        saleAmount: 1900,
+        saleQuantity: 45,
+        cost: 1100,
+        profit: 800,
+        discount: 0.03
+      },
+      {
+        id: 27,
+        productType: '食品',
+        saleArea: '华北',
+        saleTime: 'Q1',
+        clientType: '企业客户',
+        saleAmount: 2900,
+        saleQuantity: 75,
+        cost: 1700,
+        profit: 1200,
+        discount: 0.02,
+      },
+      {
+        id: 28,
+        productType: '电子产品',
+        saleArea: '华南',
+        saleTime: 'Q1',
+        clientType: '个人客户',
+        saleAmount: 3900,
+        saleQuantity: 78,
+        cost: 2400,
+        profit: 1500,
+        discount: 0.04,
+      },
+      {
+        id: 29,
+        productType: '服装',
+        saleArea: '华北',
+        saleTime: 'Q1',
+        clientType: '企业客户',
+        saleAmount: 2400,
+        saleQuantity: 55,
+        cost: 1400,
+        profit: 1000,
+        discount: 0.03,
+      },
+      {
+        id: 30,
+        productType: '食品',
+        saleArea: '华北',
+        saleTime: 'Q1',
+        clientType: '个人客户',
+        saleAmount: 2100,
+        saleQuantity: 65,
+        cost: 1200,
+        profit: 900,
+        discount: 0.02,
+      },
+      {
+        id: 31,
+        productType: '电子产品',
+        saleArea: '华南',
+        saleTime: 'Q2',
+        clientType: '企业客户',
+        saleAmount: 5400,
+        saleQuantity: 108,
+        cost: 3100,
+        profit: 2300,
+        discount: 0.05,
+      },
+      {
+        id: 32,
+        productType: '服装',
+        saleArea: '华北',
+        saleTime: 'Q2',
+        clientType: '个人客户',
+        saleAmount: 2200,
+        saleQuantity: 50,
+        cost: 1200,
+        profit: 1000,
+        discount: 0.03,
+      },
+      {
+        id: 33,
+        productType: '食品',
+        saleArea: '华北',
+        saleTime: 'Q2',
+        clientType: '企业客户',
+        saleAmount: 3100,
+        saleQuantity: 85,
+        cost: 1800,
+        profit: 1300,
+        discount: 0.02,
+      },
+      {
+        id: 34,
+        productType: '电子产品',
+        saleArea: '华南',
+        saleTime: 'Q2',
+        clientType: '个人客户',
+        saleAmount: 4100,
+        saleQuantity: 82,
+        cost: 2500,
+        profit: 1600,
+        discount: 0.04,
+      },
+      {
+        id: 35,
+        productType: '服装',
+        saleArea: '华北',
+        saleTime: 'Q2',
+        clientType: '企业客户',
+        saleAmount: 2700,
+        saleQuantity: 65,
+        cost: 1500,
+        profit: 1200,
+        discount: 0.03,
+      },
+      {
+        id: 36,
+        productType: '食品',
+        saleArea: '华北',
+        saleTime: 'Q2',
+        clientType: '个人客户',
+        saleAmount: 2400,
+        saleQuantity: 75,
+        cost: 1300,
+        profit: 1100,
+        discount: 0.02,
+      },
+      {
+        id: 37,
+        productType: '电子产品',
+        saleArea: '华南',
+        saleTime: 'Q3',
+        clientType: '企业客户',
+        saleAmount: 5900,
+        saleQuantity: 118,
+        cost: 3400,
+        profit: 2500,
+        discount: 0.05,
+      },
+      {
+        id: 38,
+        productType: '服装',
+        saleArea: '华北',
+        saleTime: 'Q3',
+        clientType: '个人客户',
+        saleAmount: 2500,
+        saleQuantity: 55,
+        cost: 1300,
+        profit: 1200,
+        discount: 0.03,
+      },
+      {
+        id: 39,
+        productType: '食品',
+        saleArea: '华北',
+        saleTime: 'Q3',
+        clientType: '企业客户',
+        saleAmount: 3400,
+        saleQuantity: 95,
+        cost: 1900,
+        profit: 1500,
+        discount: 0.02,
+      },
+      {
+        id: 40,
+        productType: '电子产品',
+        saleArea: '华南',
+        saleTime: 'Q3',
+        clientType: '个人客户',
+        saleAmount: 4400,
+        saleQuantity: 88,
+        cost: 2700,
+        profit: 1700,
+        discount: 0.04,
       },
     ],
     fields: [
       {
         name: 'id',
-        label: '编号',
-      },
-      {
-        name: 'company',
-        label: '公司',
-      },
-      {
-        name: 'itemCode',
-        label: '报价信息',
-      },
-      {
-        name: 'unitPrice',
-        type: 'currency',
-        label: '含税单价',
-      },
-      {
-        name: 'quantity',
+        label: '订单ID',
         type: 'number',
-        label: '数量',
       },
       {
-        name: 'amount',
-        type: 'currency',
-        label: '含税金额',
+        name: 'productType',
+        label: '产品类别',
+        type: 'string',
       },
       {
-        name: 'totalAmount',
-        type: 'currency',
-        label: '总价(含税)',
+        name: 'saleArea',
+        label: '销售地区',
+        type: 'string',
       },
       {
-        name: 'totalAmountNoTax',
-        type: 'currency',
-        label: '总价(不含税)',
+        name: 'saleTime',
+        label: '销售季度',
+        type: 'string',
       },
       {
-        name: 'taxAmount',
-        type: 'currency',
-        label: '税额',
+        name: 'clientType',
+        label: '客户类型',
+        type: 'string',
       },
       {
-        name: 'itemSize',
-        label: '规格',
-      },
-      {
-        name: 'origin',
-        label: '产地',
-      },
-      {
-        name: 'unit',
-        label: '单位',
-      },
-      {
-        name: 'tax',
+        name: 'saleAmount',
+        label: '销售额',
         type: 'number',
-        label: '税率',
+      },
+      {
+        name: 'saleQuantity',
+        label: '销售量',
+        type: 'number',
+      },
+      {
+        name: 'cost',
+        label: '成本',
+        type: 'number',
+      },
+      {
+        name: 'profit',
+        label: '利润',
+        type: 'number',
+      },
+      {
+        name: 'discount',
+        label: '折扣率',
+        type: 'number',
       },
     ],
   }), []);
 
-  // 评分
-  const scoreDs = useDataSet(() => ({
-    paging: false,
-    data: [
-      { id: 8, company: '厦门XX食品有限公司', scoreId: '8', scoreMeaning: '技术总分（50%）', score: '80', showInHeader: 1, payType: '本人付款', currency: 'CNY' },
-      { id: 1, company: '厦门XX食品有限公司', scoreId: '1', scoreMeaning: '评分要素1', score: '80', payType: '本人付款', currency: 'CNY' },
-      { id: 2, company: '厦门XX食品有限公司', scoreId: '2', scoreMeaning: '评分要素2', score: '80', parentScoreId: '1', payType: '本人付款', currency: 'CNY' },
-      { id: 3, company: '厦门XX食品有限公司', scoreId: '3', scoreMeaning: '评分要素3', score: '80', payType: '本人付款', currency: 'CNY' },
-      { id: 4, company: '厦门XX食品有限公司', scoreId: '4', scoreMeaning: '商务总分（50%）', score: '80', showInHeader: 1, payType: '本人付款', currency: 'CNY' },
-      { id: 5, company: '厦门XX食品有限公司', scoreId: '5', scoreMeaning: '评分要素1', score: '80', payType: '本人付款', currency: 'CNY' },
-      { id: 6, company: '厦门XX食品有限公司', scoreId: '6', scoreMeaning: '评分要素2', score: '80', parentScoreId: '5', payType: '本人付款', currency: 'CNY' },
-      { id: 7, company: '厦门XX食品有限公司', scoreId: '7', scoreMeaning: '评分要素3', score: '80', payType: '本人付款', currency: 'CNY' },
-      { id: 18, company: '山西XX科贸有限公司', scoreId: '8', scoreMeaning: '技术总分（50%）', score: '70', showInHeader: 1, payType: '代理人付款', currency: 'CNY' },
-      { id: 11, company: '山西XX科贸有限公司', scoreId: '1', scoreMeaning: '评分要素1', score: '70', payType: '代理人付款', currency: 'CNY' },
-      { id: 12, company: '山西XX科贸有限公司', scoreId: '2', scoreMeaning: '评分要素2', score: '70', parentScoreId: '1', payType: '代理人付款', currency: 'CNY' },
-      { id: 13, company: '山西XX科贸有限公司', scoreId: '3', scoreMeaning: '评分要素3', score: '70', payType: '代理人付款', currency: 'CNY' },
-      { id: 14, company: '山西XX科贸有限公司', scoreId: '4', scoreMeaning: '商务总分（50%）', score: '70', showInHeader: 1, payType: '代理人付款', currency: 'CNY' },
-      { id: 15, company: '山西XX科贸有限公司', scoreId: '5', scoreMeaning: '评分要素1', score: '70', payType: '代理人付款', currency: 'CNY' },
-      { id: 16, company: '山西XX科贸有限公司', scoreId: '6', scoreMeaning: '评分要素2', score: '70', parentScoreId: '5', payType: '代理人付款', currency: 'CNY' },
-      { id: 17, company: '山西XX科贸有限公司', scoreId: '7', scoreMeaning: '评分要素3', score: '70', payType: '代理人付款', currency: 'CNY' },
-      { id: 28, company: '上海XX商务有限公司', scoreId: '8', scoreMeaning: '技术总分（50%）', score: '60', showInHeader: 1, payType: '现金付款', currency: 'USD' },
-      { id: 21, company: '上海XX商务有限公司', scoreId: '1', scoreMeaning: '评分要素1', score: '60', payType: '现金付款', currency: 'USD' },
-      { id: 22, company: '上海XX商务有限公司', scoreId: '2', scoreMeaning: '评分要素2', score: '60', parentScoreId: '1', payType: '现金付款', currency: 'USD' },
-      { id: 23, company: '上海XX商务有限公司', scoreId: '3', scoreMeaning: '评分要素3', score: '60', payType: '现金付款', currency: 'USD' },
-      { id: 24, company: '上海XX商务有限公司', scoreId: '4', scoreMeaning: '商务总分（50%）', score: '60', showInHeader: 1, payType: '现金付款', currency: 'USD' },
-      { id: 25, company: '上海XX商务有限公司', scoreId: '5', scoreMeaning: '评分要素1', score: '60', payType: '现金付款', currency: 'USD' },
-      { id: 26, company: '上海XX商务有限公司', scoreId: '6', scoreMeaning: '评分要素2', score: '60', parentScoreId: '5', payType: '现金付款', currency: 'USD' },
-      { id: 27, company: '上海XX商务有限公司', scoreId: '7', scoreMeaning: '评分要素3', score: '60', payType: '现金付款', currency: 'USD' },
-    ],
-    fields: [
-      {
-        name: 'id',
-        label: '编号',
-      },
-      {
-        name: 'company',
-        label: '公司',
-      },
-      {
-        name: 'scoreId',
-        label: '评分',
-      },
-      {
-        name: 'payType',
-        label: '付款方式',
-      },
-      {
-        name: 'payTerms',
-        label: '付款条款',
-      },
-      {
-        name: 'currency',
-        label: '币种',
-      },
-    ],
-  }), []);
-
-  const itemColumns = React.useMemo(() => [
-    {
-      header: () => 'xxx',
-      children: [
-        {
-          title: '头分组聚合列', // 可在个性化内显示
-          header: ({ aggregationTree, title }) => aggregationTree ? aggregationTree : title,
-          renderer: ({ text, record, dataSet, aggregationTree, headerGroup }) => headerGroup && headerGroup.getState('editing') ? (
-            <Row>
-              <Col span={12} style={{ cursor: 'pointer', borderRight: '1px solid #eee' }}
-                   onClick={() => record.isSelected ? dataSet.unSelect(record) : dataSet.select(record)}>
-                {aggregationTree[0]}
-                {record.isSelected ? <div>已选</div> : null}
-              </Col>
-              <Col span={12}>
-                {record.isSelected ? aggregationTree[1] : null}
-              </Col>
-            </Row>
-          ) : aggregationTree[0],
-          aggregation: true,
-          aggregationLimit: 3,
-          aggregationLimitDefaultExpanded: true,
-          titleEditable: false,
-          key: 'itemDetail',
-          align: 'left',
-          children: [
-            { name: 'unitPrice' },
-            { name: 'quantity', editor: true, aggregationTreeIndex: 1 },
-            { name: 'amount' },
-            { name: 'tax', renderer: ({ value }) => `${value * 100}%` },
-          ],
-          width: 300,
-        }
-      ]
-    },
+  const groups = React.useMemo(() => [
+    // { 
+    //   name: 'saleArea',
+    //   type: 'column',
+    // },
+    // { 
+    //   name: 'productType',
+    //   type: 'column',
+    // },
+    // { 
+    //   name: 'saleTime',
+    //   type: 'column',
+    // },
   ], []);
 
-  const scoreColumns = React.useMemo(() => [
-    {
-      name: 'score',
-      title: '评分',
-      titleEditable: false,
-      header: ({ group, title }) => group ? (
-        group.totalRecords.reduce((list, record) => {
-          if (record.get('showInHeader')) {
-            list.push(<div key={record.key}>{record.get('scoreMeaning')} {record.get('score')}</div>);
-          }
-          return list;
-        }, [])
-      ) : title,
-      footer: ({ aggregationTree }) => aggregationTree,
-      width: 300,
-    },
-  ], []);
+  const columns = React.useMemo(() => {
+    const result = [
+      { name: 'saleArea' },
+      { name: 'productType' },
+      { name: 'saleTime' },
+      { name: 'clientType' },
+      { name: 'id' },
+      { name: 'saleAmount' },
+      { name: 'saleQuantity' },
+      { name: 'cost' },
+      { name: 'profit' },
+      { name: 'discount' },
+    ];
+    return result;
+  }, []);
 
-  const itemGroups = React.useMemo(() => [
-    {
-      name: 'company',
-      type: 'header',
-      columnProps: {
-        header: ({ dataSet }) => (
-          <>
-            <div>汇总</div>
-            <div>共有3家供应商参与报价</div>
-          </>
-        ),
-        renderer: ({ text, headerGroup, record, dataSet }) => {
-          if (headerGroup) {
-            return (
-              <>
-                <div>
-                  {text}
-                  <CheckBox
-                    value
-                    checked={headerGroup.getState('editing') || false}
-                    onChange={action((value) => headerGroup.setState('editing', value))}
-                  />
-                </div>
-                <div>排名：{headerGroup.index + 1}</div>
-              </>
-            );
-          }
-          return text;
-        },
-        aggregationLimit: 2,
-        aggregationLimitDefaultExpanded: true,
-        children: [
-          { name: 'totalAmount' },
-          { name: 'totalAmountNoTax' },
-          { name: 'taxAmount' },
-        ],
-        style: { textAlign: 'left' },
-        headerStyle: { textAlign: 'left' },
-      },
-    },
-    {
-      name: 'itemCode',
-      type: 'column',
-      columnProps: {
-        header: () => '整包',
-        align: 'left',
-        children: [
-          {
-            header: () => '报价信息',
-            key: 'key',
-            align: 'left',
-            aggregation: true,
-            aggregationLimit: 2,
-            aggregationLimitDefaultExpanded: true,
-            width: 200,
-            children: [
-              { name: 'itemSize' },
-              { name: 'origin' },
-              { name: 'unit' },
-            ]
-          }
-        ],
-        renderer: ({ record, dataSet, text }) => {
-          const handleClick = action(() => {
-            const isEditing = !dataSet.getState('editing');
-            dataSet.setState('editing', isEditing);
-            dataSet.forEach((r) => r.setState('editing', isEditing));
-          });
-          return (
-            <div style={{ cursor: 'pointer' }} onClick={handleClick}>
-              {record.get('itemName')}
-              <div style={{ fontWeight: 400 }}>
-                {text}
-              </div>
-            </div>
-          );
-        },
-      },
-    },
-  ], []);
-
-  const scoreGroups = React.useMemo(() => [
-    {
-      name: 'company',
-      type: 'header',
-      columnProps: {
-        align: 'left',
-        aggregationLimit: 2,
-        aggregationLimitDefaultExpanded: true,
-        children: [
-          { name: 'payType' },
-          { name: 'payTerms' },
-          { name: 'currency' },
-        ],
-      },
-    },
-    {
-      name: 'scoreId',
-      parentField: 'parentScoreId',
-      type: 'column',
-      columnProps: {
-        renderer: ({ record }) => record.get('scoreMeaning'),
-        footer: '其他信息',
-        width: 200,
-      },
-    },
-  ], []);
-
-  const group1Ref = React.useRef(null);
-  const group2Ref = React.useRef(null);
-  const handleGroup1ScrollLeft = React.useCallback((scrollLeft, getScrollInfo) => {
-    const { current } = group2Ref;
-    if (current) {
-      current.setScrollLeft(scrollLeft);
-    }
-    console.log('scrollLeft', getScrollInfo());
-  }, []);
-  const handleGroup1ScrollTop = React.useCallback((scrollTop, getScrollInfo) => {
-    console.log('scrollTop', getScrollInfo());
-  }, []);
-  const handleGroup2ScrollLeft = React.useCallback((scrollLeft) => {
-    const { current } = group1Ref;
-    if (current) {
-      current.setScrollLeft(scrollLeft);
-    }
-  }, []);
-  const handleGroup1ColumnResize = React.useCallback(({ width, index }) => {
-    const { current } = group2Ref;
-    if (current) {
-      current.setColumnWidth(width, index);
-    }
-  }, []);
-  const handleGroup2ColumnResize = React.useCallback(({ width, index }) => {
-    const { current } = group1Ref;
-    if (current) {
-      current.setColumnWidth(width, index);
-    }
-  }, []);
-  const showGroupInfo = React.useCallback(() => {
-    const { current } = group1Ref;
-    if (current) {
-      console.log(current.getHeaderGroups()[0].getState('editing'))
-    }
-  }, [])
+  window.record = new Record({}, userDs)
 
   return (
     <>
-      <Button onClick={showGroupInfo}>showGroupInfo</Button>
       <Table
-        customizable
-        customizedCode="advanced-group"
-        aggregation
-        columnDraggable
-        columnTitleEditable
-        border
-        dataSet={itemDs}
-        columns={itemColumns}
-        groups={itemGroups}
-        headerRowHeight="auto"
-        onScrollLeft={handleGroup1ScrollLeft}
-        onScrollTop={handleGroup1ScrollTop}
-        onColumnResize={handleGroup1ColumnResize}
-        ref={group1Ref}
+        dataSet={userDs}
+        columns={columns}
+        groups={groups}
         style={{ height: 500 }}
-        selectionMode="none"
-        bodyExpandable
-        fullColumnWidth={false}
-      />
-      <Table
-        customizable
-        customizedCode="advanced-group2"
-        aggregation
-        columnDraggable
-        columnTitleEditable
-        border
-        dataSet={scoreDs}
-        columns={scoreColumns}
-        groups={scoreGroups}
-        headerRowHeight="auto"
-        footerRowHeight="auto"
-        onScrollLeft={handleGroup2ScrollLeft}
-        onColumnResize={handleGroup2ColumnResize}
-        ref={group2Ref}
-        selectionMode="none"
-        bodyExpandable
-        bodyExpanded={bodyExpanded}
-        onBodyExpand={setBodyExpanded}
+        // virtual
+        autoGroup
       />
     </>
   );

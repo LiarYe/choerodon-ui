@@ -909,6 +909,8 @@ export interface TableProps extends DataSetComponentProps {
    * 个性化列的自定义列属性, 设置时需要注意: 个性化列仅有header部分, 仅有部分属性生效
    */
   customizedColumnProps?: ColumnProps | ((defaultProps: ColumnProps) => ColumnProps);
+
+  autoGroup?: boolean;
 }
 
 @observer

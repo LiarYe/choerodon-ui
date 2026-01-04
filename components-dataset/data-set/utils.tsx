@@ -1,6 +1,6 @@
 import queryString from 'querystringify';
 import moment, { isDate, isMoment } from 'moment';
-import { isArrayLike, ObservableMap } from 'mobx';
+import { isArrayLike, ObservableMap, runInAction } from 'mobx';
 import { AxiosRequestConfig } from 'axios';
 import isPromise from 'is-promise';
 import isBoolean from 'lodash/isBoolean';
@@ -1093,6 +1093,115 @@ function normalizeGroupsToTree(groups: Group[]): Group[] {
     return [...map2.values()];
   }
   return groups;
+}
+
+export function calculateGroups(group: Group, dataSet: DataSet, groups: object[]): object {
+  const { records, subGroups, value } = group;
+  const calObj = {};
+  group.calObj = calObj;
+  const calcRecord = new Record({}, dataSet);
+  group.calcRecord = calcRecord;
+  if (subGroups.length === 0) {
+    records.forEach((record, index) => {
+      const { fields } = dataSet;
+
+      fields.forEach(field => {
+        const { name, type } = field;
+        const value = record.get(name);
+        const isNumber = type === FieldType.number || type === FieldType.currency || type === FieldType.bigNumber;
+        if (!calObj[name]) {
+          calObj[name] = {
+            isNumber,
+            sum: isNumber ? 0 : null,
+            count: 0,
+            max: isNumber ? -Infinity : null,
+            min: isNumber ? Infinity : null,
+            avg: isNumber ? 0 : null,
+          }
+        }
+        if (isNumber) {
+          calObj[name].sum = math.plus(calObj[name].sum, value);
+          calObj[name].count++;
+          calObj[name].max = math.max(calObj[name].max, value);
+          calObj[name].min = math.min(calObj[name].min, value);
+          if (index === records.length - 1) {
+            calObj[name].avg = math.div(calObj[name].sum, calObj[name].count);
+          }
+        } else {
+          calObj[name].count++;
+        }
+        
+        if (index === records.length - 1) {
+          if (group.name === name) {
+            // calcRecord.set(name, group.value);
+            calcRecord.set(name, `${group.value} 合计(${calObj[name].count})`);
+          } else {
+            const gNameIndex = groups.findIndex(g => g.name === group.name);
+            const nameIndex = groups.findIndex(g => g.name === name);
+            calcRecord.set(name,
+              nameIndex >= 0
+                ? nameIndex < gNameIndex ? record.get(name) : undefined
+                : calObj[name].sum,
+            );
+          }
+        }
+      });
+    });
+  } else {
+    subGroups.forEach((subGroup, index) => {
+      const groupCalObj = calculateGroups(subGroup, dataSet, groups);
+
+      const { fields } = dataSet;
+      fields.forEach(field => {
+        const { name } = field;
+        const { isNumber } = groupCalObj[name];
+        if (!calObj[name]) {
+          calObj[name] = {
+            isNumber,
+            sum: isNumber ? 0 : null,
+            count: 0,
+            max: isNumber ? -Infinity : null,
+            min: isNumber ? Infinity : null,
+            avg: isNumber ? 0 : null,
+          }
+        }
+        if (isNumber) {
+          calObj[name].sum = math.plus(calObj[name].sum, groupCalObj[name].sum);
+          calObj[name].count += groupCalObj[name].count;
+          calObj[name].max = math.max(calObj[name].max, groupCalObj[name].max);
+          calObj[name].min = math.min(calObj[name].min, groupCalObj[name].min);
+          if (index === subGroups.length - 1) {
+            calObj[name].avg = math.div(calObj[name].sum, calObj[name].count);
+            if (math.isBigNumber(calObj[name].avg)) {
+              calObj[name].avg = math.toFixed(calObj[name].avg, 2);
+            }
+          }
+        } else {
+          calObj[name].count += groupCalObj[name].count;
+        }
+
+        if (index === subGroups.length - 1) {
+          if (group.name === name) {
+            // calcRecord.set(name, group.value);
+            calcRecord.set(name, `${group.value} 合计(${calObj[name].count})`);
+          } else {
+            const gNameIndex = groups.findIndex(g => g.name === group.name);
+            const nameIndex = groups.findIndex(g => g.name === name);
+            calcRecord.set(name,
+              nameIndex >= 0
+                ? nameIndex < gNameIndex ? subGroup.calcRecord.get(name) : undefined
+                : calObj[name].sum,
+            );
+          }
+        }
+      });
+    });
+  }
+  runInAction(() => {
+    calcRecord.status = RecordStatus.sync;
+    calcRecord.dirtyData = undefined;
+  });
+  return calObj;
 }
 
 const EMPTY_GROUP_KEY = Symbol('__empty_group__');

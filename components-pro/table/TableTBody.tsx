@@ -26,7 +26,7 @@ import Record from '../data-set/Record';
 import { ColumnLock, DragColumnAlign, GroupType } from './enum';
 import ExpandedRow from './ExpandedRow';
 import { RecordCachedType } from '../data-set/enum';
-import { DragRender, instance } from './Table';
+import { DragRender, instance, TableGroup } from './Table';
 import { getHeader, isStickySupport } from './utils';
 import ColumnGroups from './ColumnGroups';
 import TableRowGroup from './TableRowGroup';
@@ -87,6 +87,7 @@ export interface RowsProps extends GenerateRowsProps {
   onClearCache: (type?: RecordCachedType) => void;
   snapshot?: DroppableStateSnapshot;
   dragRowHeight?: number;
+  groups?: TableGroup[];
 }
 
 export interface GenerateRowProps extends GenerateRowsProps {
@@ -412,18 +413,35 @@ function generateGroupRows(
       });
     } else {
       if (subGroups && subGroups.length) {
-        generateGroupRows(rows, subGroups, props, hasCached, statistics, path, index, isLast);
+        // 有子节点的 group 展开时
+        if (tableStore.isGroupExpanded(group)) {
+          generateGroupRows(rows, subGroups, props, hasCached, statistics, path, index, isLast);
+        }
       }
-      records.forEach((record) => {
+      if (tableStore.isGroupExpanded(group)) {
+        records.forEach((record) => {
+          generateRowAndChildRows(rows, {
+            ...props,
+            record,
+            index,
+            statistics,
+            groupPath: path,
+            parentExpanded: true,
+          });
+        });
+      }
+
+      // 合计行
+      if (group.calcRecord) {
         generateRowAndChildRows(rows, {
           ...props,
-          record,
+          record: group.calcRecord,
           index,
           statistics,
-          groupPath: path,
+          groupPath: tableStore.isGroupExpanded(group) ? path.slice(0, path.length - 1) : path,
           parentExpanded: true,
         });
-      });
+      }
     }
     if (hasChildren) {
       generateGroupRows(rows, children!, props, hasCached, statistics, groupPath, undefined, isLastInTreeNode);
@@ -527,7 +545,7 @@ function findRowMeta(rowMetaData: VirtualRowMetaData[], count: { index: number }
 const VirtualRows: FunctionComponent<RowsProps> = function VirtualRows(props) {
   const {
     lock, columnGroups, onClearCache, expandIconColumnIndex, tableStore, rowDragRender,
-    isTree, rowDraggable, snapshot, dragRowHeight, isFixedRowHeight, virtualCell,
+    isTree, rowDraggable, snapshot, dragRowHeight, isFixedRowHeight, virtualCell, groups,
   } = props;
   const draggableId = snapshot && snapshot.draggingFromThisWith;
   const [totalRows, statistics]: [ReactNode[], Statistics] = useComputed(() => {
@@ -559,7 +577,7 @@ const VirtualRows: FunctionComponent<RowsProps> = function VirtualRows(props) {
     return [cachedRows.concat(rows), $statistics];
   }, [
     tableStore, columnGroups, expandIconColumnIndex, lock, isTree, rowDraggable,
-    rowDragRender, onClearCache, draggableId, dragRowHeight, isFixedRowHeight, virtualCell,
+    rowDragRender, onClearCache, draggableId, dragRowHeight, isFixedRowHeight, virtualCell, groups,
   ]);
   const renderGroup = useCallback((startIndex) => {
     const groups: ReactNode[] = [];
@@ -621,7 +639,7 @@ VirtualRows.displayName = 'VirtualRows';
 const Rows: FunctionComponent<RowsProps> = function Rows(props) {
   const {
     lock, columnGroups, onClearCache, expandIconColumnIndex, tableStore,
-    rowDragRender, isTree, rowDraggable, isFixedRowHeight, virtualCell,
+    rowDragRender, isTree, rowDraggable, isFixedRowHeight, virtualCell, groups,
   } = props;
   const cachedRows: ReactNode[] = useComputed(() => (
     generateCachedRows({ tableStore, columnGroups, lock, isTree, rowDraggable, virtual: false, isFixedRowHeight, virtualCell }, onClearCache)
@@ -642,7 +660,7 @@ const Rows: FunctionComponent<RowsProps> = function Rows(props) {
     }, hasCache)
   ), [
     tableStore, columnGroups, hasCache, expandIconColumnIndex,
-    lock, isTree, rowDraggable, rowDragRender, isFixedRowHeight, virtualCell,
+    lock, isTree, rowDraggable, rowDragRender, isFixedRowHeight, virtualCell, groups,
   ]);
   useEffect(action(() => {
     if (tableStore.actualRows !== undefined) {
@@ -667,7 +685,7 @@ const ObserverRows = observer(Rows);
 const TableTBody: FunctionComponent<TableTBodyProps> = function TableTBody(props) {
   const { lock, columnGroups, snapshot, dragRowHeight, ...rest } = props;
   const { prefixCls, tableStore, rowDragRender, dataSet, expandedRowRenderer, isTree } = useContext(TableContext);
-  const { rowDraggable, virtualCell, isFixedRowHeight, addNewButton } = tableStore;
+  const { rowDraggable, virtualCell, isFixedRowHeight, addNewButton, groups } = tableStore;
   const expandIconColumnIndex = (expandedRowRenderer || isTree) ?
     (lock === ColumnLock.right ? columnGroups.leafs.filter(group => group.column.lock !== ColumnLock.right).length : 0) : -1;
   const handleResize = useCallback(action((_width: number, height: number, target: HTMLTableSectionElement) => {
@@ -767,6 +785,7 @@ const TableTBody: FunctionComponent<TableTBodyProps> = function TableTBody(props
       dragRowHeight={dragRowHeight}
       isFixedRowHeight={isFixedRowHeight}
       virtualCell={virtualCell}
+      groups={groups}
     />
   ) : (
     <ObserverRows
@@ -780,6 +799,7 @@ const TableTBody: FunctionComponent<TableTBodyProps> = function TableTBody(props
       rowDraggable={rowDraggable}
       isFixedRowHeight={isFixedRowHeight}
       virtualCell={virtualCell}
+      groups={groups}
     />
   );
   const tbody = rowDraggable && !tableStore.virtual ? (

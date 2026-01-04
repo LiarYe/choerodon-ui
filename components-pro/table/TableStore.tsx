@@ -24,6 +24,7 @@ import pick from 'lodash/pick';
 import noop from 'lodash/noop';
 import { isMoment } from 'moment';
 import { CHILDREN_PAGE_INFO, QUERY_CANCELABLE } from 'choerodon-ui/dataset/data-set/DataSet';
+import { math } from 'choerodon-ui/dataset';
 import Column, { ColumnDefaultProps, ColumnProps, defaultAggregationRenderer } from './Column';
 import CustomizationSettings from './customization-settings/CustomizationSettings';
 import isFragment from '../_util/isFragment';
@@ -76,7 +77,7 @@ import Menu from '../menu';
 import Modal, { ModalProps } from '../modal/Modal';
 import { treeMap, treeSome } from '../_util/treeUtils';
 import { HighlightRenderer, TagRendererProps } from '../field/FormField';
-import { getIf, mergeGroupStates, normalizeGroups } from '../data-set/utils';
+import { getIf, mergeGroupStates, normalizeGroups, calculateGroups } from '../data-set/utils';
 import VirtualRowMetaData from './VirtualRowMetaData';
 import BatchRunner from '../_util/BatchRunner';
 import { LabelLayout } from '../form/enum';
@@ -2673,10 +2674,12 @@ export default class TableStore {
     this.disposeGroupReaction();
   }
 
+  @autobind
   @action
-  initGroups() {
+  initGroups(groupsProps?: TableGroup[]) {
     this.disposeGroupReaction();
-    const { groups = [] } = this.props;
+    const { groups: oriGroups = [] } = this.props;
+    const groups = groupsProps || oriGroups;
     if (groups.length) {
       this.groupReaction = reaction(() => dataSet.data, () => this.initGroups());
       const headerGroupNames: string[] = [];
@@ -2713,17 +2716,60 @@ export default class TableStore {
       this.groupedData = mergeGroupStates(normalizeGroups(rowGroupNames.concat(groupNames), headerGroupNames, this.currentData, parentFields), this.groupedData);
       this.groupedDataWithHeader = mergeGroupStates(normalizeGroups(headerGroupNames.concat(rowGroupNames, groupNames), [], this.currentData), this.groupedDataWithHeader);
       this.groups = [...header, ...row, ...column];
+
+      const calObj = {};
+      this.groupedData.forEach((group, index) => {
+        const groupCalObj = calculateGroups(group, this.dataSet, this.groups);
+
+        const { fields } = dataSet;
+        fields.forEach(field => {
+          const { name } = field;
+          const { isNumber } = groupCalObj[name];
+          if (!calObj[name]) {
+            calObj[name] = {
+              isNumber,
+              sum: isNumber ? 0 : null,
+              count: 0,
+              max: isNumber ? -Infinity : null,
+              min: isNumber ? Infinity : null,
+              avg: isNumber ? 0 : null,
+            }
+          }
+          if (isNumber) {
+            calObj[name].sum = math.plus(calObj[name].sum, groupCalObj[name].sum);
+            calObj[name].count += groupCalObj[name].count;
+            calObj[name].max = math.max(calObj[name].max, groupCalObj[name].max);
+            calObj[name].min = math.min(calObj[name].min, groupCalObj[name].min);
+            if (index === this.groupedData.length - 1) {
+              calObj[name].avg = math.div(calObj[name].sum, calObj[name].count);
+              if (math.isBigNumber(calObj[name].avg)) {
+                calObj[name].avg = math.toFixed(calObj[name].avg, 2);
+              }
+            }
+          } else {
+            calObj[name].count += groupCalObj[name].count;
+          }
+        });
+      });
+      this.groupedDataCalObj = calObj;
     } else {
       this.groups = [];
       this.groupedData = [];
       this.groupedDataWithHeader = [];
     }
+
+    if (groupsProps) {
+      this.initColumns();
+    }
   }
 
   @action
   initColumns() {
-    const { customized, customizable, aggregation, dataSet } = this;
-    const { columns, children } = this.props;
+    const { customized, customizable, aggregation, dataSet, groups } = this;
+    const { columns: propsColumns, children } = this.props;
+    const columns = propsColumns
+      ? propsColumns.filter(column => !groups || !groups.find(group => group.name === column.name))
+      : propsColumns;
     const customizedColumns = customizable ? customized.columns : undefined;
     dataSet.setState('__CUSCOLUMNS__', customized);
     const [leftOriginalColumns, originalColumns, rightOriginalColumns, hasAggregationColumn] =
@@ -2772,7 +2818,8 @@ export default class TableStore {
   }
 
   isGroupExpanded(group: Group): boolean {
-    return group.isExpanded && (!group.parent || this.isGroupExpanded(group.parent));
+    // return group.isExpanded && (!group.parent || this.isGroupExpanded(group.parent));
+    return group.isExpanded && (!group.parentGroup || this.isGroupExpanded(group.parentGroup));
   }
 
   setGroupExpanded(group: Group, isExpanded: boolean) {

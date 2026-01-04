@@ -21,12 +21,26 @@ const TableGroupCellInner: FunctionComponent<TableGroupCellInnerProps> = functio
   const { children } = group;
   const { renderer = defaultAggregationRenderer, __tableGroup } = column;
   const handleExpandChange = useCallback(() => {
+    console.log('handleExpandChange', group);
     tableStore.setGroupExpanded(group, !tableStore.isGroupExpanded(group));
   }, [tableStore, group]);
   const record = group.totalRecords[0];
   const text = renderer({ text: aggregationList || group.value, rowGroup: group, dataSet, record });
+  const newText = group.isExpanded
+    ? !tableStore.isGroupExpanded(group) ? undefined : text
+    : group?.calcRecord.get(group.name);
   const hasExpandIcon = Boolean(__tableGroup && __tableGroup.parentField);
   const renderExpandIcon = () => {
+    const isExpanded = tableStore.isGroupExpanded(group);
+    return !!newText && (
+      <ExpandIcon
+        prefixCls={prefixCls}
+        expandable
+        onChange={handleExpandChange}
+        expanded={isExpanded}
+      />
+    );
+
     if (hasExpandIcon) {
       const expandable = !!children;
       const { expandIcon } = tableStore;
@@ -69,7 +83,7 @@ const TableGroupCellInner: FunctionComponent<TableGroupCellInnerProps> = functio
     <span {...cellProps}>
       {renderIndent()}
       {renderExpandIcon()}
-      {text}
+      {newText}
     </span>
   );
 };

@@ -1502,6 +1502,110 @@
     background: red;
     border-radius: 50%;
   }
+
+  &-group-config {
+    &-popover {
+      z-index: 10 !important;
+      &.@{c7n-prefix}-popover {
+        padding: 0;
+      }
+
+      .@{c7n-prefix}-popover {
+        &-arrow {
+          display: none;
+        }
+      }
+
+      .@{c7n-prefix}-popover-title {
+        padding: 0.16rem 0.16rem 0.04rem !important;
+        font-weight: 500 !important;
+        font-size: 0.14rem !important;
+        border: none;
+      }
+
+      .@{c7n-prefix}-popover-inner-content {
+        padding: 0.06rem 0.16rem 0.16rem !important;
+      }
+    }
+
+    &-header-inner {
+      position: relative;
+      display: flex;
+
+      &-title {
+        font-weight: 500;
+        font-size: 0.14rem;
+        line-height: 0.22rem;
+      }
+    }
+
+    &-content {
+      width: 4.1rem;
+    }
+
+    &-list {
+      display: flex;
+      flex-direction: column;
+
+      &-container {
+        max-height: 2.8rem;
+        overflow-x: hidden;
+        overflow-y: auto;
+      }
+
+      &-item {
+        padding: 0.06rem 0;
+
+        &-dragging {
+          background: #fff;
+          box-shadow: 0 0.02rem 0.08rem rgba(0, 0, 0, 0.12);
+        }
+
+        &-drag:hover {
+          cursor: move;
+        }
+
+        & &-index {
+          display: inline-block;
+          width: 0.23rem;
+          margin: 0 0 0 0.04rem;
+          line-height: 1;
+          text-align: center;
+          vertical-align: middle;
+
+          .@{c7n-prefix}-tag {
+            height: 0.16rem;
+            margin: 0;
+            padding: 0 0.04rem;
+            line-height: 0.15rem;
+            border: none;
+          }
+        }
+
+        &-groupName {
+          width: 1.4rem;
+          margin: 0 0 0 0.08rem;
+        }
+
+        &-groupType {
+          width: 1.22rem;
+          margin: 0 0 0 0.1rem;
+        }
+
+        &-delete {
+          float: right;
+        }
+      }
+    }
+
+    &-add-button {
+      margin: 0.05rem 0;
+    }
+
+    &-footer {
+      text-align: right;
+    }
+  }
 }
 
 .border() {

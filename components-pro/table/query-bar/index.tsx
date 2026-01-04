@@ -37,6 +37,7 @@ import Column from '../Column';
 import ColumnGroup from '../ColumnGroup';
 import { getEditorByField, getPlaceholderByField, getTableHeaderRows } from '../utils';
 import CombineSort from './CombineSort';
+import GroupFieldConfig from './GroupFieldConfig';
 import TableToolBar from './TableToolBar';
 import TableFilterBar from './TableFilterBar';
 import TableAdvancedQueryBar from './TableAdvancedQueryBar';
@@ -626,6 +627,16 @@ export default class TableQueryBar extends Component<TableQueryBarProps> {
           />
         ), ...(buttons || [])];
       }
+    }
+    if (tableStore.props.autoGroup) {
+      buttons = [(
+        <GroupFieldConfig
+          key="GroupFieldConfig"
+          tableStore={tableStore}
+          dataSet={dataSet}
+          prefixCls={prefixCls}
+        />
+      ), ...(buttons || [])];
     }
     if (buttons) {
       // 汇总条存在下 buttons 大于 3 个放入下拉
