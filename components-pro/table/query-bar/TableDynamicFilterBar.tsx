@@ -688,7 +688,7 @@ export default class TableDynamicFilterBar extends Component<TableDynamicFilterB
     }
     const fuzzyValue = dataSet.getState(ORIGINALVALUEOBJ)?.fuzzy;
     const searchText = dataSet.getState(SEARCHTEXT);
-    if (status === RecordStatus.sync && searchText !== (isNil(fuzzyValue) ? null : fuzzyValue)) {
+    if (status === RecordStatus.sync && (isNil(searchText) ? null : searchText) !== (isNil(fuzzyValue) ? null : fuzzyValue)) {
       status = RecordStatus.update;
     }
     this.setConditionStatus(status);
