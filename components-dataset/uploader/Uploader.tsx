@@ -116,7 +116,7 @@ export default class Uploader {
         runInAction(() => {
           attachment.status = 'error';
           attachment.invalid = true;
-          attachment.errorMessage = $l('Attachment', 'file_not_readable');
+          attachment.errorMessage = $l('Attachment', 'file_not_exist');
         });
         return;
       }

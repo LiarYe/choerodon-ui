@@ -42,7 +42,7 @@ const locale: Locale = {
   Attachment: {
     file_max_size: 'File size cannot exceed: {size}',
     file_type_mismatch: 'File type mismatch, correct type: {types}',
-    file_not_readable: 'The file is inaccessible, please check.',
+    file_not_exist: 'The file does not exist, please check.',
   },
 };
 
