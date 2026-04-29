@@ -219,7 +219,7 @@ export interface Locale extends DataSetLocale {
     remove_confirm_title: string;
     file: string;
     directory: string;
-    file_not_readable: string;
+    file_not_exist: string;
   };
   Modal: {
     ok: string;
