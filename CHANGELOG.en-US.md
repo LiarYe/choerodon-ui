@@ -107,6 +107,7 @@ timeline: true
 - 🐞 `<pro>Lov`: Fixed incorrect parameter serialization for object-type query conditions, ensuring the value field is submitted correctly.
 - 🐞 `<pro>PerformanceTable`: Fixed the issue where the scrollbar position does not sync after the table data is updated.
 - 🐞 `<pro>Table`: Fixed the issue where components in the cell tooltip could not inherit ConfigProvider configuration.
+- 🐞 `<pro>DatePicker`: Fixed the issue where the start and end values overlap when configuring the `timeZone` in the range mode.
 
 ## 1.6.8
 
