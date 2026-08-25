@@ -107,6 +107,7 @@ timeline: true
 - 🐞 `<pro>Lov`: 修复对象类型查询条件参数序列化异常的问题，确保查询时正确提交值字段。
 - 🐞 `<pro>PerformanceTable`: 修复表格数据更新后滚动条位置不同步问题。
 - 🐞 `<pro>Table`: 修复单元格 tooltip 中的组件无法继承 ConfigProvider 配置的问题。
+- 🐞 `<pro>DatePicker`: 修复范围模式配置 timeZone 时开始值与结束值显示重叠的问题。
 
 ## 1.6.8
 
