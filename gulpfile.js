@@ -6,7 +6,19 @@ const babel = require('gulp-babel');
 const argv = require('minimist')(process.argv.slice(2));
 const chalk = require('chalk');
 const path = require('path');
+
+// gulp-typescript 依赖 source-map, source-map@0.7.3 会将 Node 18+ 的全局 fetch 误判为浏览器环境;
+// source-map 判断环境主要发生在模块加载阶段;
+// 加载 gulp-typescript 前隐藏 fetch, source-map 正确识别为 Node 环境, 加载完成后恢复 fetch;
+const globalFetch = global.fetch;
+if (globalFetch) {
+  delete global.fetch;
+}
 const ts = require('gulp-typescript');
+if (globalFetch) {
+  global.fetch = globalFetch;
+}
+
 const gulp = require('gulp');
 const rimraf = require('rimraf');
 const stripCode = require('gulp-strip-code');
