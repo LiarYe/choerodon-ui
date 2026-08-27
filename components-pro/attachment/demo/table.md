@@ -29,9 +29,9 @@ const App = () => {
     }, {}, {}],
   }), []);
   const columns = React.useMemo(() => [
-    { name: 'attachment', editor: <Attachment viewMode="popup" funcType="link" /> },
-    { name: 'attachment2' },
-    { name: 'attachment3', editor: true },
+    { name: 'attachment', editor: <Attachment viewMode="popup" funcType="link" />, tooltip: 'always', tooltipProps: { theme: 'light' } },
+    { name: 'attachment2', tooltip: 'always', tooltipProps: { theme: 'light' } },
+    { name: 'attachment3', editor: true, tooltip: 'always', tooltipProps: { theme: 'light' } },
   ], []);
 
   return (

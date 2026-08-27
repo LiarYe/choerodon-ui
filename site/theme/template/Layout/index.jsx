@@ -26,6 +26,30 @@ configure({ enforceActions: 'always' });
 //   fields: [{ name: 'H-SECRET-LEVEL', type: 'string', required: true, label: '密级' }],
 // });
 
+// 保持和项目配置一致
+const tooltipThemeHook = (target) => {
+  switch (target) {
+    case 'table-cell':
+      return 'dark';
+    case 'output':
+      return 'dark';
+    case 'label':
+      return 'dark';
+    case 'button':
+      return 'dark';
+    case 'select-option':
+      return 'light';
+    case 'validation':
+      return 'light';
+    case 'help':
+      return 'light';
+    case 'text-field-disabled':
+      return 'light';
+    default:
+      return 'light';
+  }
+};
+
 UIconfigure({
   lovQueryUrl: undefined,
   lovQueryAxiosConfig(code, lovConfig, props, lovQueryUrl) {
@@ -48,6 +72,7 @@ UIconfigure({
     // formProps: {},
     // modalProps: {},
   },
+  tooltipTheme: tooltipThemeHook,
 });
 
 export const uiConfigure = {
