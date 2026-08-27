@@ -36,6 +36,7 @@ import { isCalcSize, isPercentSize, pxToRem, toPx } from 'choerodon-ui/lib/_util
 import measureScrollbar from 'choerodon-ui/lib/_util/measureScrollbar';
 import KeyCode from 'choerodon-ui/lib/_util/KeyCode';
 import ReactResizeObserver from 'choerodon-ui/lib/_util/resizeObserver';
+import { DuplicateKeyConfig } from 'choerodon-ui/lib/configure/interface';
 import Column, { ColumnProps } from './Column';
 import TableRow, { TableRowProps } from './TableRow';
 import TableHeaderCell from './TableHeaderCell';
@@ -912,6 +913,10 @@ export interface TableProps extends DataSetComponentProps {
    * 个性化列的自定义列属性, 设置时需要注意: 个性化列仅有header部分, 仅有部分属性生效
    */
   customizedColumnProps?: ColumnProps | ((defaultProps: ColumnProps) => ColumnProps);
+  /**
+   * 重复主键(primaryKey)处理的配置对象；也可通过全局 `duplicateKey` hook 按组件名配置
+   */
+  duplicateKey?: DuplicateKeyConfig;
 }
 
 /**
@@ -1522,7 +1527,7 @@ export default class Table extends DataSetComponent<TableProps> {
       if (index) {
         const record = dataSet.findRecordById(index);
         if (record) {
-          if (!record.selectable || this.tableStore.isDuplicatePrimaryKeyRecord(record)) {
+          if (!record.selectable) {
             this.handleKeyDownUp(e);
           } else if (!record.isSelected) {
             dataSet.select(record);
@@ -2108,6 +2113,7 @@ export default class Table extends DataSetComponent<TableProps> {
       'summaryBarConfigProps',
       'customizedColumnProps',
       'combineColumnFilter',
+      'duplicateKey',
     ]);
   }
 

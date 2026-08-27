@@ -401,6 +401,7 @@ export default class Lov extends Select<LovProps> {
           lang={this.lang}
           renderAddNewOptionPrompt={isFunction(addNewOptionPrompt) || (addNewOptionPrompt && addNewOptionPrompt.path)
             ? this.renderAddNewOptionPrompt : undefined}
+          duplicateKey={this.duplicateKeyConfig}
         />
       );
     }
@@ -729,6 +730,7 @@ export default class Lov extends Select<LovProps> {
             lang: this.lang,
             renderAddNewOptionPrompt: isFunction(addNewOptionPrompt) || (addNewOptionPrompt && addNewOptionPrompt.path)
               ? this.renderAddNewOptionPrompt : undefined,
+            duplicateKey: this.duplicateKeyConfig,
           }
           this.modal = (modalContext || Modal).open(mergeProps<ModalProps>({
             title: title || this.getLabel(),
@@ -915,7 +917,7 @@ export default class Lov extends Select<LovProps> {
     }
     if (e.keyCode === KeyCode.ENTER && this.props.popupSearchMode === PopupSearchMode.single) {
       const record = this.options.current;
-      if (record && !this.duplicateOptionInfo.duplicateRecords.has(record)) {
+      if (record && (!this.duplicateKeyConfig.disable || !this.duplicateOptionInfo.duplicateRecords.has(record))) {
         this.handleLovViewSelect(record);
       }
     }
@@ -1029,6 +1031,7 @@ export default class Lov extends Select<LovProps> {
     return {
       ...lovTablePropsConfigData,
       ...mergeProps<Partial<TableProps>>(localTableProps, tablePropsData),
+      duplicateKey: this.duplicateKeyConfig,
     };
   }
 

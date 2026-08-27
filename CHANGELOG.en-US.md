@@ -15,10 +15,10 @@ timeline: true
 
 ---
 
-- 🌟 `configure`: Added `selectBeforeCreateComboOption`, `uploadBatchMaxFileCount`, `attachment.previewTarget`, `lovModalAutoWidth` property.
+- 🌟 `configure`: Added `selectBeforeCreateComboOption`, `uploadBatchMaxFileCount`, `attachment.previewTarget`, `lovModalAutoWidth`, `duplicateKey` property.
 - 🌟 `<pro>Table`: A `type` parameter has been added to the `onReset` event of the search bar to distinguish the triggering scenarios.
 - 🌟 `<pro>Button`: Added `iconPlacement` property.
-- 🌟 `<pro>Select`: Added `beforeCreateComboOption`, `autoScrollToSelected` properties.
+- 🌟 `<pro>Select`: Added `beforeCreateComboOption`, `autoScrollToSelected`, `duplicateKey` properties.
 - 🌟 `<pro>PercentField`: Added the `PercentField` component.
 - 🌟 `<pro>DataSet.Field`: Add the `percentage` type.
 - 🌟 `<pro>PerformanceTable`: Added column attribute `customizable`.
@@ -29,6 +29,7 @@ timeline: true
 - 🌟 `<pro>DataSet.Field`: A new property named `lovQueryBatchAxiosConfig` has been added, enabling custom batch queries for `Lov` fields when pasting tables.
 - 🌟 `Upload`: Added `batchMaxFileCount`, `alwaysShowActions` property.
 - 🌟 `<pro>Attachment`: Added `batchMaxFileCount`, `alwaysShowActions` property.
+- 🌟 `<pro>Table`: Added `duplicateKey` property.
 - 💄 `<pro>FormField`: Optimize the `help` style of the `newLine` type and enable the display of overflow `Tooltip`.
 - 💄 `Tabs`: When the current `tab` changes, the previous or next `tab` is displayed simultaneously.
 - 💄 `<pro>Attachment`: Optimize the display of incompletely visible filenames by displaying the full filename via a tooltip. 

@@ -785,7 +785,7 @@ const TableCellInner: FunctionComponent<TableCellInnerProps> = function TableCel
     children: showDuplicateHelp ? (
       <span className={`${prefixCls}-duplicate-content`}>
         <span className={`${prefixCls}-duplicate-text`}>{text}</span>
-        <Tooltip title={$l('Table', 'duplicate_key_warning')}>
+        <Tooltip title={$l('Table', !tableStore.duplicateKeyConfig.disable ? 'duplicate_key_warning_no_disable' : 'duplicate_key_warning')}>
           <Icon type="error_outline" className={`${prefixCls}-duplicate-help`} />
         </Tooltip>
       </span>

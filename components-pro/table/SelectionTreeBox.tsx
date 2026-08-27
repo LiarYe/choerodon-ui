@@ -12,7 +12,7 @@ export interface SelectionTreeBoxProps {
 
 const SelectionTreeBox: FunctionComponent<SelectionTreeBoxProps> = function SelectionTreeBox(props) {
   const { record, tableStore } = props;
-  const disabled = !record.selectable || (tableStore && tableStore.isDuplicatePrimaryKeyRecord(record));
+  const disabled = !record.selectable || (tableStore && tableStore.duplicateKeyConfig.disable && tableStore.isDuplicatePrimaryKeyRecord(record));
   const handleChange = useCallback(() => {
     const { dataSet } = record;
     if (dataSet) {

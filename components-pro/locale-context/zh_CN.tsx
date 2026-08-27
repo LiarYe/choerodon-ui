@@ -164,6 +164,7 @@ const locale: Locale = {
     copy_display_success: '复制显示值成功',
     copy_pristine_success: '复制原始值成功',
     duplicate_key_warning: '该选项检测到重复标识数据，不可选择，请联系管理员。',
+    duplicate_key_warning_no_disable: '该选项检测到重复标识数据，请联系管理员。',
     paste_template: '粘贴模板',
     no_xlsx: '缺少 xlsx 配置，请先配置 xlsx 后再进行下载',
     arrange_count: '计数',
@@ -274,6 +275,7 @@ const locale: Locale = {
     input_prompt_searchable: '可搜索查找，或直接选择值',
     input_prompt_combo: '可填写值，或直接选择值',
     duplicate_key_warning: '该选项检测到重复标识数据，不可选择，请联系管理员。',
+    duplicate_key_warning_no_disable: '该选项检测到重复标识数据，请联系管理员。',
   },
   SecretField: {
     edit: '{label}编辑',

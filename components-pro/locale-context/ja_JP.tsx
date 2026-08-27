@@ -167,6 +167,7 @@ const locale: Locale = {
     copy_display_success: '表示値のコピーに成功しました',
     copy_pristine_success: '元の値のコピーに成功しました',
     duplicate_key_warning: 'この項目で重複する識別データが検出されたため、選択できません。管理者にお問い合わせください。',
+    duplicate_key_warning_no_disable: 'この項目に重複する識別データが検出されました。管理者にお問い合わせください。',
     paste_template: 'テンプレートの貼り付け',
     no_xlsx: 'xlsx構成がありません。エクスポートする前にxlsx構成を構成してください',
     arrange_count: 'カウント',
@@ -277,6 +278,7 @@ const locale: Locale = {
     input_prompt_searchable: '検索したり値を選択したりすることができます',
     input_prompt_combo: '値を記入したり選択したりできます',
     duplicate_key_warning: 'この項目で重複する識別データが検出されたため、選択できません。管理者にお問い合わせください。',
+    duplicate_key_warning_no_disable: 'この項目に重複する識別データが検出されました。管理者にお問い合わせください。',
   },
   SecretField: {
     edit: '{label}編集',

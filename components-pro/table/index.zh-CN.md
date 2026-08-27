@@ -128,6 +128,7 @@ subtitle: 表格
 | combineSortConfig | 组合排序配置, 默认开启前端、后端排序, 显示排序选项; 内置了前端组合排序函数, 如有复杂字段排序请自行实现排序函数。currentDataSort: 当前页排序(前端排序); allDataSort: 所有页排序(后端排序); | { currentDataSort?: { show?: boolean; enable?: boolean; customFn?: ((props: { dataSet: DataSet, sortInfo: Map<string, SortOrder> }) => void); allDataSort?: { show?: boolean; enable?: boolean} }  |  |
 | addNewButton | 表格体内新增输入行按钮, 数据为空时代替 renderEmpty; 设置 pristine 时, 此属性无效 |	boolean |	 |
 | customizedColumnProps | 个性化列的自定义列属性, 设置时需要注意: 个性化列仅有header部分, 仅有部分属性生效 |	ColumnProps \| ((defaultProps: ColumnProps) => ColumnProps) |	 |
+| duplicateKey | 重复主键(primaryKey)处理的配置对象；也可通过全局 `duplicateKey` hook 按组件名配置。`disable` 控制是否禁用重复记录，`showWarning` 是否显示重复项提示 | { disable?: boolean; showWarning?: boolean } | [globalConfig.duplicateKey](/components/configure#API) |
 
 更多属性请参考 [DataSetComponent](/components-pro/core/#DataSetComponent)。
 

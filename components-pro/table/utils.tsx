@@ -263,7 +263,7 @@ export function findIndexedSibling(element, direction): HTMLTableRowElement | nu
 
 export function isDisabledRow(record: Record, tableStore: TableStore) {
   return record.status === RecordStatus.delete || record.disabled ||
-    tableStore.isDuplicatePrimaryKeyRecord(record);
+    (tableStore.duplicateKeyConfig.disable && tableStore.isDuplicatePrimaryKeyRecord(record));
 }
 
 export function isSelectedRow(record: Record) {

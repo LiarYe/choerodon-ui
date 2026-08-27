@@ -166,6 +166,7 @@ export interface Locale extends DataSetLocale {
     copy_display_success: string,
     copy_pristine_success: string,
     duplicate_key_warning: string,
+    duplicate_key_warning_no_disable: string,
     paste_template: string,
     no_xlsx: string,
     arrange_count: string,
@@ -278,6 +279,7 @@ export interface Locale extends DataSetLocale {
     input_prompt_searchable: string;
     input_prompt_combo: string;
     duplicate_key_warning: string;
+    duplicate_key_warning_no_disable: string;
   };
   SecretField: {
     edit: string;

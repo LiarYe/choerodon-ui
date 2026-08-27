@@ -9,6 +9,7 @@ import KeyCode from 'choerodon-ui/lib/_util/KeyCode';
 import { math } from 'choerodon-ui/dataset';
 import ConfigContext from 'choerodon-ui/lib/config-provider/ConfigContext';
 import Alert from 'choerodon-ui/lib/alert';
+import { DuplicateKeyConfig } from 'choerodon-ui/lib/configure/interface';
 import DataSet from '../data-set/DataSet';
 import Record from '../data-set/Record';
 import Table, { onColumnResizeProps, TableProps, TableQueryBarHookCustomProps } from '../table/Table';
@@ -49,6 +50,7 @@ export interface LovViewProps {
   showDetailWhenReadonly?: boolean;
   lang?: Lang;
   renderAddNewOptionPrompt?: (type: 'prompt' | 'noDataPrompt', renderEmptyComponent: string) => ReactNode;
+  duplicateKey?: DuplicateKeyConfig;
 }
 
 interface LovViewState {
@@ -238,7 +240,8 @@ export default class LovView extends Component<LovViewProps, LovViewState> {
   }
 
   isDuplicateRecord(record: Record): boolean {
-    return this.duplicateRecords.has(record);
+    const { duplicateKey = {} } = this.props;
+    return !!duplicateKey.disable && this.duplicateRecords.has(record);
   }
 
   closeModal(record: Record | Record[] | undefined, closeModal?: boolean) {

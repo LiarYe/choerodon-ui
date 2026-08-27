@@ -16,6 +16,7 @@ import { warning } from 'choerodon-ui/dataset/utils';
 import measureScrollbar from 'choerodon-ui/lib/_util/measureScrollbar';
 import { isCalcSize, pxToRem, scaleSize, toPx } from 'choerodon-ui/lib/_util/UnitConvertor';
 import { Config, ConfigKeys, DefaultConfig } from 'choerodon-ui/lib/configure';
+import { DuplicateKeyConfig } from 'choerodon-ui/lib/configure/interface';
 import { ConfigContextValue } from 'choerodon-ui/lib/config-provider/ConfigContext';
 import Icon from 'choerodon-ui/lib/icon';
 import isFunction from 'lodash/isFunction';
@@ -350,7 +351,7 @@ function renderSelectionBox({ record, store }: { record: any; store: TableStore 
   const { dataSet } = record;
   if (dataSet) {
     const { selection } = dataSet;
-    const selectionDisabled = !record.selectable || store.isDuplicatePrimaryKeyRecord(record);
+    const selectionDisabled = !record.selectable || (store.duplicateKeyConfig.disable && store.isDuplicatePrimaryKeyRecord(record));
     const handleChange = value => {
       if (store.props.selectionMode === SelectionMode.mousedown) {
         // 将处理逻辑交给 mousedown 的处理逻辑 不然会两次触发导致不被勾选上
@@ -388,7 +389,7 @@ function renderSelectionBox({ record, store }: { record: any; store: TableStore 
           if (endIndex !== -1 && startIndex !== endIndex) {
             // Batch update selections
             const rangeRecords = dataSet.slice(startIndex, endIndex + 1)
-              .filter(rangeRecord => !store.isDuplicatePrimaryKeyRecord(rangeRecord));
+              .filter(rangeRecord => !store.duplicateKeyConfig.disable || !store.isDuplicatePrimaryKeyRecord(rangeRecord));
             const changedRecords: Record[] = [];
             const selectedKeys = new Set(dataSet.selected.map(selected => selected.key));
             if (record.isSelected) {
@@ -1185,8 +1186,18 @@ export default class TableStore {
     return this.props.dataSet;
   }
 
+  get duplicateKeyConfig(): DuplicateKeyConfig {
+    const config: any = this.props.duplicateKey || this.getConfig('duplicateKey');
+    const resolvedConfig = typeof config === 'function' ? config('Table') : config;
+    return resolvedConfig || {};
+  }
+
   @computed
   get duplicatePrimaryKeyInfo(): { duplicateKeys: string[]; duplicateRecords: Set<Record> } {
+    const duplicateKeyConfig = this.duplicateKeyConfig;
+    if (!duplicateKeyConfig.disable && !duplicateKeyConfig.showWarning) {
+      return { duplicateKeys: [], duplicateRecords: new Set() };
+    }
     const { dataSet } = this;
     const { primaryKey } = dataSet.props;
     const recordsByKey = new Map<string, Record[]>();
@@ -2370,7 +2381,8 @@ export default class TableStore {
   get selectionFilter(): (record: Record) => boolean {
     const { filter } = this.props;
     const { duplicateRecords } = this.duplicatePrimaryKeyInfo;
-    return record => (!filter || filter(record)) && !duplicateRecords.has(record);
+    return record => (!filter || filter(record)) &&
+      (!this.duplicateKeyConfig.disable || !duplicateRecords.has(record));
   }
 
   @computed
@@ -2669,10 +2681,7 @@ export default class TableStore {
 
   @action
   changeMouseBatchChooseIdList(idList: number[]) {
-    this.mouseBatchChooseIdList = idList.filter(id => {
-      const record = this.dataSet.findRecordById(id);
-      return !record || !this.isDuplicatePrimaryKeyRecord(record);
-    });
+    this.mouseBatchChooseIdList = idList;
   }
 
   showNextEditor(name: string, reserve: boolean): boolean {

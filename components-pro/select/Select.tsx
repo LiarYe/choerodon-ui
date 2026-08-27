@@ -16,6 +16,7 @@ import Tag from 'choerodon-ui/lib/tag';
 import KeyCode from 'choerodon-ui/lib/_util/KeyCode';
 import { pxToRem } from 'choerodon-ui/lib/_util/UnitConvertor';
 import { Size } from 'choerodon-ui/lib/_util/enum';
+import { DuplicateKeyConfig } from 'choerodon-ui/lib/configure/interface';
 import { Tooltip as OptionTooltip } from '../core/enum';
 import TriggerField, { TriggerFieldPopupContentProps, TriggerFieldProps } from '../trigger-field/TriggerField';
 import autobind from '../_util/autobind';
@@ -312,6 +313,10 @@ export interface SelectProps extends TriggerFieldProps<SelectPopupContentProps> 
    * 自动滚动到选中位置
    */
   autoScrollToSelected?: boolean;
+  /**
+   * 重复 `valueField` 处理的配置对象；也可通过全局 `duplicateKey` hook 按组件名配置
+   */
+  duplicateKey?: DuplicateKeyConfig;
 }
 
 export class Select<T extends SelectProps = SelectProps> extends TriggerField<T> {
@@ -396,8 +401,19 @@ export class Select<T extends SelectProps = SelectProps> extends TriggerField<T>
     return this.searchData(optionsFilter ? optionsWithCombo.filter(optionsFilter) : optionsWithCombo);
   }
 
+  get duplicateKeyConfig(): DuplicateKeyConfig {
+    const config = this.getProp('duplicateKey') || this.getContextConfig('duplicateKey');
+    const { displayName = 'Select' } = this.constructor as any;
+    const resolvedConfig = typeof config === 'function' ? config(displayName) : config;
+    return resolvedConfig || {};
+  }
+
   @computed
   get duplicateOptionInfo(): { duplicateKeys: string[]; duplicateRecords: Set<Record> } {
+    const duplicateKeyConfig = this.duplicateKeyConfig;
+    if (!duplicateKeyConfig.disable && !duplicateKeyConfig.showWarning) {
+      return { duplicateKeys: [], duplicateRecords: new Set() };
+    }
     const { optionsWithCombo, valueField } = this;
     const firstRecordByValue = new Map<unknown, Record>();
     const duplicateKeySet = new Set<string>();
@@ -745,6 +761,7 @@ export class Select<T extends SelectProps = SelectProps> extends TriggerField<T>
       'addNewOptionPrompt',
       'beforeCreateComboOption',
       'autoScrollToSelected',
+      'duplicateKey',
     ]);
   }
 
@@ -897,6 +914,7 @@ export class Select<T extends SelectProps = SelectProps> extends TriggerField<T>
       disabled: menuDisabled,
       textField,
       valueField,
+      duplicateKeyConfig,
       props: { dropdownMenuStyle, onOption, optionTooltip = getTooltip('select-option') },
     } = this;
     const groups = options.getGroups();
@@ -960,10 +978,11 @@ export class Select<T extends SelectProps = SelectProps> extends TriggerField<T>
       }
       const itemContent = this.getMenuItem({ record, text, value });
       const duplicate = duplicateRecords.has(record);
-      const renderedItemContent = duplicate ? (
+      const duplicateDisabled = duplicateKeyConfig.disable && duplicate;
+      const renderedItemContent = duplicate && duplicateKeyConfig.showWarning ? (
         <span className={`${this.prefixCls}-option-duplicate-inner`}>
           <span className={`${this.prefixCls}-option-duplicate-text`}>{toJS(itemContent)}</span>
-          <Tooltip title={$l('Select', 'duplicate_key_warning')}>
+          <Tooltip title={$l('Select', !duplicateKeyConfig.disable ? 'duplicate_key_warning_no_disable' : 'duplicate_key_warning')}>
             <Icon type="error_outline" className={`${this.prefixCls}-option-duplicate-help`} />
           </Tooltip>
         </span>
@@ -1000,10 +1019,10 @@ export class Select<T extends SelectProps = SelectProps> extends TriggerField<T>
           ...optionProps.style,
           ...itemProps.style,
         },
-        disabled: itemDisabled || duplicate,
+        disabled: itemDisabled || duplicateDisabled,
       } : {
         ...itemProps,
-        disabled: itemDisabled || duplicate,
+        disabled: itemDisabled || duplicateDisabled,
       };
       const option: ReactElement = (
         <Item {...mergedProps}>
@@ -1379,7 +1398,9 @@ export class Select<T extends SelectProps = SelectProps> extends TriggerField<T>
       record: findRecord,
     }) : undefined;
     const optionDisabled = (optionProps && optionProps.disabled);
-    return (findRecord && findRecord.get(DISABLED_FIELD) === true) || optionDisabled || this.disabled;
+    const duplicateDisabled = findRecord && this.duplicateKeyConfig.disable &&
+      this.duplicateOptionInfo.duplicateRecords.has(findRecord);
+    return (findRecord && findRecord.get(DISABLED_FIELD) === true) || optionDisabled || duplicateDisabled || this.disabled;
   }
 
   handleKeyDownFirstLast(e, menu: Menu, direction: number) {
@@ -1881,7 +1902,8 @@ export class Select<T extends SelectProps = SelectProps> extends TriggerField<T>
         const recordItem = this.findByValue(v);
         const findRecord = this.findByValue(v);
         const optionProps = findRecord ? onOption({ dataSet: options, record: findRecord }) : undefined;
-        const optionDisabled = (optionProps && optionProps.disabled) || (findRecord && duplicateRecords.has(findRecord));
+        const optionDisabled = (optionProps && optionProps.disabled) ||
+          (findRecord && this.duplicateKeyConfig.disable && duplicateRecords.has(findRecord));
         return (recordItem && recordItem.get(DISABLED_FIELD) === true) || optionDisabled;
       });
       const multipleValue = valuesDisabled.length > 0 ? valuesDisabled : this.emptyValue;
@@ -1930,9 +1952,11 @@ export class Select<T extends SelectProps = SelectProps> extends TriggerField<T>
     }
     if (record) {
       const { duplicateRecords } = this.duplicateOptionInfo;
-      const selectableRecord = isArrayLike(record)
-        ? record.filter(item => !duplicateRecords.has(item))
-        : duplicateRecords.has(record) ? undefined : record;
+      const selectableRecord = !this.duplicateKeyConfig.disable
+        ? record
+        : isArrayLike(record)
+          ? record.filter(item => !duplicateRecords.has(item))
+          : duplicateRecords.has(record) ? undefined : record;
       if (selectableRecord && (!isArrayLike(selectableRecord) || selectableRecord.length)) {
         this.handleOptionSelect(selectableRecord);
       }
@@ -1960,7 +1984,7 @@ export class Select<T extends SelectProps = SelectProps> extends TriggerField<T>
     const { duplicateRecords } = this.duplicateOptionInfo;
     const selectedOptions = this.filteredOptions.filter((record) => {
       const optionProps = onOption({ dataSet: options, record });
-      const optionDisabled = (optionProps && optionProps.disabled) || duplicateRecords.has(record);
+      const optionDisabled = (optionProps && optionProps.disabled) || (this.duplicateKeyConfig.disable && duplicateRecords.has(record));
       return !optionDisabled && !this.optionIsSelected(record, values);
     });
     this.choose(selectedOptions);
@@ -1979,7 +2003,7 @@ export class Select<T extends SelectProps = SelectProps> extends TriggerField<T>
     const { duplicateRecords } = this.duplicateOptionInfo;
     const selectedOptions = this.filteredOptions.filter((record) => {
       const optionProps = onOption({ dataSet: options, record });
-      const optionDisabled = (optionProps && optionProps.disabled) || duplicateRecords.has(record);
+      const optionDisabled = (optionProps && optionProps.disabled) || (this.duplicateKeyConfig.disable && duplicateRecords.has(record));
       const optionIsSelect = this.optionIsSelected(record, values);
       return (!optionDisabled && !optionIsSelect) || (optionDisabled && optionIsSelect);
     });
