@@ -106,6 +106,7 @@ const TableRow: FunctionComponent<TableRowProps> = function TableRow(props) {
   const dragRef = useRef<boolean>(false);
   const needIntersection = intersectionRef;
   const duplicatePrimaryKey = tableStore.isDuplicatePrimaryKeyRecord(record);
+  const { duplicateKeyConfig } = tableStore;
   const disabled = isDisabledRow(record, tableStore);
   const rowRef = useRef<HTMLTableRowElement | null>(null);
   const childrenRenderedRef = useRef<boolean | undefined>();
@@ -184,11 +185,11 @@ const TableRow: FunctionComponent<TableRowProps> = function TableRow(props) {
   }, [highLightRow, tableStore, record]);
 
   const handleSelection = useCallback(() => {
-    if (tableStore.isDuplicatePrimaryKeyRecord(record)) {
+    if (duplicateKeyConfig.disable && tableStore.isDuplicatePrimaryKeyRecord(record)) {
       return;
     }
     dataSet[record.isSelected ? 'unSelect' : 'select'](record);
-  }, [record, dataSet, tableStore]);
+  }, [record, dataSet, tableStore, duplicateKeyConfig]);
 
   const handleExpandChange = useCallback(() => {
     if (expandable) {
@@ -437,7 +438,7 @@ const TableRow: FunctionComponent<TableRowProps> = function TableRow(props) {
     const sliceLeafs = !propVirtual ? leafs : (left ? leafs.slice(...left) : []).concat(leafs.slice(...center)).concat(right ? leafs.slice(...right) : []);
     const columnLength = sliceLeafs.length;
     const hasBlankCell = leafs.length > sliceLeafs.length;
-    const duplicateHelpColumn = duplicatePrimaryKey
+    const duplicateHelpColumn = duplicatePrimaryKey && duplicateKeyConfig.showWarning
       ? tableStore.columnGroups.leafs.find(({ column }) => !tableStore.isBuiltInColumn(column))
       : undefined;
     return sliceLeafs.reduce<[ReactNode[], { isCurrent?: boolean }]>((result, columnGroup, columnIndex) => {

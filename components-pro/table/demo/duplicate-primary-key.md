@@ -7,11 +7,11 @@ title:
 
 ## zh-CN
 
-同一当前页包含两条 `primaryKey='id'` 相同的不同记录。Table 会显示错误 Alert，并在重复记录最左侧显示红条；控制台输出提示。本示例刻意保留原始主键和重复数据，仅用于复现。
+同一当前页包含两条 `primaryKey='id'` 相同的不同记录。重复记录默认禁用，并在首个非内置列显示提示，同时控制台输出警告。本示例刻意保留原始主键和重复数据，仅用于复现。
 
 ## en-US
 
-The current page contains two different records with the same `primaryKey='id'`. Table displays an error Alert and a red bar at the left edge of duplicate rows. In non-production environments, Console output prompt. The original keys and duplicate data are intentionally preserved for reproduction only.
+The current page contains two different records with the same `primaryKey='id'`. Duplicate records are disabled by default, with a hint shown in the first non-built-in column and a warning output to the console. The original keys and duplicate data are intentionally preserved for reproduction only.
 
 ```jsx
 import { DataSet, Table } from 'choerodon-ui/pro';

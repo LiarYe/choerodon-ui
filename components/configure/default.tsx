@@ -100,6 +100,7 @@ const defaults = {
   collapseExpandIconPosition: 'left',
   collapseTrigger: 'header',
   lovTableProps: {},
+  duplicateKey: { disable: true, showWarning: true },
   lovModalProps: {},
   lovModalAutoWidth: false,
   lovAutoSelectSingle: false,

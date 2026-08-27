@@ -164,6 +164,7 @@ const locale: Locale = {
     copy_display_success: 'Successfully copied display values',
     copy_pristine_success: 'Successfully copied the original value',
     duplicate_key_warning: 'A duplicate identifier was detected for this option. It cannot be selected. Please contact your administrator.',
+    duplicate_key_warning_no_disable: 'A duplicate identifier was detected for this option. Please contact your administrator.',
     paste_template: 'Paste Template',
     no_xlsx: 'Missing xlsx configuration, please configure xlsx configuration before exporting',
     arrange_count: 'count',
@@ -274,6 +275,7 @@ const locale: Locale = {
     input_prompt_searchable: 'You can search and find, or directly select the value',
     input_prompt_combo: 'You can fill in the value or directly select the value',
     duplicate_key_warning: 'A duplicate identifier was detected for this option. It cannot be selected. Please contact your administrator.',
+    duplicate_key_warning_no_disable: 'A duplicate identifier was detected for this option. Please contact your administrator.',
   },
   SecretField: {
     edit: '{label} Edit',

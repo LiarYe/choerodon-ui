@@ -17,3 +17,16 @@ export enum InputSuffixCompName  {
   ColorPicker = 'ColorPicker',
   IconPicker = 'IconPicker',
 }
+
+export interface DuplicateKeyConfig {
+  /**
+   * 是否禁用重复项
+   */
+  disable?: boolean;
+  /**
+   * 是否显示重复项提示
+   */
+  showWarning?: boolean;
+}
+
+export type DuplicateKeyConfigHook = (componentName: string) => (DuplicateKeyConfig | undefined);

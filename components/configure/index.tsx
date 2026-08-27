@@ -58,7 +58,7 @@ import { PanelProps } from '../collapse';
 import { TabsCustomized } from '../tabs/Tabs';
 import defaults from './default';
 import { UploadListReUploadIconFunc } from '../upload/interface';
-import { InputSuffixCompName } from './interface';
+import { InputSuffixCompName, DuplicateKeyConfig, DuplicateKeyConfigHook } from './interface';
 
 overwriteConfigMergeProps<Config>(['pagination']);
 overwriteDefaultConfig<Config>(defaults);
@@ -486,6 +486,11 @@ export interface Config extends DataSetConfig {
    * 禁止时间组件循环滚动
    */
   disabledTimeLoopRoll?: boolean;
+  /**
+   * 重复 key 处理的配置: 对象或者钩子
+   * 是否禁用重复 key 对应选项; 是否显示提示;
+   */
+  duplicateKey?: DuplicateKeyConfig | DuplicateKeyConfigHook;
   /**
    * @deprecated
    */

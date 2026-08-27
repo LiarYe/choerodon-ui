@@ -52,6 +52,7 @@ title: Select
 | showInputPrompt | 可输入时，下拉框中是否显示输入提示。返回 true 或字符串时, 会同时显示到 placeholder 中 | boolean \| ReactNode \| (({ searchable, combo }) => boolean \| ReactNode) \| undefined |  |
 | addNewOptionPrompt | 自定义新增选项功能: 传入 path(根据addNewOptionPromptRender渲染) 或者 完全自定义渲染; | [AddNewOptionPromptResultProps](#AddNewOptionPromptResultProps) \| ((props: [AddNewOptionPromptRenderProps](#AddNewOptionPromptRenderProps)) => (ReactNode \| AddNewOptionPromptResultProps)) |  |
 | autoScrollToSelected | 自动滚动到选中位置 | boolean | true |
+| duplicateKey | 重复 `valueField` 处理的配置对象；也可通过全局 `duplicateKey` hook 按组件名配置。`disable` 控制是否禁用重复项，`showWarning` 是否显示重复项提示 | { disable?: boolean; showWarning?: boolean } | [globalConfig.duplicateKey](/components/configure#API) |
 
 更多属性请参考 [TriggerField](/components-pro/trigger-field/#TriggerField)。
 
