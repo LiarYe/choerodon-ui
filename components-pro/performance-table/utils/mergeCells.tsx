@@ -21,7 +21,8 @@ function mergeCells(cells, leftFixedLength: number = 0) {
   for (let i = 0; i < cells.length; i += 1) {
     const {
       width,
-      colSpan,
+      colSpan: columnColSpan,
+      cellExternalProps,
       groupCount,
       groupHeader,
       isHeaderCell,
@@ -175,7 +176,14 @@ function mergeCells(cells, leftFixedLength: number = 0) {
       }
 
       continue;
-    } else if (colSpan) {
+    } else {
+      const colSpan = !isHeaderCell && cellExternalProps
+        ? cellExternalProps.colSpan || columnColSpan
+        : columnColSpan;
+      if (!colSpan) {
+        nextCells.push(cells[i]);
+        continue;
+      }
       /**
        * 如果存在 colSpan 属性，就去找它的下一个 Cell,
        * 看看值是否是 isNullOrUndefined，，如果为空这可以合并这个单元格

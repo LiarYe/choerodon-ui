@@ -2592,11 +2592,18 @@ export default class PerformanceTable extends React.Component<TableProps, TableS
 
     for (let i = 0; i < bodyCells.length; i++) {
       const cell = bodyCells[i];
+      const { onCell, dataIndex, dataKey } = cell.props;
+      const cellExternalProps = typeof onCell === 'function' ? onCell({
+        rowData,
+        dataIndex: dataIndex || dataKey,
+        rowIndex: props.rowIndex,
+      }) || {} : {};
       cells.push(
         // @ts-ignore
         React.cloneElement<any>(cell, {
           hasChildren,
           rowData,
+          cellExternalProps,
           wordWrap,
           renderTreeToggle,
           height: props.height,
@@ -2663,12 +2670,7 @@ export default class PerformanceTable extends React.Component<TableProps, TableS
 
     for (let i = 0; i < cells.length; i++) {
       const cell = cells[i];
-      const { onCell, dataIndex, rowSpan, width = 0 } = cell.props;
-      const cellExternalProps = onCell && typeof onCell === 'function' ? onCell({
-        rowData,
-        dataIndex,
-        rowIndex,
-      }) || {} : {};
+      const { cellExternalProps = {}, rowSpan, width = 0 } = cell.props;
       const cellRowSpan = !isNil(cellExternalProps.rowSpan) ? cellExternalProps.rowSpan : rowSpan;
       const normalizedRowSpan = isNil(cellRowSpan) ? 1 : cellRowSpan;
       const isHiddenCell = cellExternalProps.hidden || normalizedRowSpan === 0;

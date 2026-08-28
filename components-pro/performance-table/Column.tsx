@@ -20,7 +20,7 @@ export interface ColumnProps {
    * @default true
    */
   hideable?: boolean;
-  onCell?: (props: { rowData: any, rowIndex?: number, dataIndex?: string | undefined }) => object;
+  onCell?: (props: { rowData: any, rowIndex?: number, dataIndex?: string | undefined }) => { colSpan?: number, [key: string]: any };
   onResize?: (columnWidth?: number, dataIndex?: string) => void;
   render?: (props: { rowData: any, rowIndex: number, dataIndex?: string | undefined }) => React.ReactNode;
   dataIndex?: string;
