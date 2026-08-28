@@ -33,6 +33,7 @@ export interface CellProps extends StandardProps {
   rowIndex?: number;
   rowSpan?: number;
   rowData?: RowDataType;
+  cellExternalProps?: Record<string, any>;
   depth?: number; // change `Cell` width and depth prop to optional
 
   onTreeToggle?: (
@@ -179,12 +180,13 @@ class Cell extends React.PureComponent<CellProps> {
       rowSpan,
       fixed,
       hasChildren,
+      cellExternalProps: cachedCellExternalProps,
       ...rest
     } = this.props;
     const { tableStore, tableWidth } = this.context;
 
-    const cellExternalProps = (
-      typeof onCell === 'function'
+    const cellExternalProps = cachedCellExternalProps || (
+      !isHeaderCell && typeof onCell === 'function'
         ? onCell({
           rowData,
           dataKey,
