@@ -1,4 +1,4 @@
-﻿import React, { Component, DragEvent, ReactNode } from 'react';
+import React, { Component, DragEvent, ReactNode } from 'react';
 import classNames from 'classnames';
 import uniqBy from 'lodash/uniqBy';
 import isUndefined from 'lodash/isUndefined';
@@ -280,6 +280,26 @@ export default class Upload extends Component<UploadProps, UploadState> {
     });
   };
 
+  onReject = (files: UploadFile[]) => {
+    const { accept = '', locale, onReject } = this.props;
+    const { fileList } = this.state;
+    const uploadLocale = { ...(getRuntimeLocale().Upload || {}), ...locale };
+    const response = (uploadLocale.fileTypeMismatch || '').replace('{accept}', accept);
+    const targetItems = files.map(file => {
+      const targetItem = fileToObject(file);
+      targetItem.status = 'error';
+      targetItem.response = response;
+      return targetItem;
+    });
+    this.onChange({
+      file: targetItems[targetItems.length - 1],
+      fileList: [...fileList, ...targetItems],
+    });
+    if (onReject) {
+      files.forEach(onReject);
+    }
+  };
+
   beforeUpload = (file: UploadFile, uploadFiles: UploadFile[]) => {
     const { multiple, beforeUpload } = this.props;
     if (!multiple) {
@@ -512,6 +532,7 @@ export default class Upload extends Component<UploadProps, UploadState> {
       onSuccess: this.onSuccess,
       onReUpload,
       ...(overwriteDefaultEvent ? this.props : undefined),
+      onReject: this.onReject,
       beforeUpload: this.beforeUpload,
       beforeUploadFiles,
       confirmBatchUpload: this.confirmBatchUpload,

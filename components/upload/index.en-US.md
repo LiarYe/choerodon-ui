@@ -43,6 +43,7 @@ Uploading is the process of publishing information (web pages, text, pictures, v
 | onSuccess   | A callback function, will be executed when upload success.   | Function(response, file) | 无   |
 | onProgress   | A callback function, will be executed when upload in progress.   | Function({ percent }, file) | 无   |
 | onError   | A callback function, will be executed when upload error.   | Function(error, response, file) | 无   |
+| onReject | Callback triggered when file type validation fails; invoked separately for each rejected file. | (file: UploadFile) => void | - |
 | onDragEnd   | A callback function, will drag `picture-card`   | Function(fileList) | -   |
 | requestFileKeys   | can upload the file props to the server   | string,string[] | 无   |
 | showFileSize | Whether file sizes are displayed when `listType` is `text`   | boolean | false |

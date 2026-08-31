@@ -50,6 +50,7 @@ export default {
     confirmReUpload: 'Are you sure to reupload?',
     reUpload: 'Upload again',
     batchMaxFileCount: 'You selected {count} files, exceeding the maximum limit of {max} files per upload. We recommend compressing them or uploading in batches. If you continue, only the first {max} files will be uploaded.',
+    fileTypeMismatch: 'File type mismatch. Accepted file types: {accept}',
   },
   Collapse: {
     fold: 'Fold',
