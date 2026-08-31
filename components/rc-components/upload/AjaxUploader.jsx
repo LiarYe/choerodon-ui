@@ -29,13 +29,38 @@ class AjaxUploader extends Component {
 
   reqs = {};
 
+  isAcceptFile = file => attrAccept(file, this.props.accept);
+
+  handleRejectFiles = files => {
+    if (files.length && this.props.onReject) {
+      files.forEach(file => {
+        file.uid = getUid();
+      });
+      this.props.onReject(files);
+    }
+  };
+
+  filterAcceptFiles = files => {
+    const acceptedFiles = [];
+    const rejectedFiles = [];
+    Array.prototype.slice.call(files).forEach(file => {
+      (this.isAcceptFile(file) ? acceptedFiles : rejectedFiles).push(file);
+    });
+    this.handleRejectFiles(rejectedFiles);
+    return acceptedFiles;
+  };
+
   onChange = e => {
-    const files = e.target.files;
-    const { onReUpload, originReuploadItem } = this.props;
+    const files = this.filterAcceptFiles(e.target.files);
+    const { onReUpload, originReuploadItem, setReplaceReuploadItem } = this.props;
     if (originReuploadItem && originReuploadItem !== null) {
       // Upload 文件重新上传的替换操作只考虑单个文件
       const targetFile = files[0];
-      targetFile ? onReUpload(targetFile) : null;
+      if (targetFile) {
+        onReUpload(targetFile);
+      } else {
+        setReplaceReuploadItem(null);
+      }
       this.reset();
     } else {
       this.uploadFiles(files);
@@ -72,18 +97,17 @@ class AjaxUploader extends Component {
     if (this.props.directory) {
       traverseFileTree(
         e.dataTransfer.items,
-        (files) => {
+        (files, rejectedFiles) => {
+          this.handleRejectFiles(rejectedFiles);
           uploadCount++;
           if (this.props.multiple || uploadCount <= 1) {
             this.uploadFiles(files);
           }
         },
-        _file => attrAccept(_file, this.props.accept),
+        this.isAcceptFile,
       );
     } else {
-      const files = Array.prototype.slice.call(e.dataTransfer.files).filter(
-        file => attrAccept(file, this.props.accept),
-      );
+      const files = this.filterAcceptFiles(e.dataTransfer.files);
       const filesResult = this.props.multiple || (files.length <= 1) ? files : [files[0]];
       this.uploadFiles(filesResult);
     }
@@ -137,6 +161,9 @@ class AjaxUploader extends Component {
 
   upload(file, fileList, extraHeaders = {}) {
     const { props } = this;
+    if (!attrAccept(file, props.accept)) {
+      return;
+    }
     if (!props.beforeUpload) {
       // always async in case use react state to keep fileList
       return setTimeout(() => this.post(file, extraHeaders), 0);

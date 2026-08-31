@@ -1,5 +1,6 @@
 const traverseFileTree = (files, callback, isAccepted) => {
   const dataTransfer = new DataTransfer();
+  const rejectedFiles = [];
 
   const _traverseFileTree = (item, path = '') => {
     return new Promise((resolve) => {
@@ -7,6 +8,8 @@ const traverseFileTree = (files, callback, isAccepted) => {
         item.file((file) => {
           if (isAccepted(file)) {
             dataTransfer.items.add(file);
+          } else {
+            rejectedFiles.push(file);
           }
           resolve();
         });
@@ -35,7 +38,7 @@ const traverseFileTree = (files, callback, isAccepted) => {
   Promise.all(
     Array.from(files).map(file => _traverseFileTree(file.webkitGetAsEntry()))
   ).then(() => {
-    callback(dataTransfer.files);
+    callback(dataTransfer.files, rejectedFiles);
   });
 };
 

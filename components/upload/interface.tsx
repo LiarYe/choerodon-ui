@@ -54,6 +54,7 @@ export interface UploadLocale {
   confirmReUpload?: string;
   reUpload?: string;
   batchMaxFileCount?: string;
+  fileTypeMismatch?: string;
 }
 
 export type UploadType = 'drag' | 'select';
@@ -88,6 +89,7 @@ export interface UploadProps {
   onSuccess?: (response: any, file: UploadFile) => void;
   onProgress?: (e: { percent: number }, file: UploadFile) => void;
   onError?: (error: Error, response: any, file: UploadFile) => void;
+  onReject?: (file: UploadFile) => void;
   supportServerRender?: boolean;
   style?: CSSProperties;
   disabled?: boolean;

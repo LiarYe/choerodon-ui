@@ -49,6 +49,7 @@ export default {
     confirmReUpload: '确认重新上传？',
     reUpload: '重新上传',
     batchMaxFileCount: '本次选择了 {count} 个文件，超过单次上传最大限制 {max} 个，建议压缩或分批上传。继续上传将只上传前 {max} 个文件。',
+    fileTypeMismatch: '类型不符合，支持的文件类型：{accept}',
   },
   Collapse: {
     fold: '收起',
