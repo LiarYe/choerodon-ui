@@ -978,7 +978,6 @@ export class Select<T extends SelectProps = SelectProps> extends TriggerField<T>
       }
       const itemContent = this.getMenuItem({ record, text, value });
       const duplicate = duplicateRecords.has(record);
-      const duplicateDisabled = duplicateKeyConfig.disable && duplicate;
       const renderedItemContent = duplicate && duplicateKeyConfig.showWarning ? (
         <span className={`${this.prefixCls}-option-duplicate-inner`}>
           <span className={`${this.prefixCls}-option-duplicate-text`}>{toJS(itemContent)}</span>
@@ -1004,11 +1003,7 @@ export class Select<T extends SelectProps = SelectProps> extends TriggerField<T>
           [`${this.prefixCls}-option-duplicate`]: duplicate,
         }),
       };
-      const itemDisabled = optionProps
-        ? (optionProps.disabled === false
-          ? (itemProps.disabled || optionProps.disabled)
-          : (itemProps.disabled || optionProps.disabled || record.disabled || record.selectable === false))
-        : (itemProps.disabled || record.disabled || record.selectable === false);
+      const itemDisabled = menuDisabled || this.getOptionDisabled(record, optionProps);
       const mergedProps = optionProps ? {
         ...optionProps,
         ...itemProps,
@@ -1019,10 +1014,10 @@ export class Select<T extends SelectProps = SelectProps> extends TriggerField<T>
           ...optionProps.style,
           ...itemProps.style,
         },
-        disabled: itemDisabled || duplicateDisabled,
+        disabled: itemDisabled,
       } : {
         ...itemProps,
-        disabled: itemDisabled || duplicateDisabled,
+        disabled: itemDisabled,
       };
       const option: ReactElement = (
         <Item {...mergedProps}>
@@ -1387,20 +1382,34 @@ export class Select<T extends SelectProps = SelectProps> extends TriggerField<T>
     return superPlaceholders;
   }
 
+  /**
+   * 统一的选项禁用判断
+   * @param record 选项对应的数据记录
+   * @param onOptionProps 已通过 onOption 计算出的选项属性, 未提供时内部计算
+   */
+  getOptionDisabled(record: Record, onOptionProps?: OptionProps): boolean {
+    const optionProps = onOptionProps || this.props.onOption({ dataSet: this.options, record });
+    const optionDisabled = optionProps && optionProps.disabled;
+    const duplicateDisabled = this.duplicateKeyConfig.disable
+      && this.duplicateOptionInfo.duplicateRecords.has(record);
+    if (optionDisabled === false) {
+      // onOption 显式返回 false 时视为强制启用, 仅重复值禁用不受覆盖
+      return !!duplicateDisabled;
+    }
+    return !!optionDisabled
+      || !!record.get(DISABLED_FIELD)
+      || !!record.disabled
+      || record.selectable === false
+      || !!duplicateDisabled;
+  }
+
   @autobind
   isMultipleBlockDisabled(v) {
-    const {
-      props: { onOption },
-    } = this;
+    if (this.disabled) {
+      return true;
+    }
     const findRecord = this.findByValue(v);
-    const optionProps = findRecord ? onOption === defaultOnOption ? defaultOnOption({ record: findRecord }) : onOption({
-      dataSet: this.options,
-      record: findRecord,
-    }) : undefined;
-    const optionDisabled = (optionProps && optionProps.disabled);
-    const duplicateDisabled = findRecord && this.duplicateKeyConfig.disable &&
-      this.duplicateOptionInfo.duplicateRecords.has(findRecord);
-    return (findRecord && findRecord.get(DISABLED_FIELD) === true) || optionDisabled || duplicateDisabled || this.disabled;
+    return !!(findRecord && this.getOptionDisabled(findRecord));
   }
 
   handleKeyDownFirstLast(e, menu: Menu, direction: number) {
@@ -1892,19 +1901,13 @@ export class Select<T extends SelectProps = SelectProps> extends TriggerField<T>
   clear() {
     const values = this.getValues();
     const {
-      props: { maxTagCount = this.getContextConfig('fieldMaxTagCount'), onClear = noop, onOption = noop },
-      options,
+      props: { onClear = noop },
     } = this;
     this.setText(undefined);
     if (this.multiple) {
-      const { duplicateRecords } = this.duplicateOptionInfo;
-      const valuesDisabled = values.slice(0, maxTagCount).filter(v => {
-        const recordItem = this.findByValue(v);
+      const valuesDisabled = values.filter(v => {
         const findRecord = this.findByValue(v);
-        const optionProps = findRecord ? onOption({ dataSet: options, record: findRecord }) : undefined;
-        const optionDisabled = (optionProps && optionProps.disabled) ||
-          (findRecord && this.duplicateKeyConfig.disable && duplicateRecords.has(findRecord));
-        return (recordItem && recordItem.get(DISABLED_FIELD) === true) || optionDisabled;
+        return !!findRecord && this.getOptionDisabled(findRecord);
       });
       const multipleValue = valuesDisabled.length > 0 ? valuesDisabled : this.emptyValue;
       this.setValue(multipleValue);
@@ -1942,7 +1945,12 @@ export class Select<T extends SelectProps = SelectProps> extends TriggerField<T>
 
   unChoose(record?: Record | Record[] | null) {
     if (record) {
-      this.handleOptionUnSelect(record);
+      const unSelectableRecord = isArrayLike(record)
+        ? record.filter(item => !this.getOptionDisabled(item))
+        : this.getOptionDisabled(record) ? undefined : record;
+      if (unSelectableRecord && (!isArrayLike(unSelectableRecord) || unSelectableRecord.length)) {
+        this.handleOptionUnSelect(unSelectableRecord);
+      }
     }
   }
 
@@ -1951,12 +1959,9 @@ export class Select<T extends SelectProps = SelectProps> extends TriggerField<T>
       this.collapse();
     }
     if (record) {
-      const { duplicateRecords } = this.duplicateOptionInfo;
-      const selectableRecord = !this.duplicateKeyConfig.disable
-        ? record
-        : isArrayLike(record)
-          ? record.filter(item => !duplicateRecords.has(item))
-          : duplicateRecords.has(record) ? undefined : record;
+      const selectableRecord = isArrayLike(record)
+        ? record.filter(item => !this.getOptionDisabled(item))
+        : this.getOptionDisabled(record) ? undefined : record;
       if (selectableRecord && (!isArrayLike(selectableRecord) || selectableRecord.length)) {
         this.handleOptionSelect(selectableRecord);
       }
@@ -1976,17 +1981,9 @@ export class Select<T extends SelectProps = SelectProps> extends TriggerField<T>
 
   @autobind
   chooseAll() {
-    const {
-      options,
-      props: { onOption },
-    } = this;
     const values = this.getValues();
-    const { duplicateRecords } = this.duplicateOptionInfo;
-    const selectedOptions = this.filteredOptions.filter((record) => {
-      const optionProps = onOption({ dataSet: options, record });
-      const optionDisabled = (optionProps && optionProps.disabled) || (this.duplicateKeyConfig.disable && duplicateRecords.has(record));
-      return !optionDisabled && !this.optionIsSelected(record, values);
-    });
+    const selectedOptions = this.filteredOptions.filter(record =>
+      !this.getOptionDisabled(record) && !this.optionIsSelected(record, values));
     this.choose(selectedOptions);
   }
 
@@ -1995,15 +1992,9 @@ export class Select<T extends SelectProps = SelectProps> extends TriggerField<T>
    */
   @autobind
   chooseRe() {
-    const {
-      options,
-      props: { onOption },
-    } = this;
     const values = this.getValues();
-    const { duplicateRecords } = this.duplicateOptionInfo;
-    const selectedOptions = this.filteredOptions.filter((record) => {
-      const optionProps = onOption({ dataSet: options, record });
-      const optionDisabled = (optionProps && optionProps.disabled) || (this.duplicateKeyConfig.disable && duplicateRecords.has(record));
+    const selectedOptions = this.filteredOptions.filter(record => {
+      const optionDisabled = this.getOptionDisabled(record);
       const optionIsSelect = this.optionIsSelected(record, values);
       return (!optionDisabled && !optionIsSelect) || (optionDisabled && optionIsSelect);
     });
