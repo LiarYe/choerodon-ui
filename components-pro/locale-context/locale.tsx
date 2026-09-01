@@ -224,6 +224,7 @@ export interface Locale extends DataSetLocale {
     directory: string;
     batch_max_file_count: string;
     file_not_exist: string;
+    required: string;
   };
   Modal: {
     ok: string;

@@ -45,6 +45,10 @@ function isIntlField(editor: ReactElement<FormFieldProps>): boolean {
   return (editor.type as any).__PRO_INTLFIELD;
 }
 
+function isAttachment(editor: ReactElement<FormFieldProps>): boolean {
+  return (editor.type as any).__PRO_ATTACHMENT;
+}
+
 function isHTMLElement(el): el is HTMLElement {
   return el;
 }
@@ -740,7 +744,7 @@ export default class TableEditor extends Component<TableEditorProps> {
         dataSet,
         pristine,
         inlineEdit,
-        tableStore: { currentEditRecord, currentEditorName, getColumnTagRenderer },
+        tableStore: { currentEditRecord, currentEditorName, currentData, getColumnTagRenderer },
         rowHeight,
       } = this.context;
       const record = currentEditRecord || dataSet.current;
@@ -761,6 +765,10 @@ export default class TableEditor extends Component<TableEditorProps> {
         }
         const isMultipleLineIntlField = isIntlField(cellEditor) && this.editorProps.type === IntlType.multipleLine;
         const isTextAreaEditor = isTextArea(cellEditor) && (!isIntlField(cellEditor) || isMultipleLineIntlField);
+        const attachmentRequired = isAttachment(cellEditor) && field && field.get('required', record);
+        const _inTableRequired = attachmentRequired
+          ? currentData.every(currentRecord => field && field.get('required', currentRecord)) ? 'all' : 'partial'
+          : undefined;
         const newEditorProps = {
           ...otherProps,
           style,
@@ -777,6 +785,7 @@ export default class TableEditor extends Component<TableEditorProps> {
           labelLayout: LabelLayout.none,
           // 目前测试inline时候需要放开限制
           _inTable: !inlineEdit,
+          _inTableRequired,
           shouldStickLengthInfoOnTop: this.shouldStickLengthInfoOnTop,
           preventRenderer: true,
         };

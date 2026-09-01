@@ -116,6 +116,7 @@ export interface AttachmentProps extends FormFieldProps, ButtonProps, UploaderPr
    */
   uploadImmediately?: boolean;
   alwaysShowActions?: boolean;
+  _inTableRequired?: 'all' | 'partial';
 }
 
 export type Sort = {
@@ -454,6 +455,7 @@ export default class Attachment extends FormField<AttachmentProps> {
       'batchMaxFileCount',
       'uploadImmediately',
       'alwaysShowActions',
+      '_inTableRequired',
     ]);
   }
 
@@ -1158,6 +1160,12 @@ export default class Attachment extends FormField<AttachmentProps> {
       countText = countTextRenderer(count, max, countText);
     }
     const cardButtonInner = children || $l('Attachment', 'upload_picture');
+    const { _inTableRequired } = this.props;
+    const showTableRequired = _inTableRequired === 'partial' || _inTableRequired === 'all' && (this.getValidationResults() || [])
+      .some(validationResult => validationResult.ruleName === 'valueMissing');
+    const tableRequiredText = showTableRequired ? (
+      <span className={`${prefixCls}-in-table-required-text`}>{$l('Attachment', 'required')}</span>
+    ) : undefined;
     if (isCardButton) {
       return (
         <Button
@@ -1173,7 +1181,7 @@ export default class Attachment extends FormField<AttachmentProps> {
               {cardButtonInner}
             </div>
           </OverflowTip>
-          {countText ? <div>{countText}</div> : undefined}
+          {countText || tableRequiredText ? <div>{countText}{tableRequiredText}</div> : undefined}
           <input
             key="upload"
             {...uploadProps}
@@ -1224,7 +1232,7 @@ export default class Attachment extends FormField<AttachmentProps> {
         onMouseEnter={this.handleMouseEnter}
         onMouseLeave={this.handleMouseLeave}
       >
-        {children || $l('Attachment', 'upload_attachment')}{label && <>({label})</>} {countText}
+        {children || $l('Attachment', 'upload_attachment')}{label && <>({label})</>}{countText && ' '}{countText}{tableRequiredText}
         <input key="upload" {...uploadProps} style={{ width: 0, height: 0, display: 'block', position: 'absolute', visibility: 'hidden' }} />
       </ButtonDir>
     );

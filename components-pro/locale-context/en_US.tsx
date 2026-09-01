@@ -220,6 +220,7 @@ const locale: Locale = {
     file: 'File',
     directory: 'Directory',
     batch_max_file_count: 'You selected {count} files, exceeding the maximum limit of {max} files per upload. We recommend compressing them or uploading in batches. If you continue, only the first {max} files will be uploaded.',
+    required: '(Required)',
   },
   Modal: {
     ok: 'OK',

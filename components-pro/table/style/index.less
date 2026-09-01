@@ -928,6 +928,17 @@
     border-color: @table-editable-cell-border-color;
   }
 
+  &-cell-inner-required-header::before {
+    position: relative;
+    top: 0.02rem;
+    display: inline-block;
+    margin-right: 0.04rem;
+    color: @label-required-color;
+    font-size: 0.14rem;
+    line-height: 1;
+    content: '*';
+  }
+
   &-cell &-cell-inner-required {
     background-color: @table-editable-cell-required-bg;
     border-color: @table-editable-cell-required-border-color;

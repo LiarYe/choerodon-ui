@@ -14,14 +14,14 @@ title:
 Display in Table
 
 ````jsx
-import { Attachment, Table, DataSet, Row, Col } from 'choerodon-ui/pro';
+import { Attachment, Table, DataSet, Row, Col, Button } from 'choerodon-ui/pro';
 
 const App = () => {
   const ds = React.useMemo(() => new DataSet({
     fields: [
       { help: '支持文件类型： .deb .txt .pdf image/*1', name: 'attachment', type: 'attachment', label: '技术附件', max: 9, accept: ['.deb', '.txt', '.pdf', 'image/*'], required: true },
       { help: '支持文件类型： .deb .txt .pdf image/*2', name: 'attachment2', type: 'attachment', label: '管理附件' },
-      { help: '支持文件类型： .deb .txt .pdf image/*3', name: 'attachment3', type: 'attachment', label: '项目附件' },
+      { help: '支持文件类型： .deb .txt .pdf image/*3', name: 'attachment3', type: 'attachment', label: '项目附件', dynamicProps: { required: ({ record }) => record.index !== 2 } },
     ],
     data: [{
       attachment: '4c74a34a-fa37-4e92-be9d-5cf726fb1472',
@@ -35,7 +35,9 @@ const App = () => {
   ], []);
 
   return (
-    <Table dataSet={ds} columns={columns} />
+    <Table dataSet={ds} columns={columns} buttons={['add', (
+      <Button onClick={() => ds.validate()}>校验</Button>
+    )]} />
   );
 }
 

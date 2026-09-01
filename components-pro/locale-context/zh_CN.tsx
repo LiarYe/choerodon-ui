@@ -220,6 +220,7 @@ const locale: Locale = {
     file: '文件',
     directory: '文件夹',
     batch_max_file_count: '本次选择了 {count} 个文件，超过单次上传最大限制 {max} 个，建议压缩或分批上传。继续上传将只上传前 {max} 个文件。',
+    required: '(必填)',
   },
   Modal: {
     ok: '确定',
