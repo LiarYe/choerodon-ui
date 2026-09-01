@@ -1386,7 +1386,7 @@ export default class TableStore {
     let firstIndex = -1;
     let lastIndex = -1;
     const centerLeafsLength = leafs.length - rightLeafs.length;
-    for (let i = (leftLeafs.length ? leftLeafs.length - 1 : 0); i < centerLeafsLength; i++) {
+    for (let i = leftLeafs.length; i < centerLeafsLength; i++) {
       const { width } = leafs[i];
       visibleColumnWidth += width;
       if (firstIndex === -1 && visibleColumnWidth > scrollLeft) {
@@ -1439,6 +1439,10 @@ export default class TableStore {
     }
     if (rightColLength) {
       rangeThreshold.right = [leafs.length - rightColLength, leafs.length];
+    }
+    if (leftColLength + rightColLength === leafs.length) {
+      rangeThreshold.center = [leftColLength, leftColLength];
+      return rangeThreshold;
     }
 
     const [start, end] = this.updateRenderZonePosition();
