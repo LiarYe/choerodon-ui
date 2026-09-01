@@ -48,6 +48,7 @@ import TableCellInner from './TableCellInner';
 import { TableVirtualHeaderCellProps } from './TableVirtualHeaderCell';
 import TextField from '../text-field';
 import Button from '../button/Button';
+import { FieldType } from '../data-set/enum';
 import { SortOrder } from '../data-set/interface';
 import { ButtonColor } from '../button/enum';
 import { ValueChangeAction } from '../text-field/enum';
@@ -76,7 +77,7 @@ const TableHeaderCell: FunctionComponent<TableHeaderCellProps> = function TableH
   const { tooltipProps, sortableCallback } = column;
   const { rowHeight, border, prefixCls, tableStore, dataSet, aggregation, autoMaxWidth } = useContext(TableContext);
   const { getTooltipTheme, getTooltipPlacement } = useContext(ConfigContext);
-  const { columnResizable, headerRowHeight, props: { combineColumnFilter } } = tableStore;
+  const { columnResizable, headerRowHeight, currentData, props: { combineColumnFilter } } = tableStore;
   const {
     headerClassName,
     headerStyle = {},
@@ -88,6 +89,7 @@ const TableHeaderCell: FunctionComponent<TableHeaderCellProps> = function TableH
     filter,
   } = column;
   const field = dataSet.getField(name);
+  const attachmentRequired = field && field.get('type') === FieldType.attachment && currentData.every(record => field.get('required', record));
   const [filterText, setFilterText] = useState<any>();
   const aggregationTree = useMemo((): ReactElement<AggregationTreeProps>[] | undefined => {
     if (aggregation) {
@@ -688,6 +690,9 @@ const TableHeaderCell: FunctionComponent<TableHeaderCellProps> = function TableH
   // 兼容 label 超长
   if (labelClassNames.length > 0) {
     labelClassNames.push(`${prefixCls}-cell-inner-right-has-other`);
+  }
+  if (attachmentRequired) {
+    labelClassNames.push(`${prefixCls}-cell-inner-required-header`);
   }
   const labelClassNamesStr = labelClassNames.length > 0 ? labelClassNames.join(' ') : undefined;
   const headerNode = !isSearchCell ? (isValidElement(header) ? (

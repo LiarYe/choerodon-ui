@@ -380,6 +380,10 @@ const TableCellInner: FunctionComponent<TableCellInnerProps> = function TableCel
       if (multiLine) {
         return cellEditor;
       }
+      const attachmentRequired = (cellEditor.type as any).__PRO_ATTACHMENT && field && field.get('required', record);
+      const _inTableRequired = attachmentRequired
+        ? tableStore.currentData.every(currentRecord => field && field.get('required', currentRecord)) ? 'all' : 'partial'
+        : undefined;
       const newEditorProps = {
         ...cellEditor.props,
         record,
@@ -389,10 +393,11 @@ const TableCellInner: FunctionComponent<TableCellInnerProps> = function TableCel
         indeterminate: checkField && checkField === name && record.isIndeterminate,
         labelLayout: LabelLayout.none,
         showHelp: ShowHelp.none,
+        _inTableRequired,
       };
       return cloneElement(cellEditor, newEditorProps as FormFieldProps);
     }
-  }, [disabled, cellEditor, checkField, multiLine, record, name, pristine, inlineEdit]);
+  }, [disabled, cellEditor, checkField, multiLine, record, name, pristine, inlineEdit, field, tableStore]);
 
   const cellRenderer = useMemo((): Renderer | undefined => {
     if (columnCommand) {
