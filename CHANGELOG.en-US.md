@@ -113,6 +113,7 @@ timeline: true
 - 🐞 `<pro>Table`: Fixed the issue where components in the cell tooltip could not inherit ConfigProvider configuration.
 - 🐞 `<pro>DatePicker`: Fixed the issue where the start and end values overlap when configuring the `timeZone` in the range mode.
 - 🐞 `<pro>Table`: Fixed the issue where blank columns appear after resizing fixed columns in virtual scrolling.
+- 🐞 `<pro>Select`: Fix an issue where the input width gradually increased when switching options containing bold text in `isFlat` auto-width mode.
 
 ## 1.6.8
 
