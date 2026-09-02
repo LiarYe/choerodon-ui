@@ -449,6 +449,10 @@ export interface Config extends DataSetConfig {
   uploadSecretLevelOptions?: { fields: FieldProps[], formProps?: FormProps, modalProps?: ModalProps };
   pictureCardShowName?: boolean;
   /**
+   * Upload\Attachment 组件设置操作按钮是否常显
+   */
+  uploadAlwaysShowActions?: boolean;
+  /**
    * 输入框 range 分隔符
    */
   rangeSeparator?: string;

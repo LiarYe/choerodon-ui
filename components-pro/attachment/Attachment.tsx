@@ -1356,7 +1356,8 @@ export default class Attachment extends FormField<AttachmentProps> {
   renderUploadList(uploadButton?: ReactNode) {
     const {
       listType, sortable, listLimit, showHistory, showSize, buttons, getPreviewUrl, disabled, getDownloadUrl, enableDeleteAll,
-      pictureCardShowName, alwaysShowActions,
+      pictureCardShowName,
+      alwaysShowActions = this.getContextConfig('uploadAlwaysShowActions'),
     } = this.props;
     let mergeButtons:AttachmentButtons[]  = [AttachmentButtonType.download, AttachmentButtonType.remove];
     if (buttons) {

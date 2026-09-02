@@ -413,7 +413,7 @@ export default class Upload extends Component<UploadProps, UploadState> {
       tooltipPrefixCls,
       popconfirmProps,
       pictureCardShowName = getConfig('pictureCardShowName'),
-      alwaysShowActions,
+      alwaysShowActions = getConfig('uploadAlwaysShowActions'),
     } = this.props;
     const prefixCls = this.getPrefixCls();
     const { fileList } = this.state;
