@@ -18,6 +18,10 @@ const RenderedText: FunctionComponent<RenderedTextProps> = ({ prefixCls, childre
     width: 'auto',
     maxWidth: 'none',
   } : undefined, [isFlat]);
+  const innerStyle = useMemo(() => isFlat ? {
+    width: 'auto',
+    maxWidth: 'none',
+  } : undefined, [isFlat]);
   useLayoutEffect(() => {
     if (onContentChange) {
       const { current } = renderedValueRef;
@@ -32,7 +36,7 @@ const RenderedText: FunctionComponent<RenderedTextProps> = ({ prefixCls, childre
   }, [onContentChange, renderedValueRef, content, children, rangeTarget]);
   return (
     <span key="renderedText" className={classNames(selfPrefixCls, className)} hidden={hidden} style={style}>
-      <span className={`${selfPrefixCls}-inner`} ref={renderedValueRef}>{children}</span>
+      <span className={`${selfPrefixCls}-inner`} ref={renderedValueRef} style={innerStyle}>{children}</span>
     </span>
   );
 };
