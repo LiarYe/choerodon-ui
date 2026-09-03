@@ -73,6 +73,7 @@ export interface AttachmentFileProps extends AttachmentProps {
 
 export interface AttachmentUseChunkProps extends AttachmentOption {
   useChunk?: boolean;
+  isReplace?: boolean;
 }
 
 export interface AttachmentChunkProps extends AttachmentFileProps {
@@ -86,6 +87,7 @@ export interface AttachmentActionProps extends AttachmentFileProps {
 export interface AttachmentOnRemoveProps extends Omit<AttachmentFileProps, 'attachment'> {
   attachment?: AttachmentFile;
   attachments?: AttachmentFile[];
+  isReplace?: boolean;
 }
 
 export type TemplateUrlType = string | Function | undefined;
