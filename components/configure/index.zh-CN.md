@@ -325,10 +325,10 @@ const prefixCls = getConfig('prefixCls');
 | renderHistory               | 渲染操作历史                | ({ attachment: AttachmentFile, bucketName?: string, bucketDirectory?: string, storageCode?:string, attachmentUUID: string }) => ReactNode                            | |
 | onBeforeUpload | 上传前的回调 | (attachment: AttachmentFile, attachments: AttachmentFile[], props: { useChunk?: boolean, bucketName?: string, bucketDirectory?: string, storageCode?: string, isPublic?: boolean }) => boolean \| undefined \| PromiseLike<boolean \| undefined> | |
 | onBeforeUploadChunk | 上传分片前的回调 | ({ chunk: AttachmentFileChunk, attachment: AttachmentFile, bucketName?: string, bucketDirectory?: string, storageCode?: string, isPublic?: boolean }) => boolean \| undefined \| PromiseLike<boolean \| undefined> | |
-| onUploadSuccess | 上传成功的回调 | (response: any, attachment: AttachmentFile, props: { useChunk?: boolean, bucketName?: string, bucketDirectory?: string, storageCode?: string, isPublic?: boolean }) => Promise<any\> \| void | |
+| onUploadSuccess | 上传成功的回调 | (response: any, attachment: AttachmentFile, props: { useChunk?: boolean, bucketName?: string, bucketDirectory?: string, storageCode?: string, isPublic?: boolean, isReplace?: boolean }) => Promise<any\> \| void | |
 | onUploadError | 上传出错的回调 | (error: Error, attachment: AttachmentFile) => void | |
 | onOrderChange | 排序变化回调，用于发送排序请求 | (attachments: AttachmentFile[], { isPublic?: boolean }) => void | |
-| onRemove | 删除文件回调，用于发送删除请求, 返回 false 或抛出异常将中止删除 | ({ attachment: AttachmentFile, bucketName?: string, bucketDirectory?: string, storageCode?:string, attachmentUUID: string, isPublic?: boolean }) => boolean | |
+| onRemove | 删除文件回调，用于发送删除请求, 返回 false 或抛出异常将中止删除 | ({ attachment: AttachmentFile, bucketName?: string, bucketDirectory?: string, storageCode?:string, attachmentUUID: string, isPublic?: boolean, isReplace?: boolean }) => boolean | |
 | orderField | 附件排序字段名，初始化或自定义排序时会以该字段值升序排序 | string | |
 | removeConfirm | 删除前确认气泡框配置 | boolean \| PopconfirmProps | |
 

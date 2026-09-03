@@ -117,7 +117,7 @@ export default class Uploader {
     }
   }
 
-  async upload(attachment: AttachmentFile, attachments?: AttachmentFile[], tempAttachmentUUID?: string | undefined): Promise<any> {
+  async upload(attachment: AttachmentFile, attachments?: AttachmentFile[], tempAttachmentUUID?: string | undefined, isReplace?: boolean): Promise<any> {
     const { attachmentUUID = tempAttachmentUUID } = attachment;
     if (attachment.status === 'success' || attachment.invalid || !attachmentUUID) {
       return;
@@ -154,6 +154,7 @@ export default class Uploader {
           if (handleUploadSuccess) {
             handleUploadSuccessResult = handleUploadSuccess(resp, attachment, {
               useChunk,
+              isReplace,
               bucketName: props.bucketName,
               bucketDirectory: props.bucketDirectory,
               storageCode: props.storageCode,

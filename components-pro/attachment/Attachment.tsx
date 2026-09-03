@@ -521,10 +521,17 @@ export default class Attachment extends FormField<AttachmentProps> {
       }
     }
     const oldAttachments = this.attachments || [];
+    const isReplace = !this.multiple && oldAttachments.some(attachment => (
+      attachment.status !== 'error'
+      && !attachment.invalid
+      && Boolean(attachment.status)
+      && attachment.status !== 'deferred'
+    ));
+    attachments.forEach(attachment => attachment.isReplace = isReplace);
     if (this.multiple) {
       this.attachments = [...oldAttachments.slice(), ...attachments];
     } else {
-      oldAttachments.forEach(attachment => this.doRemove(attachment));
+      oldAttachments.forEach(attachment => this.doRemove(attachment, [], isReplace));
       this.attachments = [...attachments];
     }
     if (uploadImmediately) {
@@ -623,7 +630,7 @@ export default class Attachment extends FormField<AttachmentProps> {
       // 将uploader实例保存到组件中，以便后续中断
       this.uploader = uploader;
       
-      const result = await uploader.upload(attachment, this.attachments || [attachment], this.tempAttachmentUUID);
+      const result = await uploader.upload(attachment, this.attachments || [attachment], this.tempAttachmentUUID, attachment.isReplace);
       if (result === false) {
         this.removeAttachment(attachment);
       } else {
@@ -715,7 +722,7 @@ export default class Attachment extends FormField<AttachmentProps> {
     }
   }
 
-  doRemove(attachment?: AttachmentFile, attachments: AttachmentFile[] = []): Promise<any> | undefined {
+  doRemove(attachment?: AttachmentFile, attachments: AttachmentFile[] = [], isReplace?: boolean): Promise<any> | undefined {
     const { bucketName, bucketDirectory, storageCode, isPublic, multiple, props: { onRemove: onAttachmentRemove = noop } } = this;
     if (attachment) {
       return Promise.resolve(onAttachmentRemove(attachment)).then(mobxAction(ret => {
@@ -732,7 +739,7 @@ export default class Attachment extends FormField<AttachmentProps> {
             const attachmentUUID = this.getValue();
             if (attachmentUUID) {
               attachment.status = 'deleting';
-              return onRemove({ attachment, attachmentUUID, bucketName, bucketDirectory, storageCode, isPublic }, multiple)
+              return onRemove({ attachment, attachmentUUID, bucketName, bucketDirectory, storageCode, isPublic, isReplace }, multiple)
                 .then(mobxAction((result) => {
                   if (result !== false) {
                     this.removeAttachment(attachment);
