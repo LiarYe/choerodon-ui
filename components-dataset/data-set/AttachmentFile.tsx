@@ -16,6 +16,7 @@ export interface FileLike {
   originFileObj?: File;
   creationDate?: Date;
   attachmentUUID?: string;
+  isReplace?: boolean;
 
   [key: string]: any;
 }
@@ -39,6 +40,8 @@ export default class AttachmentFile implements FileLike {
   @observable ext: string;
 
   originFileObj?: File | undefined;
+
+  isReplace?: boolean;
 
   @observable status?: 'error' | 'success' | 'uploading' | 'deleting' | 'done' | 'aborted' | 'deferred';
 
