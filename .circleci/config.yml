@@ -2,7 +2,7 @@ version: 2
 jobs:
   dev_build:
     docker:
-      - image: circleci/node:10.16
+      - image: cimg/node:18.20
 
     working_directory: ~/repo
 
@@ -10,18 +10,18 @@ jobs:
       - checkout
       - restore_cache:
           keys:
-          - v1-dependencies-{{ checksum "package.json" }}
-          - v1-dependencies-
+          - v2-node18-dependencies-{{ checksum "package.json" }}-{{ checksum "package-lock.json" }}
+          - v2-node18-dependencies-
       - run: npm install
       - save_cache:
           paths:
             - node_modules
-          key: v1-dependencies-{{ checksum "package.json" }}
+          key: v2-node18-dependencies-{{ checksum "package.json" }}-{{ checksum "package-lock.json" }}
       - run: npm run lint
 
   release_publish:
     docker:
-      - image: circleci/node:10.16
+      - image: cimg/node:18.20
 
     working_directory: ~/repo
 
@@ -29,8 +29,8 @@ jobs:
       - checkout
       - restore_cache:
           keys:
-          - v1-dependencies-{{ checksum "package.json" }}
-          - v1-dependencies-
+          - v2-node18-dependencies-{{ checksum "package.json" }}-{{ checksum "package-lock.json" }}
+          - v2-node18-dependencies-
       - run: npm install
       - run: echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" >> ~/.npmrc
       - run: npm run pub

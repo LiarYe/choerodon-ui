@@ -19,7 +19,6 @@ interface Group {
  * groups.fields 弹窗内字段
  */
 type FieldListProps = {
-  closeMenu: () => void;
   value: string[];
   prefixCls: string;
   onSelect: (code: string | string[]) => void;

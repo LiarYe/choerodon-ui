@@ -2,10 +2,12 @@
 
 const fs = require('fs');
 const path = require('path');
-const glob = require('glob');
-const postcss = require('postcss');
-const less = require('less');
-const NpmImportPlugin = require('less-plugin-npm-import');
+const legacy = require('../site/legacy-build/resolve');
+
+const glob = legacy.load('glob');
+const postcss = legacy.load('postcss');
+const less = legacy.load('less');
+const NpmImportPlugin = legacy.load('less-plugin-npm-import');
 
 const COLOR_MAP = {
   '#e6f7ff': 'color(~`colorPalette("@{primary-color}", 1)`)', // @primary-1
@@ -92,4 +94,7 @@ less.render.call(less, content, {
     fs.mkdirSync(siteDir);
   }
   fs.writeFileSync(path.resolve(__dirname, '../_site/color.less'), css);
+}).catch(error => {
+  console.error(error);
+  process.exitCode = 1;
 });

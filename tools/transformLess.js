@@ -1,4 +1,4 @@
-const less = require('less');
+const less = require('./lessImplementation');
 const { readFileSync } = require('fs');
 const path = require('path');
 const postcss = require('postcss');

@@ -1,30 +1,39 @@
 const path = require('path');
-const webpack = require('webpack');
-const CSSSplitWebpackPlugin = require('css-split-webpack-plugin').default;
-const babelOptions = require('bisheng/lib/config/getBabelCommonConfig').default();
-const NpmImportPlugin = require('less-plugin-npm-import');
+const legacy = require('./legacy-build/resolve');
 const replaceLib = require('../tools/replaceLib');
 
+const webpack = legacy.load('webpack');
+const CSSSplitWebpackPlugin = legacy.load('css-split-webpack-plugin').default;
+const NpmImportPlugin = legacy.load('less-plugin-npm-import');
+
 const isDev = process.env.NODE_ENV === 'development';
-const rcPath = path.resolve(process.cwd(), 'components', 'rc-components');
+const rcPath = path.join(legacy.root, 'components', 'rc-components');
+const babelLoader = legacy.resolve('babel-loader');
 
 function alertBabelConfig(rules) {
   rules.forEach(rule => {
-    if (rule.loader && rule.loader === 'babel-loader') {
+    if (rule.loader === babelLoader || rule.loader === 'babel-loader') {
       if (rule.options.plugins.indexOf(replaceLib) === -1) {
         rule.options.plugins.push(replaceLib);
       }
       rule.options.plugins = rule.options.plugins.filter(
-        plugin => !plugin.indexOf || plugin.indexOf('babel-plugin-add-module-exports') === -1,
+        plugin => !String(Array.isArray(plugin) ? plugin[0] : plugin).includes('babel-plugin-add-module-exports'),
       );
-    } else if (rule.use) {
+    }
+    if (Array.isArray(rule.use)) {
       alertBabelConfig(rule.use);
+    }
+    if (rule.oneOf) {
+      alertBabelConfig(rule.oneOf);
+    }
+    if (rule.rules) {
+      alertBabelConfig(rule.rules);
     }
   });
 }
 
 module.exports = {
-  port: 8001,
+  port: 8899,
   hash: true,
   root: '/choerodon-ui/',
   source: {
@@ -84,7 +93,13 @@ module.exports = {
     // },
   },
   webpackConfig(config) {
+    config.context = legacy.root;
+    config.resolve.modules = [path.join(legacy.root, 'node_modules'), legacy.nodeModules, ...config.resolve.modules];
+    config.resolveLoader.modules = [legacy.nodeModules];
+    config.resolveLoader.alias = { ...config.resolveLoader.alias, babel: babelLoader };
     config.resolve.alias = {
+      ...config.resolve.alias,
+      webpack: legacy.packageDirectory('webpack'),
       'choerodon-ui/dataset': path.resolve('components-dataset'),
       'choerodon-ui/shared': path.resolve('components-shared'),
       'choerodon-ui/pro/lib': path.resolve('components-pro'),
@@ -92,15 +107,19 @@ module.exports = {
       'choerodon-ui/lib': path.resolve('components'),
       'choerodon-ui': path.resolve('index'),
       site: path.resolve('site'),
-      'react-router': 'react-router/umd/ReactRouter',
+      'react-router': legacy.resolve('react-router/umd/ReactRouter'),
     };
+
+    ['react', 'react-dom', 'mobx', 'mobx-react'].forEach(name => {
+      config.resolve.alias[name] = path.dirname(require.resolve(`${name}/package.json`, { paths: [legacy.root] }));
+    });
 
     config.externals = {
       'react-router-dom': 'ReactRouterDOM',
     };
 
     config.module.rules.forEach(rule => {
-      if (rule.loader && rule.loader === require.resolve('babel-loader')) {
+      if (rule.loader === babelLoader) {
         if (rule.exclude) {
           rule.exclude = [rule.exclude, rcPath];
         } else {
@@ -112,8 +131,8 @@ module.exports = {
     const rcComponentsRule = {
       test: /\.jsx?$/,
       include: [rcPath],
-      loader: require.resolve('babel-loader'),
-      options: babelOptions,
+      loader: babelLoader,
+      options: legacy.load('bisheng/lib/config/getBabelCommonConfig').default(),
     };
 
     config.module.rules.unshift(rcComponentsRule);
@@ -121,7 +140,7 @@ module.exports = {
     alertBabelConfig(config.module.rules);
 
     rcComponentsRule.options.plugins.push(
-      require.resolve('@babel/plugin-transform-proto-to-assign'),
+      legacy.resolve('@babel/plugin-transform-proto-to-assign'),
       // [require.resolve('@babel/plugin-transform-classes'), { loose: true }],
     );
 

@@ -192,7 +192,7 @@ const TableHeader: FunctionComponent<TableHeaderProps> = function TableHeader(pr
       const { fields } = queryDataSet;
       return [...fields.entries()].reduce((list, [name, field]) => {
         if (!field.get('bind')) {
-          const props: any = {
+          const fieldProps: any = {
             key: name,
             name,
             dataSet: queryDataSet,
@@ -202,14 +202,14 @@ const TableHeader: FunctionComponent<TableHeaderProps> = function TableHeader(pr
             isValidElement(element)
               ? cloneElement(element, {
                 placeholder: field.get('label'),
-                ...props,
+                ...fieldProps,
                 style: { height: rowHeight },
               })
               : cloneElement(getEditorByField(field), {
                 placeholder: field.get('label'),
-                ...props,
+                ...fieldProps,
                 style: {
-                  ...props.style || {},
+                  ...fieldProps.style || {},
                   ...extraStyle,
                   height: rowHeight,
                 },

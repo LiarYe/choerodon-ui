@@ -52,19 +52,20 @@ const Dropdown: DropdownInterface = function Dropdown(props) {
   const {
     onOverlayClick, hidden: propsHidden, visible: propsVisible, trigger, overlay, children, placement, popupClassName, disabled,
     getPopupContainer, onHiddenBeforeChange, suffixCls, prefixCls: customizePrefixCls, onHiddenChange, onVisibleChange,
+    defaultHidden, defaultVisible,
   } = props;
   const prefixCls = getProPrefixCls(suffixCls!, customizePrefixCls);
   const [hidden, setHidden] = useState<boolean>(() => {
     if ('hidden' in props) {
-      return props.hidden!;
+      return propsHidden!;
     }
     if ('visible' in props) {
-      return !props.visible!;
+      return !propsVisible!;
     }
     if ('defaultHidden' in props) {
-      return props.defaultHidden!;
+      return defaultHidden!;
     }
-    return !props.defaultVisible;
+    return !defaultVisible;
   });
   const renderedContentPropsRef = useRef<{ onClick?(e) }>();
   const getContent = useCallback((...popupProps): ReactNode => {

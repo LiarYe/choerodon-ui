@@ -12,7 +12,6 @@ type ConfirmChildrenProps = {
   children?: ReactNode;
   iconNode?: ReactNode;
   titleNode?: ReactNode;
-  type?: string;
   modal?: ModalChildrenProps;
 };
 

@@ -50,19 +50,45 @@ const proName = `${packageJson.name}/pro/lib`;
 const lessLibName = /(\.\.\/)+components/g;
 
 function dist(done) {
-  rimraf.sync(path.join(cwd, 'dist'));
+  const previousRunEnv = process.env.RUN_ENV;
   process.env.RUN_ENV = 'PRODUCTION';
-  const webpackConfig = require(path.join(cwd, 'webpack.config.js'));
-  webpack(webpackConfig, (err, stats) => {
+  let compiler;
+  let setupError;
+  try {
+    const configPath = require.resolve(path.join(cwd, 'webpack.config.js'));
+    delete require.cache[configPath];
+    const webpackConfig = require(configPath);
+    compiler = webpack(webpackConfig);
+  } catch (error) {
+    setupError = error;
+  } finally {
+    if (previousRunEnv === undefined) {
+      delete process.env.RUN_ENV;
+    } else {
+      process.env.RUN_ENV = previousRunEnv;
+    }
+  }
+  if (setupError) {
+    done(setupError);
+    return;
+  }
+  try {
+    rimraf.sync(path.join(cwd, 'dist'));
+  } catch (error) {
+    compiler.close(() => done(error));
+    return;
+  }
+  compiler.run((err, stats) => {
     if (err) {
       console.error(err.stack || err);
       if (err.details) {
         console.error(err.details);
       }
+      compiler.close(() => done(err));
       return;
     }
 
-    const info = stats.toJson();
+    const info = stats.toJson({ all: false, errors: true, warnings: true });
 
     if (stats.hasErrors()) {
       console.error(info.errors);
@@ -82,7 +108,8 @@ function dist(done) {
       version: false,
     });
     console.log(buildInfo);
-    done(0);
+    const buildError = stats.hasErrors() ? new Error('Webpack dist compilation failed') : undefined;
+    compiler.close(closeError => done(buildError || closeError));
   });
 }
 

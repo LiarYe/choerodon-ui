@@ -6,35 +6,34 @@ injectRequire();
 process.traceDeprecation = true;
 
 // Normal requirement
-const path = require('path');
 const webpack = require('webpack');
-const WebpackBar = require('webpackbar');
-const webpackMerge = require('webpack-merge');
+const { merge: webpackMerge } = require('webpack-merge');
 const TerserJSPlugin = require('terser-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
-const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin');
+const CssMinimizerPlugin = require('css-minimizer-webpack-plugin');
 const CaseSensitivePathsPlugin = require('case-sensitive-paths-webpack-plugin');
-const FilterWarningsPlugin = require('webpack-filter-warnings-plugin');
 const postcssConfig = require('./postcssConfig');
-const CleanUpStatsPlugin = require('./utils/CleanUpStatsPlugin');
+const lessImplementation = require('./lessImplementation');
 
 const limit = 10000;
 const svgRegex = /\.svg(\?v=\d+\.\d+\.\d+)?$/;
 const svgOptions = {
   limit,
-  minetype: 'image/svg+xml',
+  mimetype: 'image/svg+xml',
 };
 
 const imageOptions = {
   limit,
 };
 
-function getAssetLoader(props) {
+function getAssetRule(test, mimetype) {
   return {
-    loader: 'url-loader',
-    options: {
-      ...props,
-      name: '[name].[hash:8].[ext]',
+    test,
+    type: 'asset',
+    parser: { dataUrlCondition: { maxSize: limit } },
+    generator: {
+      filename: '[name].[hash:8][ext]',
+      ...(mimetype ? { dataUrl: { mimetype, encoding: 'base64' } } : {}),
     },
   };
 }
@@ -42,6 +41,7 @@ function getAssetLoader(props) {
 function getWebpackConfig(modules) {
   const pkg = require(getProjectPath('package.json'));
   const babelConfig = require('./getBabelCommonConfig')(modules || false);
+  babelConfig.sourceType = 'unambiguous';
 
   // babel import for components
   babelConfig.plugins.push(
@@ -66,6 +66,7 @@ function getWebpackConfig(modules) {
   );
 
   const config = {
+    target: ['web', 'es5'],
     devtool: 'source-map',
 
     output: {
@@ -94,20 +95,19 @@ function getWebpackConfig(modules) {
         [`${pkg.name}/lib`]: getProjectPath('components'),
         [pkg.name]: process.cwd(),
       },
+      fallback: {
+        child_process: false,
+        cluster: false,
+        dgram: false,
+        dns: false,
+        fs: false,
+        module: false,
+        net: false,
+        readline: false,
+        repl: false,
+        tls: false,
+      },
     },
-
-    node: [
-      'child_process',
-      'cluster',
-      'dgram',
-      'dns',
-      'fs',
-      'module',
-      'net',
-      'readline',
-      'repl',
-      'tls',
-    ].reduce((acc, name) => Object.assign({}, acc, { [name]: 'empty' }), {}),
 
     module: {
       noParse: [/moment.js/],
@@ -115,6 +115,12 @@ function getWebpackConfig(modules) {
         {
           test: /\.jsx?$/,
           exclude: /node_modules/,
+          loader: resolve('babel-loader'),
+          options: babelConfig,
+        },
+        {
+          test: /\.m?js$/,
+          include: /node_modules[/\\]tslib[/\\]/,
           loader: resolve('babel-loader'),
           options: babelConfig,
         },
@@ -145,7 +151,10 @@ function getWebpackConfig(modules) {
             },
             {
               loader: 'postcss-loader',
-              options: Object.assign({}, postcssConfig, { sourceMap: true }),
+              options: {
+                postcssOptions: postcssConfig,
+                sourceMap: true,
+              },
             },
           ],
         },
@@ -161,77 +170,48 @@ function getWebpackConfig(modules) {
             },
             {
               loader: 'postcss-loader',
-              options: Object.assign({}, postcssConfig, { sourceMap: true }),
+              options: {
+                postcssOptions: postcssConfig,
+                sourceMap: true,
+              },
             },
             {
               loader: resolve('less-loader'),
               options: {
-                javascriptEnabled: true,
+                // 所有 compiler 共用 Less render 队列，避免并发解析导致选择器缺失。
+                implementation: lessImplementation,
+                lessOptions: {
+                  javascriptEnabled: true,
+                },
+                // 通过串行编译保留原始 Less 文件、行列映射，无需关闭 sourceMap 来规避缺类问题。
                 sourceMap: true,
-                // modifyVars: {
-                //   'c7n-icon-url': JSON.stringify(
-                //     'https://choerodon.github.io/choerodon-ui-font/icomoon',
-                //   ),
-                // },
               },
             },
           ],
         },
-        {
-          test: /\.woff(\?v=\d+\.\d+\.\d+)?$/,
-          use: getAssetLoader({
-            limit,
-            mimetype: 'application/font-woff',
-          }),
-        },
-        {
-          test: /\.woff2(\?v=\d+\.\d+\.\d+)?$/,
-          use: getAssetLoader({
-            limit,
-            mimetype: 'application/font-woff',
-          }),
-        },
-        {
-          test: /\.ttf(\?v=\d+\.\d+\.\d+)?$/,
-          use: getAssetLoader({
-            limit,
-            mimetype: 'application/octet-stream',
-          }),
-        },
-        {
-          test: /\.eot(\?v=\d+\.\d+\.\d+)?$/,
-          use: getAssetLoader({
-            limit,
-            mimetype: 'application/vnd.ms-fontobject',
-          }),
-        },
-        {
-          test: /\.svg(\?v=\d+\.\d+\.\d+)?$/,
-          use: getAssetLoader(svgOptions),
-        },
-        {
-          test: /\.(png|jpg|jpeg|gif)(\?v=\d+\.\d+\.\d+)?$/i,
-          use: getAssetLoader(imageOptions),
-        },
+        getAssetRule(/\.woff$/, 'application/font-woff'),
+        getAssetRule(/\.woff2$/, 'application/font-woff'),
+        getAssetRule(/\.ttf$/, 'application/octet-stream'),
+        getAssetRule(/\.eot$/, 'application/vnd.ms-fontobject'),
+        getAssetRule(/\.svg$/, svgOptions.mimetype),
+        getAssetRule(/\.(png|jpg|jpeg|gif)$/i),
       ],
     },
 
     plugins: [
       new CaseSensitivePathsPlugin(),
+      new MiniCssExtractPlugin({
+        filename: '[name].css',
+      }),
       new webpack.BannerPlugin(`
 ${pkg.name} v${pkg.version}
       `),
-      new WebpackBar({
-        name: '🚚  Choerodon Tools',
-        color: '#3f51b5',
-      }),
-      new CleanUpStatsPlugin(),
-      new FilterWarningsPlugin({
-        // suppress conflicting order warnings from mini-css-extract-plugin.
-        // ref: https://github.com/ant-design/ant-design/issues/14895
-        // see https://github.com/webpack-contrib/mini-css-extract-plugin/issues/250
-        exclude: /mini-css-extract-plugin[^]*Conflicting order between:/,
-      }),
+      new webpack.ProgressPlugin(),
+    ],
+
+    ignoreWarnings: [
+      /mini-css-extract-plugin[^]*Conflicting order/,
+      /export .* was not found in .*/,
     ],
 
     performance: {
@@ -244,7 +224,6 @@ ${pkg.name} v${pkg.version}
     const entryPro = ['./index-pro'];
     const entryDemoDataMock = ['./site/theme/mock/browser-online-demo'];
 
-    // Common config
     config.externals = {
       react: {
         root: 'React',
@@ -265,53 +244,38 @@ ${pkg.name} v${pkg.version}
         amd: 'mobx',
       },
     };
-    config.output.library = '[name]';
-    config.output.libraryTarget = 'umd';
+    config.output.library = {
+      name: '[name]',
+      type: 'umd',
+    };
+    config.output.globalObject = 'this';
     config.optimization = {
       minimizer: [
         new TerserJSPlugin({
-          cache: true,
           parallel: true,
-          sourceMap: true,
+          extractComments: true,
+          terserOptions: { ecma: 5 },
         }),
+        new CssMinimizerPlugin(),
       ],
     };
 
-    // Development
-    const uncompressedConfig = webpackMerge({}, config, {
+    const uncompressedConfig = webpackMerge(config, {
       entry: {
         [pkg.name]: entry,
         [`${pkg.name}-pro`]: entryPro,
         [`${pkg.name}-demo-data-mock`]: entryDemoDataMock,
       },
       mode: 'development',
-      plugins: [
-        new MiniCssExtractPlugin({
-          filename: '[name].css',
-        }),
-      ],
     });
 
-    // Production
-    const prodConfig = webpackMerge({}, config, {
+    const prodConfig = webpackMerge(config, {
       entry: {
         [`${pkg.name}.min`]: entry,
         [`${pkg.name}-pro.min`]: entryPro,
         [`${pkg.name}-demo-data-mock.min`]: entryDemoDataMock,
       },
       mode: 'production',
-      plugins: [
-        new webpack.optimize.ModuleConcatenationPlugin(),
-        new webpack.LoaderOptionsPlugin({
-          minimize: true,
-        }),
-        new MiniCssExtractPlugin({
-          filename: '[name].css',
-        }),
-      ],
-      optimization: {
-        minimizer: [new OptimizeCSSAssetsPlugin({})],
-      },
     });
 
     return [prodConfig, uncompressedConfig];

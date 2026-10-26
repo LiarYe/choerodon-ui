@@ -191,13 +191,13 @@ const CardContent: FunctionComponent<CardContentProps> = function CardContent(pr
     const children: ReactElement<ButtonProps | DropDownProps>[] = [];
     if (tableBtns && tableBtns.length && buttonsLimits) {
       tableBtns.slice(buttonsLimits).forEach(button => {
-        let props: TableButtonProps = {};
+        let buttonOptions: TableButtonProps = {};
         if (isArrayLike(button)) {
-          props = button[1] || {};
+          buttonOptions = button[1] || {};
           button = button[0];
         }
         if (isString(button) && button in TableButtonType) {
-          const { afterClick, ...buttonProps } = props;
+          const { afterClick, ...buttonProps } = buttonOptions;
           const defaultButtonProps = getButtonProps(button as TableButtonType);
           if (defaultButtonProps) {
             if (afterClick) {
@@ -231,7 +231,7 @@ const CardContent: FunctionComponent<CardContentProps> = function CardContent(pr
           );
         } else if (isObject(button)) {
           children.push(
-            <Menu.Item hidden={props.hidden}>
+            <Menu.Item hidden={buttonOptions.hidden}>
               <Button {...tableButtonProps} {...button} funcType={FuncType.link} />
             </Menu.Item>,
           );

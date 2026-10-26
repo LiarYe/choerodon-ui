@@ -40,12 +40,13 @@ const Col: FunctionComponent<ColProps> = function Col(props) {
   const { getPrefixCls } = useContext(ConfigContext);
   const prefixCls = getPrefixCls('col', customizePrefixCls);
   let sizeClassObj = {};
-  ['xs', 'sm', 'md', 'lg', 'xl', 'xxl'].forEach(size => {
+  (['xs', 'sm', 'md', 'lg', 'xl', 'xxl'] as const).forEach(size => {
+    const { [size]: sizeValue } = props;
     let sizeProps: ColSize = {};
-    if (typeof props[size] === 'number') {
-      sizeProps.span = props[size];
-    } else if (typeof props[size] === 'object') {
-      sizeProps = props[size] || {};
+    if (typeof sizeValue === 'number') {
+      sizeProps.span = sizeValue;
+    } else if (typeof sizeValue === 'object') {
+      sizeProps = sizeValue || {};
     }
 
     delete others[size];

@@ -1267,7 +1267,6 @@ export default class TableDynamicFilterBar extends Component<TableDynamicFilterB
                           fields: isTenant ? [...queryDataSet.fields.values()] : this.originOrderQueryFields.slice(fieldsLimit),
                         }]}
                         prefixCls={`${proPrefixCls}-filter-list` || 'c7n-pro-table-filter-list'}
-                        closeMenu={() => runInAction(() => this.fieldSelectHidden = true)}
                         value={selectFields}
                         onSelect={this.handleSelect}
                         onUnSelect={this.handleUnSelect}

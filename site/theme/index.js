@@ -1,5 +1,7 @@
-require('core-js/es6/string');
 const path = require('path');
+const legacy = require('../legacy-build/resolve');
+
+legacy.load('core-js/es6/string');
 
 const homeTmpl = './template/Home/index';
 const contentTmpl = './template/Content/index';
@@ -8,11 +10,12 @@ const redirectTmpl = './template/Redirect';
 
 const demoBabelConfig = encodeURIComponent(
   JSON.stringify({
+    presets: [legacy.resolve('@babel/preset-react'), legacy.resolve('@babel/preset-env')],
     plugins: [
-      ['@babel/plugin-transform-typescript', { isTSX: true }],
-      ['@babel/plugin-proposal-decorators', { legacy: true }],
-      ['@babel/plugin-proposal-class-properties', { loose: true }],
-      '@babel/plugin-proposal-object-rest-spread',
+      [legacy.resolve('@babel/plugin-transform-typescript'), { isTSX: true }],
+      [legacy.resolve('@babel/plugin-proposal-decorators'), { legacy: true }],
+      [legacy.resolve('@babel/plugin-proposal-class-properties'), { loose: true }],
+      legacy.resolve('@babel/plugin-proposal-object-rest-spread'),
     ],
   }),
 );
@@ -57,10 +60,10 @@ module.exports = {
     'docs/spec': pickerGenerator('spec'),
   },
   plugins: [
-    'bisheng-plugin-description',
-    'bisheng-plugin-toc?maxDepth=2&keepElem',
-    `bisheng-plugin-choerodon-ui?babelConfig=${demoBabelConfig}`,
-    'bisheng-plugin-react?lang=__react',
+    legacy.packageDirectory('bisheng-plugin-description'),
+    `${legacy.packageDirectory('bisheng-plugin-toc')}?maxDepth=2&keepElem`,
+    `${legacy.packageDirectory('bisheng-plugin-choerodon-ui')}?babelConfig=${demoBabelConfig}`,
+    `${legacy.packageDirectory('bisheng-plugin-react')}?lang=__react&babelConfig=${demoBabelConfig}`,
   ],
   routes: [{
     path: '/iframe/:demo/:component/:children/',

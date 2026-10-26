@@ -67,3 +67,4 @@ components/rc-components/tree/**/*.js
 components/form/__tests__/type.js
 site/theme/mock/performance-data/*.js
 .eslintcache
+reports-new/

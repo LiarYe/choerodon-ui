@@ -1225,7 +1225,6 @@ export default class TableComboBar extends Component<TableComboBarProps> {
                               prefixCls={
                                 `${prefixCls}-combo-filter-list` || 'c7n-pro-table-combo-filter-list'
                               }
-                              closeMenu={() => runInAction(() => (this.fieldSelectHidden = true))}
                               value={selectFields}
                               onSelect={this.handleSelect}
                               onUnSelect={this.handleUnSelect}
