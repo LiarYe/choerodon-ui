@@ -1,5 +1,7 @@
 const path = require('path');
 const legacy = require('./legacy-build/resolve');
+const targets = require('./legacy-build/babelTargets');
+const BuildErrorPlugin = require('./legacy-build/BuildErrorPlugin');
 const replaceLib = require('../tools/replaceLib');
 
 const webpack = legacy.load('webpack');
@@ -13,6 +15,10 @@ const babelLoader = legacy.resolve('babel-loader');
 function alertBabelConfig(rules) {
   rules.forEach(rule => {
     if (rule.loader === babelLoader || rule.loader === 'babel-loader') {
+      rule.options.presets = rule.options.presets.map(preset => {
+        const [name, options = {}] = Array.isArray(preset) ? preset : [preset];
+        return name === legacy.resolve('@babel/preset-env') ? [name, { ...options, targets }] : preset;
+      });
       if (rule.options.plugins.indexOf(replaceLib) === -1) {
         rule.options.plugins.push(replaceLib);
       }
@@ -153,6 +159,9 @@ module.exports = {
 
     if (isDev) {
       config.devtool = '#source-map';
+    }
+    if (process.env.BISHENG_COMMAND === 'build') {
+      config.plugins.push(new BuildErrorPlugin());
     }
 
     return config;

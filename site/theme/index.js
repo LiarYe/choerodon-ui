@@ -1,5 +1,6 @@
 const path = require('path');
 const legacy = require('../legacy-build/resolve');
+const targets = require('../legacy-build/babelTargets');
 
 legacy.load('core-js/es6/string');
 
@@ -10,7 +11,7 @@ const redirectTmpl = './template/Redirect';
 
 const demoBabelConfig = encodeURIComponent(
   JSON.stringify({
-    presets: [legacy.resolve('@babel/preset-react'), legacy.resolve('@babel/preset-env')],
+    presets: [legacy.resolve('@babel/preset-react'), [legacy.resolve('@babel/preset-env'), { targets }]],
     plugins: [
       [legacy.resolve('@babel/plugin-transform-typescript'), { isTSX: true }],
       [legacy.resolve('@babel/plugin-proposal-decorators'), { legacy: true }],

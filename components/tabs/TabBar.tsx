@@ -711,7 +711,8 @@ const TabBar: FunctionComponent<TabBarProps> = function TabBar(props) {
     setOffset(vertical ? scrollTop : scrollLeft, setNextPrev);
   }, [tabBarPosition, setOffset, setMenuList]);
 
-  const renderInkBar = () => {
+  // getTabs 的 useMemo 会同步读取此回调，使用函数声明提升，避免 const 箭头函数的暂时性死区。
+  function renderInkBar() {
     const inkBarNode = inkBarRef.current;
     if (inkBarNode) {
       const inkBarNodeStyle = inkBarNode.style;
@@ -768,7 +769,7 @@ const TabBar: FunctionComponent<TabBarProps> = function TabBar(props) {
       }
       inkBarNodeStyle.visibility = activeTab ? 'visible' : 'hidden';
     }
-  };
+  }
 
   useLayoutEffect(() => {
     renderInkBar();

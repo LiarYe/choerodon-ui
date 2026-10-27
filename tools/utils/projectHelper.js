@@ -26,10 +26,15 @@ function injectRequire() {
     try {
       return oriRequire.apply(this, args);
     } catch (err) {
-      const newArgs = [...args];
-      if (moduleName[0] !== '/') {
-        newArgs[0] = getProjectPath('node_modules', moduleName);
+      if (
+        err.code !== 'MODULE_NOT_FOUND' ||
+        moduleName.startsWith('.') ||
+        path.isAbsolute(moduleName) ||
+        !err.message.startsWith(`Cannot find module '${moduleName}'`)
+      ) {
+        throw err;
       }
+      const newArgs = [getProjectPath('node_modules', moduleName), ...args.slice(1)];
       return oriRequire.apply(this, newArgs);
     }
   };

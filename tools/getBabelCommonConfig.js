@@ -2,7 +2,7 @@
 const runtimeVersion = require('@babel/runtime/package.json').version;
 const { resolve, isThereHaveBrowserslistConfig } = require('./utils/projectHelper');
 
-module.exports = function(modules) {
+module.exports = function(modules = 'commonjs') {
   const plugins = [
     [
       resolve('@babel/plugin-transform-typescript'),
@@ -11,34 +11,30 @@ module.exports = function(modules) {
       },
     ],
     // resolve('babel-plugin-inline-import-data-uri'),
-    resolve('@babel/plugin-transform-member-expression-literals'),
-    resolve('@babel/plugin-transform-object-assign'),
-    resolve('@babel/plugin-transform-property-literals'),
     [resolve('@babel/plugin-transform-runtime'), { version: runtimeVersion }],
-    resolve('@babel/plugin-transform-spread'),
-    resolve('@babel/plugin-transform-template-literals'),
     resolve('@babel/plugin-proposal-export-default-from'),
-    resolve('@babel/plugin-proposal-export-namespace-from'),
-    resolve('@babel/plugin-proposal-object-rest-spread'),
+    resolve('@babel/plugin-transform-export-namespace-from'),
+    resolve('@babel/plugin-transform-object-rest-spread'),
     [
       resolve('@babel/plugin-proposal-decorators'),
       {
-        legacy: true,
+        version: 'legacy',
       },
     ],
-    resolve('@babel/plugin-proposal-class-properties'),
+    resolve('@babel/plugin-transform-class-properties'),
   ];
   return {
     presets: [
-      resolve('@babel/preset-react'),
+      [resolve('@babel/preset-react'), { runtime: 'classic' }],
       [
         resolve('@babel/preset-env'),
         {
           modules,
+          bugfixes: true,
           targets: isThereHaveBrowserslistConfig()
             ? undefined
             : {
-              browsers: ['last 2 versions', 'Firefox ESR', '> 1%', 'ie >= 11'],
+              browsers: ['> 0.5%', 'last 2 versions', 'Firefox ESR', 'not dead'],
             },
         },
       ],

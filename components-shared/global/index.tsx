@@ -17,6 +17,6 @@ export interface Globals {
   FUNCTION_CHAINS_MAP?: WeakMap<Function, ChainsFunction>;
 }
 
-const global: Globals = {};
+const sharedGlobal: Globals = {};
 
-export default global;
+export default sharedGlobal;

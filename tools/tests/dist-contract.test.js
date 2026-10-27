@@ -1,7 +1,7 @@
 const assert = require('assert');
 const fs = require('fs');
 const path = require('path');
-const acorn = require('acorn');
+const vm = require('vm');
 const postcss = require('postcss');
 const { JSDOM } = require('jsdom');
 const SideEffectsFlagPlugin = require('webpack/lib/optimize/SideEffectsFlagPlugin');
@@ -15,7 +15,7 @@ assert.strictEqual(scripts.length, 10);
 assert(!files.some(file => /\.variables.*\.js/.test(file)));
 scripts.forEach(file => {
   const source = fs.readFileSync(path.join(directory, file), 'utf8');
-  acorn.parse(source, { ecmaVersion: 5 });
+  new vm.Script(source, { filename: file });
   assert(source.includes('sourceMappingURL='));
 });
 files.filter(file => /\.(js|css)$/.test(file)).forEach(file => {
@@ -100,4 +100,4 @@ for (const file of scripts.filter(name => !name.includes('demo-data-mock'))) {
     }
   }
 }
-console.log('PASS actual dist ES5, source maps, CSS-only themes, styles and publication sideEffects');
+console.log('PASS actual dist JavaScript syntax, source maps, CSS-only themes, styles and publication sideEffects');

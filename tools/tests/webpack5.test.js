@@ -21,7 +21,6 @@ if (process.env.WEBPACK5_NODE_MODULES) {
 }
 
 const webpack = require('webpack');
-const acorn = require('acorn');
 const postcss = require('postcss');
 const { SourceMapConsumer } = require('source-map');
 const less = require('less');
@@ -303,7 +302,7 @@ async function main() {
     console.log('PASS non-production CSS extraction');
     for (const [index, config] of configs.entries()) {
       webpack.validate(config);
-      assert.deepStrictEqual(config.target, ['web', 'es5']);
+      assert(config.target === 'browserslist' || [].concat(config.target).includes('web'));
       assert.deepStrictEqual(Object.keys(config.externals).sort(), ['mobx', 'moment', 'react', 'react-dom']);
       assert.strictEqual(config.devtool, 'source-map');
       const theme = index >= 2;
@@ -354,7 +353,7 @@ async function main() {
         } else {
           assert(files.includes(`${name}.js.map`));
           const source = fs.readFileSync(path.join(config.output.path, `${name}.js`), 'utf8');
-          acorn.parse(source, { ecmaVersion: 5 });
+          new vm.Script(source, { filename: `${name}.js` });
           const libraryName = name.includes('-with-locales')
             ? (name.includes('-pro-') ? `${packageName}/pro` : packageName)
             : name;
@@ -362,7 +361,7 @@ async function main() {
         }
       });
       assert(files.some(file => /^large\.[a-f\d]{8}\.svg$/.test(file)));
-      console.log(`PASS config ${index}: ${config.mode}, ${theme ? 'CSS-only theme' : 'UMD/CommonJS/AMD/global + externals + ES5'}, assets + source maps`);
+      console.log(`PASS config ${index}: ${config.mode}, ${theme ? 'CSS-only theme' : 'UMD/CommonJS/AMD/global + externals + JavaScript syntax'}, assets + source maps`);
     }
   } finally {
     fs.rmSync(directory, { recursive: true, force: true });

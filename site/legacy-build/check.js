@@ -2,6 +2,7 @@ const assert = require('assert');
 const path = require('path');
 const legacy = require('./resolve');
 const manifest = require('./package.json');
+const targets = require('./babelTargets');
 const replaceLib = require('../../tools/replaceLib');
 
 process.chdir(legacy.root);
@@ -26,11 +27,13 @@ const resolvePlugins = legacy.load('bisheng/lib/utils/resolve-plugins');
 
 const demoPlugin = theme.plugins.find(plugin => plugin.includes('bisheng-plugin-choerodon-ui?'));
 const demoConfig = JSON.parse(decodeURIComponent(demoPlugin.split('babelConfig=')[1]));
+const acorn = require(require.resolve('acorn', { paths: [legacy.packageDirectory('webpack')] }));
 const transformed = legacy.load('bisheng-plugin-react/lib/transformer')(
-  'const Demo = () => <div />; ReactDOM.render(<Demo />, mountNode);',
+  'const Demo = () => <div>{data?.items?.[0] ?? "fallback"}</div>; ReactDOM.render(<Demo />, mountNode);',
   demoConfig,
 );
 assert(transformed.includes('React.createElement(Demo'));
+acorn.parse(transformed, { ecmaVersion: 2019, sourceType: 'module' });
 
 legacy.load('bisheng/lib/context').initialize({ bishengConfig: config, themeConfig: theme });
 const common = legacy.load('bisheng/lib/config/getWebpackCommonConfig').default();
@@ -48,9 +51,23 @@ function checkRules(rules) {
   rules.forEach(rule => {
     if (rule.loader === legacy.resolve('babel-loader')) {
       assert(rule.options.plugins.includes(replaceLib));
+      const preset = rule.options.presets.find(item => Array.isArray(item) && item[0] === legacy.resolve('@babel/preset-env'));
+      assert.deepStrictEqual(preset[1].targets, targets);
+      const { cacheDirectory, ...options } = rule.options;
+      const output = legacy.load('@babel/core').transformSync(
+        'const value = data?.items?.[0] ?? "fallback";',
+        { ...options, babelrc: false, configFile: false },
+      ).code;
+      acorn.parse(output, { ecmaVersion: 2019, sourceType: 'module' });
     }
     if (Array.isArray(rule.use)) {
       checkRules(rule.use);
+    }
+    if (rule.oneOf) {
+      checkRules(rule.oneOf);
+    }
+    if (rule.rules) {
+      checkRules(rule.rules);
     }
   });
 }

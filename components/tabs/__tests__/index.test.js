@@ -1,10 +1,24 @@
 import React from 'react';
 import { mount } from 'enzyme';
 import Tabs from '..';
+import Count from '../Count';
 
 const { TabPane } = Tabs;
 
 describe('Tabs', () => {
+  it('initializes the ink bar callback before rendering tab counts', () => {
+    const wrapper = mount(
+      <Tabs>
+        <TabPane tab="Counted tab" key="1" showCount count={() => 3}>
+          Content
+        </TabPane>
+      </Tabs>,
+    );
+    expect(wrapper.find('.c7n-tabs-tab-count').text()).toBe('3');
+    expect(wrapper.find(Count).prop('asyncCount')).toEqual(expect.any(Function));
+    wrapper.unmount();
+  });
+
   describe('editable-card', () => {
     let handleEdit;
     let wrapper;

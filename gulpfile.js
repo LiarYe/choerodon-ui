@@ -5,6 +5,7 @@ const webpack = require('webpack');
 const babel = require('gulp-babel');
 const argv = require('minimist')(process.argv.slice(2));
 const chalk = require('chalk');
+const fs = require('fs');
 const path = require('path');
 
 // gulp-typescript 依赖 source-map, source-map@0.7.3 会将 Node 18+ 的全局 fetch 误判为浏览器环境;
@@ -122,31 +123,131 @@ function tag() {
   console.log('tagged');
 }
 
+function pipeStreams(...streams) {
+  return streams.reduce((source, destination) => {
+    let ended = false;
+    let finished = false;
+    source.once('end', () => {
+      ended = true;
+    });
+    destination.once('finish', () => {
+      finished = true;
+    });
+    source.on('error', error => destination.destroy(error));
+    source.once('close', () => {
+      if (!ended && !destination.destroyed) {
+        destination.destroy(new Error('Stream closed before completion'));
+      }
+    });
+    destination.once('close', () => {
+      if (!finished) {
+        source.destroy();
+      }
+    });
+    return source.pipe(destination);
+  });
+}
+
+function runCompile(stream, destination, done) {
+  let completed = false;
+  function complete(error) {
+    if (!completed) {
+      completed = true;
+      done(error);
+    }
+  }
+  destination.once('error', complete);
+  destination.once('finish', () => complete());
+  destination.once('close', () => complete(new Error('Stream closed before completion')));
+  pipeStreams(stream, destination).resume();
+}
+
+function cleanCompileDirs(done) {
+  try {
+    [esDir, libDir, esProDir, libProDir, datasetDir, sharedDir].forEach(dir => {
+      rimraf.sync(dir);
+    });
+    done();
+  } catch (error) {
+    done(error);
+  }
+}
+
+function compileTypescript(source, modules, streams = []) {
+  let hasDiagnostics = false;
+  const tsResult = ts(tsConfig, {
+    error(error, typescript) {
+      hasDiagnostics = true;
+      tsDefaultReporter.error(error, typescript);
+    },
+    finish: tsDefaultReporter.finish,
+  });
+  const auxiliaryStreams = streams.map(stream => pipeStreams(stream, through2.obj()));
+  const js = babelify(tsResult.js, modules);
+  const inputs = [...auxiliaryStreams, js, tsResult.dts];
+  const output = merge2(inputs, { pipeError: true });
+  function cancel() {
+    [tsResult, tsResult.js, tsResult.dts, ...streams, ...inputs].forEach(stream => {
+      if (!stream.destroyed) {
+        stream.destroy();
+      }
+    });
+  }
+  output.on('error', error => output.destroy(error));
+  output.once('error', cancel);
+  output.once('close', cancel);
+  [tsResult, ...inputs].forEach(stream => {
+    let ended = false;
+    stream.once('end', () => {
+      ended = true;
+    });
+    stream.once('close', () => {
+      if (!ended && !output.destroyed) {
+        output.destroy(new Error('Stream closed before completion'));
+      }
+    });
+  });
+  tsResult.on('error', error => {
+    if (
+      argv['ignore-error'] &&
+      hasDiagnostics &&
+      error.message === 'TypeScript: Compilation failed'
+    ) {
+      return;
+    }
+    output.destroy(error);
+  });
+  pipeStreams(gulp.src(source), tsResult);
+  tsResult.resume();
+  return output;
+}
+
 function babelify(js, modules) {
   const babelConfig = getBabelCommonConfig(modules);
   if (modules === false) {
     babelConfig.plugins.push(replaceLib);
   }
-  let stream = js
-    .pipe(sourcemaps.init())
-    .pipe(babel(babelConfig))
-    .pipe(
-      through2.obj(function z(file, encoding, next) {
-        this.push(file.clone());
-        if (file.path.match(/[/\\]style[/\\]index\.js/)) {
-          const content = file.contents.toString(encoding);
-          file.contents = Buffer.from(cssInjection(content));
-          file.path = file.path.replace(/index\.js/, 'css.js');
-          this.push(file);
-          next();
-        } else {
-          next();
-        }
-      }),
-    )
-    .pipe(sourcemaps.write('.'));
+  let stream = pipeStreams(
+    js,
+    sourcemaps.init(),
+    babel(babelConfig),
+    through2.obj(function z(file, encoding, next) {
+      this.push(file.clone());
+      if (file.path.match(/[/\\]style[/\\]index\.js/)) {
+        const content = file.contents.toString(encoding);
+        file.contents = Buffer.from(cssInjection(content));
+        file.path = file.path.replace(/index\.js/, 'css.js');
+        this.push(file);
+        next();
+      } else {
+        next();
+      }
+    }),
+    sourcemaps.write('.'),
+  );
   if (modules === false) {
-    stream = stream.pipe(
+    stream = pipeStreams(
+      stream,
       stripCode({
         start_comment: '@remove-on-es-build-begin',
         end_comment: '@remove-on-es-build-end',
@@ -163,57 +264,18 @@ function compileRc(modules) {
 
 function compileShared() {
   const source = ['components-shared/**/*.tsx', 'components-shared/**/*.ts', 'typings/**/*.d.ts'];
-  let error = 0;
-  const tsResult = gulp.src(source).pipe(
-    ts(tsConfig, {
-      error(e) {
-        tsDefaultReporter.error(e);
-        error = 1;
-      },
-      finish: tsDefaultReporter.finish,
-    }),
-  );
-
-  function check() {
-    if (error && !argv['ignore-error']) {
-      process.exit(1);
-    }
-  }
-
-  tsResult.on('finish', check);
-  tsResult.on('end', check);
-
-  return merge2([babelify(tsResult.js), tsResult.dts]);
+  return compileTypescript(source);
 }
 
 function compileDataset() {
   const source = ['components-dataset/**/*.tsx', 'components-dataset/**/*.ts', 'typings/**/*.d.ts'];
-  let error = 0;
-  const tsResult = gulp.src(source).pipe(
-    ts(tsConfig, {
-      error(e) {
-        tsDefaultReporter.error(e);
-        error = 1;
-      },
-      finish: tsDefaultReporter.finish,
-    }),
-  );
-
-  function check() {
-    if (error && !argv['ignore-error']) {
-      process.exit(1);
-    }
-  }
-
-  tsResult.on('finish', check);
-  tsResult.on('end', check);
-
-  return merge2([babelify(tsResult.js), tsResult.dts]);
+  return compileTypescript(source);
 }
 
 function compilePro(modules) {
   const dir = modules === false ? 'es' : 'lib';
-  const less = gulp.src(['components-pro/**/*.less']).pipe(
+  const less = pipeStreams(
+    gulp.src(['components-pro/**/*.less']),
     through2.obj(function (file, encoding, next) {
       const content = file.contents.toString(encoding);
       if (content.match(lessLibName)) {
@@ -236,41 +298,20 @@ function compilePro(modules) {
             this.push(file);
             next();
           })
-          .catch(e => {
-            console.error(e);
-          });
+          .catch(next);
       } else {
         next();
       }
     }),
   );
-  const assets = gulp.src(['components-pro/**/*.@(png|svg)']);
-  let error = 0;
+  const assets = gulp.src(['components-pro/**/*.@(png|svg)'], { encoding: false });
   const source = ['components-pro/**/*.tsx', 'components-pro/**/*.ts', 'typings/**/*.d.ts'];
-  const tsResult = gulp.src(source).pipe(
-    ts(tsConfig, {
-      error(e) {
-        tsDefaultReporter.error(e);
-        error = 1;
-      },
-      finish: tsDefaultReporter.finish,
-    }),
-  );
-
-  function check() {
-    if (error && !argv['ignore-error']) {
-      process.exit(1);
-    }
-  }
-
-  tsResult.on('finish', check);
-  tsResult.on('end', check);
-
-  return merge2([less, babelify(tsResult.js, modules), tsResult.dts, assets]);
+  return compileTypescript(source, modules, [less, assets]);
 }
 
 function compile(modules) {
-  const less = gulp.src(['components/**/*.less']).pipe(
+  const less = pipeStreams(
+    gulp.src(['components/**/*.less']),
     through2.obj(function (file, encoding, next) {
       this.push(file.clone());
       if (
@@ -284,37 +325,15 @@ function compile(modules) {
             this.push(file);
             next();
           })
-          .catch(e => {
-            console.error(e);
-          });
+          .catch(next);
       } else {
         next();
       }
     }),
   );
-  const assets = gulp.src(['components/**/*.@(png|svg)']);
-  let error = 0;
+  const assets = gulp.src(['components/**/*.@(png|svg)'], { encoding: false });
   const source = ['components/**/*.tsx', 'components/**/*.ts', 'typings/**/*.d.ts'];
-  const tsResult = gulp.src(source).pipe(
-    ts(tsConfig, {
-      error(e) {
-        tsDefaultReporter.error(e);
-        error = 1;
-      },
-      finish: tsDefaultReporter.finish,
-    }),
-  );
-
-  function check() {
-    if (error && !argv['ignore-error']) {
-      process.exit(1);
-    }
-  }
-
-  tsResult.on('finish', check);
-  tsResult.on('end', check);
-
-  return merge2([less, babelify(tsResult.js, modules), tsResult.dts, assets]);
+  return compileTypescript(source, modules, [less, assets]);
 }
 
 function publish(tagString, done) {
@@ -410,81 +429,71 @@ gulp.task(
 
 gulp.task('compile-with-es', done => {
   rimraf.sync(esDir);
-  compile(false)
-    .pipe(changePath(esProDir, proName, true))
-    .pipe(gulp.dest(esDir))
-    .on('finish', done);
+  runCompile(pipeStreams(compile(false), changePath(esProDir, proName, true)), gulp.dest(esDir), done);
 });
 
 gulp.task('compile-with-lib', done => {
   rimraf.sync(libDir);
-  compile()
-    .pipe(changePath(libProDir, proName, true))
-    .pipe(gulp.dest(libDir))
-    .on('finish', done);
+  runCompile(pipeStreams(compile(), changePath(libProDir, proName, true)), gulp.dest(libDir), done);
 });
 
 gulp.task('compile-with-pro-es', done => {
   rimraf.sync(esProDir);
-  compilePro(false)
-    .pipe(changePath(esDir, libName))
-    .pipe(gulp.dest(esProDir))
-    .on('finish', done);
+  runCompile(pipeStreams(compilePro(false), changePath(esDir, libName)), gulp.dest(esProDir), done);
 });
 
 gulp.task('compile-with-pro-lib', done => {
   rimraf.sync(libProDir);
-  compilePro()
-    .pipe(changePath(libDir, libName))
-    .pipe(gulp.dest(libProDir))
-    .on('finish', done);
+  runCompile(pipeStreams(compilePro(), changePath(libDir, libName)), gulp.dest(libProDir), done);
 });
 
 gulp.task('compile-with-dataset-compile', done => {
   rimraf.sync(datasetDir);
-  compileDataset()
-    .pipe(gulp.dest(datasetDir))
-    .on('finish', done);
+  runCompile(compileDataset(), gulp.dest(datasetDir), done);
 });
 gulp.task('compile-with-dataset-move-js', done => {
-  gulp.src(['components-dataset/axios/_helpers/*.js'])
-    .pipe(gulp.dest(datasetAxiosHelpersDir))
-    .on('finish', done);
+  runCompile(gulp.src(['components-dataset/axios/_helpers/*.js']), gulp.dest(datasetAxiosHelpersDir), done);
 });
 gulp.task('compile-with-dataset', gulp.series('compile-with-dataset-compile', 'compile-with-dataset-move-js'));
 
 gulp.task('compile-with-shared', done => {
   rimraf.sync(sharedDir);
-  compileShared()
-    .pipe(gulp.dest(sharedDir))
-    .on('finish', done);
+  runCompile(compileShared(), gulp.dest(sharedDir), done);
 });
 
 gulp.task('compile-with-rc-es', done => {
-  compileRc(false)
-    .pipe(changePath(esProDir, proName, true))
-    .pipe(gulp.dest(esRcDir))
-    .on('finish', done);
+  runCompile(pipeStreams(compileRc(false), changePath(esProDir, proName, true)), gulp.dest(esRcDir), done);
 });
 
 gulp.task('compile-with-rc-lib', done => {
-  compileRc()
-    .pipe(changePath(libProDir, proName, true))
-    .pipe(gulp.dest(libRcDir))
-    .on('finish', done);
+  runCompile(pipeStreams(compileRc(), changePath(libProDir, proName, true)), gulp.dest(libRcDir), done);
 });
+
+function checkCompileEntries(done) {
+  const entries = ['main', 'module', 'main-pro', 'module-pro'];
+  const missing = entries
+    .map(entry => packageJson[entry])
+    .filter(entry => {
+      const filename = path.join(cwd, entry);
+      return !fs.existsSync(filename) || fs.statSync(filename).size === 0;
+    });
+  done(missing.length ? new Error(`Missing or empty compile entries: ${missing.join(', ')}`) : undefined);
+}
 
 gulp.task(
   'compile',
-  gulp.parallel(
-    'compile-with-es',
-    'compile-with-lib',
-    'compile-with-pro-es',
-    'compile-with-pro-lib',
-    'compile-with-dataset',
-    'compile-with-shared',
-    'compile-with-rc-es',
-    'compile-with-rc-lib',
+  gulp.series(
+    cleanCompileDirs,
+    gulp.parallel(
+      'compile-with-es',
+      'compile-with-lib',
+      'compile-with-pro-es',
+      'compile-with-pro-lib',
+      'compile-with-dataset',
+      'compile-with-shared',
+    ),
+    gulp.parallel('compile-with-rc-es', 'compile-with-rc-lib'),
+    checkCompileEntries,
   ),
 );
 
