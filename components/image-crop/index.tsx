@@ -259,7 +259,7 @@ const ImgCrop = forwardRef(function ImgCrop(props: ImgCropProps, ref) {
   const resolveRef = useRef<(value?: any | PromiseLike<any>) => void>(); // 返回文件上传的成功数据的方法
   const rejectRef = useRef<(reason?: any) => void>(); // 返回失败数据的方法
 
-  const cropPixelsRef = React.useRef<HTMLImageElement>();
+  const cropPixelsRef = React.useRef<Area>();
 
   const imageCropCanvas = (naturalModalImg): HTMLCanvasElement | undefined => {
     const { naturalWidth, naturalHeight } = naturalModalImg;
@@ -361,11 +361,11 @@ const ImgCrop = forwardRef(function ImgCrop(props: ImgCropProps, ref) {
       const canvas = serverCrop ? imageToCanvas(naturalModalImg) : imageCropCanvas(naturalModalImg);
       if (canvas) {
         canvas.toBlob((blob) => {
-          let area = {};
+          let area = {} as Area;
           if (cropPixelsRef.current) {
             area = cropPixelsRef.current;
           }
-          onCropComplete({ url: canvas.toDataURL(), blob, area });
+          onCropComplete({ url: canvas.toDataURL(), blob: blob as Blob, area });
         });
       }
     }
@@ -473,11 +473,11 @@ const ImgCrop = forwardRef(function ImgCrop(props: ImgCropProps, ref) {
         }
         if (isFunction(onModalOk) && canvas) {
           canvas.toBlob((blob) => {
-            let area = {};
+            let area = {} as Area;
             if (cropPixelsRef.current) {
               area = cropPixelsRef.current;
             }
-            onModalOk({ url: canvas.toDataURL(), blob, area });
+            onModalOk({ url: canvas.toDataURL(), blob: blob as Blob, area });
           });
         }
       }

@@ -144,7 +144,7 @@ export default class Upload extends Component<UploadProps, UploadState> {
       if (typeof response === 'string') {
         response = JSON.parse(response);
       }
-    } catch (e) {
+    } catch {
       /* do nothing */
     }
     const { fileList } = this.state;

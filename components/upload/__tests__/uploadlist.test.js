@@ -4,7 +4,9 @@ import Upload from '..';
 import Form from '../../form';
 import { errorRequest, successRequest } from './requests';
 
-const delay = timeout => new Promise(resolve => setTimeout(resolve, timeout));
+const delay = timeout => new Promise(resolve => {
+  setTimeout(resolve, timeout);
+});
 
 const fileList = [
   {

@@ -21,7 +21,7 @@ if (typeof window !== 'undefined') {
     try {
       jsonlint.parse(text);
       // eslint-disable-next-line no-empty
-    } catch (e) {}
+    } catch {}
     return found;
   });
 }

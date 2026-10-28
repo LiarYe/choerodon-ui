@@ -22,7 +22,7 @@ function isEvalSupport(): boolean {
       eval('');
       global.EVAL_SUPPORT = true;
       return true;
-    } catch (e) {
+    } catch {
       global.EVAL_SUPPORT = false;
       return false;
     }
@@ -143,7 +143,7 @@ export function toPx(num?: number | string | null, getRelationSize?: (unit: 'vh'
             }
             return result;
           }, toPx(list[0], getRelationSize));
-        } catch (e) {
+        } catch {
           console.error(`Invalid property value in "${num}".`);
           return undefined;
         }
@@ -177,7 +177,7 @@ export function toPx(num?: number | string | null, getRelationSize?: (unit: 'vh'
               default:
                 try {
                   return cssUnitConverter(number, u as CSSUnits, 'px');
-                } catch (e) {
+                } catch {
                   return undefined;
                 }
             }

@@ -508,7 +508,7 @@ const KanbanCustomizationSettings: FunctionComponent<KanbanCustomizationSettings
             currentViewDS.query();
           }
         }
-      } catch (e) {
+      } catch {
         // record.status = RecordStatus.sync;
       }
       if (modal) {

@@ -112,7 +112,7 @@ const CardCommand: FunctionComponent<CardCommandProps> = function CardCommand(pr
             ...button.props,
             onClick: (e) => {
               e.stopPropagation();
-              button.props.onClick(e);
+              button.props.onClick!(e);
             },
             funcType: FuncType.link,
             className: classNames(classString, button.props.className),

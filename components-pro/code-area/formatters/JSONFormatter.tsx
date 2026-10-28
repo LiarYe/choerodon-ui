@@ -12,7 +12,7 @@ export class JSONFormatter implements CodeAreaFormatter {
     try {
       const mergeOptions = { ...JSONFormatter.defaultOptions, ...options };
       t = prettier.format(rawText, mergeOptions);
-    } catch (error) {
+    } catch {
       // 
     }
     return t

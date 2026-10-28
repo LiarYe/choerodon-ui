@@ -13,7 +13,7 @@ export class HTMLFormatter implements CodeAreaFormatter {
     try {
       const mergeOptions = { ...HTMLFormatter.defaultOptions, ...options };
       t = prettier.format(rawText, mergeOptions);
-    } catch (error) {
+    } catch {
       // 
     }
     return t

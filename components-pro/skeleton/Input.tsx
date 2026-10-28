@@ -7,13 +7,13 @@ export interface SkeletonInputProps extends DataSetComponentProps, Omit<C7nSkele
 
 @observer
 export default class SkeletonInput extends DataSetComponent<SkeletonInputProps> {
-   static displayName = 'SkeletonInput'
+  static displayName = 'SkeletonInput'
 
-   render(){
-     const {...otherProps} = this.props
+  render(){
+    const {...otherProps} = this.props
 
-     const props: SkeletonInputProps = {}
+    const props: SkeletonInputProps = {}
 
-     return <C7nSkeletonInput {...otherProps} {...props}/>
-   }
+    return <C7nSkeletonInput {...otherProps} {...props}/>
+  }
 }

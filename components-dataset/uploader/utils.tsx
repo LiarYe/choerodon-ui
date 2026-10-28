@@ -463,7 +463,7 @@ export const checkFileReadable = (file: File): Promise<boolean> => {
     try {
       // 空文件切片后只是一个无需访问原文件的空 Blob，必须直接读取 File 才能检测原文件是否仍可访问。
       reader.readAsArrayBuffer(file.size === 0 ? file : file.slice(0, 1));
-    } catch (error) {
+    } catch {
       finish(false);
     }
   });

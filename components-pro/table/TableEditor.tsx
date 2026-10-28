@@ -238,7 +238,7 @@ export default class TableEditor extends Component<TableEditorProps> {
     if (editor && cellNode && cellEditor && isTextArea(cellEditor) && !aggregation) {
       const { column: { name } } = this.props;
       const { currentEditRecord } = tableStore;
-      const { offsetHeight: height } = editor?.element;
+      const { offsetHeight: height } = editor.element;
       const current = currentEditRecord || dataSet.current;
       if (current && name && (rowHeight !== height || current.getState(`__column_resize_height_${name}`) !== undefined)) {
         current.setState(`__column_resize_height_${name}`, height);

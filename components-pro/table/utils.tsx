@@ -301,7 +301,7 @@ export function getHeader(column: HeaderOptions): ReactNode {
     };
     try {
       return header(options, name, $title, aggregation);
-    } catch (e) {
+    } catch {
       return header(dataSet, name, $title, aggregation);
     }
   }

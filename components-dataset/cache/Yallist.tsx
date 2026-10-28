@@ -9,6 +9,7 @@ class Node {
 
   constructor(value: any, prev: Node | null, next: Node | null, list: Yallist) {
     if (!(this instanceof Node)) {
+      // eslint-disable-next-line no-constructor-return
       return new Node(value, prev, next, list);
     }
 
@@ -76,6 +77,7 @@ export default class Yallist {
 
   constructor(...args) {
     if (!(this instanceof Yallist)) {
+      // eslint-disable-next-line no-constructor-return
       return new Yallist(...args);
     }
 
@@ -439,4 +441,4 @@ try {
     }
   };
   // eslint-disable-next-line no-empty
-} catch (er) {}
+} catch {}

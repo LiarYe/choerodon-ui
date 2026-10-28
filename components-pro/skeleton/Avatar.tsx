@@ -8,13 +8,13 @@ export interface AvatarProps extends Omit<C7nAvatarProps,'size'>,DataSetComponen
 
 @observer
 export default class Avatar extends DataSetComponent<AvatarProps>{
-    static displayName = 'Avatar'
+  static displayName = 'Avatar'
     
-    render(){
-      const {...otherProps} = this.props
+  render(){
+    const {...otherProps} = this.props
 
-      const props: C7nAvatarProps = {}
+    const props: C7nAvatarProps = {}
 
-      return <C7nAvatar {...otherProps} {...props} />
-    }
+    return <C7nAvatar {...otherProps} {...props} />
+  }
 }

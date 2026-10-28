@@ -68,7 +68,9 @@ describe('Table', () => {
     wrapper.setProps({ loading });
     expect(wrapper.find('.c7n-spin')).toHaveLength(0);
 
-    await new Promise(resolve => setTimeout(resolve, 500));
+    await new Promise(resolve => {
+      setTimeout(resolve, 500);
+    });
     wrapper.update();
     expect(wrapper.find('.c7n-spin')).toHaveLength(1);
   });

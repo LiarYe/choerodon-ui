@@ -35,7 +35,7 @@ const QuickJumper: FunctionComponent<QuickJumperProps> = function (props) {
           isFlat
           border={false}
           showValidation={ShowValidation.tooltip}
-          restrict={new RegExp('[.]|^0*', 'g')}
+          restrict={/[.]|^0*/g}
         />
         {$l('Pagination', 'page')}
       </span>

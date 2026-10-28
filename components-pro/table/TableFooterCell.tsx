@@ -96,7 +96,7 @@ const TableFooterCell: FunctionComponent<TableFooterCellProps> = function TableF
         };
         try {
           return footer(footerHookOptions);
-        } catch (e) {
+        } catch {
           return footer(dataSet, name);
         }
       }

@@ -9,7 +9,7 @@ export function getDocument(self: Window): Document {
       return getDocument(parent);
     }
     return parent.document;
-  } catch (e) {
+  } catch {
     return self.document;
   }
 }
@@ -21,7 +21,7 @@ export function getDocuments(self: Window, list: Document[] = []): Document[] {
       return getDocuments(parent, list);
     }
     return list.concat(parent.document);
-  } catch (e) {
+  } catch {
     return list.concat(self.document);
   }
 }
@@ -56,7 +56,7 @@ export function getMousePosition(x: number, y: number, self: Window, client?: bo
       return getPageMousePosition(newX, newY, parent, client);
     }
     return getMousePosition(newX, newY, parent);
-  } catch (e) {
+  } catch {
     return getPageMousePosition(x, y, self, client);
   }
 }

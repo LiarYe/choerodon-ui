@@ -72,7 +72,7 @@ export default function measureTextWidth(text: string, style?: CSSProperties | C
     return measureTextWidthFirefox(text, style);
   }
   let width = 0;
-  if (typeof window !== undefined) {
+  if (typeof window !== 'undefined') {
     const { tabSize = 8 } = style || getComputedStyle(document.body);
     const tabSpace = ' '.repeat(Number(tabSize));
     const ctx = getCanvasContext();

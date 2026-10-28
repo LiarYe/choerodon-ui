@@ -18,7 +18,7 @@ export function text2Delta(description) {
       .replace(/\\t/g, '\\t')
       .replace(/\\b/g, '\\b')
       .replace(/\\f/g, '\\f'));
-  } catch (error) {
+  } catch {
     temp = description;
   }
   // return temp;

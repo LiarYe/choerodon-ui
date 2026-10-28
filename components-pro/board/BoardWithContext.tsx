@@ -559,7 +559,7 @@ const BoardWithContext: FunctionComponent<BoardWithContextProps> = function Boar
                         record.commit(res, customizedDS);
                       }
                     }
-                  } catch (e) {
+                  } catch {
                     record.status = RecordStatus.sync;
                   }
                 }
@@ -582,7 +582,7 @@ const BoardWithContext: FunctionComponent<BoardWithContextProps> = function Boar
                           if (record.isCurrent) {
                             customizedDS.current = customizedDS.find(record => record.get(ViewField.id) === '__DEFAULT__');
                           }
-                        } catch (e) {
+                        } catch {
                           record.status = RecordStatus.sync;
                         }
                       })
@@ -612,7 +612,7 @@ const BoardWithContext: FunctionComponent<BoardWithContextProps> = function Boar
                   // if (isFunction(onChange)) {
                   //   onChange({ record: customizedDS.current, dataSet });
                   // }
-                } catch (e) {
+                } catch {
                   // record.status = RecordStatus.sync;
                 }
                 setHidden(true);
@@ -645,7 +645,7 @@ const BoardWithContext: FunctionComponent<BoardWithContextProps> = function Boar
                   // if (isFunction(onChange)) {
                   //   onChange({ record: customizedDS.current, dataSet, currentViewDS:  });
                   // }
-                } catch (e) {
+                } catch {
                   // record.status = RecordStatus.sync;
                 }
                 setHidden(true);

@@ -180,19 +180,20 @@ export default class Uploader {
         return resp;
       } catch (error) {
         if (error instanceof UploadError) {
+          const uploadError = error as UploadError & AxiosError;
           const { response } = error;
           runInAction(() => {
             const { onUploadError } = props;
             const { onUploadError: handleUploadError } = globalConfig;
             attachment.status = 'error';
-            attachment.error = error;
+            attachment.error = uploadError;
             const { message } = error;
             if (handleUploadError) {
-              handleUploadError(error, attachment);
+              handleUploadError(uploadError, attachment);
             }
             attachment.errorMessage = message || attachment.errorMessage;
             if (onUploadError) {
-              onUploadError(error, response, attachment);
+              onUploadError(uploadError, response, attachment);
             }
           });
           return response;

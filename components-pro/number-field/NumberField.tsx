@@ -222,7 +222,7 @@ export class NumberField<T extends NumberFieldProps> extends TextField<T & Numbe
   @computed
   get allowNegative(): boolean {
     const { min } = this;
-    return isNil(min) || min < 0;
+    return isNil(min) || (min as number) < 0;
   }
 
   @computed

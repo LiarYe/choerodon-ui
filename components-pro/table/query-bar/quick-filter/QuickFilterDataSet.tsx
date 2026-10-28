@@ -52,7 +52,7 @@ export const ConditionDataSet: () => DataSetProps = () => ({
             return JSON.parse(value);
           }
           return value;
-        } catch (e) {
+        } catch {
           return value;
         }
       },
@@ -134,7 +134,7 @@ export const NewFilterDataSet = ({ propFields }) => {
         transformResponse: value => {
           try {
             return JSON.parse(value);
-          } catch (e) {
+          } catch {
             return value;
           }
         },

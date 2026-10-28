@@ -167,7 +167,7 @@ export function parseValue(value) {
       return res;
     }
     return value;
-  } catch (e) {
+  } catch {
     return value;
   }
 }
@@ -208,7 +208,7 @@ export function processFilterParam(dataSet) {
     const name = dataObj[AdvancedFieldSet.fieldName];
     const comparator = dataObj[AdvancedFieldSet.comparator];
     const tableName = newFilterDataSet.getField(name)!.get('help', record);
-    let value = '';
+    let value: any = '';
     if (isObject(dataObj[name])) {
       if (!isArray(dataObj[name])) {
         value = dataObj[name][name];

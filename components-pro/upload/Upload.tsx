@@ -37,7 +37,7 @@ function getResponse(xhr: XMLHttpRequest): string {
 
   try {
     return JSON.parse(res).message;
-  } catch (e) {
+  } catch {
     return '';
   }
 }

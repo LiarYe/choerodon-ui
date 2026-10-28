@@ -25,7 +25,7 @@ export function normalizeProps(
       children: props,
     };
   }
-  return props;
+  return props as ModalProps & confirmProps;
 }
 
 const drawerTransitionNames: string[] = ['slide-up', 'slide-right', 'slide-down', 'slide-left'];

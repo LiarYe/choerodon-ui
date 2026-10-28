@@ -150,7 +150,7 @@ export default class Dialog extends Component<IDialogPropTypes, any> {
       if (mask && this.lastOutSideFocusNode) {
         try {
           this.lastOutSideFocusNode.focus();
-        } catch (e) {
+        } catch {
           this.lastOutSideFocusNode = null;
         }
         this.lastOutSideFocusNode = null;

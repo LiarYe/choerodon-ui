@@ -168,7 +168,7 @@ class InternalTreeNode extends React.Component<InternalTreeNodeProps, TreeNodeSt
       // ie throw error
       // firefox-need-it
       e.dataTransfer.setData('text/plain', '');
-    } catch (error) {
+    } catch {
       // empty
     }
   };

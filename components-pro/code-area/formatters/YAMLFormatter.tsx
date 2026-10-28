@@ -13,7 +13,7 @@ export class YAMLFormatter implements CodeAreaFormatter {
     try {
       const mergeOptions = { ...YAMLFormatter.defaultOptions, ...options };
       t = prettier.format(rawText, mergeOptions);
-    } catch (error) {
+    } catch {
       // 
     }
     return t

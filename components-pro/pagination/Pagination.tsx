@@ -314,7 +314,7 @@ export default class Pagination extends DataSetComponent<PaginationProps> {
         min={1}
         onChange={this.handleJumpChange}
         showValidation={ShowValidation.tooltip}
-        restrict={new RegExp('[.]|^0*', 'g')}
+        restrict={/[.]|^0*/g}
         {...otherProps}
       />
     );
