@@ -1,4 +1,4 @@
-import { observable } from 'mobx';
+import { makeObservable, observable } from 'mobx';
 import isNil from 'lodash/isNil';
 import { CancelTokenSource } from 'axios';
 import AttachmentFile from './AttachmentFile';
@@ -14,11 +14,11 @@ export default class AttachmentFileChunk {
 
   index: number;
 
-  @observable percent?: number | undefined;
+  @observable percent?: number | undefined = undefined;
 
   status?: 'error' | 'success' | 'uploading' | 'aborted';
 
-  @observable aborted?: boolean;
+  @observable aborted?: boolean = undefined;
   
   cancelToken?: CancelTokenSource;
 
@@ -29,5 +29,6 @@ export default class AttachmentFileChunk {
         this[key] = value;
       }
     });
+    makeObservable(this);
   }
 }

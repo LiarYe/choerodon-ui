@@ -61,7 +61,7 @@ export default class PerformanceTableQueryBar extends Component<TableQueryBarPro
     const result: ReactElement<any>[] = [];
     if (queryDataSet) {
       const { fields, current, props: { fields: propFields = [] } } = queryDataSet;
-      const cloneFields: Map<string, Field> = fields.toJS();
+      const cloneFields: Map<string, Field> = new Map(fields);
       const processField = (field, name) => {
         if (!field.get('bind', current) && !name.includes('__tls')) {
           const element: ReactNode = queryFields![name];

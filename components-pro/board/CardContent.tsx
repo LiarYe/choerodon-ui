@@ -1,7 +1,7 @@
 import React, { isValidElement, CSSProperties, FunctionComponent, ReactElement, ReactNode, useCallback, useContext, cloneElement, useMemo, JSXElementConstructor, useEffect, MouseEventHandler, useState, useRef } from 'react';
 import classnames from 'classnames';
 import { observer } from 'mobx-react-lite';
-import { isArrayLike } from 'mobx';
+import isArrayLike from 'choerodon-ui/dataset/mobx-helper/isArrayLike';
 import isString from 'lodash/isString';
 import noop from 'lodash/noop';
 import isObject from 'lodash/isObject';
@@ -131,7 +131,7 @@ const CardContent: FunctionComponent<CardContentProps> = function CardContent(pr
     const result: ReactElement<any>[] = [];
     if (queryDataSet) {
       const { fields, current, props: { fields: propFields = [] } } = queryDataSet;
-      const cloneFields: Map<string, Field> = fields.toJS();
+      const cloneFields: Map<string, Field> = new Map(fields);
       const tlsKey = getConfig('tlsKey');
       const processField = (field, name) => {
         if (!field.get('bind', current) && !name.includes(tlsKey)) {

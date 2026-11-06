@@ -22,7 +22,7 @@ export function sortAttachments(attachments: AttachmentFile[] | undefined, sort:
   if (attachments) {
     if (!sort.custom) {
       const { type, order } = sort;
-      return attachments.sort((a, b) => {
+      return attachments.slice().sort((a, b) => {
         if (type === 'name') {
           if (order === 'desc') {
             return b.name.localeCompare(a.name);
@@ -38,9 +38,9 @@ export function sortAttachments(attachments: AttachmentFile[] | undefined, sort:
     if (sort.custom && orderField) {
       const { order } = sort;
       if (order === 'desc') {
-        return attachments.sort((a, b) => b[orderField] - a[orderField]);
+        return attachments.slice().sort((a, b) => b[orderField] - a[orderField]);
       }
-      return attachments.sort((a, b) => a[orderField] - b[orderField]);
+      return attachments.slice().sort((a, b) => a[orderField] - b[orderField]);
     }
     return attachments;
   }

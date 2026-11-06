@@ -80,7 +80,7 @@ export default class DecadeYearsView<T extends DateViewProps> extends DaysView<T
   renderHeader(): ReactNode {
     const {
       prefixCls,
-      props: { date },
+      reactiveProps: { date },
     } = this;
     const year = date.year() % 100;
     const from = date.clone().subtract(year, 'y');
@@ -107,7 +107,7 @@ export default class DecadeYearsView<T extends DateViewProps> extends DaysView<T
   renderPanelBody(): ReactNode {
     const {
       prefixCls,
-      props: { date, renderer = this.renderCell, isValidDate = alwaysValidDate, onDateMouseLeave },
+      reactiveProps: { date, renderer = this.renderCell, isValidDate = alwaysValidDate, onDateMouseLeave },
     } = this;
     const selected = date.clone().subtract(date.year() % 10, 'y');
     const from = date

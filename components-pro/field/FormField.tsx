@@ -1,5 +1,6 @@
 import React, { cloneElement, FormEventHandler, isValidElement, ReactInstance, ReactNode } from 'react';
-import { action, computed, isArrayLike, observable, runInAction, toJS } from 'mobx';
+import { action, observable, runInAction, toJS, makeObservable } from 'mobx';
+import isArrayLike from 'choerodon-ui/dataset/mobx-helper/isArrayLike';
 import classNames from 'classnames';
 import isPromise from 'is-promise';
 import isNumber from 'lodash/isNumber';
@@ -310,6 +311,33 @@ export interface FormFieldProps<V = any> extends DataSetComponentProps {
 }
 
 export class FormField<T extends FormFieldProps = FormFieldProps> extends DataSetComponent<T, FormContextValue> {
+  constructor(props, context) {
+    super(props, context);
+    if (!Object.prototype.hasOwnProperty.call(this, 'floatLabelOffsetX')) this.floatLabelOffsetX = undefined;
+    if (!Object.prototype.hasOwnProperty.call(this, 'rangeTarget')) this.rangeTarget = undefined;
+    if (!Object.prototype.hasOwnProperty.call(this, 'rangeValue')) this.rangeValue = undefined;
+    if (!Object.prototype.hasOwnProperty.call(this, '$validator')) this.$validator = undefined;
+    if (!Object.prototype.hasOwnProperty.call(this, 'validationResults')) this.validationResults = undefined;
+    makeObservable(this, {
+      floatLabelOffsetX: observable,
+      rangeTarget: observable,
+      rangeValue: observable,
+      $validator: observable,
+      validationResults: observable,
+      updateValidationMessages: action.bound,
+      prepareSetValue: action,
+      removeValues: action,
+      removeLastValue: action,
+      beginRange: action,
+      endRange: action,
+      setRangeTarget: action,
+      setValue: action,
+      clear: action,
+      validate: action,
+      reset: action.bound,
+    });
+  }
+
   static get contextType(): typeof FormContext {
     return FormContext;
   }
@@ -331,15 +359,15 @@ export class FormField<T extends FormFieldProps = FormFieldProps> extends DataSe
   // 多选中出现了校验值的数量大于一那么输入框不需要存在校验信息展示
   multipleValidateMessageLength = 0;
 
-  @observable floatLabelOffsetX?: number;
+  floatLabelOffsetX?: number;
 
-  @observable rangeTarget?: 0 | 1;
+  rangeTarget?: 0 | 1;
 
-  @observable rangeValue?: [any, any] | undefined;
+  rangeValue?: [any, any] | undefined;
 
-  @observable $validator?: Validator | undefined;
+  $validator?: Validator | undefined;
 
-  @observable validationResults?: ValidationResult[] | undefined;
+  validationResults?: ValidationResult[] | undefined;
 
   isOverflowMaxTagTextLength?: boolean;
 
@@ -362,11 +390,11 @@ export class FormField<T extends FormFieldProps = FormFieldProps> extends DataSe
   }
 
   get labelLayout(): LabelLayout | undefined {
-    return this.props.labelLayout || this.context.labelLayout;
+    return this.reactiveProps.labelLayout || this.reactiveContext.labelLayout;
   }
 
   get labelTooltip(): TextTooltip | [TextTooltip, TooltipProps] | undefined {
-    return this.props.labelTooltip || this.context.labelTooltip || this.context.getTooltip('label');
+    return this.reactiveProps.labelTooltip || this.reactiveContext.labelTooltip || this.reactiveContext.getTooltip('label');
   }
 
   get hasFloatLabel(): boolean {
@@ -375,7 +403,7 @@ export class FormField<T extends FormFieldProps = FormFieldProps> extends DataSe
   }
 
   get isControlled(): boolean {
-    return this.getControlled(this.props);
+    return this.getControlled(this.reactiveProps);
   }
 
   get pristine(): boolean {
@@ -386,12 +414,10 @@ export class FormField<T extends FormFieldProps = FormFieldProps> extends DataSe
     return {};
   }
 
-  @computed
   get editable(): boolean {
     return this.isEditable();
   }
 
-  @computed
   get dataSet(): DataSet | undefined {
     const { record } = this;
     if (record) {
@@ -404,7 +430,6 @@ export class FormField<T extends FormFieldProps = FormFieldProps> extends DataSe
     return observableProps.contextDataSet;
   }
 
-  @computed
   get record(): Record | undefined {
     const { observableProps } = this;
     if ('record' in observableProps) {
@@ -426,13 +451,11 @@ export class FormField<T extends FormFieldProps = FormFieldProps> extends DataSe
     return observableProps.contextRecord;
   }
 
-  @computed
   get dataIndex(): number | undefined {
     const { dataIndex, contextDataIndex } = this.observableProps;
     return defaultTo(dataIndex, contextDataIndex);
   }
 
-  @computed
   get field(): Field | undefined {
     const { dataSet, name, observableProps } = this;
     const { displayName } = this.constructor as any;
@@ -452,7 +475,6 @@ export class FormField<T extends FormFieldProps = FormFieldProps> extends DataSe
     return undefined;
   }
 
-  @computed
   get valid(): boolean {
     return this.isValid();
   }
@@ -481,10 +503,9 @@ export class FormField<T extends FormFieldProps = FormFieldProps> extends DataSe
     if (field) {
       return field && field.get('range', record);
     }
-    return 'range' in observableProps ? observableProps('range') : this.props.range!;
+    return 'range' in observableProps ? observableProps('range') : this.reactiveProps.range!;
   }
 
-  @computed
   get readOnly(): boolean {
     return this.isReadOnly();
   }
@@ -493,13 +514,11 @@ export class FormField<T extends FormFieldProps = FormFieldProps> extends DataSe
     return this.getDisplayProp('highlight');
   }
 
-  @computed
   get showValidation(): ShowValidation {
     const { showValidation = this.getContextConfig('showValidation') } = this.observableProps;
     return showValidation;
   }
 
-  @computed
   get showHelp(): ShowHelp {
     const { showHelp = this.getContextConfig('showHelp') } = this.observableProps;
     return showHelp;
@@ -510,7 +529,6 @@ export class FormField<T extends FormFieldProps = FormFieldProps> extends DataSe
     return helpTooltipProps;
   }
 
-  @computed
   get highlightRenderer(): HighlightRenderer {
     const { highlightRenderer = this.getContextConfig('highlightRenderer') } = this.observableProps;
     return highlightRenderer;
@@ -550,13 +568,13 @@ export class FormField<T extends FormFieldProps = FormFieldProps> extends DataSe
    */
   @autobind
   isValidationMessageHidden(message?: ReactNode): boolean {
-    const { hidden, noValidate } = this.props;
+    const { hidden, noValidate } = this.reactiveProps;
     return !!(hidden || !message || this.pristine || (!this.record && noValidate));
   }
 
   @autobind
   showValidationMessage(e, message?: ReactNode) {
-    showValidationMessage(e, message, this.context.getTooltipTheme('validation'), this.context.getTooltipPlacement('validation'), this.getContextConfig);
+    showValidationMessage(e, message, this.reactiveContext.getTooltipTheme('validation'), this.reactiveContext.getTooltipPlacement('validation'), this.getContextConfig);
   }
 
   isEmpty() {
@@ -833,7 +851,7 @@ export class FormField<T extends FormFieldProps = FormFieldProps> extends DataSe
   @autobind
   renderValidationResult(validationResult?: ValidationResult): ReactNode {
     const validationMessage = this.getValidationMessage(validationResult);
-    const { labelLayout, getProPrefixCls } = this.context;
+    const { labelLayout, getProPrefixCls } = this.reactiveContext;
     if (validationMessage) {
       const showIcon = !(labelLayout === LabelLayout.float || this.showValidation === ShowValidation.newLine);
       return renderValidationMessage(validationMessage, showIcon, getProPrefixCls);
@@ -864,12 +882,10 @@ export class FormField<T extends FormFieldProps = FormFieldProps> extends DataSe
     const { name } = this;
     return {
       name,
-      form: this.context.formNode as Form,
+      form: this.reactiveContext.formNode as Form,
     };
   }
 
-  @autobind
-  @action
   updateValidationMessages() {
     const { field, record, isUpdatedValMes } = this;
     if (field && !isUpdatedValMes) {
@@ -907,7 +923,7 @@ export class FormField<T extends FormFieldProps = FormFieldProps> extends DataSe
       }
     }
     const {
-      props: { validationRenderer },
+      reactiveProps: { validationRenderer },
     } = this;
     if (validationResult) {
       if (validationRenderer) {
@@ -924,7 +940,7 @@ export class FormField<T extends FormFieldProps = FormFieldProps> extends DataSe
     if (!this.hasFloatLabel && this.showValidation === ShowValidation.tooltip) {
       const message = this.getTooltipValidationMessage();
       if (message) {
-        showValidationMessage(e, message, this.context.getTooltipTheme('validation'), this.context.getTooltipPlacement('validation'), this.getContextConfig);
+        showValidationMessage(e, message, this.reactiveContext.getTooltipTheme('validation'), this.reactiveContext.getTooltipPlacement('validation'), this.getContextConfig);
         return true;
       }
     }
@@ -936,20 +952,20 @@ export class FormField<T extends FormFieldProps = FormFieldProps> extends DataSe
     if (this.showTooltip(e)) {
       this.tooltipShown = true;
     }
-    const { onMouseEnter = noop } = this.props;
+    const { onMouseEnter = noop } = this.reactiveProps;
     onMouseEnter(e);
   }
 
   @autobind
   handleMouseLeave(e) {
     this.hideTooltip();
-    const { onMouseLeave = noop } = this.props;
+    const { onMouseLeave = noop } = this.reactiveProps;
     onMouseLeave(e);
   }
 
   @autobind
   handleFloatLabelMouseEnter(e) {
-    const { labelTooltip, context: { getTooltipTheme, getTooltipPlacement } } = this;
+    const { labelTooltip, reactiveContext: { getTooltipTheme, getTooltipPlacement } } = this;
     const { currentTarget } = e;
     if (labelTooltip === TextTooltip.always || (labelTooltip === TextTooltip.overflow && isOverflow(currentTarget))) {
       show(currentTarget, {
@@ -978,7 +994,6 @@ export class FormField<T extends FormFieldProps = FormFieldProps> extends DataSe
     hide();
   }
 
-  @autobind
   handleFocus(e) {
     super.handleFocus(e);
     if (this.range && !this.rangeValue) {
@@ -986,7 +1001,6 @@ export class FormField<T extends FormFieldProps = FormFieldProps> extends DataSe
     }
   }
 
-  @autobind
   handleBlur(e) {
     super.handleBlur(e);
     if (this.range && (this.editable || this.isEditableLike() || this.doEndRange)) {
@@ -996,14 +1010,14 @@ export class FormField<T extends FormFieldProps = FormFieldProps> extends DataSe
 
   @autobind
   handleCompositionStart(e) {
-    const { onCompositionStart = noop } = this.props;
+    const { onCompositionStart = noop } = this.reactiveProps;
     this.lock = true;
     onCompositionStart(e);
   }
 
   @autobind
   handleCompositionEnd(e) {
-    const { onCompositionEnd = noop } = this.props;
+    const { onCompositionEnd = noop } = this.reactiveProps;
     onCompositionEnd(e);
     this.lock = false;
     this.handleChange(e);
@@ -1018,7 +1032,7 @@ export class FormField<T extends FormFieldProps = FormFieldProps> extends DataSe
 
   @autobind
   handleKeyDown(e) {
-    const { onKeyDown = noop, onEnterDown = noop } = this.props;
+    const { onKeyDown = noop, onEnterDown = noop } = this.reactiveProps;
     onKeyDown(e);
     if (!e.isDefaultPrevented()) {
       switch (e.keyCode) {
@@ -1092,7 +1106,7 @@ export class FormField<T extends FormFieldProps = FormFieldProps> extends DataSe
   }
 
   getTextByValue(value: any): ReactNode {
-    const { preventRenderer } = this.props;
+    const { preventRenderer } = this.reactiveProps;
     const text =
       this.editable && (preventRenderer || this.isFocused)
         ? this.processValue(value)
@@ -1114,7 +1128,7 @@ export class FormField<T extends FormFieldProps = FormFieldProps> extends DataSe
       field,
       record,
       dataSet,
-      props: { renderer = this.defaultRenderer, name, maxTagTextLength },
+      reactiveProps: { renderer = this.defaultRenderer, name, maxTagTextLength },
     } = this;
     const showValueIfNotFound = this.getContextConfig('showValueIfNotFound');
     let processedValue;
@@ -1200,7 +1214,6 @@ export class FormField<T extends FormFieldProps = FormFieldProps> extends DataSe
     }
   }
 
-  @action
   prepareSetValue(...value: any[]): void {
     const processV = this.getProp('processValue');
     const { range } = this;
@@ -1229,7 +1242,6 @@ export class FormField<T extends FormFieldProps = FormFieldProps> extends DataSe
     }
   }
 
-  @action
   removeValues(values: any[], index = 0) {
     let repeat: number;
     const newValues = values.reduce((oldValues, value) => {
@@ -1254,7 +1266,6 @@ export class FormField<T extends FormFieldProps = FormFieldProps> extends DataSe
     this.removeValues([value], index);
   }
 
-  @action
   removeLastValue(): any {
     const values = this.getValues();
     const index = findLastIndex(values, (value) => !this.isMultipleBlockDisabled(value));
@@ -1271,7 +1282,6 @@ export class FormField<T extends FormFieldProps = FormFieldProps> extends DataSe
     // noop
   }
 
-  @action
   beginRange() {
     this.setRangeTarget(this.rangeTarget || 0);
     this.rangeValue = this.multiple
@@ -1279,7 +1289,6 @@ export class FormField<T extends FormFieldProps = FormFieldProps> extends DataSe
       : toRangeValue(this.getValue(), this.range);
   }
 
-  @action
   endRange() {
     if (this.rangeValue) {
       const values = this.rangeValue.slice();
@@ -1291,7 +1300,6 @@ export class FormField<T extends FormFieldProps = FormFieldProps> extends DataSe
     this.setRangeTarget(undefined);
   }
 
-  @action
   setRangeTarget(target?: 0 | 1) {
     this.rangeTarget = target;
   }
@@ -1312,7 +1320,6 @@ export class FormField<T extends FormFieldProps = FormFieldProps> extends DataSe
     }
   }
 
-  @action
   setValue(value: any, noVaidate?: boolean): void {
     if (!this.readOnly) {
       if (
@@ -1328,7 +1335,7 @@ export class FormField<T extends FormFieldProps = FormFieldProps> extends DataSe
         trim,
         format,
       } = this;
-      const { onChange = noop, onBeforeChange = noop } = this.props;
+      const { onChange = noop, onBeforeChange = noop } = this.reactiveProps;
       const old = toJS(this.getOldValue());
       if (!dataSet || !name) {
         value = formatString(value, {
@@ -1353,7 +1360,7 @@ export class FormField<T extends FormFieldProps = FormFieldProps> extends DataSe
       };
       // 转成实际的数据再进行判断
       if (!this.compare(old, toJS(value))) {
-        const { formNode } = this.context;
+        const { formNode } = this.reactiveContext;
         const storedValue = this.value;
         const beforeChange = onBeforeChange(value, old, formNode);
         const resolveCallback = action(() => {
@@ -1418,7 +1425,7 @@ export class FormField<T extends FormFieldProps = FormFieldProps> extends DataSe
       prefixCls,
       range,
       disabled,
-      props: {
+      reactiveProps: {
         maxTagCount = this.getContextConfig('fieldMaxTagCount'),
         maxTagPlaceholder = this.getContextConfig('fieldMaxTagPlaceholder'),
         tagRenderer,
@@ -1451,9 +1458,8 @@ export class FormField<T extends FormFieldProps = FormFieldProps> extends DataSe
     return values;
   }
 
-  @action
   clear() {
-    const { onClear = noop } = this.props;
+    const { onClear = noop } = this.reactiveProps;
     this.setValue(this.emptyValue);
     this.rangeValue = this.isFocused ? [undefined, undefined] : undefined;
     onClear();
@@ -1462,7 +1468,7 @@ export class FormField<T extends FormFieldProps = FormFieldProps> extends DataSe
   async checkValidity(): Promise<boolean> {
     const { name } = this;
     const valid = await this.validate();
-    const { onInvalid = noop } = this.props;
+    const { onInvalid = noop } = this.reactiveProps;
     if (!valid) {
       const validationResults = this.getValidationResults();
       if (validationResults) {
@@ -1473,9 +1479,8 @@ export class FormField<T extends FormFieldProps = FormFieldProps> extends DataSe
     return valid;
   }
 
-  @action
   validate(value?: any, report = true): Promise<boolean> {
-    if (!this.props.noValidate) {
+    if (!this.reactiveProps.noValidate) {
       if (value === undefined) {
         value = this.multiple ? this.getValues() : this.getValue();
       }
@@ -1496,7 +1501,7 @@ export class FormField<T extends FormFieldProps = FormFieldProps> extends DataSe
         }
         if (report) {
           Validator.report(validationResults, validatorProps);
-          const { formNode } = this.context;
+          const { formNode } = this.reactiveContext;
           if (formNode && !formNode.validating) {
             formNode.reportValidity(valid);
           }
@@ -1533,11 +1538,9 @@ export class FormField<T extends FormFieldProps = FormFieldProps> extends DataSe
     return false;
   }
 
-  @autobind
-  @action
   reset() {
     if (!this.isControlled && !this.dataSet) {
-      this.setValue(this.props.defaultValue, true);
+      this.setValue(this.reactiveProps.defaultValue, true);
     }
     const { record, name } = this;
     if (record && name) {
@@ -1553,7 +1556,7 @@ export class FormField<T extends FormFieldProps = FormFieldProps> extends DataSe
 
   getProp(propName: string, fieldPropName = propName) {
     const { field, observableProps, record } = this;
-    return defaultTo(field && field.get(fieldPropName, record), propName in observableProps ? observableProps[propName] : this.props[propName]);
+    return defaultTo(field && field.get(fieldPropName, record), propName in observableProps ? observableProps[propName] : this.reactiveProps[propName]);
   }
 
   /**
@@ -1564,12 +1567,12 @@ export class FormField<T extends FormFieldProps = FormFieldProps> extends DataSe
    */
   getDisplayProp(propName: string, fieldPropName = propName) {
     const { field, observableProps, record } = this;
-    return defaultTo(propName in observableProps ? observableProps[propName] : this.props[propName], field && field.get(fieldPropName, record));
+    return defaultTo(propName in observableProps ? observableProps[propName] : this.reactiveProps[propName], field && field.get(fieldPropName, record));
   }
 
   @autobind
   getTooltipValidationMessage(): ReactNode {
-    const { _inTable } = this.props;
+    const { _inTable } = this.reactiveProps;
     if (!_inTable && (this.customShowErrorTooltip ||
       !(!!(this.multiple && this.getValues().length) && !this.getProp('validator') || this.multipleValidateMessageLength > 0))
     ) {

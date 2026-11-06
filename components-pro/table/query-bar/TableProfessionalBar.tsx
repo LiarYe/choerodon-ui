@@ -1,6 +1,6 @@
 import React, { cloneElement, Component, ReactElement, ReactNode } from 'react';
 import { observer } from 'mobx-react';
-import { action, observable, runInAction } from 'mobx';
+import { action, observable, runInAction, makeObservable } from 'mobx';
 import isFunction from 'lodash/isFunction';
 import noop from 'lodash/noop';
 import classNames from 'classnames';
@@ -41,6 +41,15 @@ export interface TableProfessionalBarProps extends ElementProps {
 
 @observer
 export default class TableProfessionalBar extends Component<TableProfessionalBarProps> {
+  constructor(props, context) {
+    super(props, context);
+    if (!Object.prototype.hasOwnProperty.call(this, 'moreFields')) Object.assign(this, { moreFields: undefined });
+    makeObservable(this, {
+      moreFields: observable.shallow,
+      openMore: action,
+    });
+  }
+
   static get contextType(): typeof TableContext {
     return TableContext;
   }
@@ -50,7 +59,7 @@ export default class TableProfessionalBar extends Component<TableProfessionalBar
     autoQueryAfterReset: true,
   };
 
-  @observable moreFields: ReactElement[];
+  moreFields: ReactElement[];
 
   get queryFields(): React.ReactElement<any>[] {
     const { queryFields } = this.props;
@@ -163,7 +172,6 @@ export default class TableProfessionalBar extends Component<TableProfessionalBar
     }
   }
 
-  @action
   openMore = (fields: ReactElement[]) => {
     const { tableStore } = this.context;
     if (this.moreFields && this.moreFields.length) {

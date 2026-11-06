@@ -14,7 +14,7 @@ export default class MonthsView<T extends DateViewProps> extends DaysView<T> {
 
   getTargetDate(target?: 0 | 1): Moment {
     const { comboRangeMode } = this;
-    const { date, dateRangeValue, rangeTarget } = this.props;
+    const { date, dateRangeValue, rangeTarget } = this.reactiveProps;
     if (!comboRangeMode || !dateRangeValue || rangeTarget === undefined || target === undefined) return date;
 
     if (dateRangeValue[0] && dateRangeValue[1] && dateRangeValue[0].isSame(dateRangeValue[1], 'y')) {
@@ -66,7 +66,7 @@ export default class MonthsView<T extends DateViewProps> extends DaysView<T> {
     stopEvent(e);
     if (this.comboRangeMode) return;
     if (e.altKey) {
-      const { mode } = this.props;
+      const { mode } = this.reactiveProps;
       if (mode !== ViewMode.month) {
         this.changeViewMode(mode);
       }
@@ -132,7 +132,7 @@ export default class MonthsView<T extends DateViewProps> extends DaysView<T> {
       comboRangeMode,
       startDate,
       endDate,
-      props: { renderer = this.renderCell, isValidDate = alwaysValidDate, onDateMouseLeave },
+      reactiveProps: { renderer = this.renderCell, isValidDate = alwaysValidDate, onDateMouseLeave },
     } = this;
     const date = this.getTargetDate(target);
     const selected = date.clone();
@@ -189,7 +189,7 @@ export default class MonthsView<T extends DateViewProps> extends DaysView<T> {
   }
 
   choose(date: Moment) {
-    const { mode } = this.props;
+    const { mode } = this.reactiveProps;
     if (mode !== ViewMode.month) {
       this.changeCursorDate(date);
       this.changeViewMode(mode);

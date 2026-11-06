@@ -1,5 +1,5 @@
 import { isValidElement, ReactNode } from 'react';
-import { isArrayLike } from 'mobx';
+import isArrayLike from 'choerodon-ui/dataset/mobx-helper/isArrayLike';
 
 export default function isReactChildren(element: ReactNode) {
   if (element) {

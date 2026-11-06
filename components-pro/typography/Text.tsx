@@ -24,7 +24,7 @@ export default class Text extends FormField<TextProps> {
   };
 
   get mergedEllipsis(): boolean | EllipsisConfig | undefined {
-    const { ellipsis } = this.props;
+    const { ellipsis } = this.reactiveProps;
     if (ellipsis && typeof ellipsis === 'object') {
       return omit(ellipsis as any, ['expandable', 'rows']);
     }

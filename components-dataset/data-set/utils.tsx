@@ -1,6 +1,6 @@
 import queryString from 'querystringify';
 import moment, { isDate, isMoment } from 'moment';
-import { isArrayLike, ObservableMap, runInAction } from 'mobx';
+import { ObservableMap, runInAction } from 'mobx';
 import { AxiosRequestConfig } from 'axios';
 import isPromise from 'is-promise';
 import isBoolean from 'lodash/isBoolean';
@@ -10,6 +10,7 @@ import isArray from 'lodash/isArray';
 import isNumber from 'lodash/isNumber';
 import isNil from 'lodash/isNil';
 import _isEmpty from 'lodash/isEmpty';
+import isArrayLike from '../mobx-helper/isArrayLike';
 import { isEmpty, parseBigNumber, parseNumber, warning } from '../utils';
 import Field, { FieldProps, Fields } from './Field';
 import { BooleanValue, DataToJSON, FieldType, RecordStatus, SortOrder } from './enum';
@@ -375,16 +376,24 @@ export function sortData(data: object[], dataSet: DataSet): object[] {
   if (data.length > 1 && !dataSet.paging) {
     const orderFields = getOrderFields(dataSet);
     if (orderFields.length > 0) {
-      data.sort(dataSorter<object>(orderFields, (item, key) => item[key]));
+      const sortedData = data.slice().sort(dataSorter<object>(orderFields, (item, key) => item[key]));
       const { childrenField } = dataSet.props;
       if (childrenField) {
-        data.forEach(item => {
+        return sortedData.map(item => {
+          if (item instanceof Record) {
+            return item;
+          }
           const childData = item[childrenField];
           if (childData) {
-            sortData(childData, dataSet);
+            const sortedChildren = sortData(childData, dataSet);
+            if (sortedChildren !== childData) {
+              return { ...item, [childrenField]: sortedChildren };
+            }
           }
+          return item;
         });
       }
+      return sortedData;
     }
   }
   return data;
@@ -514,7 +523,7 @@ export function sortTree(records: Record[], orderFields: Field[], deep?: boolean
         }
       });
     }
-    return records.sort(dataSorter<Record>(orderFields, (item, key) => item.get(key)));
+    return records.slice().sort(dataSorter<Record>(orderFields, (item, key) => item.get(key)));
   }
   return records;
 }

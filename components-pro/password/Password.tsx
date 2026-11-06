@@ -1,6 +1,6 @@
 import React, { ReactNode } from 'react';
 import { observer } from 'mobx-react';
-import { action, observable } from 'mobx';
+import { action, observable, makeObservable } from 'mobx';
 import defer from 'lodash/defer';
 import { TextField, TextFieldProps } from '../text-field/TextField';
 import autobind from '../_util/autobind';
@@ -19,6 +19,16 @@ export interface PasswordProps extends TextFieldProps {
 
 @observer
 export default class Password extends TextField<PasswordProps> {
+  constructor(props, context) {
+    super(props, context);
+    if (!Object.prototype.hasOwnProperty.call(this, 'reveal')) this.reveal = undefined;
+    makeObservable(this, {
+      reveal: observable,
+      doReveal: action,
+      resetReveal: action,
+    });
+  }
+
   static displayName = 'Password';
 
   static defaultProps = {
@@ -32,7 +42,7 @@ export default class Password extends TextField<PasswordProps> {
 
   revealIconFocus: boolean;
 
-  @observable reveal?: boolean;
+  reveal?: boolean;
 
   get multiple(): boolean {
     return false;
@@ -53,7 +63,7 @@ export default class Password extends TextField<PasswordProps> {
   }
 
   getInnerSpanButton(): ReactNode {
-    const { reveal } = this.props;
+    const { reveal } = this.reactiveProps;
     if (reveal && !this.disabled) {
       return this.wrapperInnerSpanButton(
         <Icon
@@ -72,7 +82,6 @@ export default class Password extends TextField<PasswordProps> {
     }
   }
 
-  @autobind
   handleFocus(e) {
     super.handleFocus(e);
     defer(() => {
@@ -100,14 +109,12 @@ export default class Password extends TextField<PasswordProps> {
     defer(() => target.setSelectionRange(-1, -1));
   }
 
-  @action
   doReveal(target) {
     target.type = 'text';
     this.type = target.type;
     this.reveal = true;
   }
 
-  @action
   resetReveal(target) {
     target.type = 'password';
     this.type = target.type;

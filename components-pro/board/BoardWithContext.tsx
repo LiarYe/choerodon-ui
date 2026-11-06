@@ -1,3 +1,4 @@
+import mapToObject from 'choerodon-ui/dataset/mobx-helper/mapToObject';
 import React, {
   FunctionComponent,
   ReactNode,
@@ -57,16 +58,16 @@ export const GROUPFIELD = '__GROUPFIELD__';
 
 export function processFieldProps(fields: ObservableMap<string, any>): FieldProps[] {
   const result: FieldProps[] = [];
-  
+
   fields.forEach((field, fieldName) => {
     // 过滤掉以 __tls. 开头的字段
     if (!fieldName.startsWith('__tls.')) {
       // 获取并转换属性
-      const props = field.props.toPOJO();
+      const props = mapToObject(field.props);
       result.push(props);
     }
   });
-  
+
   return result;
 }
 
@@ -398,7 +399,7 @@ const BoardWithContext: FunctionComponent<BoardWithContextProps> = function Boar
     const result: ReactElement<any>[] = [];
     if (queryDataSet) {
       const { fields, current, props: { fields: propFields = [] } } = queryDataSet;
-      const cloneFields: Map<string, Field> = fields.toJS();
+      const cloneFields: Map<string, Field> = new Map(fields);
       const tlsKey = getConfig('tlsKey');
       const processField = (field, name) => {
         if (!field.get('bind', current) && !name.includes(tlsKey)) {

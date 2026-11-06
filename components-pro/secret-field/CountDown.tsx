@@ -1,19 +1,23 @@
-import { action, observable, runInAction } from 'mobx';
+import { action, observable, runInAction, makeObservable } from 'mobx';
 
 class CountDown {
-  @observable count: number;
+  count: number;
 
   startTime: number;
 
   verifyType: any;
 
   constructor() {
+    if (!Object.prototype.hasOwnProperty.call(this, 'count')) Object.assign(this, { count: undefined });
+    makeObservable(this, {
+      count: observable,
+      setCount: action,
+    });
     runInAction(() => {
       this.count = 0;
     });
   }
 
-  @action
   setCount() {
     // 计算时间差
     const millis = Date.now() - this.startTime;

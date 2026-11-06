@@ -1,6 +1,6 @@
 import React, { Component, Key, ReactNode } from 'react';
 import classNames from 'classnames';
-import { action, computed, toJS } from 'mobx';
+import { action, toJS, makeObservable } from 'mobx';
 import isPromise from 'is-promise';
 import noop from 'lodash/noop';
 import debounce from 'lodash/debounce';
@@ -70,6 +70,11 @@ export default class LovView extends Component<LovViewProps, LovViewState> {
 
   constructor(props: LovViewProps) {
     super(props);
+    makeObservable(this, {
+      componentWillMount: action,
+      componentWillUnmount: action,
+      componentWillReceiveProps: action,
+    });
     const {
       dataSet,
       showDetailWhenReadonly,
@@ -82,7 +87,6 @@ export default class LovView extends Component<LovViewProps, LovViewState> {
     };
   }
 
-  @action
   componentWillMount() {
     const {
       dataSet,
@@ -98,7 +102,6 @@ export default class LovView extends Component<LovViewProps, LovViewState> {
     }
   }
 
-  @action
   componentWillUnmount() {
     const { dataSet, multiple, viewMode, showDetailWhenReadonly } = this.props;
     dataSet.selection = this.selection;
@@ -111,7 +114,6 @@ export default class LovView extends Component<LovViewProps, LovViewState> {
     }
   }
 
-  @action
   componentWillReceiveProps(nextProps: LovViewProps) {
     const { dataSet: beforeDataSet, showDetailWhenReadonly } = this.props;
     if (beforeDataSet !== nextProps.dataSet) {
@@ -219,7 +221,6 @@ export default class LovView extends Component<LovViewProps, LovViewState> {
     }
   }
 
-  @computed
   get duplicateRecords(): Set<Record> {
     const { dataSet: { records }, valueField } = this.props;
     const firstRecordByValue = new Map<unknown, Record>();

@@ -1,5 +1,6 @@
 import isObject from 'lodash/isObject';
-import { isArrayLike, observable } from 'mobx';
+import { observable } from 'mobx';
+import isArrayLike from '../mobx-helper/isArrayLike';
 import { mobxGet, mobxRemove, mobxSet } from '../mobx-helper';
 import Field, { Fields } from '../data-set/Field';
 import Record from '../data-set/Record';

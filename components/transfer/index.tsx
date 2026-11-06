@@ -1,6 +1,5 @@
 ﻿import React, { ChangeEvent, Component, CSSProperties, ReactNode, SyntheticEvent } from 'react';
 import classNames from 'classnames';
-import { computed } from 'mobx';
 import noop from 'lodash/noop';
 import scrollIntoView from 'scroll-into-view-if-needed';
 import { arrayMove } from 'choerodon-ui/pro/lib/data-set/utils';
@@ -181,7 +180,6 @@ export default class Transfer extends Component<TransferProps, any> {
     return this.splitedDataSource;
   }
 
-  @computed
   get computedRightDataSource(): TransferItem[] {
     const { filterOption } = this.props;
     const { rightFilter } = this.state;

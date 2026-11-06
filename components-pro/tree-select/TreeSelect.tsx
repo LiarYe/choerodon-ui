@@ -1,6 +1,7 @@
 import React, { Key, ReactNode } from 'react';
 import classNames from 'classnames';
-import { action, computed, observable, runInAction, isArrayLike } from 'mobx';
+import { action, observable, runInAction, makeObservable } from 'mobx';
+import isArrayLike from 'choerodon-ui/dataset/mobx-helper/isArrayLike';
 import { observer } from 'mobx-react';
 import isNil from 'lodash/isNil';
 import Tree, { TreeProps } from 'choerodon-ui/lib/tree';
@@ -36,6 +37,16 @@ function recordIsDisabled(record: Record): boolean {
 
 @observer
 export default class TreeSelect extends Select<TreeSelectProps> {
+  constructor(props, context) {
+    super(props, context);
+    if (!Object.prototype.hasOwnProperty.call(this, 'expandedKeys')) this.expandedKeys = undefined;
+    makeObservable(this, {
+      expandedKeys: observable,
+      handleSearch: action,
+      handleExpand: action.bound,
+    });
+  }
+
   static displayName = 'TreeSelect';
 
   static defaultProps = {
@@ -48,19 +59,16 @@ export default class TreeSelect extends Select<TreeSelectProps> {
 
   static TreeNode = TreeNode;
 
-  @observable expandedKeys: string[] | undefined;
+  expandedKeys: string[] | undefined;
 
-  @computed
   get parentField(): string {
     return this.getProp('parentField') || 'parentValue';
   }
 
-  @computed
   get idField(): string {
     return this.getProp('idField') || this.valueField;
   }
 
-  @computed
   get options(): DataSet {
     const {
       field,
@@ -88,26 +96,23 @@ export default class TreeSelect extends Select<TreeSelectProps> {
     );
   }
 
-  @computed
   get treeData() {
     return this.optionsWithCombo.filter(r => !r.parent);
   }
 
-  @computed
   get selectedKeys(): Key[] {
     const { idField } = this;
     return this.options.reduce<Key[]>((array, r) => this.isSelected(r) ? array.concat(String(r.get(idField))) : array, []);
   }
 
   get checkStrictly(): boolean | undefined {
-    const { dataSet, checkStrictly } = this.props;
+    const { dataSet, checkStrictly } = this.reactiveProps;
     if (dataSet && !isNil(dataSet.props.treeCheckStrictly)) {
       return dataSet.props.treeCheckStrictly;
     }
     return checkStrictly;
   }
 
-  @action
   handleSearch(text?: string | string[] | undefined) {
     if (!isSearchTextEmpty(text)) {
       const { options } = this;
@@ -116,15 +121,12 @@ export default class TreeSelect extends Select<TreeSelectProps> {
     }
   }
 
-  @autobind
-  @action
   handleExpand(keys) {
     this.expandedKeys = keys;
   }
 
-  @computed
   get multiple(): boolean {
-    return !!this.getProp('multiple') || !!this.props.treeCheckable;
+    return !!this.getProp('multiple') || !!this.reactiveProps.treeCheckable;
   }
 
   get showSelectLoading(): boolean | undefined {
@@ -292,7 +294,7 @@ export default class TreeSelect extends Select<TreeSelectProps> {
 
   @autobind
   handleTreeNode(e) {
-    const { onOption } = this.props;
+    const { onOption } = this.reactiveProps;
     const props = onOption(e) || {};
     props.className = classNames(props.className, `${this.getMenuPrefixCls()}-item`);
     return props;
@@ -300,7 +302,7 @@ export default class TreeSelect extends Select<TreeSelectProps> {
 
   @autobind
   handleLoadData(event): Promise<any> {
-    const { loadData } = this.props;
+    const { loadData } = this.reactiveProps;
     const dataSet = this.options;
     const promises: Promise<any>[] = [];
     if (dataSet) {
@@ -334,7 +336,7 @@ export default class TreeSelect extends Select<TreeSelectProps> {
       optionsFilter,
       idField,
       searchable,
-      props: {
+      reactiveProps: {
         dropdownMenuStyle, optionRenderer = defaultRenderer,
         treeDefaultExpandAll, treeDefaultExpandedKeys, treeCheckable,
         async, loadData, showLine,

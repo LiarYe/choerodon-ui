@@ -1,33 +1,32 @@
-import { action, computed, observable } from 'mobx';
+import { makeObservable, action, computed, observable } from 'mobx';
 
 export default class Validity {
-  @observable badInput: boolean;
+  badInput: boolean;
 
-  @observable customError: boolean;
+  customError: boolean;
 
-  @observable patternMismatch: boolean;
+  patternMismatch: boolean;
 
-  @observable rangeOverflow: boolean;
+  rangeOverflow: boolean;
 
-  @observable rangeUnderflow: boolean;
+  rangeUnderflow: boolean;
 
-  @observable rangeOverflowExcl: boolean;
+  rangeOverflowExcl: boolean;
 
-  @observable rangeUnderflowExcl: boolean;
+  rangeUnderflowExcl: boolean;
 
-  @observable stepMismatch: boolean;
+  stepMismatch: boolean;
 
-  @observable tooLong: boolean;
+  tooLong: boolean;
 
-  @observable tooShort: boolean;
+  tooShort: boolean;
 
-  @observable typeMismatch: boolean;
+  typeMismatch: boolean;
 
-  @observable valueMissing: boolean;
+  valueMissing: boolean;
 
-  @observable uniqueError: boolean;
+  uniqueError: boolean;
 
-  @computed
   get valid(): boolean {
     return Object.keys(this)
       .filter(key => key !== 'valid')
@@ -35,6 +34,38 @@ export default class Validity {
   }
 
   constructor(props?: object) {
+    Object.assign(this, {
+      badInput: undefined,
+      customError: undefined,
+      patternMismatch: undefined,
+      rangeOverflow: undefined,
+      rangeUnderflow: undefined,
+      rangeOverflowExcl: undefined,
+      rangeUnderflowExcl: undefined,
+      stepMismatch: undefined,
+      tooLong: undefined,
+      tooShort: undefined,
+      typeMismatch: undefined,
+      valueMissing: undefined,
+      uniqueError: undefined,
+    });
+    makeObservable(this, {
+      badInput: observable,
+      customError: observable,
+      patternMismatch: observable,
+      rangeOverflow: observable,
+      rangeUnderflow: observable,
+      rangeOverflowExcl: observable,
+      rangeUnderflowExcl: observable,
+      stepMismatch: observable,
+      tooLong: observable,
+      tooShort: observable,
+      typeMismatch: observable,
+      valueMissing: observable,
+      uniqueError: observable,
+      valid: computed,
+      init: action,
+    });
     this.init(props);
   }
 
@@ -42,7 +73,6 @@ export default class Validity {
     this.init();
   }
 
-  @action
   init(props?: object) {
     this.badInput = false;
     this.customError = false;

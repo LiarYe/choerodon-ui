@@ -1,5 +1,5 @@
 import { CSSProperties } from 'react';
-import { isArrayLike } from 'mobx';
+import isArrayLike from 'choerodon-ui/dataset/mobx-helper/isArrayLike';
 import isNumber from 'lodash/isNumber';
 import isString from 'lodash/isString';
 import isObject from 'lodash/isObject';

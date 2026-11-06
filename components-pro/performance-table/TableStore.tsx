@@ -1,5 +1,5 @@
 import React from 'react';
-import { action, computed, get, observable, runInAction, set } from 'mobx';
+import { action, computed, get, observable, runInAction, set, makeObservable } from 'mobx';
 import isString from 'lodash/isString';
 import isNumber from 'lodash/isNumber';
 import isObject from 'lodash/isObject';
@@ -11,6 +11,7 @@ import isPlainObject from 'lodash/isPlainObject';
 import { math } from 'choerodon-ui/dataset';
 import { Config, ConfigKeys, DefaultConfig } from 'choerodon-ui/lib/configure';
 import { Size } from 'choerodon-ui/lib/_util/enum';
+import warning from 'choerodon-ui/lib/_util/warning';
 import { isCalcSize, toPx } from 'choerodon-ui/lib/_util/UnitConvertor';
 import CustomizationColumnHeader from './customization-settings/CustomizationColumnHeader';
 import CustomizationSettings from './customization-settings';
@@ -19,6 +20,7 @@ import { getColumnKey } from './utils';
 import PerformanceTable, { PerformanceTableCustomized, TableProps, TableQueryBarProps, TableRowSelection } from './Table';
 import Column, { ColumnProps } from './Column';
 import autobind from '../_util/autobind';
+import observableColumn from '../_util/observableColumn';
 import { ModalProps } from '../modal/Modal';
 import { $l } from '../locale-context';
 import { ColumnLock, TableAutoHeightType, TableColumnResizeTriggerType, TableHeightType } from '../table/enum';
@@ -130,13 +132,13 @@ export function mergeDefaultProps(
     }
   }, []);
   if (parent) {
-    return sortColumnsByCustomizable(columns);
+    return sortColumnsByCustomizable(columns).map(observableColumn);
   }
   return [
     ...sortColumnsByCustomizable(leftColumns),
     ...sortColumnsByCustomizable(columns),
     ...sortColumnsByCustomizable(rightColumns),
-  ];
+  ].map(observableColumn);
 }
 
 // export interface CheckboxPropsCache {
@@ -156,56 +158,56 @@ export default class TableStore {
 
   selectionDirty?: boolean;
 
-  @observable props: any;
+  props: PerformanceTable['props'];
 
-  @observable originalColumns: ColumnProps[];
+  context: PerformanceTable['context'];
 
-  @observable customizedActiveKey: string[];
+  originalColumns: ColumnProps[];
 
-  @observable tempCustomized: PerformanceTableCustomized;
+  customizedActiveKey: string[];
 
-  @observable customized: PerformanceTableCustomized;
+  tempCustomized: PerformanceTableCustomized;
 
-  @observable totalHeight?: number;
+  customized: PerformanceTableCustomized;
 
-  @observable height?: number;
+  totalHeight?: number;
 
-  @observable loading?: boolean;
+  height?: number;
 
-  @observable rowZIndex?: number[];
+  loading?: boolean;
 
-  @observable selectedRowKeys: string[] | number[];
+  rowZIndex?: number[];
+
+  selectedRowKeys: string[] | number[];
 
   mouseBatchChooseStartId = 0;
 
   mouseBatchChooseEndId = 0;
 
-  @observable mouseBatchChooseState: boolean;
+  mouseBatchChooseState: boolean;
 
-  @observable mouseBatchChooseIdList: number[];
+  mouseBatchChooseIdList: number[];
 
   get queryBar(): TableQueryBarProps | false | undefined {
-    return this.node.props.queryBar;
+    return this.props.queryBar;
   }
 
   /**
    * 表头支持编辑
    */
-  @computed
   get columnTitleEditable(): boolean {
-    if ('columnTitleEditable' in this.node.props) {
-      return this.node.props.columnTitleEditable!;
+    if ('columnTitleEditable' in this.props) {
+      return this.props.columnTitleEditable!;
     }
     return this.getConfig('performanceTableColumnTitleEditable') === true;
   }
 
   get useMouseBatchChoose(): boolean {
-    if ('useMouseBatchChoose' in this.node.props) {
-      return this.node.props.useMouseBatchChoose!;
+    if ('useMouseBatchChoose' in this.props) {
+      return this.props.useMouseBatchChoose!;
     }
     return this.getConfig('performanceTableUseMouseBatchChoose') === true;
   }
-
 
 
   get dataSet(): DataSet | undefined {
@@ -221,13 +223,38 @@ export default class TableStore {
 
   // @computed
   // get selectedRowKeys(): string[] {
-  //   const { queryBar } = this.node.props;
+  //   const { queryBar } = this.props;
   //   return queryBar && queryBar.dataSet;
   // }
 
-  async loadCustomized() {
-    const { customizedCode } = this.node.props;
-    if (this.customizable && customizedCode) {
+  private disposed = false;
+
+  private customizedRequest = 0;
+
+  private customizedIdentity?: any[];
+
+  private getCustomizedIdentity() {
+    return [this.props.customizedCode, !!this.customizable, this.props.columns, this.props.children,
+      this.getConfig('tableCustomizedLoad') || this.getConfig('customizedLoad'), this.dataSet];
+  }
+
+  private handleCustomizedResult<T>(promise: Promise<T>): Promise<T> {
+    promise.catch(error => warning(false, error instanceof Error ? error.message : String(error)));
+    return promise;
+  }
+
+  loadCustomized() {
+    return this.handleCustomizedResult(this.loadCustomizedAsync());
+  }
+
+  private async loadCustomizedAsync() {
+    const { customizedCode } = this.props;
+    if (!this.disposed && this.customizable && customizedCode) {
+      const request = ++this.customizedRequest;
+      const identity = this.getCustomizedIdentity();
+      this.customizedIdentity = identity;
+      const isCurrent = () => !this.disposed && request === this.customizedRequest &&
+        identity.every((value, index) => value === this.getCustomizedIdentity()[index]);
       const tableCustomizedLoad = this.getConfig('tableCustomizedLoad') || this.getConfig('customizedLoad');
       runInAction(() => {
         this.loading = true;
@@ -235,71 +262,95 @@ export default class TableStore {
       try {
         const customized: PerformanceTableCustomized | undefined | null = await tableCustomizedLoad(customizedCode, 'PerformanceTable');
         runInAction(() => {
-          this.customized = { columns: {}, ...customized };
+          if (isCurrent()) {
+            this.customized = { columns: {}, ...customized };
+            this.handleLoadCustomized();
+          }
         });
       } finally {
         runInAction(() => {
-          this.loading = false;
+          if (isCurrent()) this.loading = false;
         });
       }
     }
   }
 
-  @action
-  updateProps(props, node) {
-    this.node = node;
-    this.originalColumns = props.columns;
-    this.originalChildren = props.children;
-    if (this.customizable && props.columns) {
-      this.loadCustomized().then(this.handleLoadCustomized);
+  syncProps(props, context) {
+    this.props = props;
+    this.context = context;
+  }
+
+  syncCustomized() {
+    if (this.disposed) return;
+    const identity = this.getCustomizedIdentity();
+    if (!this.customizedIdentity || identity.some((value, index) => value !== this.customizedIdentity![index])) {
+      this.customizedIdentity = identity;
+      this.customizedRequest++;
+      this.loading = false;
+      this.saveCustomizedDebounce.cancel();
+      if (this.customizable) {
+        this.loadCustomized();
+      } else {
+        this.initColumns();
+      }
     }
   }
 
-  @computed
+  dispose() {
+    this.disposed = true;
+    this.customizedRequest++;
+    this.loading = false;
+    this.saveCustomizedDebounce.cancel();
+  }
+
+  updateProps(props, node) {
+    this.node = node;
+    this.syncProps(props, node.context);
+    this.originalColumns = props.columns && mergeDefaultProps(props.columns, this.customizable ? this.customized.columns : undefined);
+    this.originalChildren = props.children;
+  }
+
   get prefixCls() {
-    const { classPrefix } = this.node.props;
+    const { classPrefix } = this.props;
     return classPrefix;
   }
 
-  @computed
   get proPrefixCls() {
-    return this.node.context.getProPrefixCls('table');
+    return this.context.getProPrefixCls('table');
   }
 
-  @computed
   get columnHideable(): boolean {
-    if ('columnHideable' in this.node.props) {
-      return this.node.props.columnHideable;
+    if ('columnHideable' in this.props) {
+      return this.props.columnHideable;
     }
     return this.getConfig('performanceTableColumnHideable') !== false;
   }
 
-  @computed
   get customizable(): boolean | undefined {
-    const { customizedCode } = this.node.props;
+    const { customizedCode } = this.props;
     if (customizedCode && (this.columnTitleEditable || this.columnDraggable || this.columnHideable)) {
-      if ('customizable' in this.node.props) {
-        return this.node.props.customizable;
+      if ('customizable' in this.props) {
+        return this.props.customizable;
       }
-      return this.getConfig('performanceTableCustomizable') || this.node.context.getCustomizable('PerformanceTable');
+      return this.getConfig('performanceTableCustomizable') || this.context.getCustomizable('PerformanceTable');
     }
     return false;
   }
 
-  @computed
   get autoHeight(): boolean | { type: TableAutoHeightType; diff: number } {
-    const { autoHeight } = this.node.props;
+    const { autoHeight } = this.props;
     if (isUndefined(autoHeight)) {
       const config: any = this.getConfig('performanceTableAutoHeight');
       if (isObject(config)) {
         return {
           type: TableAutoHeightType.minHeight,
           diff: 0,
-          ...config
+          ...config,
         };
       }
       return !!config
-    } else if (isObject(autoHeight)) {
+    }
+    if (isObject(autoHeight)) {
       return {
         type: autoHeight.type || TableAutoHeightType.minHeight,
         diff: autoHeight.diff || 0,
@@ -309,7 +360,6 @@ export default class TableStore {
 
   }
 
-  @computed
   get heightType(): TableHeightType {
     const tempHeightType = get(this.tempCustomized, 'heightType');
     if (tempHeightType !== undefined) {
@@ -322,9 +372,8 @@ export default class TableStore {
     return this.originalHeightType;
   }
 
-  @computed
   get originalHeightType(): TableHeightType {
-    const { height, autoHeight } = this.node.props;
+    const { height, autoHeight } = this.props;
     if (autoHeight) {
       return TableHeightType.flex;
     }
@@ -339,10 +388,8 @@ export default class TableStore {
     return TableHeightType.auto;
   }
 
-  @autobind
-  @action
   openCustomizationModal(modal) {
-    const { customizedCode } = this.node.props;
+    const { customizedCode } = this.props;
     const modalProps: ModalProps = {
       drawer: true,
       size: Size.small,
@@ -364,23 +411,21 @@ export default class TableStore {
     return <CustomizationColumnHeader onHeaderClick={this.openCustomizationModal} />;
   }
 
-  @action
   initColumns() {
+    if (this.disposed) return;
     const { customized, customizable } = this;
-    const { columns = [] } = this.node.props;
+    const { columns = [] } = this.props;
     const customizedColumns = customizable ? customized.columns : undefined;
     this.originalColumns = mergeDefaultProps(columns, customizedColumns);
+    this.node.setSelectionColumn(this.props);
     this.node._cacheCells = null;
     this.node.forceUpdate();
   }
 
-  @autobind
-  @action
   handleLoadCustomized() {
     this.initColumns();
   }
 
-  @action
   changeCustomizedColumnValue(columnKey: string, value: object) {
     const { customized: { columns } } = this;
     const oldCustomized = get(columns, columnKey);
@@ -391,53 +436,107 @@ export default class TableStore {
     this.saveCustomizedDebounce();
   }
 
-  @action
   saveCustomized(customized?: PerformanceTableCustomized | null, otherInfo?: { columnDataSet?: DataSet }) {
-    if (this.customizable) {
-      const { customizedCode } = this.node.props;
+    try {
+      return this.handleCustomizedResult(Promise.resolve(this.saveCustomizedSync(customized, otherInfo)));
+    } catch (error) {
+      return this.handleCustomizedResult(Promise.reject(error));
+    }
+  }
+
+  private saveCustomizedSync(customized?: PerformanceTableCustomized | null, otherInfo?: { columnDataSet?: DataSet }) {
+    if (!this.disposed && this.customizable) {
+      const { customizedCode } = this.props;
       if (customized) {
         this.customized = customized;
       }
       this.node.forceUpdate();
       if (customizedCode) {
         const tableCustomizedSave = this.getConfig('tableCustomizedSave') || this.getConfig('customizedSave');
-        tableCustomizedSave(customizedCode, this.customized, 'PerformanceTable', otherInfo);
+        return tableCustomizedSave(customizedCode, this.customized, 'PerformanceTable', otherInfo);
       }
     }
   };
 
-  saveCustomizedDebounce = debounce(this.saveCustomized, 1000);
+  saveCustomizedDebounce: ReturnType<typeof debounce>;
 
-  @computed
   get columnDraggable(): boolean {
-    if ('columnDraggable' in this.node.props) {
-      return this.node.props.columnDraggable!;
+    if ('columnDraggable' in this.props) {
+      return this.props.columnDraggable!;
     }
     return this.getConfig('performanceTableColumnDraggable') === true;
   }
 
   @autobind
   getConfig<T extends ConfigKeys>(key: T): T extends keyof DefaultConfig ? DefaultConfig[T] : Config[T] {
-    return this.node.context.getConfig(key);
+    return this.context.getConfig(key);
   }
 
-  @action
   changeMouseBatchChooseIdList(idList: number[]) {
     this.mouseBatchChooseIdList = idList;
   }
 
   constructor(node: PerformanceTable) {
+    this.context = node.context;
+    if (!Object.prototype.hasOwnProperty.call(this, 'props')) Object.assign(this, { props: undefined });
+    if (!Object.prototype.hasOwnProperty.call(this, 'originalColumns')) Object.assign(this, { originalColumns: undefined });
+    if (!Object.prototype.hasOwnProperty.call(this, 'customizedActiveKey')) Object.assign(this, { customizedActiveKey: undefined });
+    if (!Object.prototype.hasOwnProperty.call(this, 'tempCustomized')) Object.assign(this, { tempCustomized: undefined });
+    if (!Object.prototype.hasOwnProperty.call(this, 'customized')) Object.assign(this, { customized: undefined });
+    if (!Object.prototype.hasOwnProperty.call(this, 'totalHeight')) this.totalHeight = undefined;
+    if (!Object.prototype.hasOwnProperty.call(this, 'height')) this.height = undefined;
+    if (!Object.prototype.hasOwnProperty.call(this, 'loading')) this.loading = undefined;
+    if (!Object.prototype.hasOwnProperty.call(this, 'rowZIndex')) this.rowZIndex = undefined;
+    if (!Object.prototype.hasOwnProperty.call(this, 'selectedRowKeys')) Object.assign(this, { selectedRowKeys: undefined });
+    if (!Object.prototype.hasOwnProperty.call(this, 'mouseBatchChooseState')) Object.assign(this, { mouseBatchChooseState: undefined });
+    if (!Object.prototype.hasOwnProperty.call(this, 'mouseBatchChooseIdList')) Object.assign(this, { mouseBatchChooseIdList: undefined });
+    makeObservable<this, 'saveCustomizedSync'>(this, {
+      props: observable.ref,
+      context: observable.ref,
+      syncProps: action,
+      syncCustomized: action,
+      dispose: action,
+      originalColumns: observable,
+      customizedActiveKey: observable,
+      tempCustomized: observable,
+      customized: observable,
+      totalHeight: observable,
+      height: observable,
+      loading: observable,
+      rowZIndex: observable,
+      selectedRowKeys: observable,
+      mouseBatchChooseState: observable,
+      mouseBatchChooseIdList: observable,
+      columnTitleEditable: computed,
+      updateProps: action,
+      prefixCls: computed,
+      proPrefixCls: computed,
+      columnHideable: computed,
+      customizable: computed,
+      autoHeight: computed,
+      heightType: computed,
+      originalHeightType: computed,
+      openCustomizationModal: action.bound,
+      initColumns: action,
+      handleLoadCustomized: action.bound,
+      changeCustomizedColumnValue: action,
+      saveCustomized: action,
+      saveCustomizedSync: action,
+      columnDraggable: computed,
+      changeMouseBatchChooseIdList: action,
+    });
+    this.saveCustomizedDebounce = debounce(this.saveCustomized, 1000);
     runInAction(() => {
       this.node = node;
+      this.props = node.props;
       this.rowZIndex = [];
       this.customizedActiveKey = ['columns'];
       this.tempCustomized = { columns: {} };
       this.customized = { columns: {} };
-      this.selectedRowKeys = getRowSelection(this.node.props).selectedRowKeys || [];
+      this.selectedRowKeys = getRowSelection(this.props).selectedRowKeys || [];
       this.selectionDirty = false;
-      if (this.customizable) {
-        this.loadCustomized().then(this.handleLoadCustomized);
-      }
+      this.customizedIdentity = this.getCustomizedIdentity();
+      if (this.customizable) this.loadCustomized();
     });
   }
 }

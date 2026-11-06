@@ -13,7 +13,8 @@ import noop from 'lodash/noop';
 import defer from 'lodash/defer';
 import attempt from 'lodash/attempt';
 import isFunction from 'lodash/isFunction';
-import { action, isArrayLike, runInAction, toJS } from 'mobx';
+import { action, runInAction, toJS, makeObservable } from 'mobx';
+import isArrayLike from 'choerodon-ui/dataset/mobx-helper/isArrayLike';
 import {
   DragDropContext,
   DragDropContextProps,
@@ -936,6 +937,26 @@ interface LovBatchTask {
 
 @observer
 export default class Table extends DataSetComponent<TableProps> {
+  constructor(props, context) {
+    super(props, context);
+    makeObservable(this, {
+      handleResize: action.bound,
+      handleDataSetLoad: action.bound,
+      handlePasteChoose: action,
+      syncParentSize: action,
+      handleWrapperResize: action.bound,
+      reorderDataSet: action,
+      removeSourceRecord: action,
+      clearSortInfo: action.bound,
+      handleDragUpdate: action.bound,
+      handleDragStart: action.bound,
+      handleDragEnd: action.bound,
+      setScrollPosition: action,
+      syncSize: action.bound,
+      initDefaultExpandedRows: action,
+    });
+  }
+
   static displayName = 'Table';
 
   static Column = Column;
@@ -1041,7 +1062,7 @@ export default class Table extends DataSetComponent<TableProps> {
 
   get showBottomSummaryBar(): boolean {
     const {
-      props: {
+      reactiveProps: {
         summaryBar,
         summaryBarConfigProps = {},
       },
@@ -1085,8 +1106,6 @@ export default class Table extends DataSetComponent<TableProps> {
     }
   }
 
-  @autobind
-  @action
   handleResize(width?: number) {
     const { element, tableStore, wrapperWidth } = this;
     if (element && !element.offsetParent) {
@@ -1132,8 +1151,6 @@ export default class Table extends DataSetComponent<TableProps> {
     }
   }
 
-  @autobind
-  @action
   handleDataSetLoad() {
     const { tableStore } = this;
     if (tableStore.performanceEnabled) {
@@ -1193,7 +1210,7 @@ export default class Table extends DataSetComponent<TableProps> {
   @autobind
   handleDataSetValidate(props: { valid: boolean; dataSet: DataSet; errors: ValidationErrors[]; noLocate?: boolean }) {
     const { valid, dataSet, errors: validationErrors, noLocate } = props;
-    const { autoValidationLocate } = this.props;
+    const { autoValidationLocate } = this.reactiveProps;
     const errors = dataSet.getAllValidationErrors();
     this.bubbleValidationReport(errors.dataSet.length > 0 || errors.records.length > 0);
     if (autoValidationLocate !== false && !noLocate && !valid) {
@@ -1237,12 +1254,12 @@ export default class Table extends DataSetComponent<TableProps> {
 
   @autobind
   handleKeyDown(e) {
-    const { tableStore, props: { clipboard } } = this;
+    const { tableStore, reactiveProps: { clipboard } } = this;
     const { keyboard } = tableStore;
     const ctrlKey = e.ctrlKey || e.metaKey;
     if (!tableStore.editing) {
       try {
-        const { dataSet } = this.props;
+        const { dataSet } = this.reactiveProps;
         const altKey = e.altKey;
         const shiftKey = e.shiftKey;
         const target = e.target as HTMLElement | null;
@@ -1309,7 +1326,7 @@ export default class Table extends DataSetComponent<TableProps> {
     if (clipboard && clipboard.copy && ctrlKey && e.keyCode === KeyCode.C) {
       this.handleCopyChoose();
     }
-    const { onKeyDown = noop } = this.props;
+    const { onKeyDown = noop } = this.reactiveProps;
     onKeyDown(e);
   }
 
@@ -1337,7 +1354,7 @@ export default class Table extends DataSetComponent<TableProps> {
   handleMouseDown(e) {
     const {
       disabled,
-      props: {
+      reactiveProps: {
         multiDragSelectMode,
         onMouseDown = noop,
       },
@@ -1362,7 +1379,7 @@ export default class Table extends DataSetComponent<TableProps> {
     if (row) {
       const { index } = row.dataset;
       if (index) {
-        const { dataSet } = this.props;
+        const { dataSet } = this.reactiveProps;
         const record = dataSet.findRecordById(index);
         if (record) {
           dataSet.current = record;
@@ -1374,7 +1391,7 @@ export default class Table extends DataSetComponent<TableProps> {
 
   async handleKeyDownHome(e) {
     e.preventDefault();
-    const { dataSet } = this.props;
+    const { dataSet } = this.reactiveProps;
     if (!this.tableStore.isTree) {
       await dataSet.first();
     }
@@ -1383,7 +1400,7 @@ export default class Table extends DataSetComponent<TableProps> {
 
   async handleKeyDownEnd(e) {
     e.preventDefault();
-    const { dataSet } = this.props;
+    const { dataSet } = this.reactiveProps;
     if (!this.tableStore.isTree) {
       await dataSet.last();
     }
@@ -1477,7 +1494,7 @@ export default class Table extends DataSetComponent<TableProps> {
       if (previousElementSibling) {
         returnRecod = this.focusRow(previousElementSibling);
       } else {
-        const { dataSet } = this.props;
+        const { dataSet } = this.reactiveProps;
         await dataSet.prePage();
         returnRecod = this.focusRow(this.lastRow);
       }
@@ -1498,7 +1515,7 @@ export default class Table extends DataSetComponent<TableProps> {
       if (nextElementSibling) {
         returnRecod = this.focusRow(nextElementSibling);
       } else {
-        const { dataSet } = this.props;
+        const { dataSet } = this.reactiveProps;
         await dataSet.nextPage();
         returnRecod = this.focusRow(this.firstRow);
       }
@@ -1564,7 +1581,7 @@ export default class Table extends DataSetComponent<TableProps> {
   handleKeyDownRight(e, isTextEditingTarget?: boolean | Element) {
     const {
       tableStore,
-      props: { expandedRowRenderer, dataSet },
+      reactiveProps: { expandedRowRenderer, dataSet },
     } = this;
     if ((tableStore.isTree || expandedRowRenderer) && !isTextEditingTarget) {
       const { current } = dataSet;
@@ -1578,7 +1595,7 @@ export default class Table extends DataSetComponent<TableProps> {
   handleKeyDownLeft(e, isTextEditingTarget?: boolean | Element) {
     const {
       tableStore,
-      props: { expandedRowRenderer, dataSet },
+      reactiveProps: { expandedRowRenderer, dataSet },
     } = this;
     if ((tableStore.isTree || expandedRowRenderer) && !isTextEditingTarget) {
       const { current } = dataSet;
@@ -1599,7 +1616,7 @@ export default class Table extends DataSetComponent<TableProps> {
           const maxRowIndex = Math.max(startChooseCell.rowIndex, endChooseCell.rowIndex);
           const minColIndex = Math.min(startChooseCell.colIndex, endChooseCell.colIndex);
           const maxColIndex = Math.max(startChooseCell.colIndex, endChooseCell.colIndex);
-  
+
           const getRenderedCellText = (record: Record, columnKey: React.Key) => {
             const renderedCell = this.tableStore.renderedCellNode.get(record)?.get(columnKey);
             return renderedCell?.isConnected ? renderedCell.innerText : this.tableStore.renderedCellText.get(record)?.get(columnKey);
@@ -1617,7 +1634,7 @@ export default class Table extends DataSetComponent<TableProps> {
                 if (field) {
                   const fieldType = field && field.get('type', record);
                   recordData = record.get(fieldName);
-  
+
                   if (clipboard && !isCopyPristine) {
                     if (field.getLookup(record) || field.get('options', record) || field.get('lovCode', record)) {
                       // 处理 lookup、lov
@@ -1644,7 +1661,7 @@ export default class Table extends DataSetComponent<TableProps> {
                   recordData = this.tableStore.renderedCellText.get(record)?.get(columns[j].key);
                 }
               }
-  
+
               recordData = isNil(recordData) ? '' : recordData;
               let parseData;
               if (j === maxColIndex) { 
@@ -1677,7 +1694,6 @@ export default class Table extends DataSetComponent<TableProps> {
     }
   }
 
-  @action
   async handlePasteChoose(clipText: string) {
     const { columnGroups, currentEditorName, currentEditRecord, editors, inlineEdit, clipboard } = this.tableStore;
     if (!currentEditorName && !currentEditRecord) return;
@@ -2144,7 +2160,7 @@ export default class Table extends DataSetComponent<TableProps> {
   }
 
   getWrapperProps(props: any = {}): any {
-    const { autoWidth } = this.props;
+    const { autoWidth } = this.reactiveProps;
     const wrapperProps = {
       ...props,
     };
@@ -2202,7 +2218,7 @@ export default class Table extends DataSetComponent<TableProps> {
    * 获取传入的 Spin props
    */
   getSpinProps(): SpinProps {
-    const { spin, dataSet } = this.props;
+    const { spin, dataSet } = this.reactiveProps;
     const spinProps: SpinProps = { ...spin };
     const { loading, headerHeight, footerHeight, overflowX, height } = this.tableStore;
     const footerTotalHeight = isStickySupport() && overflowX && height === undefined ? measureScrollbar() + (footerHeight || 0) : footerHeight;
@@ -2255,8 +2271,8 @@ export default class Table extends DataSetComponent<TableProps> {
   }
 
   componentWillReceiveProps(nextProps, nextContext) {
-    super.componentWillReceiveProps(nextProps, nextContext);
     this.disconnect();
+    super.componentWillReceiveProps(nextProps, nextContext);
     this.columnsSize = this.tableStore.columns.length;
     this.tableStore.updateProps(nextProps);
     this.connect();
@@ -2272,7 +2288,7 @@ export default class Table extends DataSetComponent<TableProps> {
   }
 
   bubbleValidationReport(showInvalid: boolean) {
-    const { pristine } = this.props;
+    const { pristine } = this.reactiveProps;
     if (!pristine) {
       const onComponentValidationReport = this.getContextConfig('onComponentValidationReport');
       if (onComponentValidationReport) {
@@ -2284,7 +2300,6 @@ export default class Table extends DataSetComponent<TableProps> {
     }
   }
 
-  @action
   syncParentSize(height: number, target: HTMLElement) {
     const { tableStore, element, wrapper } = this;
     if (element) {
@@ -2304,8 +2319,6 @@ export default class Table extends DataSetComponent<TableProps> {
     this.syncParentSize(height, entry.target as HTMLDivElement);
   }
 
-  @autobind
-  @action
   handleWrapperResize(entries: ResizeObserverEntry[]) {
     const [entry] = entries;
     const { target } = entry;
@@ -2364,7 +2377,7 @@ export default class Table extends DataSetComponent<TableProps> {
     if (dataSet) {
       const handler = flag ? dataSet.addEventListener : dataSet.removeEventListener;
       handler.call(dataSet, DataSetEvents.load, this.handleDataSetLoad);
-      if (inlineEdit || (clipboard && clipboard.copy) || this.props.defaultRowExpanded) {
+      if (inlineEdit || (clipboard && clipboard.copy) || this.reactiveProps.defaultRowExpanded) {
         handler.call(dataSet, DataSetEvents.create, this.handleDataSetCreate);
       }
       handler.call(dataSet, DataSetEvents.validate, this.handleDataSetValidate);
@@ -2377,7 +2390,7 @@ export default class Table extends DataSetComponent<TableProps> {
   render() {
     const {
       tableStore: { overflowX, overflowY, isAnyColumnsLeftLock, isAnyColumnsRightLock, columns },
-      props: {
+      reactiveProps: {
         dataSet,
         treeQueryExpanded,
         virtualSpin,
@@ -2516,7 +2529,6 @@ export default class Table extends DataSetComponent<TableProps> {
     );
   }
 
-  @action
   reorderDataSet(startIndex: number, endIndex: number) {
     const { dataSet } = this.tableStore;
     dataSet.move(startIndex, endIndex);
@@ -2527,7 +2539,6 @@ export default class Table extends DataSetComponent<TableProps> {
    * 触发组合或拖拽排序, 移除原纪录
    * @param currentRecord
    */
-  @action
   removeSourceRecord(currentRecord: Record) {
     const { parent } = currentRecord;
     if (parent) {
@@ -2544,8 +2555,6 @@ export default class Table extends DataSetComponent<TableProps> {
     }
   }
 
-  @autobind
-  @action
   clearSortInfo() {
     const { dataSet } = this.tableStore;
     dataSet.fields.forEach(field => {
@@ -2558,22 +2567,18 @@ export default class Table extends DataSetComponent<TableProps> {
     }
   }
 
-  @autobind
-  @action
   handleDragUpdate(initial: DragUpdate, provided: ResponderProvided): void {
     if (this.tableStore.isTree) {
       this.tableStore.dragUpdateState = initial;
     }
-    const { dragDropContextProps } = this.props;
+    const { dragDropContextProps } = this.reactiveProps;
     if (dragDropContextProps && dragDropContextProps.onDragUpdate) {
       dragDropContextProps.onDragUpdate(initial, provided);
     }
   }
 
-  @autobind
-  @action
   handleDragStart(initial: DragStart, provided: ResponderProvided): void {
-    const { dragDropContextProps } = this.props;
+    const { dragDropContextProps } = this.reactiveProps;
     const { rowMetaData, isTree, currentEditorName } = this.tableStore;
     if (isTree && rowMetaData) {
       const { source } = initial;
@@ -2590,15 +2595,13 @@ export default class Table extends DataSetComponent<TableProps> {
     }
   }
 
-  @autobind
-  @action
   handleDragEnd(resultDrag: DropResult, provided: ResponderProvided) {
     if (this.tableStore.dragUpdateState) {
       this.tableStore.dragUpdateState = undefined;
     }
     const { dataSet, rowMetaData, isTree, showRemovedRow, clipboard, rowDraggable, selectedDragRows } = this.tableStore;
     const { parentField, idField, childrenField } = dataSet.props;
-    const { onDragEnd, onDragEndBefore, dragDropContextProps, multiDragSelectMode, rowDragRender } = this.props;
+    const { onDragEnd, onDragEndBefore, dragDropContextProps, multiDragSelectMode, rowDragRender } = this.reactiveProps;
     let resultBefore: DropResult | undefined = resultDrag;
     const recordFromIndex = rowMetaData ? rowMetaData[resultBefore.source.index].record?.index : undefined;
     const recordToIndex = rowMetaData && resultBefore.destination ? rowMetaData[resultBefore.destination.index].record?.index : undefined;
@@ -2826,7 +2829,6 @@ export default class Table extends DataSetComponent<TableProps> {
     }
   }
 
-  @action
   setScrollPosition(position: ScrollPosition): void {
     const { tableStore } = this;
     if (tableStore.scrollPosition !== position) {
@@ -2872,7 +2874,7 @@ export default class Table extends DataSetComponent<TableProps> {
     /* eslint-enable react/no-this-in-sfc */
     const virtualWrapper = virtual ? <VirtualWrapper>{wrapper}</VirtualWrapper> : wrapper();
     if (hasBody && tableStore.rowDraggable) {
-      const { dragDropContextProps } = this.props;
+      const { dragDropContextProps } = this.reactiveProps;
       if (tableStore.customDragDropContenxt) {
         return virtualWrapper;
       }
@@ -2893,7 +2895,7 @@ export default class Table extends DataSetComponent<TableProps> {
 
   getHeader(): ReactNode {
     const {
-      props: { header, dataSet },
+      reactiveProps: { header, dataSet },
     } = this;
     if (header) {
       const { prefixCls } = this;
@@ -2908,7 +2910,7 @@ export default class Table extends DataSetComponent<TableProps> {
 
   getFooter(): ReactNode | undefined {
     const {
-      props: { footer, dataSet },
+      reactiveProps: { footer, dataSet },
     } = this;
     if (footer) {
       const { prefixCls } = this;
@@ -2947,7 +2949,7 @@ export default class Table extends DataSetComponent<TableProps> {
 
   getPagination(position: TablePaginationPosition): ReactElement<PaginationProps> | undefined {
     const {
-      props: { dataSet, selectionMode },
+      reactiveProps: { dataSet, selectionMode },
       prefixCls,
       tableStore: { pagination, showSelectionTips, showCachedTips },
     } = this;
@@ -2971,7 +2973,7 @@ export default class Table extends DataSetComponent<TableProps> {
 
   getBottomSummaryBar(): ReactNode | undefined {
     const {
-      props: {
+      reactiveProps: {
         summaryFieldsLimit,
         summaryBarFieldWidth,
         summaryBar: summaryBarProp,
@@ -2992,7 +2994,7 @@ export default class Table extends DataSetComponent<TableProps> {
   }
 
   getTable(lock?: ColumnLock): ReactNode {
-    const { props, tableStore } = this;
+    const { reactiveProps: props, tableStore } = this;
     const { overflowX, heightType, hasFooter: footer, virtual } = tableStore;
     let tableHead: ReactNode;
     let tableBody: ReactNode;
@@ -3086,7 +3088,7 @@ export default class Table extends DataSetComponent<TableProps> {
   getTableBody(columnGroups: ColumnGroups, lock?: ColumnLock, snapshot?: DroppableStateSnapshot, dragRowHeight?: number): ReactNode {
     const {
       tableStore: { performanceEnabled },
-      props: {
+      reactiveProps: {
         bodyExpandable,
       },
     } = this;
@@ -3102,7 +3104,7 @@ export default class Table extends DataSetComponent<TableProps> {
   }
 
   getTableHeader(lock?: ColumnLock): ReactNode {
-    const { showHeader, queryFields } = this.props;
+    const { showHeader, queryFields } = this.reactiveProps;
     return showHeader || this.tableStore.customizable ? (
       <TableHeader key="thead" lock={lock} queryFields={queryFields} />
     ) : undefined;
@@ -3113,7 +3115,7 @@ export default class Table extends DataSetComponent<TableProps> {
   }
 
   getStyleHeight(): number | undefined {
-    const { style } = this.props;
+    const { style } = this.reactiveProps;
     if (style) {
       return toPx(style.height);
     }
@@ -3126,8 +3128,6 @@ export default class Table extends DataSetComponent<TableProps> {
     this.nextFrameActionId = raf(this.syncSize.bind(this, width));
   }
 
-  @autobind
-  @action
   syncSize(width: number = this.getWidth()) {
     const { element, tableStore } = this;
     if (tableStore.hidden || !element || !element.offsetParent) {
@@ -3149,11 +3149,10 @@ export default class Table extends DataSetComponent<TableProps> {
     tableStore.editors.forEach(editor => editor.collapsePopupIfCellInvisible());
   }
 
-  @action
   initDefaultExpandedRows(root?: Record) {
     const {
       tableStore,
-      props: { dataSet, defaultRowExpanded },
+      reactiveProps: { dataSet, defaultRowExpanded },
     } = this;
     if (tableStore.isTree && defaultRowExpanded) {
       const records = root ? root.treeReduce<Record[]>((all, record) => all.concat(record), []) : dataSet;
@@ -3226,7 +3225,7 @@ export default class Table extends DataSetComponent<TableProps> {
       this.lastScrollTop = scrollTop;
       tableStore.setLastScrollTop(scrollTop);
       if (target) {
-        const { onScrollTop } = this.props;
+        const { onScrollTop } = this.reactiveProps;
         if (onScrollTop) {
           onScrollTop(scrollTop, () => {
             const { groupedData, rowMetaData } = tableStore;
@@ -3307,7 +3306,7 @@ export default class Table extends DataSetComponent<TableProps> {
       this.lastScrollLeft = scrollLeft;
       tableStore.setLastScrollLeft(scrollLeft);
       if (target) {
-        const { onScrollLeft } = this.props;
+        const { onScrollLeft } = this.reactiveProps;
         if (onScrollLeft) {
           onScrollLeft(scrollLeft, () => {
             const { groupedDataWithHeader, columnGroups } = tableStore;

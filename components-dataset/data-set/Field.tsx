@@ -1,5 +1,6 @@
+import { makeObservable, action, computed, get, IComputedValue, isObservableObject, observable, ObservableMap, remove, runInAction, set, toJS } from 'mobx';
 import { CSSProperties, ReactNode } from 'react';
-import { action, computed, get, IComputedValue, isObservableObject, observable, ObservableMap, remove, runInAction, set, toJS } from 'mobx';
+
 import { MomentInput } from 'moment';
 import raf from 'raf';
 import isString from 'lodash/isString';
@@ -12,6 +13,8 @@ import isNil from 'lodash/isNil';
 import { AxiosRequestConfig } from 'axios';
 import isPromise from 'is-promise';
 import BigNumber from 'bignumber.js';
+import mapToObject from '../mobx-helper/mapToObject';
+import observableConfig, { observableConfigMap } from '../mobx-helper/observableConfig';
 import { getDateFormatByField, isSame, isSameLike, warning } from '../utils';
 import DataSet, { DataSetProps } from './DataSet';
 import Record from './Record';
@@ -47,6 +50,8 @@ import { treeFind } from '../tree-helper';
 import LookupCache from './LookupCache';
 import { AttachmentValue } from '../configure';
 import { defaultTextField, defaultValueField } from './constant';
+
+const recordComputedOptions = new WeakMap<Record, Map<string, IComputedValue<DataSet | undefined>>>();
 
 function isEqualDynamicProps(oldProps, newProps) {
   if (newProps === oldProps) {
@@ -541,7 +546,7 @@ export default class Field {
 
   record?: Record | undefined;
 
-  @observable lookupToken?: string | undefined;
+  lookupToken?: string | undefined = undefined;
 
   lastDynamicProps?: { [key: string]: any } | undefined;
 
@@ -551,11 +556,11 @@ export default class Field {
 
   computedOptions?: IComputedValue<DataSet | undefined> | undefined;
 
-  @observable props: ObservableMap<string, any>;
+  props: ObservableMap<string, any>;
 
-  @observable dirtyProps?: Partial<FieldProps> | undefined;
+  dirtyProps?: Partial<FieldProps> | undefined = undefined;
 
-  @observable searchPara?: object;
+  searchPara?: object = undefined;
 
   fetchingList?: Promise<any>;
 
@@ -579,7 +584,7 @@ export default class Field {
 
   get pristineProps(): FieldProps {
     return {
-      ...this.props.toPOJO(),
+      ...mapToObject(this.props),
       ...this.dirtyProps,
     };
   }
@@ -648,10 +653,29 @@ export default class Field {
   private hasLovSideEffects: boolean | undefined;
 
   constructor(props: FieldProps = {}, dataSet: DataSet, record?: Record | undefined) {
+    Object.assign(this, {
+      props: undefined,
+    });
+    makeObservable(this, {
+      lookupToken: observable,
+      props: observable,
+      dirtyProps: observable,
+      searchPara: observable,
+      set: action,
+      replace: action,
+      merge: action,
+      reset: action,
+      commit: action,
+      setLovPara: action,
+      checkValidity: action,
+      fetchLookup: action,
+      setAttachments: action,
+      setAttachmentCount: action,
+    });
     runInAction(() => {
       this.dataSet = dataSet;
       this.record = record;
-      this.props = observable.map(props);
+      this.props = observableConfigMap(props);
       if (!props.options) {
         const { dynamicProps, computedProps } = props;
         if (typeof dynamicProps === 'function') {
@@ -730,8 +754,8 @@ export default class Field {
       { lookupUrl: this.dataSet.getConfig('lookupUrl') },
       defaultProps,
       getPropsFromLovConfig(lovCode, ['textField', 'valueField']),
-      dsField && dsField.props.toPOJO(),
-      this.props.toPOJO(),
+      dsField && mapToObject(dsField.props),
+      mapToObject(this.props),
     );
   }
 
@@ -775,7 +799,8 @@ export default class Field {
         const computedProps = this.get('computedProps', record);
         if (computedProps) {
           const newComputedProp = computed(() => {
-            const computProp = computedProps[propsName];
+            const currentComputedProps = this.get('computedProps', record);
+            const computProp = currentComputedProps && currentComputedProps[propsName];
             if (typeof computProp === 'function') {
               const prop = this.executeDynamicProps(computProp, propsName, record);
               if (prop !== undefined) {
@@ -887,7 +912,7 @@ export default class Field {
    * @param value 属性值
    * @return {any}
    */
-  @action
+
   set(propsName: string, value: any): Field {
     const { record, name } = this;
     if (record) {
@@ -903,7 +928,7 @@ export default class Field {
     }
     const oldValue = this.get(propsName);
     if (!isEqualDynamicProps(toJS(oldValue), value)) {
-      const dirtyProps = getIf<Field, Partial<FieldProps>>(this, 'dirtyProps', {});
+      const dirtyProps = getIf<Field, Partial<FieldProps>>(this, 'dirtyProps', () => observableConfig({}));
       if (!(propsName in dirtyProps)) {
         set(dirtyProps, propsName, oldValue);
       } else if (isSame(toJS(dirtyProps[propsName]), value)) {
@@ -934,7 +959,6 @@ export default class Field {
     return this;
   }
 
-  @action
   replace(props: Partial<FieldProps> = {}): Field {
     const p = { ...props };
     this.props.forEach((_v, key) => {
@@ -946,7 +970,6 @@ export default class Field {
     return this.merge(p);
   }
 
-  @action
   merge(props: Partial<FieldProps>): Field {
     Object.keys(props).forEach((key) => {
       if (key !== 'name') {
@@ -1116,7 +1139,11 @@ export default class Field {
       return options;
     }
     const { name } = this;
-    const computedOptionsMap: Map<string, IComputedValue<DataSet | undefined>> | undefined = record ? getIf<Record, Map<string, IComputedValue<DataSet | undefined>>>(record, 'computedFieldOptions', () => new Map()) : undefined;
+    let computedOptionsMap = record && recordComputedOptions.get(record);
+    if (record && !computedOptionsMap) {
+      computedOptionsMap = new Map();
+      recordComputedOptions.set(record, computedOptionsMap);
+    }
     const computedOptions: IComputedValue<DataSet | undefined> | undefined = computedOptionsMap ? computedOptionsMap.get(name) :
       this.computedOptions;
     if (computedOptions) {
@@ -1173,7 +1200,7 @@ export default class Field {
   /**
    * 重置设置的属性
    */
-  @action
+
   reset(): void {
     const { dirtyProps } = this;
     if (dirtyProps) {
@@ -1182,7 +1209,6 @@ export default class Field {
     }
   }
 
-  @action
   commit(record: Record | undefined = this.record): void {
     if (record) {
       record.clearValidationError(this.name);
@@ -1258,7 +1284,7 @@ export default class Field {
    * @param {String} name
    * @param {Object} value
    */
-  @action
+
   setLovPara(name: string, value: any, record: Record | undefined = this.record) {
     const isComputedLovPara = this.get('computedProps')?.lovPara;
     const p = (isComputedLovPara ? cloneDeep(toJS(this.get('lovPara', record))) : toJS(this.get('lovPara', record))) || {};
@@ -1271,7 +1297,6 @@ export default class Field {
     }
     this.set('lovPara', p);
   }
-
 
   getValidatorPropGetter(record: Record | undefined = this.record): <T extends keyof ValidatorProps>(key: T) => ValidatorProps[T] {
     return (key) => {
@@ -1318,7 +1343,7 @@ export default class Field {
    * 只有通过record.getField()获取的field才能校验
    * @return true | false
    */
-  @action
+
   async checkValidity(record: Record | undefined = this.record): Promise<boolean> {
     if (record) {
       const { name, type } = this;
@@ -1353,7 +1378,7 @@ export default class Field {
    * @param noCache default: undefined
    * @return Promise<object[]>
    */
-  @action
+
   fetchLookup(noCache = false, record: Record | undefined = this.record): Promise<object[] | undefined> {
     const lookupCaches = getIf<DataSet, ObservableMap<string, LookupCache>>(this.dataSet, 'lookupCaches', () => observable.map());
     const oldToken = getLookupToken(this, record);
@@ -1497,8 +1522,8 @@ export default class Field {
     const { bucketName, bucketDirectory, attachmentUUID, storageCode, isPublic } = props;
     const { fetchList } = this.dataSet.getConfig('attachment');
     if (fetchList) {
-      this.fetchingList = fetchList({ bucketName, bucketDirectory, attachmentUUID, storageCode, isPublic }).then(action((results: FileLike[]) => {
-        this.setAttachments(results.map(file => new AttachmentFile(file)), record, undefined);
+      this.fetchingList = Promise.resolve().then(() => fetchList({ bucketName, bucketDirectory, attachmentUUID, storageCode, isPublic })).then(action((results: FileLike[]) => {
+        this.setAttachmentsInternal(results.map(file => new AttachmentFile(file)), record, attachmentUUID, false);
       })).finally(() => {
         if (this.isDirty(record)) {
           this.checkValidity(record);
@@ -1516,9 +1541,9 @@ export default class Field {
         bucketDirectory: this.get('bucketDirectory', record),
         storageCode: this.get('storageCode', record),
         isPublic,
-      }, this).then((count) => {
-        this.setAttachmentCount(count, record);
-      }).finally(() => {
+      }, this).then(action((count) => {
+        this.setAttachmentCountInternal(count, record, uuid);
+      })).finally(() => {
         if (this.isDirty(record)) {
           this.checkValidity(record);
         }
@@ -1564,8 +1589,11 @@ export default class Field {
     return [];
   }
 
-  @action
   setAttachments(attachments: AttachmentFile[] | undefined, record: Record | undefined = this.record, uuid?: string | undefined) {
+    this.setAttachmentsInternal(attachments, record, uuid, true);
+  }
+
+  private setAttachmentsInternal(attachments: AttachmentFile[] | undefined, record: Record | undefined, uuid: string | undefined, updatePendingUUID: boolean) {
     if (record) {
       const recordValue = record.get(this.name);
       const value = uuid || recordValue;
@@ -1577,11 +1605,13 @@ export default class Field {
         } else {
           attachmentCaches.set(value, { attachments });
         }
-        const pendingAttachmentUUIDs = getIf<Record, ObservableMap<string, string>>(record, 'pendingAttachmentUUIDs', () => observable.map());
-        if (uuid && uuid !== recordValue) {
-          pendingAttachmentUUIDs.set(this.name, uuid);
-        } else if (recordValue && pendingAttachmentUUIDs.has(this.name)) {
-          pendingAttachmentUUIDs.delete(this.name);
+        if (updatePendingUUID) {
+          const pendingAttachmentUUIDs = getIf<Record, ObservableMap<string, string>>(record, 'pendingAttachmentUUIDs', () => observable.map());
+          if (uuid && uuid !== recordValue) {
+            pendingAttachmentUUIDs.set(this.name, uuid);
+          } else if (recordValue && pendingAttachmentUUIDs.has(this.name)) {
+            pendingAttachmentUUIDs.delete(this.name);
+          }
         }
       }
     } else {
@@ -1611,10 +1641,13 @@ export default class Field {
     return undefined;
   }
 
-  @action
   setAttachmentCount(count: number | undefined, record: Record | undefined = this.record) {
+    this.setAttachmentCountInternal(count, record);
+  }
+
+  private setAttachmentCountInternal(count: number | undefined, record: Record | undefined, attachmentUUID?: string | undefined) {
     if (record) {
-      const uuid = record.get(this.name);
+      const uuid = attachmentUUID || record.get(this.name);
       if (uuid) {
         const attachmentCaches = getIf<Record, ObservableMap<string, AttachmentCache>>(record, 'attachmentCaches', () => observable.map());
         const cache = attachmentCaches.get(uuid);

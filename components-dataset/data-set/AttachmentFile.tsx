@@ -1,4 +1,4 @@
-import { action as mobxAction, observable, runInAction } from 'mobx';
+import { action as mobxAction, makeObservable, observable, runInAction } from 'mobx';
 import { AxiosError, CancelTokenSource } from 'axios';
 import isNil from 'lodash/isNil';
 import AttachmentFileChunk from './AttachmentFileChunk';
@@ -23,9 +23,9 @@ export interface FileLike {
 
 export default class AttachmentFile implements FileLike {
 
-  @observable name: string;
+  @observable name: string = '';
 
-  @observable size: number;
+  @observable size: number = 0;
 
   type: string;
 
@@ -33,9 +33,9 @@ export default class AttachmentFile implements FileLike {
 
   uid: string;
 
-  @observable url?: string | undefined;
+  @observable url?: string | undefined = undefined;
 
-  @observable filename: string;
+  @observable filename: string = '';
 
   @observable ext: string;
 
@@ -43,11 +43,11 @@ export default class AttachmentFile implements FileLike {
 
   isReplace?: boolean;
 
-  @observable status?: 'error' | 'success' | 'uploading' | 'deleting' | 'done' | 'aborted' | 'deferred';
+  @observable status?: 'error' | 'success' | 'uploading' | 'deleting' | 'done' | 'aborted' | 'deferred' = undefined;
 
-  @observable aborted?: boolean;
+  @observable aborted?: boolean = undefined;
 
-  @observable private $percent?: number | undefined;
+  @observable private $percent?: number | undefined = undefined;
 
   uploadQueue?: PromiseQueue;
 
@@ -81,19 +81,23 @@ export default class AttachmentFile implements FileLike {
     });
   }
 
-  @observable error?: AxiosError | undefined;
+  @observable error?: AxiosError | undefined = undefined;
 
-  @observable errorMessage?: string | undefined;
+  @observable errorMessage?: string | undefined = undefined;
 
-  @observable invalid?: boolean;
+  @observable invalid?: boolean = undefined;
 
   creationDate: Date;
 
   attachmentUUID?: string | undefined;
 
-  chunks?: AttachmentFileChunk[];
+  @observable.ref chunks?: AttachmentFileChunk[] = undefined;
 
   constructor(file: FileLike) {
+    Object.assign(this, {
+      ext: undefined,
+    });
+    makeObservable(this);
     runInAction(() => {
       this.name = '';
       this.filename = '';

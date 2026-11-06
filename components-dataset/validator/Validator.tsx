@@ -1,8 +1,9 @@
 import React, { ReactNode } from 'react';
-import { action, flow, isArrayLike, toJS } from 'mobx';
+import { action, flow, makeObservable, toJS } from 'mobx';
 import isPromise from 'is-promise';
 import isString from 'lodash/isString';
 import noop from 'lodash/noop';
+import isArrayLike from '../mobx-helper/isArrayLike';
 import ValidationResult from './ValidationResult';
 import Record from '../data-set/Record';
 import { Form } from '../interface';
@@ -153,7 +154,6 @@ export default class Validator {
     }
   }
 
-  @action
   static async checkValidity(value: unknown = null, props: ValidatorBaseProps = {}, getProp: <T extends keyof ValidatorProps>(key: T) => ValidatorProps[T] = noop): Promise<ValidationReport> {
     const validationResults: ValidationResult[] = [];
     const valueMiss: methodReturn = valueMissing(value, props, getProp);
@@ -176,3 +176,5 @@ export default class Validator {
     };
   }
 }
+
+makeObservable(Validator, { checkValidity: action });

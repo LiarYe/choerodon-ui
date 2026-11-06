@@ -49,7 +49,7 @@ export default class Rate<T extends RateProps> extends FormField<T> {
   @autobind
   renderValidationResult(validationResult?: ValidationResult): ReactNode {
     const validationMessage = this.getValidationMessage(validationResult);
-    const { labelLayout, showValidation, getProPrefixCls } = this.context;
+    const { labelLayout, showValidation, getProPrefixCls } = this.reactiveContext;
     if (validationMessage) {
       const showIcon = !((labelLayout && [LabelLayout.float, LabelLayout.placeholder].includes(labelLayout)) || showValidation === ShowValidation.newLine);
       return renderValidationMessage(validationMessage, showIcon, getProPrefixCls);
@@ -62,7 +62,7 @@ export default class Rate<T extends RateProps> extends FormField<T> {
 
   @autobind
   handleHelpMouseEnter(e) {
-    const { getTooltipTheme, getTooltipPlacement } = this.context;
+    const { getTooltipTheme, getTooltipPlacement } = this.reactiveContext;
     const { helpTooltipProps } = this;
     let helpTooltipCls = `${this.getContextConfig('proPrefixCls')}-tooltip-popup-help`;
     if (helpTooltipProps && helpTooltipProps.popupClassName) {

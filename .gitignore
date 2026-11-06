@@ -47,6 +47,10 @@ components-dataset/**/*.d.ts
 !components-dataset/data-set/__tests__/**/*.js
 !components-dataset/utils/__tests__/color.test.js
 !components-dataset/validator/__tests__/color.test.js
+!components-dataset/mobx-helper/__tests__/observableConfig.test.js
+!components-dataset/promise-merger/__tests__/*.js
+!components-dataset/stores/__tests__/*.js
+!components-dataset/validator/__tests__/action.test.js
 !components-dataset/axios/_helpers/*
 components-shared/**/*.jsx
 components-shared/**/*.js
@@ -67,4 +71,3 @@ components/rc-components/tree/**/*.js
 components/form/__tests__/type.js
 site/theme/mock/performance-data/*.js
 .eslintcache
-reports-new/

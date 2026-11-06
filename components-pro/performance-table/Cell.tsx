@@ -88,6 +88,17 @@ export const propTypeKeys = [
   'isDragging',
 ];
 
+function RowZIndex({ tableStore, rowIndex }) {
+  React.useLayoutEffect(() => {
+    runInAction(() => {
+      if (!tableStore.rowZIndex.includes(rowIndex)) {
+        tableStore.rowZIndex.push(rowIndex);
+      }
+    });
+  }, [tableStore, rowIndex]);
+  return null;
+}
+
 class Cell extends React.PureComponent<CellProps> {
   static get contextType(): typeof TableContext {
     return TableContext;
@@ -200,9 +211,7 @@ class Cell extends React.PureComponent<CellProps> {
 
     if (cellHidden || cellRowSpan === 0) {
       if (!isHeaderCell && rowData && cellRowSpan === 0 && fixed) {
-        runInAction(() => {
-          tableStore.rowZIndex.push(rowIndex);
-        });
+        return <RowZIndex tableStore={tableStore} rowIndex={rowIndex} />;
       }
       return null;
     }

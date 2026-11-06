@@ -17,19 +17,17 @@ function _transformStack(tree: Tree, parentValue: unknown, parentField: string):
 
   if (Array.isArray(tree)) { // array tree
     tree.forEach((node) => {
-      node[parentField] = parentValue;
       stack.push({
-        value: node,
+        value: { ...node, [parentField]: parentValue },
       });
     });
   } else if (tree instanceof Object) { // object tree
     Object.keys(tree).forEach((key) => {
       if (Object.prototype.hasOwnProperty.call(tree, key)) {
         const node = tree[key];
-        node[parentField] = parentValue;
         stack.push({
           key,
-          value: node,
+          value: { ...node, [parentField]: parentValue },
         });
       }
     })

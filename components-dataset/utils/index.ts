@@ -1,5 +1,5 @@
 import moment, { Moment, unitOfTime } from 'moment';
-import { get, isArrayLike, isObservableObject } from 'mobx';
+import { get, isObservableObject } from 'mobx';
 import warn from 'warning';
 import isNumber from 'lodash/isNumber';
 import defaultTo from 'lodash/defaultTo';
@@ -9,6 +9,7 @@ import isEqual from 'lodash/isEqual';
 import isString from 'lodash/isString';
 import isBoolean from 'lodash/isBoolean';
 import { BigNumber } from 'bignumber.js';
+import isArrayLike from '../mobx-helper/isArrayLike';
 import { TimeStep } from '../interface';
 import { TimeUnit } from '../enum';
 import Field from '../data-set/Field';

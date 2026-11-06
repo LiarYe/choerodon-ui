@@ -1,7 +1,9 @@
 import React from 'react';
 import { mount } from 'enzyme';
 import { act } from 'react-dom/test-utils';
+import { isAction } from 'mobx';
 import ColorPicker from '..';
+import observeAction from './observeAction';
 
 describe.each([
   ['color panel', 'gradient', 'selectPointer', 'handleGPClick', 'onGPMouseUp', '#7f3f3f'],
@@ -33,7 +35,7 @@ describe.each([
     jest.spyOn(picker[track], 'getBoundingClientRect').mockReturnValue({
       left: 10, top: 20, width: 200, height: 100, right: 210, bottom: 120,
     });
-    move = jest.spyOn(picker, moveHandler);
+    move = isAction(picker[moveHandler]) ? observeAction(picker, moveHandler) : jest.spyOn(picker, moveHandler);
     up = jest.spyOn(picker, upHandler);
     addListener = jest.spyOn(document, 'addEventListener');
     removeListener = jest.spyOn(document, 'removeEventListener');
@@ -42,6 +44,7 @@ describe.each([
   afterEach(() => {
     if (wrapper) wrapper.unmount();
     container.remove();
+    move.mockRestore();
     jest.restoreAllMocks();
     jest.clearAllTimers();
     jest.useRealTimers();
@@ -55,7 +58,7 @@ describe.each([
     });
     wrapper.update();
     expect(picker.draggingColor).toBe(true);
-    expect(addListener).toHaveBeenCalledWith('mousemove', move, false);
+    expect(addListener).toHaveBeenCalledWith('mousemove', picker[moveHandler], false);
     expect(addListener).toHaveBeenCalledWith('mouseup', up, false);
   }
 
@@ -91,7 +94,7 @@ describe.each([
 
     expect(up).toHaveBeenCalledTimes(1);
     expect(picker.draggingColor).toBe(false);
-    expect(removeListener).toHaveBeenCalledWith('mousemove', move, false);
+    expect(removeListener).toHaveBeenCalledWith('mousemove', picker[moveHandler], false);
     expect(removeListener).toHaveBeenCalledWith('mouseup', up, false);
     expect(picker.eventManager.events.mousemove).toHaveLength(0);
     expect(picker.eventManager.events.mouseup).toHaveLength(0);
@@ -136,7 +139,7 @@ describe.each([
     wrapper = undefined;
 
     expect(clear).toHaveBeenCalledTimes(1);
-    expect(removeListener).toHaveBeenCalledWith('mousemove', move, false);
+    expect(removeListener).toHaveBeenCalledWith('mousemove', picker[moveHandler], false);
     expect(removeListener).toHaveBeenCalledWith('mouseup', up, false);
     expect(picker.eventManager.events).toEqual({});
 

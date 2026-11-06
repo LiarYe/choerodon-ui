@@ -43,9 +43,13 @@ assert.strictEqual(webpackConfig.context, legacy.root);
 assert.deepStrictEqual(webpackConfig.resolveLoader.modules, [legacy.nodeModules]);
 assert.strictEqual(webpackConfig.resolveLoader.alias.babel, legacy.resolve('babel-loader'));
 assert.strictEqual(webpackConfig.resolve.alias.webpack, legacy.packageDirectory('webpack'));
-['react', 'react-dom', 'mobx', 'mobx-react'].forEach(name => {
+['react', 'react-dom', 'mobx', 'mobx-react', 'mobx-react-lite'].forEach(name => {
   assert.strictEqual(webpackConfig.resolve.alias[name], path.join(legacy.root, 'node_modules', name));
 });
+assert.strictEqual(
+  require.resolve('mobx-react-lite'),
+  require.resolve('mobx-react-lite', { paths: [path.dirname(require.resolve('mobx-react'))] }),
+);
 
 function checkRules(rules) {
   rules.forEach(rule => {

@@ -1,4 +1,3 @@
-import { computed } from 'mobx';
 import { ConfigContextValue } from 'choerodon-ui/lib/config-provider/ConfigContext';
 import DataSet from './DataSet';
 import ViewComponent, { ViewComponentProps } from '../core/ViewComponent';
@@ -18,7 +17,6 @@ export default class DataSetComponent<T extends DataSetComponentProps, C extends
     return this.observableProps.dataSet;
   }
 
-  @computed
   get lang(): Lang {
     const { lang } = this.observableProps;
     if (lang) {

@@ -1,6 +1,6 @@
 import React, { ReactNode } from 'react';
 import { observer } from 'mobx-react';
-import { action, observable, toJS } from 'mobx';
+import { action, observable, toJS, makeObservable } from 'mobx';
 import { ReactQuillProps } from 'react-quill/lib';
 import 'react-quill/dist/quill.snow.css';
 import isEqual from 'lodash/isEqual';
@@ -41,6 +41,16 @@ const defaultRichTextOptions: ReactQuillProps = {
 
 @observer
 export default class RichText extends FormField<RichTextProps> {
+  constructor(props, context) {
+    super(props, context);
+    if (!Object.prototype.hasOwnProperty.call(this, 'focused')) Object.assign(this, { focused: undefined });
+    makeObservable(this, {
+      focused: observable,
+      handleRichTextBlur: action.bound,
+      handleRichTextFocus: action.bound,
+    });
+  }
+
   static displayName = 'RichText';
 
   static Quill = BaseEditor.Quill;
@@ -58,7 +68,7 @@ export default class RichText extends FormField<RichTextProps> {
 
   editor: any;
 
-  @observable focused: boolean;
+  focused: boolean;
 
   toolbarId: string = randomWord(false, 32, 64);
 
@@ -83,15 +93,14 @@ export default class RichText extends FormField<RichTextProps> {
   }
 
   get border(): boolean | undefined {
-    return this.props.border;
+    return this.reactiveProps.border;
   }
 
-  
   showTooltip(e): boolean {
     if (this.showValidation === ShowValidation.tooltip) {
       const message = this.getTooltipValidationMessage();
       if (message) {
-        showValidationMessage(e, message, this.context.getTooltipTheme('validation'), this.context.getTooltipPlacement('validation'), this.getContextConfig);
+        showValidationMessage(e, message, this.reactiveContext.getTooltipTheme('validation'), this.reactiveContext.getTooltipPlacement('validation'), this.getContextConfig);
         return true;
       }
     }
@@ -155,10 +164,8 @@ export default class RichText extends FormField<RichTextProps> {
     super.componentWillReceiveProps(nextProps, nextContext);
   }
 
-  @autobind
-  @action
   handleRichTextBlur(props) {
-    const { onBlur = noop, defaultValue } = this.props;
+    const { onBlur = noop, defaultValue } = this.reactiveProps;
     this.focused = false;
     onBlur(props);
     const deltaOps = this.getValue() || defaultValue || [];
@@ -167,16 +174,14 @@ export default class RichText extends FormField<RichTextProps> {
     }
   }
 
-  @autobind
-  @action
   handleRichTextFocus(props) {
-    const { onFocus = noop } = this.props;
+    const { onFocus = noop } = this.reactiveProps;
     if (!this.disabled) this.focused = true;
     onFocus(props);
   }
 
   renderWrapper(): ReactNode {
-    const { defaultValue, dataSet } = this.props;
+    const { defaultValue, dataSet } = this.reactiveProps;
     this.rtOptions.readOnly = this.disabled || this.readOnly;
     const deltaOps = this.getValue() || defaultValue;
     return (

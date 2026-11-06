@@ -1,4 +1,3 @@
-import { action } from 'mobx';
 import { AxiosInstance, AxiosRequestConfig } from 'axios';
 import isString from 'lodash/isString';
 import { getConfig } from '../configure';
@@ -111,7 +110,6 @@ export class LookupCodeStore {
   }
 
   /** @deprecated */
-  @action
   clearCache() {
     // noop
   }

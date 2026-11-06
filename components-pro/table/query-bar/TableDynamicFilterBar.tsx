@@ -1,6 +1,7 @@
 ﻿import React, { cloneElement, Component, isValidElement, MouseEvent, ReactElement, ReactNode } from 'react';
 import { observer } from 'mobx-react';
-import { action, autorun, isArrayLike, observable, runInAction, toJS } from 'mobx';
+import { action, autorun, IReactionDisposer, observable, runInAction, toJS, makeObservable } from 'mobx';
+import isArrayLike from 'choerodon-ui/dataset/mobx-helper/isArrayLike';
 import uniq from 'lodash/uniq';
 import pull from 'lodash/pull';
 import noop from 'lodash/noop';
@@ -421,21 +422,21 @@ export default class TableDynamicFilterBar extends Component<TableDynamicFilterB
   /**
    * 控制添加筛选下拉显隐
    */
-  @observable fieldSelectHidden: boolean;
+  fieldSelectHidden: boolean;
 
   /**
    * 收起/展开
    */
-  @observable expand: boolean;
+  expand: boolean;
 
   /**
  * 弹窗显隐
  */
-  @observable visible: boolean;
+  visible: boolean;
 
-  @observable shouldLocateData: boolean;
+  shouldLocateData: boolean;
 
-  @observable showExpandIcon: boolean;
+  showExpandIcon: boolean;
 
   refAdvancedFilterContainer: Popover | null = null;
 
@@ -457,8 +458,29 @@ export default class TableDynamicFilterBar extends Component<TableDynamicFilterB
 
   menuInitPromise?: Promise<boolean>;
 
+  filterVisibleDisposer?: IReactionDisposer;
+
   constructor(props, context) {
     super(props, context);
+    if (!Object.prototype.hasOwnProperty.call(this, 'fieldSelectHidden')) Object.assign(this, { fieldSelectHidden: undefined });
+    if (!Object.prototype.hasOwnProperty.call(this, 'expand')) Object.assign(this, { expand: undefined });
+    if (!Object.prototype.hasOwnProperty.call(this, 'visible')) Object.assign(this, { visible: undefined });
+    if (!Object.prototype.hasOwnProperty.call(this, 'shouldLocateData')) Object.assign(this, { shouldLocateData: undefined });
+    if (!Object.prototype.hasOwnProperty.call(this, 'showExpandIcon')) Object.assign(this, { showExpandIcon: undefined });
+    makeObservable(this, {
+      fieldSelectHidden: observable,
+      expand: observable,
+      visible: observable,
+      shouldLocateData: observable,
+      showExpandIcon: observable,
+      handleMouseDownOut: action,
+      setConditionStatus: action.bound,
+      setOriginalConditionFields: action,
+      initConditionFields: action.bound,
+      getPrefix: action,
+      handleSelect: action,
+      handleUnSelect: action,
+    });
     runInAction(() => {
       this.fieldSelectHidden = true;
       this.expand = true;
@@ -498,11 +520,16 @@ export default class TableDynamicFilterBar extends Component<TableDynamicFilterB
     this.setFilterVisiable();
   }
 
-
   componentWillUnmount(): void {
+    if (this.filterVisibleDisposer) {
+      this.filterVisibleDisposer();
+      this.filterVisibleDisposer = undefined;
+    }
+    document.removeEventListener('mousedown', this.handleEmitFilterCancel);
+    document.removeEventListener('keydown', this.handleEmitFilterCancel);
+    document.removeEventListener('mousedown', this.handleMouseDownOut);
     const { fuzzyQueryOnly, dataSet } = this.props;
     if (!fuzzyQueryOnly) {
-      document.removeEventListener('mousedown', this.handleMouseDownOut);
       this.processDataSetListener(false);
       dataSet.setState(HASINIT, undefined)
     }
@@ -559,7 +586,6 @@ export default class TableDynamicFilterBar extends Component<TableDynamicFilterB
     }
   }
 
-  @action
   handleMouseDownOut = (e) => {
     if (this.refDropdown && !this.refDropdown.contains(e.target)) {
       this.fieldSelectHidden = true;
@@ -621,8 +647,6 @@ export default class TableDynamicFilterBar extends Component<TableDynamicFilterB
     }
   }
 
-  @autobind
-  @action
   setConditionStatus(value, orglValue?: object) {
     const { dataSet } = this.props;
     dataSet.setState(CONDITIONSTATUS, value);
@@ -632,7 +656,6 @@ export default class TableDynamicFilterBar extends Component<TableDynamicFilterB
     }
   }
 
-  @action
   setOriginalConditionFields = (code) => {
     const { queryDataSet, dataSet } = this.props;
     if (!code) {
@@ -756,8 +779,6 @@ export default class TableDynamicFilterBar extends Component<TableDynamicFilterB
    * 初始化勾选值、条件字段
    * @param props
    */
-  @autobind
-  @action
   initConditionFields(props) {
     const { dataSet: tableDS } = this.props;   
     const { dataSet, record, tableDs = tableDS } = props;
@@ -1025,7 +1046,6 @@ export default class TableDynamicFilterBar extends Component<TableDynamicFilterB
     ];
   }
 
-  @action
   getPrefix(): ReactNode {
     const { dynamicFilterBar, queryDataSet, dataSet } = this.props;
     const { prefixCls } = this;
@@ -1103,7 +1123,6 @@ export default class TableDynamicFilterBar extends Component<TableDynamicFilterB
    * @param code
    * @param record
    */
-  @action
   handleSelect = (code, record?: Record) => {
     const { dataSet } = this.props;
     const codes = Array.isArray(code) ? code : [code];
@@ -1121,7 +1140,6 @@ export default class TableDynamicFilterBar extends Component<TableDynamicFilterB
    * 取消勾选
    * @param code
    */
-  @action
   handleUnSelect = (code) => {
     const { queryDataSet, dataSet } = this.props;
     const codes = Array.isArray(code) ? code : [code];
@@ -1328,7 +1346,10 @@ export default class TableDynamicFilterBar extends Component<TableDynamicFilterB
 
   @autobind
   setFilterVisiable() {
-    autorun(() => {
+    if (this.filterVisibleDisposer) {
+      this.filterVisibleDisposer();
+    }
+    this.filterVisibleDisposer = autorun(() => {
       if (this.visible) {
         document.addEventListener('mousedown', this.handleEmitFilterCancel);
         document.addEventListener('keydown', this.handleEmitFilterCancel);
@@ -1358,7 +1379,7 @@ export default class TableDynamicFilterBar extends Component<TableDynamicFilterB
     }
     return false;
   }
-  
+
   @autobind
   handleEmitFilterCancel(e: Event | KeyboardEvent) {
     const { target, type } = e;
@@ -1815,7 +1836,7 @@ export default class TableDynamicFilterBar extends Component<TableDynamicFilterB
     const tlsKey = getConfig('tlsKey');
     if (queryDataSet) {
       const { fields, props: { fields: propFields = [] } } = queryDataSet;
-      const cloneFields: Map<string, Field> = fields.toJS();
+      const cloneFields: Map<string, Field> = new Map(fields);
       propFields.forEach(({ name }) => {
         if (name) {
           const field = cloneFields.get(name);

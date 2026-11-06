@@ -2,7 +2,7 @@ import React, { CSSProperties, ReactNode } from 'react';
 import moment, { Moment } from 'moment';
 import classNames from 'classnames';
 import throttle from 'lodash/throttle';
-import { action, computed, observable } from 'mobx';
+import { action, observable, makeObservable } from 'mobx';
 import { observer } from 'mobx-react';
 import noop from 'lodash/noop';
 import autobind from '../_util/autobind';
@@ -27,6 +27,15 @@ export interface TimesViewProps extends DateViewProps {
 
 @observer
 export default class TimesView<T extends TimesViewProps> extends DaysView<T> {
+  constructor(props, context) {
+    super(props, context);
+    if (!Object.prototype.hasOwnProperty.call(this, 'currentUnit')) this.currentUnit = undefined;
+    makeObservable(this, {
+      currentUnit: observable,
+      changeUnit: action,
+    });
+  }
+
   static displayName = 'TimesView';
 
   static defaultProps = {
@@ -36,7 +45,7 @@ export default class TimesView<T extends TimesViewProps> extends DaysView<T> {
 
   static type = FieldType.time;
 
-  @observable currentUnit?: TimeUnit;
+  currentUnit?: TimeUnit;
 
   panel: HTMLDivElement | null;
 
@@ -52,31 +61,26 @@ export default class TimesView<T extends TimesViewProps> extends DaysView<T> {
     return false;
   }
 
-  @computed
   get showHour(): boolean {
     const { format } = this.observableProps;
     return format.indexOf('H') > -1 || format.indexOf('h') > -1 || format.indexOf('k') > -1;
   }
 
-  @computed
   get showMinute(): boolean {
     const { format } = this.observableProps;
     return format.indexOf('m') > -1;
   }
 
-  @computed
   get showSecond(): boolean {
     const { format } = this.observableProps;
     return format.indexOf('s') > -1;
   }
 
-  @computed
   get use12Hours(): boolean {
     const { format } = this.observableProps;
     return format.indexOf('h') > -1 || format.indexOf('a') > -1 || format.indexOf('A') > -1;
   }
 
-  @computed
   get timeUnitQueue(): TimeUnit[] {
     const { showHour, showMinute, showSecond, use12Hours } = this;
     const queue: TimeUnit[] = [];
@@ -95,14 +99,12 @@ export default class TimesView<T extends TimesViewProps> extends DaysView<T> {
     return queue;
   }
 
-  @computed
   get barStyle(): CSSProperties {
     return {
       width: `${100 / this.timeUnitQueue.length}%`,
     };
   }
 
-  @computed
   get activeStyle(): CSSProperties {
     const { timeUnitQueue } = this;
     const width = 100 / timeUnitQueue.length;
@@ -178,7 +180,7 @@ export default class TimesView<T extends TimesViewProps> extends DaysView<T> {
   handleKeyDownLeft(e) {
     stopEvent(e);
     if (e.altKey) {
-      if (this.props.mode !== ViewMode.time) {
+      if (this.reactiveProps.mode !== ViewMode.time) {
         this.changeViewMode(ViewMode.dateTime);
       }
     } else {
@@ -196,12 +198,12 @@ export default class TimesView<T extends TimesViewProps> extends DaysView<T> {
   handleKeyDownUp(e) {
     stopEvent(e);
     const unit = this.getCurrentUnit();
-    const { disabledTimeLoopRoll } = this.props;
+    const { disabledTimeLoopRoll } = this.reactiveProps;
     let updateDate;
     if (unit === TimeUnit.a) {
       updateDate = this.getCloneDate().subtract(12, TimeUnit.hour);
     } else {
-      const { step } = this.props;
+      const { step } = this.reactiveProps;
       const unitStep = step[stepMapping[unit]] || 1;
       const date = this.getCloneDate();
       const parentUnit = unit === TimeUnit.second ? TimeUnit.minute : unit === TimeUnit.minute ? TimeUnit.hour : null;
@@ -228,12 +230,12 @@ export default class TimesView<T extends TimesViewProps> extends DaysView<T> {
   handleKeyDownDown(e) {
     stopEvent(e);
     const unit = this.getCurrentUnit();
-    const { disabledTimeLoopRoll } = this.props;
+    const { disabledTimeLoopRoll } = this.reactiveProps;
     let updateDate;
     if (unit === TimeUnit.a) {
       updateDate = this.getCloneDate().add(12, TimeUnit.hour);
     } else {
-      const { step } = this.props;
+      const { step } = this.reactiveProps;
       const unitStep = step[stepMapping[unit]] || 1;
       const date = this.getCloneDate();
       const parentUnit = unit === TimeUnit.second ? TimeUnit.minute : unit === TimeUnit.minute ? TimeUnit.hour : null;
@@ -273,7 +275,7 @@ export default class TimesView<T extends TimesViewProps> extends DaysView<T> {
     if (unit === TimeUnit.a) {
       this.changeCursorDate(this.getCloneDate().set(TimeUnit.hour, 12));
     } else {
-      const { step } = this.props;
+      const { step } = this.reactiveProps;
       const unitStep = step[stepMapping[unit]] || 1;
       const size = unit === TimeUnit.hour ? this.use12Hours ? 12 : 24 : 60;
       this.changeCursorDate(this.getCloneDate().set(unit, size - unitStep), ViewMode.time);
@@ -308,7 +310,7 @@ export default class TimesView<T extends TimesViewProps> extends DaysView<T> {
   renderHeader(): ReactNode {
     const {
       prefixCls,
-      props: { date, mode },
+      reactiveProps: { date, mode },
       observableProps: { format },
     } = this;
     if (mode === ViewMode.time) {
@@ -336,16 +338,16 @@ export default class TimesView<T extends TimesViewProps> extends DaysView<T> {
   }
 
   renderFooter(): ReactNode {
-    if (this.props.datetimeSide) {
+    if (this.reactiveProps.datetimeSide) {
       return;
     }
-    const { prefixCls, props: { disabledNow, okButton } } = this;
+    const { prefixCls, reactiveProps: { disabledNow, okButton } } = this;
     const footerProps = {
       className: classNames(`${prefixCls}-footer-now-btn`, {
         [`${prefixCls}-now-disabled`]: disabledNow,
       }),
       onClick: !disabledNow ? this.choose.bind(this, moment(), false) : noop,
-      hidden: this.props.datetimeSide,
+      hidden: this.reactiveProps.datetimeSide,
     };
 
     return (
@@ -357,7 +359,7 @@ export default class TimesView<T extends TimesViewProps> extends DaysView<T> {
           okButton && (
             <a
               className={`${prefixCls}-footer-view-select`}
-              onClick={this.choose.bind(this, this.props.date, false)}
+              onClick={this.choose.bind(this, this.reactiveProps.date, false)}
             >
               {$l('DatePicker', 'ok')}
             </a>
@@ -401,7 +403,7 @@ export default class TimesView<T extends TimesViewProps> extends DaysView<T> {
     const {
       prefixCls,
       use12Hours,
-      props: { date, renderer = this.renderCell, isValidDate = alwaysValidDate, step, onDateMouseLeave },
+      reactiveProps: { date, renderer = this.renderCell, isValidDate = alwaysValidDate, step, onDateMouseLeave },
       observableProps: { format },
     } = this;
     const isUpperCase = format.indexOf('A') > -1;
@@ -474,7 +476,6 @@ export default class TimesView<T extends TimesViewProps> extends DaysView<T> {
     return timeUnitQueue[timeUnitQueue.indexOf(this.getCurrentUnit()) + 1];
   }
 
-  @action
   changeUnit(unit?: TimeUnit) {
     if (unit !== undefined && unit !== this.currentUnit) {
       this.currentUnit = unit;
@@ -482,7 +483,7 @@ export default class TimesView<T extends TimesViewProps> extends DaysView<T> {
   }
 
   choose(date: Moment, expand?: boolean) {
-    const { mode } = this.props;
+    const { mode } = this.reactiveProps;
     super.choose(date, expand);
     if (mode !== ViewMode.time) {
       this.changeCursorDate(date);

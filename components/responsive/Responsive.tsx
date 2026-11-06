@@ -1,7 +1,7 @@
 import { PureComponent, ReactNode } from 'react';
 import isObject from 'lodash/isObject';
 import debounce from 'lodash/debounce';
-import { isArrayLike } from 'mobx';
+import isArrayLike from 'choerodon-ui/dataset/mobx-helper/isArrayLike';
 import { matchMediaPolifill } from '../_util/mediaQueryListPolyfill';
 import { Breakpoint } from './enum';
 

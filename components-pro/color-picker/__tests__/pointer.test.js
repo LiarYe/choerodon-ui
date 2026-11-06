@@ -3,6 +3,7 @@ import { mount } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import { configure } from 'mobx';
 import ColorPicker from '..';
+import observeAction from './observeAction';
 
 describe('ColorPicker measured pointer synchronization', () => {
   let wrapper;
@@ -152,7 +153,7 @@ describe('ColorPicker measured pointer synchronization', () => {
     expectPointers(picker, { r: 102, g: 51, b: 153, a: 0.25 });
     expect(onChange).toHaveBeenCalledTimes(1);
     const commit = jest.spyOn(picker, 'prepareSetValue');
-    const setColor = jest.spyOn(picker, 'setColor');
+    const setColor = observeAction(picker, 'setColor');
     picker.getPopupContent();
     picker.syncPointers();
     flush();

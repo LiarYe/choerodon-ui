@@ -8,8 +8,22 @@ export type AttachmentCache = { count?: number | undefined, attachments?: Attach
 
 type callbackArgs = [AttachmentBatchFetchCount, boolean | undefined];
 
-const publicKeys = new WeakMap<AttachmentBatchFetchCount, symbol>();
-const privateKeys = new WeakMap<AttachmentBatchFetchCount, symbol>();
+const loaderKeys = new WeakMap<AttachmentBatchFetchCount, number>();
+let nextLoaderKey = 0;
+
+function getScopeKey(options: AttachmentValue, loader: AttachmentBatchFetchCount): string {
+  let loaderKey = loaderKeys.get(loader);
+  if (loaderKey === undefined) {
+    loaderKey = nextLoaderKey++;
+    loaderKeys.set(loader, loaderKey);
+  }
+  const { isPublic, bucketName, bucketDirectory, storageCode } = options;
+  return JSON.stringify([loaderKey, isPublic === undefined ? null : isPublic, bucketName, bucketDirectory, storageCode]);
+}
+
+function getCacheKey(options: AttachmentValue, loader: AttachmentBatchFetchCount): string {
+  return JSON.stringify([getScopeKey(options, loader), options.attachmentUUID]);
+}
 
 export class AttachmentStore {
 
@@ -22,35 +36,25 @@ export class AttachmentStore {
     { maxAge: 60000, max: 100 },
   );
 
-  fetchCountInBatch(options: AttachmentValue, field?: Field | undefined): Promise<number | undefined> {
-    const { batchFetchCount } = getGlobalConfig('attachment', field);
+  fetchCountInBatch(options: AttachmentValue, field?: Field | undefined, loader?: AttachmentBatchFetchCount): Promise<number | undefined> {
+    const batchFetchCount = loader || getGlobalConfig('attachment', field).batchFetchCount;
     if (batchFetchCount) {
       const { isPublic, attachmentUUID } = options;
-      return this.merger.add(attachmentUUID, () => {
-        if (isPublic) {
-          let publicKey = publicKeys.get(batchFetchCount);
-          if (!publicKey) {
-            publicKey = Symbol('PUBLIC_KEY');
-            publicKeys.set(batchFetchCount, publicKey);
-          }
-          return publicKey;
-        }
-        let privateKey = privateKeys.get(batchFetchCount);
-        if (!privateKey) {
-          privateKey = Symbol('PRIVATE_KEY');
-          privateKeys.set(batchFetchCount, privateKey);
-        }
-        return privateKey;
-      }, [batchFetchCount, isPublic], options);
+      return this.merger.add(attachmentUUID, () => getScopeKey(options, batchFetchCount),
+        [batchFetchCount, isPublic], options, undefined, getCacheKey(options, batchFetchCount));
     }
     return Promise.resolve(undefined);
   }
 
-  updateCacheCount(code: string, count?: number): void {
+  updateCacheCount(code: string | AttachmentValue, count?: number, field?: Field, loader?: AttachmentBatchFetchCount): void {
+    const batchFetchCount = loader || getGlobalConfig('attachment', field).batchFetchCount;
+    if (!batchFetchCount) return;
+    const options = typeof code === 'string' ? { attachmentUUID: code } : code;
+    const key = getCacheKey(options, batchFetchCount);
     const { merger: { cache } } = this;
-    const cacheCount = cache.get(code);
+    const cacheCount = cache.get(key);
     if (cacheCount !== count) {
-      cache.set(code, count);
+      cache.set(key, count);
     }
   }
 

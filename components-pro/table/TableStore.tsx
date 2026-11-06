@@ -1,5 +1,5 @@
 import React, { Children, CSSProperties, isValidElement, Key, ReactNode } from 'react';
-import { action, computed, get, IReactionDisposer, observable, ObservableMap, reaction, runInAction, set } from 'mobx';
+import { action, computed, get, IReactionDisposer, observable, ObservableMap, reaction, runInAction, set, makeObservable } from 'mobx';
 import classNames from 'classnames';
 import { DragUpdate } from 'react-beautiful-dnd';
 import sortBy from 'lodash/sortBy';
@@ -28,6 +28,7 @@ import { CHILDREN_PAGE_INFO, QUERY_CANCELABLE, TABLE_SHOW_REMOVED_ROW } from 'ch
 import Column, { ColumnDefaultProps, ColumnProps, defaultAggregationRenderer } from './Column';
 import CustomizationSettings from './customization-settings/CustomizationSettings';
 import isFragment from '../_util/isFragment';
+import observableColumn from '../_util/observableColumn';
 import DataSet from '../data-set/DataSet';
 import Record from '../data-set/Record';
 import ObserverCheckBox, { CheckBoxProps } from '../check-box/CheckBox';
@@ -906,17 +907,18 @@ export function normalizeGroupColumns(
     [[], [], [], false];
   if (hasHeaderGroup) {
     const groupedColumns = [...leftColumnGroupedColumns, ...columnGroupedColumns];
+    const headerGroupedColumns = getHeaderGroupedColumns(tableStore, tableStore.groupedDataWithHeader, headerTableGroups!, [...leftOriginalColumns, ...originalColumns, ...rightOriginalColumns], dataSet, groupedColumns, customizedColumns);
     return [
-      groupedColumns,
-      getHeaderGroupedColumns(tableStore, tableStore.groupedDataWithHeader, headerTableGroups!, [...leftOriginalColumns, ...originalColumns, ...rightOriginalColumns], dataSet, groupedColumns, customizedColumns),
-      rightColumnGroupedColumns,
+      groupedColumns.map(observableColumn),
+      headerGroupedColumns.map(observableColumn),
+      rightColumnGroupedColumns.map(observableColumn),
       hasAggregationColumnGroup || hasAggregationColumn,
     ];
   }
   return [
-    [...leftColumnGroupedColumns, ...leftOriginalColumns],
-    [...columnGroupedColumns, ...originalColumns],
-    [...rightOriginalColumns, ...rightColumnGroupedColumns],
+    [...leftColumnGroupedColumns, ...leftOriginalColumns].map(observableColumn),
+    [...columnGroupedColumns, ...originalColumns].map(observableColumn),
+    [...rightOriginalColumns, ...rightColumnGroupedColumns].map(observableColumn),
     hasAggregationColumnGroup || hasAggregationColumn,
   ];
 }
@@ -959,65 +961,65 @@ export default class TableStore {
 
   customizedLoaded?: boolean;
 
-  @observable props: TableProps;
+  props: TableProps;
 
-  @observable customized: TableCustomized;
+  customized: TableCustomized;
 
-  @observable tempCustomized: TableCustomized;
+  tempCustomized: TableCustomized;
 
-  @observable loading?: boolean;
+  loading?: boolean;
 
-  @observable leftOriginalColumns: ColumnProps[];
+  leftOriginalColumns: ColumnProps[];
 
-  @observable originalColumns: ColumnProps[];
+  originalColumns: ColumnProps[];
 
-  @observable rightOriginalColumns: ColumnProps[];
+  rightOriginalColumns: ColumnProps[];
 
-  @observable hasAggregationColumn?: boolean;
+  hasAggregationColumn?: boolean;
 
-  @observable calcBodyHeight: number | undefined;
+  calcBodyHeight: number | undefined;
 
-  @observable width?: number;
+  width?: number;
 
-  @observable lastScrollTop: number;
+  lastScrollTop: number;
 
-  @observable lastScrollLeft: number;
+  lastScrollLeft: number;
 
-  @observable lockColumnsBodyRowsHeight: any;
+  lockColumnsBodyRowsHeight: any;
 
-  @observable lockColumnsFootRowsHeight: any;
+  lockColumnsFootRowsHeight: any;
 
-  @observable lockColumnsHeadRowsHeight: any;
+  lockColumnsHeadRowsHeight: any;
 
-  @observable expandedRows: (string | number)[];
+  expandedRows: (string | number)[];
 
-  @observable hoverRow?: Record;
+  hoverRow?: Record;
 
-  @observable rowClicked?: boolean;
+  rowClicked?: boolean;
 
-  @observable currentEditorName?: string;
+  currentEditorName?: string;
 
-  @observable styledHidden?: boolean;
+  styledHidden?: boolean;
 
-  @observable customizedActiveKey: string[];
+  customizedActiveKey: string[];
 
   mouseBatchChooseStartId = 0;
 
   mouseBatchChooseEndId = 0;
 
-  @observable mouseBatchChooseState: boolean;
+  mouseBatchChooseState: boolean;
 
-  @observable mouseBatchChooseIdList: number[];
+  mouseBatchChooseIdList: number[];
 
-  @observable columnResizing?: boolean;
+  columnResizing?: boolean;
 
-  @observable scrollPosition: ScrollPosition;
+  scrollPosition: ScrollPosition;
 
   inBatchExpansion = false;
 
   performanceOn = false;
 
-  @observable comboBarStatus: boolean;
+  comboBarStatus: boolean;
 
   lastSelected?: Record;
 
@@ -1028,35 +1030,35 @@ export default class TableStore {
     renderEnd: number;
   } = { renderStart: 0, renderEnd: 0 };
 
-  @observable siblingHeihgt?: { before?: number; after?: number };
+  siblingHeihgt?: { before?: number; after?: number };
 
-  @observable parentHeight?: number | undefined;
+  parentHeight?: number | undefined;
 
-  @observable parentPaddingTop?: number | undefined;
+  parentPaddingTop?: number | undefined;
 
-  @observable screenHeight: number;
+  screenHeight: number;
 
-  @observable headerHeight: number;
+  headerHeight: number;
 
-  @observable footerHeight: number;
+  footerHeight: number;
 
-  @observable headerFilter?: { fieldName?: string; filterText?: any; filter?: boolean | ((props: { record: Record; filterText?: string }) => boolean) }[];
+  headerFilter?: { fieldName?: string; filterText?: any; filter?: boolean | ((props: { record: Record; filterText?: string }) => boolean) }[];
 
   nextRenderColIndex?: [number, number];
 
   prevRenderColIndex?: [number, number];
 
-  @observable startChooseCell: { rowIndex: number; colIndex: number; target: HTMLElement } | null;
+  startChooseCell: { rowIndex: number; colIndex: number; target: HTMLElement } | null;
 
-  @observable endChooseCell: { rowIndex: number; colIndex: number; target: HTMLElement } | null;
+  endChooseCell: { rowIndex: number; colIndex: number; target: HTMLElement } | null;
 
-  @observable isFinishChooseCell: boolean;
+  isFinishChooseCell: boolean;
 
-  @observable isCopyPristine: boolean;
+  isCopyPristine: boolean;
 
-  @observable shiftKey: boolean;
+  shiftKey: boolean;
 
-  @observable autoScrollRAF: number | null;
+  autoScrollRAF: number | null;
 
   copyChooseCleanup?: () => void;
 
@@ -1064,17 +1066,17 @@ export default class TableStore {
 
   renderedCellNode: WeakMap<Record, Map<Key, HTMLTableCellElement>> = new WeakMap();
 
-  @observable arrangeValue: ArrangeValue;
+  arrangeValue: ArrangeValue;
 
-  @observable dragCorner: boolean;
+  dragCorner: boolean;
 
-  @observable dragCornerPosition: { x: number; y: number };
+  dragCornerPosition: { x: number; y: number };
 
-  @observable batchExpandRowNumber: number;
+  batchExpandRowNumber: number;
 
-  @observable selectedDragRows: Record[];
+  selectedDragRows: Record[];
 
-  @observable dragUpdateState?: DragUpdate;
+  dragUpdateState?: DragUpdate;
 
   get styleHeight(): string | number | undefined {
     const { autoHeight, props: { style }, parentPaddingTop } = this;
@@ -1091,7 +1093,6 @@ export default class TableStore {
     return style && toPx(style.minHeight, this.getRelationSize);
   }
 
-  @computed
   get computedHeight(): number | undefined {
     if (this.heightChangeable) {
       const {
@@ -1132,7 +1133,6 @@ export default class TableStore {
     return otherHeight;
   }
 
-  @computed
   get height(): number | undefined {
     if (!this.isBodyExpanded) {
       return undefined;
@@ -1192,7 +1192,6 @@ export default class TableStore {
     return resolvedConfig || {};
   }
 
-  @computed
   get duplicatePrimaryKeyInfo(): { duplicateKeys: string[]; duplicateRecords: Set<Record> } {
     const duplicateKeyConfig = this.duplicateKeyConfig;
     if (!duplicateKeyConfig.disable && !duplicateKeyConfig.showWarning) {
@@ -1238,7 +1237,7 @@ export default class TableStore {
       if ('customizable' in this.props) {
         return this.props.customizable;
       }
-      return this.getConfig('tableCustomizable') || this.node.context.getCustomizable('Table');
+      return this.getConfig('tableCustomizable') || this.node.reactiveContext.getCustomizable('Table');
     }
     return false;
   }
@@ -1267,7 +1266,6 @@ export default class TableStore {
     return this.customized.aggregationExpandType || 'cell';
   }
 
-  @computed
   get autoHeight(): { type: TableAutoHeightType; diff: number } | undefined {
     const { autoHeight } = this.props;
     if (autoHeight) {
@@ -1373,7 +1371,6 @@ export default class TableStore {
     return 3;
   }
 
-
   updateRenderZonePosition(): [number, number] {
     // 获取表格坐标显示范围
     if (!this.width) {
@@ -1413,8 +1410,6 @@ export default class TableStore {
 
   }
 
-
-  @computed
   get virtualColumnRange(): {
     left?: [number, number];
     center: [number, number];
@@ -1486,17 +1481,16 @@ export default class TableStore {
     return this.getConfig('tableColumnResizeTransition');
   }
 
-  @observable actualRows: number | undefined;
+  actualRows: number | undefined;
 
-  @observable rowMetaData?: VirtualRowMetaData[] | undefined;
+  rowMetaData?: VirtualRowMetaData[] | undefined;
 
   lastMeasuredIndex = 0;
 
-  @observable scrolling: boolean | undefined;
+  scrolling: boolean | undefined;
 
-  @observable cellVerticalSize: number | undefined;
+  cellVerticalSize: number | undefined;
 
-  @computed
   get virtualRowHeight(): number {
     const { rowHeight, cellVerticalSize = 3 } = this;
     const normalRowHeight = scaleSize(isNumber(rowHeight) ? rowHeight + cellVerticalSize : 30 + cellVerticalSize);
@@ -1544,22 +1538,18 @@ export default class TableStore {
     return Math.round(virtualEstimatedRows * virtualRowHeight);
   }
 
-  @computed
   get virtualVisibleStartIndex(): number {
     return getVisibleStartIndex(this);
   }
 
-  @computed
   get virtualVisibleEndIndex(): number {
     return getVisibleEndIndex(this);
   }
 
-  @computed
   get virtualStartIndex(): number {
     return getStartIndex(this);
   }
 
-  @computed
   get virtualEndIndex(): number {
     return getEndIndex(this);
   }
@@ -1867,7 +1857,6 @@ export default class TableStore {
   //   return this.props.pristine;
   // }
 
-  @computed
   get currentEditRecord(): Record | undefined {
     return this.dataSet.find(record => record.editing === true);
   }
@@ -1889,11 +1878,11 @@ export default class TableStore {
     });
   }
 
-  @observable showCachedSelection?: boolean;
+  showCachedSelection?: boolean;
 
-  @observable defaultRecordCachedType?: RecordCachedType;
+  defaultRecordCachedType?: RecordCachedType;
 
-  @observable recordCachedType?: RecordCachedType;
+  recordCachedType?: RecordCachedType;
 
   get computedRecordCachedType(): RecordCachedType | undefined {
     return this.recordCachedType || this.defaultRecordCachedType;
@@ -1949,7 +1938,6 @@ export default class TableStore {
     return false;
   }
 
-  @computed
   get overflowX(): boolean {
     const { width } = this;
     if (width !== undefined) {
@@ -1958,7 +1946,6 @@ export default class TableStore {
     return false;
   }
 
-  @computed
   get overflowY(): boolean {
     const { bodyHeight, height } = this;
     return (
@@ -1968,7 +1955,6 @@ export default class TableStore {
     );
   }
 
-  @computed
   get hasRowGroups(): boolean {
     if (this.cachedData.length) {
       return true;
@@ -1980,7 +1966,6 @@ export default class TableStore {
     return false;
   }
 
-  @computed
   get headerTableGroups(): TableGroup[] {
     const { groups } = this;
     return groups ? groups.filter(({ type }) => type === GroupType.header) : [];
@@ -1994,7 +1979,6 @@ export default class TableStore {
     return <CustomizationColumnHeader customizedBtn={this.customizedBtn} onHeaderClick={this.openCustomizationModal} />;
   }
 
-  @computed
   get customizedColumn(): ColumnProps | undefined {
     if (this.customizable && !this.customizedBtn && (!this.rowDraggable || this.dragColumnAlign !== DragColumnAlign.right)) {
       const { customizedColumnProps = {} } = this.props;
@@ -2015,7 +1999,6 @@ export default class TableStore {
     return undefined;
   }
 
-  @computed
   get expandColumn(): ColumnProps | undefined {
     if (this.expandIconAsCell) {
       return {
@@ -2030,7 +2013,6 @@ export default class TableStore {
     return undefined;
   }
 
-  @computed
   get rowNumberColumn(): ColumnProps | undefined {
     const { rowNumber, rowNumberColumnProps = {} } = this.props;
     if (rowNumber) {
@@ -2052,7 +2034,6 @@ export default class TableStore {
     return undefined;
   }
 
-  @computed
   get selectionColumn(): ColumnProps | undefined {
     if (this.hasRowBox) {
       const { dataSet, prefixCls } = this;
@@ -2091,7 +2072,6 @@ export default class TableStore {
     return undefined;
   }
 
-  @computed
   get comboQueryColumn(): ColumnProps | undefined {
     if (this.queryBar === TableQueryBarType.comboBar) {
       const { prefixCls, props: { queryBarProps } } = this;
@@ -2131,7 +2111,6 @@ export default class TableStore {
     return undefined;
   }
 
-  @computed
   get draggableColumn(): ColumnProps | undefined {
     const { dragColumnAlign, rowDraggable, prefixCls } = this;
     if (dragColumnAlign && rowDraggable) {
@@ -2157,7 +2136,6 @@ export default class TableStore {
     return undefined;
   }
 
-  @computed
   get leftColumns(): ColumnProps[] {
     const { dragColumnAlign, leftOriginalColumns, expandColumn, expandIconColumnIndex, draggableColumn, rowNumberColumn, selectionColumn, comboQueryColumn } = this;
     const rowSelectCols = rowNumberColumn && (rowNumberColumn.rowNumberIndex || 0) > 0 ? [
@@ -2173,10 +2151,9 @@ export default class TableStore {
       ...rowSelectCols,
       comboQueryColumn,
       ...leftOriginalColumns,
-    ].filter<ColumnProps>(columnFilter));
+    ].filter<ColumnProps>(columnFilter).map(observableColumn));
   }
 
-  @computed
   get rightColumns(): ColumnProps[] {
     const { dragColumnAlign, rightOriginalColumns, draggableColumn, customizedColumn, selectionColumn } = this;
     return observable.array([
@@ -2184,10 +2161,9 @@ export default class TableStore {
       dragColumnAlign === DragColumnAlign.right ? draggableColumn : undefined,
       selectionColumn && selectionColumn.lock === ColumnLock.right ? selectionColumn : undefined,
       customizedColumn,
-    ].filter<ColumnProps>(columnFilter));
+    ].filter<ColumnProps>(columnFilter).map(observableColumn));
   }
 
-  @computed
   get columns(): ColumnProps[] {
     const { leftColumns, rightColumns, selectionColumn, expandColumn, expandIconColumnIndex, props: { rowBoxPlacement } } = this;
     const originalColumns = this.originalColumns.slice();
@@ -2208,43 +2184,34 @@ export default class TableStore {
       }
       allColumns.splice(expandIconColumnIndex, 0, { ...expandColumn, lock });
     }
-    return observable.array([
-      ...allColumns,
-    ]);
+    return observable.array(allColumns.map(observableColumn));
   }
 
-  @computed
   get columnGroups(): ColumnGroups {
     return new ColumnGroups(this.columns, this);
   }
 
-  @computed
   get leftColumnGroups(): ColumnGroups {
     return new ColumnGroups(this.leftColumns, this);
   }
 
-  @computed
   get rightColumnGroups(): ColumnGroups {
     return new ColumnGroups(this.rightColumns, this);
   }
 
-  @computed
   get leafNamedColumns(): ColumnProps[] {
     return this.columnGroups.allLeafs.reduce<ColumnProps[]>((list, { column }) => column.name ? list.concat(column) : list, []);
   }
 
-  @computed
   get hasEmptyWidthColumn(): boolean {
     return this.columnGroups.leafs.some(({ column }) => isNil(get(column, 'width')));
   }
 
-  @computed
   get getLastEmptyWidthColumn(): ColumnProps | undefined {
     const emptyWidthColumns = this.columnGroups.leafs.filter(({ column }) => isNil(get(column, 'width')));
     return emptyWidthColumns.length ? emptyWidthColumns[emptyWidthColumns.length - 1].column : undefined;
   }
 
-  @computed
   get hasCheckFieldColumn(): boolean {
     const { checkField } = this.dataSet.props;
     if (checkField) {
@@ -2273,18 +2240,17 @@ export default class TableStore {
     return this.isAnyColumnsLeftLock || this.isAnyColumnsRightLock;
   }
 
-  @computed
   get isCombinedColumn(): boolean {
     const columns = this.columns;
     const combinedColumn = columns.find(column => !column.aggregation && column.children && column.children.length > 0);
     return !isNil(combinedColumn);
   }
 
-  @observable groups: TableGroup[];
+  groups: TableGroup[];
 
-  @observable groupedData: Group[];
+  groupedData: Group[];
 
-  @observable groupedDataWithHeader: Group[];
+  groupedDataWithHeader: Group[];
 
   get cachedDataInType(): Record[] {
     const { dataSet, showCachedSelection, computedRecordCachedType = RecordCachedType.selected } = this;
@@ -2312,7 +2278,6 @@ export default class TableStore {
     return [];
   }
 
-  @computed
   get currentData(): Record[] {
     const { pristine, filter: recordFilter, treeFilter } = this.props;
     const { dataSet, isTree, headerFilter: headerFilterArr } = this;
@@ -2377,7 +2342,6 @@ export default class TableStore {
     return treeFilter;
   }
 
-  @computed
   get data(): Record[] {
     return [...this.cachedData, ...this.currentData];
   }
@@ -2389,7 +2353,6 @@ export default class TableStore {
       (!this.duplicateKeyConfig.disable || !duplicateRecords.has(record));
   }
 
-  @computed
   get cachedIndeterminate(): boolean {
     const { dataSet, showCachedSelection, selectionFilter } = this;
     if (dataSet) {
@@ -2402,7 +2365,6 @@ export default class TableStore {
     return false;
   }
 
-  @computed
   get allCachedChecked(): boolean {
     const { dataSet, showCachedSelection, selectionFilter } = this;
     if (dataSet) {
@@ -2415,7 +2377,6 @@ export default class TableStore {
     return false;
   }
 
-  @computed
   get currentIndeterminate(): boolean {
     const { dataSet, selectionFilter } = this;
     if (dataSet) {
@@ -2427,8 +2388,6 @@ export default class TableStore {
     return false;
   }
 
-
-  @computed
   get allCurrentChecked(): boolean {
     const { dataSet, selectionFilter } = this;
     if (dataSet) {
@@ -2440,7 +2399,6 @@ export default class TableStore {
     return false;
   }
 
-  @computed
   get indeterminate(): boolean {
     const { showCachedSelection } = this;
     if (showCachedSelection) {
@@ -2454,7 +2412,6 @@ export default class TableStore {
     return this.currentIndeterminate;
   }
 
-  @computed
   get allChecked(): boolean {
     const { showCachedSelection } = this;
     if (showCachedSelection) {
@@ -2588,6 +2545,184 @@ export default class TableStore {
   });
 
   constructor(node: Table) {
+    if (!Object.prototype.hasOwnProperty.call(this, 'props')) Object.assign(this, { props: undefined });
+    if (!Object.prototype.hasOwnProperty.call(this, 'customized')) Object.assign(this, { customized: undefined });
+    if (!Object.prototype.hasOwnProperty.call(this, 'tempCustomized')) Object.assign(this, { tempCustomized: undefined });
+    if (!Object.prototype.hasOwnProperty.call(this, 'loading')) this.loading = undefined;
+    if (!Object.prototype.hasOwnProperty.call(this, 'leftOriginalColumns')) Object.assign(this, { leftOriginalColumns: undefined });
+    if (!Object.prototype.hasOwnProperty.call(this, 'originalColumns')) Object.assign(this, { originalColumns: undefined });
+    if (!Object.prototype.hasOwnProperty.call(this, 'rightOriginalColumns')) Object.assign(this, { rightOriginalColumns: undefined });
+    if (!Object.prototype.hasOwnProperty.call(this, 'hasAggregationColumn')) this.hasAggregationColumn = undefined;
+    if (!Object.prototype.hasOwnProperty.call(this, 'calcBodyHeight')) this.calcBodyHeight = undefined;
+    if (!Object.prototype.hasOwnProperty.call(this, 'width')) this.width = undefined;
+    if (!Object.prototype.hasOwnProperty.call(this, 'lastScrollTop')) Object.assign(this, { lastScrollTop: undefined });
+    if (!Object.prototype.hasOwnProperty.call(this, 'lastScrollLeft')) Object.assign(this, { lastScrollLeft: undefined });
+    if (!Object.prototype.hasOwnProperty.call(this, 'lockColumnsBodyRowsHeight')) this.lockColumnsBodyRowsHeight = undefined;
+    if (!Object.prototype.hasOwnProperty.call(this, 'lockColumnsFootRowsHeight')) this.lockColumnsFootRowsHeight = undefined;
+    if (!Object.prototype.hasOwnProperty.call(this, 'lockColumnsHeadRowsHeight')) this.lockColumnsHeadRowsHeight = undefined;
+    if (!Object.prototype.hasOwnProperty.call(this, 'expandedRows')) Object.assign(this, { expandedRows: undefined });
+    if (!Object.prototype.hasOwnProperty.call(this, 'hoverRow')) this.hoverRow = undefined;
+    if (!Object.prototype.hasOwnProperty.call(this, 'rowClicked')) this.rowClicked = undefined;
+    if (!Object.prototype.hasOwnProperty.call(this, 'currentEditorName')) this.currentEditorName = undefined;
+    if (!Object.prototype.hasOwnProperty.call(this, 'styledHidden')) this.styledHidden = undefined;
+    if (!Object.prototype.hasOwnProperty.call(this, 'customizedActiveKey')) Object.assign(this, { customizedActiveKey: undefined });
+    if (!Object.prototype.hasOwnProperty.call(this, 'mouseBatchChooseState')) Object.assign(this, { mouseBatchChooseState: undefined });
+    if (!Object.prototype.hasOwnProperty.call(this, 'mouseBatchChooseIdList')) Object.assign(this, { mouseBatchChooseIdList: undefined });
+    if (!Object.prototype.hasOwnProperty.call(this, 'columnResizing')) this.columnResizing = undefined;
+    if (!Object.prototype.hasOwnProperty.call(this, 'scrollPosition')) Object.assign(this, { scrollPosition: undefined });
+    if (!Object.prototype.hasOwnProperty.call(this, 'comboBarStatus')) Object.assign(this, { comboBarStatus: undefined });
+    if (!Object.prototype.hasOwnProperty.call(this, 'siblingHeihgt')) this.siblingHeihgt = undefined;
+    if (!Object.prototype.hasOwnProperty.call(this, 'parentHeight')) this.parentHeight = undefined;
+    if (!Object.prototype.hasOwnProperty.call(this, 'parentPaddingTop')) this.parentPaddingTop = undefined;
+    if (!Object.prototype.hasOwnProperty.call(this, 'screenHeight')) Object.assign(this, { screenHeight: undefined });
+    if (!Object.prototype.hasOwnProperty.call(this, 'headerHeight')) Object.assign(this, { headerHeight: undefined });
+    if (!Object.prototype.hasOwnProperty.call(this, 'footerHeight')) Object.assign(this, { footerHeight: undefined });
+    if (!Object.prototype.hasOwnProperty.call(this, 'headerFilter')) this.headerFilter = undefined;
+    if (!Object.prototype.hasOwnProperty.call(this, 'startChooseCell')) Object.assign(this, { startChooseCell: undefined });
+    if (!Object.prototype.hasOwnProperty.call(this, 'endChooseCell')) Object.assign(this, { endChooseCell: undefined });
+    if (!Object.prototype.hasOwnProperty.call(this, 'isFinishChooseCell')) Object.assign(this, { isFinishChooseCell: undefined });
+    if (!Object.prototype.hasOwnProperty.call(this, 'isCopyPristine')) Object.assign(this, { isCopyPristine: undefined });
+    if (!Object.prototype.hasOwnProperty.call(this, 'shiftKey')) Object.assign(this, { shiftKey: undefined });
+    if (!Object.prototype.hasOwnProperty.call(this, 'autoScrollRAF')) Object.assign(this, { autoScrollRAF: undefined });
+    if (!Object.prototype.hasOwnProperty.call(this, 'arrangeValue')) Object.assign(this, { arrangeValue: undefined });
+    if (!Object.prototype.hasOwnProperty.call(this, 'dragCorner')) Object.assign(this, { dragCorner: undefined });
+    if (!Object.prototype.hasOwnProperty.call(this, 'dragCornerPosition')) Object.assign(this, { dragCornerPosition: undefined });
+    if (!Object.prototype.hasOwnProperty.call(this, 'batchExpandRowNumber')) Object.assign(this, { batchExpandRowNumber: undefined });
+    if (!Object.prototype.hasOwnProperty.call(this, 'selectedDragRows')) Object.assign(this, { selectedDragRows: undefined });
+    if (!Object.prototype.hasOwnProperty.call(this, 'dragUpdateState')) this.dragUpdateState = undefined;
+    if (!Object.prototype.hasOwnProperty.call(this, 'actualRows')) this.actualRows = undefined;
+    if (!Object.prototype.hasOwnProperty.call(this, 'rowMetaData')) this.rowMetaData = undefined;
+    if (!Object.prototype.hasOwnProperty.call(this, 'scrolling')) this.scrolling = undefined;
+    if (!Object.prototype.hasOwnProperty.call(this, 'cellVerticalSize')) this.cellVerticalSize = undefined;
+    if (!Object.prototype.hasOwnProperty.call(this, 'showCachedSelection')) this.showCachedSelection = undefined;
+    if (!Object.prototype.hasOwnProperty.call(this, 'defaultRecordCachedType')) this.defaultRecordCachedType = undefined;
+    if (!Object.prototype.hasOwnProperty.call(this, 'recordCachedType')) this.recordCachedType = undefined;
+    if (!Object.prototype.hasOwnProperty.call(this, 'groups')) Object.assign(this, { groups: undefined });
+    if (!Object.prototype.hasOwnProperty.call(this, 'groupedData')) Object.assign(this, { groupedData: undefined });
+    if (!Object.prototype.hasOwnProperty.call(this, 'groupedDataWithHeader')) Object.assign(this, { groupedDataWithHeader: undefined });
+    makeObservable(this, {
+      props: observable.ref,
+      customized: observable,
+      tempCustomized: observable,
+      loading: observable,
+      leftOriginalColumns: observable,
+      originalColumns: observable,
+      rightOriginalColumns: observable,
+      hasAggregationColumn: observable,
+      calcBodyHeight: observable,
+      width: observable,
+      lastScrollTop: observable,
+      lastScrollLeft: observable,
+      lockColumnsBodyRowsHeight: observable,
+      lockColumnsFootRowsHeight: observable,
+      lockColumnsHeadRowsHeight: observable,
+      expandedRows: observable,
+      hoverRow: observable,
+      rowClicked: observable,
+      currentEditorName: observable,
+      styledHidden: observable,
+      customizedActiveKey: observable,
+      mouseBatchChooseState: observable,
+      mouseBatchChooseIdList: observable,
+      columnResizing: observable,
+      scrollPosition: observable,
+      comboBarStatus: observable,
+      siblingHeihgt: observable,
+      parentHeight: observable,
+      parentPaddingTop: observable,
+      screenHeight: observable,
+      headerHeight: observable,
+      footerHeight: observable,
+      headerFilter: observable,
+      startChooseCell: observable,
+      endChooseCell: observable,
+      isFinishChooseCell: observable,
+      isCopyPristine: observable,
+      shiftKey: observable,
+      autoScrollRAF: observable,
+      arrangeValue: observable,
+      dragCorner: observable,
+      dragCornerPosition: observable,
+      batchExpandRowNumber: observable,
+      selectedDragRows: observable,
+      dragUpdateState: observable,
+      computedHeight: computed,
+      height: computed,
+      duplicatePrimaryKeyInfo: computed,
+      autoHeight: computed,
+      virtualColumnRange: computed,
+      actualRows: observable,
+      rowMetaData: observable,
+      scrolling: observable,
+      cellVerticalSize: observable,
+      virtualRowHeight: computed,
+      virtualVisibleStartIndex: computed,
+      virtualVisibleEndIndex: computed,
+      virtualStartIndex: computed,
+      virtualEndIndex: computed,
+      currentEditRecord: computed,
+      showCachedSelection: observable,
+      defaultRecordCachedType: observable,
+      recordCachedType: observable,
+      overflowX: computed,
+      overflowY: computed,
+      hasRowGroups: computed,
+      headerTableGroups: computed,
+      customizedColumn: computed,
+      expandColumn: computed,
+      rowNumberColumn: computed,
+      selectionColumn: computed,
+      comboQueryColumn: computed,
+      draggableColumn: computed,
+      leftColumns: computed,
+      rightColumns: computed,
+      columns: computed,
+      columnGroups: computed,
+      leftColumnGroups: computed,
+      rightColumnGroups: computed,
+      leafNamedColumns: computed,
+      hasEmptyWidthColumn: computed,
+      getLastEmptyWidthColumn: computed,
+      hasCheckFieldColumn: computed,
+      isCombinedColumn: computed,
+      groups: observable,
+      groupedData: observable,
+      groupedDataWithHeader: observable,
+      currentData: computed,
+      data: computed,
+      cachedIndeterminate: computed,
+      allCachedChecked: computed,
+      currentIndeterminate: computed,
+      allCurrentChecked: computed,
+      indeterminate: computed,
+      allChecked: computed,
+      showEditor: action,
+      setLastScrollTop: action,
+      setLastScrollLeft: action,
+      hideEditor: action.bound,
+      changeMouseBatchChooseIdList: action,
+      setProps: action,
+      updateProps: action,
+      watchGroups: action,
+      initGroups: action,
+      initColumns: action,
+      setAggregationCellExpanded: action,
+      setRowExpanded: action,
+      setRowPending: action,
+      setRowLoaded: action,
+      cellHighlightRenderer: computed,
+      setRowHover: action,
+      expandAll: action,
+      collapseAll: action,
+      batchSetCellValue: action,
+      changeCustomizedColumnValue: action,
+      saveCustomized: action,
+      openCustomizationModal: action.bound,
+      handleAllPageSelectionMenuClick: action.bound,
+      startScroll: action,
+      clearArrangeValue: action,
+      calcArrangeValue: action,
+    });
     runInAction(() => {
       this.scrollPosition = ScrollPosition.left;
       this.mouseBatchChooseIdList = [];
@@ -2642,7 +2777,7 @@ export default class TableStore {
     if (tooltip) {
       return tooltip;
     }
-    return this.node.context.getTooltip('table-cell');
+    return this.node.reactiveContext.getTooltip('table-cell');
   }
 
   getColumnHeaders(): Promise<HeaderText[]> {
@@ -2655,18 +2790,15 @@ export default class TableStore {
     return tagRenderer;
   }
 
-  @action
   showEditor(name: string) {
     this.currentEditorName = name;
   }
 
-  @action
   setLastScrollTop(lastScrollTop: number) {
     this.lastScrollTop = lastScrollTop;
     this.startScroll();
   }
 
-  @action
   setLastScrollLeft(lastScrollLeft: number) {
     this.lastScrollLeft = lastScrollLeft;
     this.startScroll();
@@ -2678,12 +2810,10 @@ export default class TableStore {
     }
   }
 
-  @action
   hideEditor() {
     this.currentEditorName = undefined;
   }
 
-  @action
   changeMouseBatchChooseIdList(idList: number[]) {
     this.mouseBatchChooseIdList = idList;
   }
@@ -2701,17 +2831,23 @@ export default class TableStore {
     return false;
   }
 
-  @action
   setProps(props) {
+    if (this.props && (this.props.dataSet !== props.dataSet || this.props.customizedCode !== props.customizedCode ||
+      Boolean(this.props.boardCustomized) !== Boolean(props.boardCustomized) ||
+      this.props.boardCustomized?.customizedDS !== props.boardCustomized?.customizedDS ||
+      this.props.boardCustomized?.customizedBtn !== props.boardCustomized?.customizedBtn)) {
+      this.customizedRequest += 1;
+      this.saveCustomizedDebounce.cancel();
+      this.loading = false;
+    }
     this.props = props;
-    this.initGroups();
+    this.watchGroups();
     const { showCachedSelection } = props;
     if (showCachedSelection !== undefined) {
       this.showCachedSelection = showCachedSelection;
     }
   }
 
-  @action
   updateProps(props) {
     const { customizedCode, aggregation: oldAggregation } = this.props;
     const copyEnabled = Boolean(this.clipboard && this.clipboard.copy);
@@ -2754,10 +2890,15 @@ export default class TableStore {
     const { groupReaction } = this;
     if (groupReaction) {
       groupReaction();
+      this.groupReaction = undefined;
     }
   }
 
   dispose() {
+    this.disposed = true;
+    this.customizedRequest += 1;
+    this.saveCustomizedDebounce.cancel();
+    runInAction(() => { this.loading = false; });
     this.disposeGroupReaction();
     if (this.copyChooseCleanup) {
       this.copyChooseCleanup();
@@ -2767,17 +2908,31 @@ export default class TableStore {
     }
   }
 
-  @action
-  initGroups() {
+  watchGroups() {
     this.disposeGroupReaction();
+    if (this.disposed) return;
+    this.initGroups();
+    this.groupReaction = reaction(() => {
+      const { groups = [] } = this.props;
+      if (!groups.length) return [];
+      const names = groups.filter(group => group.type !== GroupType.none)
+        .reduce<string[]>((fields, group) => fields.concat(group.name, group.parentField || []), []);
+      return [groups, ...this.currentData.map(record => [record, ...names.map(name => record.get(name))])];
+    }, () => {
+      this.initGroups();
+      if (this.headerTableGroups.length) {
+        this.initColumns();
+      }
+    });
+  }
+
+  initGroups() {
     const { groups = [] } = this.props;
     if (groups.length) {
-      this.groupReaction = reaction(() => dataSet.data, () => this.initGroups());
       const headerGroupNames: string[] = [];
       const rowGroupNames: string[] = [];
       const groupNames: string[] = [];
       const parentFields: Map<string | symbol, string> = new Map();
-      const { dataSet } = this;
       const header: TableGroup[] = [];
       const row: TableGroup[] = [];
       const column: TableGroup[] = [];
@@ -2814,7 +2969,6 @@ export default class TableStore {
     }
   }
 
-  @action
   initColumns() {
     const { customized, customizable, aggregation, dataSet } = this;
     const { columns, children } = this.props;
@@ -2835,7 +2989,6 @@ export default class TableStore {
     }
   }
 
-  @action
   setAggregationCellExpanded(record: Record, key: Key, expanded: boolean) {
     const expandedKeys: ObservableMap<Key, boolean> = record.getState(AGGREGATION_EXPAND_CELL_KEY) || observable.map();
     expandedKeys.set(key, expanded);
@@ -2884,7 +3037,6 @@ export default class TableStore {
    * @param expanded 设置是否展开
    * @param disHandler 设置是否需要触发展开事件
    */
-  @action
   setRowExpanded(record: Record, expanded: boolean, disHandler?: boolean) {
     record.isExpanded = expanded;
     if (!this.inBatchExpansion) {
@@ -2910,7 +3062,6 @@ export default class TableStore {
     return record.pending === true;
   }
 
-  @action
   setRowPending(record: Record, pending: boolean) {
     record.pending = pending;
   }
@@ -2919,7 +3070,6 @@ export default class TableStore {
     return record.childrenLoaded === true;
   }
 
-  @action
   setRowLoaded(record: Record, loaded: boolean) {
     record.childrenLoaded = loaded;
   }
@@ -2933,18 +3083,15 @@ export default class TableStore {
     return treeAsync || !!treeLoadData;
   }
 
-  @computed
   get cellHighlightRenderer(): HighlightRenderer {
     const { cellHighlightRenderer = this.getConfig('highlightRenderer') } = this.props;
     return cellHighlightRenderer;
   }
 
-  @action
   setRowHover(record: Record, hover: boolean) {
     this.hoverRow = hover ? record : undefined;
   }
 
-  @action
   expandAll() {
     this.inBatchExpansion = true;
     this.expandedRows = this.dataSet.records.map(record => {
@@ -2954,7 +3101,6 @@ export default class TableStore {
     this.inBatchExpansion = false;
   }
 
-  @action
   collapseAll() {
     this.inBatchExpansion = true;
     this.dataSet.records.forEach(record => this.setRowExpanded(record, false));
@@ -3326,7 +3472,6 @@ export default class TableStore {
   }
 
   // 批量赋值款选单元格的值
-  @action
   batchSetCellValue() {
     const { node: { tableBodyWrap, expandBorder }, dataSet } = this;
     if (!this.batchExpandRowNumber) return;
@@ -3395,7 +3540,6 @@ export default class TableStore {
     }
   }
 
-  @action
   changeCustomizedColumnValue(column: ColumnProps, value: object, saveToCustomization = true) {
     const { customized: { columns } } = this;
     set(column, value);
@@ -3410,10 +3554,28 @@ export default class TableStore {
     }
   }
 
-  @action
-  async saveCustomized(customized?: TableCustomized | null, otherInfo?: { columnDataSet: DataSet, params?: any }) {
-    if (this.customizable && this.customizedLoaded) {
+  private disposed = false;
+
+  private customizedRequest = 0;
+
+  private handleCustomizedResult(promise: Promise<void>): Promise<void> {
+    promise.catch(error => warning(false, error instanceof Error ? error.message : String(error)));
+    return promise;
+  }
+
+  saveCustomized(customized?: TableCustomized | null, otherInfo?: { columnDataSet: DataSet, params?: any }) {
+    return this.handleCustomizedResult(this.saveCustomizedAsync(customized, otherInfo));
+  }
+
+  private async saveCustomizedAsync(customized?: TableCustomized | null, otherInfo?: { columnDataSet: DataSet, params?: any }) {
+    if (!this.disposed && this.customizable && this.customizedLoaded) {
       const { customizedCode, boardCustomized } = this.props;
+      const { dataSet } = this;
+      const request = ++this.customizedRequest;
+      const currentRecord = boardCustomized && boardCustomized.customizedDS && boardCustomized.customizedDS.current;
+      const isCurrent = () => !this.disposed && request === this.customizedRequest &&
+        dataSet === this.dataSet && customizedCode === this.props.customizedCode &&
+        (!boardCustomized || currentRecord === boardCustomized.customizedDS?.current);
       if (customized) {
         this.customized = customized;
       }
@@ -3422,7 +3584,6 @@ export default class TableStore {
         const tableCustomizedLoad = this.getConfig('tableCustomizedLoad') || this.getConfig('customizedLoad');
         // board 组件列表视图配置保存
         if (this.customizedBtn && boardCustomized && boardCustomized.customizedDS) {
-          const currentRecord = boardCustomized.customizedDS.current;
           // @ts-ignore
           await tableCustomizedSave(customizedCode,
             {
@@ -3431,24 +3592,24 @@ export default class TableStore {
             },
             this.customizedBtn ? 'Board' : 'Table', otherInfo);
 
-          if (customizedCode) {
+          if (isCurrent()) {
             const res = await tableCustomizedLoad(customizedCode, 'Board', {
               type: 'detail',
               id: currentRecord.get('id'),
             });
-            try {
+            if (isCurrent()) {
               const dataJson = res.dataJson ? pick(JSON.parse(res.dataJson), ['size', 'parityRow', 'pageSize', 'columns', 'combineSort', 'defaultFlag', 'height', 'heightDiff', 'viewName']) : {};
-              // @ts-ignore
-              this.customized = { columns: {}, ...omit(res, 'dataJson'), ...dataJson };
-              currentRecord.set({ objectVersionNumber: res.objectVersionNumber, dataJson, viewName: res.viewName });
-              this.dataSet.setState('__CUSTOMIZED__', this.customized);
-            } catch (error) {
-              warning(false, error.message);
+              runInAction(() => {
+                this.customized = { columns: {}, ...omit(res, 'dataJson'), ...dataJson };
+                currentRecord.set({ objectVersionNumber: res.objectVersionNumber, dataJson, viewName: res.viewName });
+                dataSet.setState('__CUSTOMIZED__', this.customized);
+              });
             }
           }
         } else {
           await tableCustomizedSave(customizedCode, this.customized, 'Table', otherInfo);
-          this.dataSet.setState('__CUSTOMIZED__', this.customized);
+          if (!isCurrent()) return;
+          runInAction(() => { dataSet.setState('__CUSTOMIZED__', this.customized); });
           if (otherInfo && otherInfo.params) {
             // 需要重新加载, 获取个性化记录的名称和id等等
             await this.loadCustomized();
@@ -3458,10 +3619,8 @@ export default class TableStore {
     }
   }
 
-  saveCustomizedDebounce = debounce(this.saveCustomized, 1000);
+  saveCustomizedDebounce = debounce((...args: Parameters<TableStore['saveCustomized']>) => this.saveCustomized(...args), 1000);
 
-  @autobind
-  @action
   openCustomizationModal(context) {
     const { customizedCode } = this.props;
     const modalProps: ModalProps = {
@@ -3482,11 +3641,21 @@ export default class TableStore {
   }
 
   @autobind
-  async loadCustomized(customizedProps?: TableCustomized, forceLoad?: boolean) {
+  loadCustomized(customizedProps?: TableCustomized, forceLoad?: boolean) {
+    return this.handleCustomizedResult(this.loadCustomizedAsync(customizedProps, forceLoad));
+  }
+
+  private async loadCustomizedAsync(customizedProps?: TableCustomized, forceLoad?: boolean) {
+    if (this.disposed) return;
     const { customizedCode, boardCustomized, onCustomizedLoad = noop, dataSet } = this.props;
     const { props: { queryBarProps } } = this;
     const showSimpleMode = queryBarProps && queryBarProps.simpleMode;
     if (((forceLoad || this.customizable) && customizedCode) || (this.queryBar === TableQueryBarType.comboBar && !showSimpleMode)) {
+      const request = ++this.customizedRequest;
+      const currentRecord = boardCustomized && boardCustomized.customizedDS && boardCustomized.customizedDS.current;
+      const isCurrent = () => !this.disposed && request === this.customizedRequest &&
+        dataSet === this.dataSet && customizedCode === this.props.customizedCode &&
+        (!boardCustomized || currentRecord === boardCustomized.customizedDS?.current);
       const tableCustomizedLoad = this.getConfig('tableCustomizedLoad') || this.getConfig('customizedLoad');
       runInAction(() => {
         delete this.customizedLoaded;
@@ -3494,6 +3663,7 @@ export default class TableStore {
         this.loading = true;
       });
       try {
+        let recordValues;
         let customized: TableCustomized | undefined | null = customizedProps;
         if (customizedCode && !boardCustomized && !customized) {
           customized = await tableCustomizedLoad(customizedCode, 'Table');
@@ -3501,19 +3671,20 @@ export default class TableStore {
         if (customizedCode && boardCustomized && boardCustomized.customizedDS && !customized) {
           const res = await tableCustomizedLoad(customizedCode, 'Board', {
             type: 'detail',
-            id: boardCustomized.customizedDS.current.get('id'),
+            id: currentRecord.get('id'),
           });
-          try {
+          if (isCurrent()) {
             const dataJson = res.dataJson ? pick(JSON.parse(res.dataJson), ['size', 'parityRow', 'pageSize', 'columns', 'combineSort', 'defaultFlag', 'height', 'heightDiff', 'viewName']) : {};
-            boardCustomized.customizedDS.current.set({ objectVersionNumber: res.objectVersionNumber, dataJson, viewName: res.viewName });
+            recordValues = { objectVersionNumber: res.objectVersionNumber, dataJson, viewName: res.viewName };
             // @ts-ignore
             customized = { ...omit(res, 'dataJson'), ...dataJson };
-          } catch (error) {
-            warning(false, error.message);
           }
         }
-        runInAction(async () => {
-          const newCustomized: TableCustomized = { columns: {}, ...customized };
+        if (!isCurrent()) return;
+        const newCustomized: TableCustomized = { columns: {}, ...customized };
+        let query;
+        runInAction(() => {
+          if (recordValues) currentRecord.set(recordValues);
           this.customized = newCustomized;
           dataSet.setState('__CUSTOMIZED__', newCustomized);
           this.initColumns();
@@ -3523,29 +3694,32 @@ export default class TableStore {
             // 手动加载个性化时, 重新查询
             if (customizedProps) {
               dataSet.currentPage = 1;
-              dataSet.query(1, undefined, true);
-            }
-          }
-          await onCustomizedLoad(newCustomized);
-          const { aggregation: customAggregation } = newCustomized;
-          if (customAggregation !== undefined) {
-            const { onAggregationChange, aggregation } = this.props;
-            if (onAggregationChange && customAggregation !== aggregation) {
-              onAggregationChange(customAggregation);
+              query = dataSet.query(1, undefined, true);
             }
           }
         });
+        if (query) await query;
+        if (!isCurrent()) return;
+        await onCustomizedLoad(newCustomized);
+        if (!isCurrent()) return;
+        const { aggregation: customAggregation } = newCustomized;
+        if (customAggregation !== undefined) {
+          const { onAggregationChange, aggregation } = this.props;
+          if (onAggregationChange && customAggregation !== aggregation) {
+            await onAggregationChange(customAggregation);
+          }
+        }
       } finally {
-        this.customizedLoaded = true;
-        runInAction(() => {
-          this.loading = false;
-        });
+        if (!this.disposed && request === this.customizedRequest) {
+          this.customizedLoaded = true;
+          runInAction(() => {
+            this.loading = false;
+          });
+        }
       }
     }
   }
 
-  @autobind
-  @action
   handleAllPageSelectionMenuClick({ key }) {
     const { dataSet } = this;
     const { isAllPageSelection } = dataSet;
@@ -3622,7 +3796,6 @@ export default class TableStore {
     return this.screenHeight;
   }
 
-  @action
   startScroll() {
     this.scrolling = true;
     this.stopScroll();
@@ -3674,7 +3847,6 @@ export default class TableStore {
     }
   }
 
-  @action
   clearArrangeValue() {
     this.arrangeValue = {
       avg: 0,
@@ -3685,7 +3857,6 @@ export default class TableStore {
     }
   }
 
-  @action
   calcArrangeValue() {
     this.dragCorner = false;
     // 选择过程中触发滚动导致取消选择后，startChooseCell 和 endChooseCell 为 null

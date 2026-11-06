@@ -48,7 +48,8 @@ const TabPane: FunctionComponent<TabPaneProps> = function TabPane(props) {
     ...restProps
   } = props;
   const { validationMap, showInvalidTips } = useContext(TabsContext);
-  const dsList: DataSet[] = dataSet ? ([] as DataSet[]).concat(dataSet) : [];
+  const dsList: DataSet[] = useMemo(() => dataSet ? ([] as DataSet[]).concat(dataSet) : [], [dataSet]);
+  const previousDataSets = useRef<DataSet[]>([]);
   const invalidComponents: Set<any> = useMemo(() => new Set<any>(), []);
   const { length } = dsList;
   const [rendered, setRendered] = useState(active);
@@ -58,8 +59,8 @@ const TabPane: FunctionComponent<TabPaneProps> = function TabPane(props) {
 
   const handleValidationReport = useCallback(action<(props: { showInvalid, component }) => void>((validationProps) => {
     if (showInvalidTips === false) {
-      if (validationMap.size) {
-        validationMap.clear();
+      if (eventKey) {
+        validationMap.delete(eventKey);
       }
       return;
     }
@@ -75,7 +76,7 @@ const TabPane: FunctionComponent<TabPaneProps> = function TabPane(props) {
         validationMap.set(eventKey, invalidComponents.size === 0);
       }
     }
-  }), [eventKey, disabled, invalidComponents, showInvalidTips]);
+  }), [eventKey, disabled, invalidComponents, showInvalidTips, validationMap]);
   const handleValidate = useCallback(({ valid, dataSet }) => {
     handleValidationReport({
       showInvalid: !valid,
@@ -95,7 +96,7 @@ const TabPane: FunctionComponent<TabPaneProps> = function TabPane(props) {
         component: dataSet,
       });
     }
-  }, []);
+  }, [handleValidationReport]);
 
   const handleRemove = useCallback(({ dataSet, records }) => {
     if (records) {
@@ -105,15 +106,37 @@ const TabPane: FunctionComponent<TabPaneProps> = function TabPane(props) {
         component: dataSet,
       });
     }
-  }, []);
+  }, [handleValidationReport]);
 
   useEffect(() => () => invalidComponents.clear(), []);
+
+  useEffect(() => {
+    if (showInvalidTips === false) {
+      invalidComponents.clear();
+      if (eventKey) {
+        action(() => validationMap.delete(eventKey))();
+      }
+    }
+  }, [showInvalidTips, invalidComponents, validationMap, eventKey]);
 
   useEffect(() => {
     if (!destroyInactiveTabPane && active) {
       setRendered(true);
     }
   }, [destroyInactiveTabPane, active]);
+
+  useEffect(() => {
+    let changed = false;
+    previousDataSets.current.forEach(ds => {
+      if (!dsList.includes(ds) && invalidComponents.delete(ds)) {
+        changed = true;
+      }
+    });
+    previousDataSets.current = dsList;
+    if (changed && eventKey && showInvalidTips !== false) {
+      action(() => validationMap.set(eventKey, invalidComponents.size === 0))();
+    }
+  }, [dsList, eventKey, invalidComponents, validationMap, showInvalidTips]);
 
   useEffect(() => {
     if (length && !disabled && showInvalidTips !== false) {
@@ -132,7 +155,7 @@ const TabPane: FunctionComponent<TabPaneProps> = function TabPane(props) {
           .removeEventListener(DataSetEvents.reset, handleReset),
       );
     }
-  }, [active, disabled, handleValidate, handleReset, handleRemove, length, showInvalidTips, ...dsList]);
+  }, [disabled, handleValidate, handleReset, handleRemove, dsList, length, showInvalidTips]);
 
   const childrenWithProvider = length || showInvalidTips === false ? children : (
     <ConfigProvider onComponentValidationReport={handleValidationReport}>
@@ -165,7 +188,7 @@ const TabPane: FunctionComponent<TabPaneProps> = function TabPane(props) {
 
 TabPane.displayName = 'TabPane';
 
-const MemoTabPane: typeof TabPane = memo(TabPane, (props, nextProps) => !nextProps.forceRender && !props.active && !nextProps.active);
+const MemoTabPane: typeof TabPane = memo(TabPane, (props, nextProps) => !nextProps.forceRender && !props.active && !nextProps.active && props.dataSet === nextProps.dataSet && props.disabled === nextProps.disabled && props.eventKey === nextProps.eventKey);
 
 MemoTabPane.defaultProps = {
   overflowCount: 99,

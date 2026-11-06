@@ -1,7 +1,7 @@
-import React, { FunctionComponent, memo, ReactNode, useCallback, useContext, useMemo } from 'react';
-import { observable } from 'mobx';
-import { useLocalStore } from 'mobx-react-lite';
+import React, { FunctionComponent, memo, ReactNode, useCallback, useContext, useMemo, useState } from 'react';
+import { observableConfigMap } from 'choerodon-ui/dataset/mobx-helper/observableConfig';
 import isBoolean from 'lodash/isBoolean';
+import shallowEqual from 'shallowequal';
 import { FormProvider } from 'choerodon-ui/pro/lib/form/FormContext';
 import ConfigContext, { ConfigContextValue } from './ConfigContext';
 import { Config } from '../configure';
@@ -15,9 +15,13 @@ export interface ConfigProviderProps extends Config {
 const ConfigProvider: FunctionComponent<ConfigProviderProps> = function ConfigProvider(props) {
   const { getConfig: getParentConfig } = useContext(ConfigContext);
   const { children, ...localConfig } = props;
-  const configStore = useLocalStore((config) => ({
-    config,
-  }), observable.map(localConfig));
+  const [stableConfig, setStableConfig] = useState(localConfig);
+  if (!shallowEqual(stableConfig, localConfig)) {
+    setStableConfig(localConfig);
+  }
+  const configStore = useMemo(() => ({
+    config: observableConfigMap(stableConfig),
+  }), [stableConfig]);
   const getLocalConfig = useCallback<typeof getConfig>((key): any => {
     const localValue = configStore.config.get(key);
     if (configStore.config.has(key)) {

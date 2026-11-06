@@ -15,7 +15,7 @@ export default class YearsView<T extends DateViewProps> extends DaysView<T> {
 
   getTargetDate(target?: 0 | 1): Moment {
     const { comboRangeMode } = this;
-    const { date, dateRangeValue, rangeTarget } = this.props;
+    const { date, dateRangeValue, rangeTarget } = this.reactiveProps;
     if (!comboRangeMode || !dateRangeValue || rangeTarget === undefined || target === undefined) return date;
 
     if (dateRangeValue[0] && dateRangeValue[1] &&
@@ -85,7 +85,7 @@ export default class YearsView<T extends DateViewProps> extends DaysView<T> {
     stopEvent(e);
     if (this.comboRangeMode) return;
     if (e.altKey) {
-      if (this.props.mode !== ViewMode.year) {
+      if (this.reactiveProps.mode !== ViewMode.year) {
         this.changeViewMode(ViewMode.month);
       }
     } else {
@@ -153,7 +153,7 @@ export default class YearsView<T extends DateViewProps> extends DaysView<T> {
       comboRangeMode,
       startDate,
       endDate,
-      props: { renderer = this.renderCell, isValidDate = alwaysValidDate, onDateMouseLeave },
+      reactiveProps: { renderer = this.renderCell, isValidDate = alwaysValidDate, onDateMouseLeave },
     } = this;
     const date = this.getTargetDate(target);
     const selected = date.clone();
@@ -221,7 +221,7 @@ export default class YearsView<T extends DateViewProps> extends DaysView<T> {
   }
 
   choose(date: Moment): void {
-    const { mode } = this.props;
+    const { mode } = this.reactiveProps;
     if (mode !== ViewMode.year) {
       this.changeCursorDate(date);
       this.changeViewMode(mode === ViewMode.quarter ? ViewMode.quarter : ViewMode.month);

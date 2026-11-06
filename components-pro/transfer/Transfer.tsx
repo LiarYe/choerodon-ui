@@ -1,6 +1,6 @@
 import React, { ReactNode } from 'react';
 import { observer } from 'mobx-react';
-import { action, observable, runInAction } from 'mobx';
+import { action, observable, runInAction, makeObservable } from 'mobx';
 import classNames from 'classnames';
 import omit from 'lodash/omit';
 import isString from 'lodash/isString';
@@ -40,16 +40,32 @@ export default class Transfer extends Select<TransferProps> {
 
   static OptGroup = OptGroup;
 
-  @observable sourceSelected: Record[];
+  sourceSelected: Record[];
 
-  @observable targetSelected: Record[];
+  targetSelected: Record[];
 
-  @observable targetCurrentSelected: string | undefined;
+  targetCurrentSelected: string | undefined;
 
   isCustom = false;
 
   constructor(props, context) {
     super(props, context);
+    if (!Object.prototype.hasOwnProperty.call(this, 'sourceSelected')) Object.assign(this, { sourceSelected: undefined });
+    if (!Object.prototype.hasOwnProperty.call(this, 'targetSelected')) Object.assign(this, { targetSelected: undefined });
+    if (!Object.prototype.hasOwnProperty.call(this, 'targetCurrentSelected')) this.targetCurrentSelected = undefined;
+    makeObservable(this, {
+      sourceSelected: observable,
+      targetSelected: observable,
+      targetCurrentSelected: observable,
+      handleMoveToLeft: action.bound,
+      handleMoveToRight: action.bound,
+      handleSortTo: action.bound,
+      handleSourceSelectAllChange: action.bound,
+      handleTargetSelectAllChange: action.bound,
+      selectRecord: action,
+      clearCurrentIndex: action,
+      updateIndex: action,
+    });
     runInAction(() => {
       this.sourceSelected = [];
       this.targetSelected = [];
@@ -70,7 +86,7 @@ export default class Transfer extends Select<TransferProps> {
   sourceFilter(record, index, array) {
     const {
       valueField,
-      props: { optionsFilter },
+      reactiveProps: { optionsFilter },
     } = this;
     if (optionsFilter && !optionsFilter(record, index, array)) {
       return false;
@@ -86,7 +102,7 @@ export default class Transfer extends Select<TransferProps> {
   targetFilter(record, index, array) {
     const {
       valueField,
-      props: { optionsFilter },
+      reactiveProps: { optionsFilter },
     } = this;
     if (optionsFilter && !optionsFilter(record, index, array)) {
       return false;
@@ -98,7 +114,6 @@ export default class Transfer extends Select<TransferProps> {
     return false;
   }
 
-  @autobind
   handleMenuClick({
     item: {
       props: { value },
@@ -125,8 +140,6 @@ export default class Transfer extends Select<TransferProps> {
     this.options.locate(value.index);
   }
 
-  @autobind
-  @action
   handleMoveToLeft() {
     const { valueField, isCustom } = this;
     if (!isCustom) {
@@ -139,13 +152,11 @@ export default class Transfer extends Select<TransferProps> {
       }
       this.setValue(currentValues);
     }
-   
+
     this.targetSelected = [];
     this.updateIndex();
   }
 
-  @autobind
-  @action
   handleMoveToRight() {
     const { valueField } = this;
 
@@ -155,13 +166,11 @@ export default class Transfer extends Select<TransferProps> {
     } else {
       this.prepareSetValue(...this.sourceSelected.map(record => record.get(valueField)));  
     }
-    
+
     this.sourceSelected = [];
     this.updateIndex();
   }
 
-  @autobind
-  @action
   handleSortTo(direction: string) {
     const { valueField, options } = this;
     const { current } = options;
@@ -186,19 +195,14 @@ export default class Transfer extends Select<TransferProps> {
     }
   }
 
-  @autobind
-  @action
   handleSourceSelectAllChange(selected: Record[]) {
     this.sourceSelected = selected;
   }
 
-  @autobind
-  @action
   handleTargetSelectAllChange(selected: Record[]) {
     this.targetSelected = selected;
   }
 
-  @action
   selectRecord(value: Record, selected: Record[]) {
     const index = selected.indexOf(value);
     if (index !== -1) {
@@ -208,7 +212,6 @@ export default class Transfer extends Select<TransferProps> {
     }
   }
 
-  @action
   clearCurrentIndex = () => {
     const current = this.options.current;
     if (current) {
@@ -240,7 +243,6 @@ export default class Transfer extends Select<TransferProps> {
     this.updateIndex();
   };
 
-  @action
   updateIndex() {
     this.changeOptionIndex();
     this.clearCurrentIndex();
@@ -258,7 +260,7 @@ export default class Transfer extends Select<TransferProps> {
       sourceSelected,
       multiple,
       valueField,
-      props: { titles = [], operations = [], sortOperations = [], sortable, oneWay, placeholderOperations = [] },
+      reactiveProps: { titles = [], operations = [], sortOperations = [], sortable, oneWay, placeholderOperations = [] },
     } = this;
 
     const targetValues = this.getValues();
@@ -291,7 +293,7 @@ export default class Transfer extends Select<TransferProps> {
       };
     }
 
-    const childProps = omit<TransferProps, keyof TransferProps>(this.props, [
+    const childProps = omit<TransferProps, keyof TransferProps>(this.reactiveProps, [
       'help',
     ]);
 

@@ -19,8 +19,32 @@ describe('TextArea-pro', () => {
 
   it('TextArea should have the default resize and rows', () => {
     const wrapper = mount(<TextArea />);
-    expect(wrapper.prop('resize')).toBe('none');
-    expect(wrapper.prop('rows')).toBe(4);
+    expect(wrapper.find('textarea').prop('style').resize).toBe('none');
+    expect(wrapper.find('textarea').prop('rows')).toBe(4);
+    wrapper.unmount();
+  });
+
+  it('updates rows and resize and restores defaults when props are removed', () => {
+    const wrapper = mount(<TextArea rows={7} resize="vertical" />);
+    expect(wrapper.find('textarea').prop('rows')).toBe(7);
+    expect(wrapper.find('textarea').prop('style').resize).toBe('vertical');
+    wrapper.setProps({ rows: 2, resize: 'horizontal' });
+    expect(wrapper.find('textarea').prop('rows')).toBe(2);
+    expect(wrapper.find('textarea').prop('style').resize).toBe('horizontal');
+    wrapper.setProps({ rows: undefined, resize: undefined });
+    expect(wrapper.find('textarea').prop('rows')).toBe(4);
+    expect(wrapper.find('textarea').prop('style').resize).toBe('none');
+    wrapper.unmount();
+  });
+
+  it('uses autoSize minRows and disables resize for a fixed row range', () => {
+    const wrapper = mount(<TextArea autoSize={{ minRows: 3, maxRows: 3 }} resize="both" />);
+    expect(wrapper.find('textarea').prop('rows')).toBe(3);
+    expect(wrapper.find('textarea').prop('style').resize).toBe('none');
+    wrapper.setProps({ autoSize: false, resize: 'vertical' });
+    expect(wrapper.find('textarea').prop('rows')).toBe(4);
+    expect(wrapper.find('textarea').prop('style').resize).toBe('vertical');
+    wrapper.unmount();
   });
 
   it('TextArea have the disabled property and default false', () => {

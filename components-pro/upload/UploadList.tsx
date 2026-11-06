@@ -36,7 +36,7 @@ export default class UploadList extends FormField<UploadListProps> {
   @autobind
   previewImageRenderer(file: UploadFile): ReactNode {
     let previewImg: ReactNode;
-    const { prefixCls, props: { showPreviewImage, previewImageWidth } } = this;
+    const { prefixCls, reactiveProps: { showPreviewImage, previewImageWidth } } = this;
     if (showPreviewImage && file.type.startsWith('image')) {
       // temporarily set img[width] to 100
       previewImg = <img width={previewImageWidth} alt={file.filename} src={file.url} />;
@@ -68,7 +68,7 @@ export default class UploadList extends FormField<UploadListProps> {
   render() {
     const {
       prefixCls,
-      props: {
+      reactiveProps: {
         items,
         remove,
         showPreviewImage,

@@ -116,7 +116,7 @@ module.exports = {
       'react-router': legacy.resolve('react-router/umd/ReactRouter'),
     };
 
-    ['react', 'react-dom', 'mobx', 'mobx-react'].forEach(name => {
+    ['react', 'react-dom', 'mobx', 'mobx-react', 'mobx-react-lite'].forEach(name => {
       config.resolve.alias[name] = path.dirname(require.resolve(`${name}/package.json`, { paths: [legacy.root] }));
     });
 

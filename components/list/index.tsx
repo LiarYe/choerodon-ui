@@ -1,7 +1,7 @@
 // @ts-nocheck
 import React, { Children, cloneElement, Component, ReactElement, ReactNode, ReactText } from 'react';
 import classNames from 'classnames';
-import { action, observable, runInAction } from 'mobx';
+import { action, observable, runInAction, makeObservable } from 'mobx';
 import { observer } from 'mobx-react';
 import omit from 'lodash/omit';
 import noop from 'lodash/noop';
@@ -88,6 +88,19 @@ export interface ListLocale {
 
 @observer
 export default class List extends Component<ListProps> {
+  constructor(props, context) {
+    super(props, context);
+    if (!Object.prototype.hasOwnProperty.call(this, 'stateCheckedKeys')) Object.assign(this, { stateCheckedKeys: undefined });
+    if (!Object.prototype.hasOwnProperty.call(this, 'paginationCurrent')) Object.assign(this, { paginationCurrent: undefined });
+    makeObservable(this, {
+      stateCheckedKeys: observable,
+      paginationCurrent: observable,
+      initDefaultCheckRows: action,
+      updateStateKey: action,
+    });
+    this.initDefaultCheckRows();
+  }
+
   static displayName = 'List';
 
   static Item: typeof Item = Item;
@@ -106,9 +119,9 @@ export default class List extends Component<ListProps> {
 
   declare context: ConfigContextValue;
 
-  @observable stateCheckedKeys: ReactText[];
+  stateCheckedKeys: ReactText[];
 
-  @observable paginationCurrent: number;
+  paginationCurrent: number;
 
   defaultPaginationProps = {
     page: 1,
@@ -166,16 +179,26 @@ export default class List extends Component<ListProps> {
     return paginationProps;
   }
 
-  componentWillMount() {
-    this.handleDataSetLoad();
-    this.processDataSetListener(true);
+  componentDidMount() {
+    const { dataSet } = this.props;
+    this.processDataSetListener(true, dataSet);
     runInAction(() => {
       this.stateCheckedKeys = [];
     })
   }
 
   componentWillUnmount() {
-    this.processDataSetListener(false);
+    const { dataSet } = this.props;
+    this.processDataSetListener(false, dataSet);
+  }
+
+  componentDidUpdate(prevProps: ListProps) {
+    const { dataSet } = this.props;
+    if (prevProps.dataSet !== dataSet) {
+      this.processDataSetListener(false, prevProps.dataSet);
+      this.processDataSetListener(true, dataSet);
+      this.handleDataSetLoad();
+    }
   }
 
   @autobind
@@ -183,15 +206,15 @@ export default class List extends Component<ListProps> {
     this.initDefaultCheckRows();
   }
 
-  processDataSetListener(flag: boolean) {
-    const { dataSet } = this.props;
-    if (dataSet) {
-      const handler = flag ? dataSet.addEventListener : dataSet.removeEventListener;
-      handler.call(dataSet, DataSetEvents.load, this.handleDataSetLoad);
+  processDataSetListener(flag: boolean, dataSet?: DataSet) {
+    const { dataSet: propsDataSet } = this.props;
+    const targetDataSet = arguments.length < 2 ? propsDataSet : dataSet;
+    if (targetDataSet) {
+      const handler = flag ? targetDataSet.addEventListener : targetDataSet.removeEventListener;
+      handler.call(targetDataSet, DataSetEvents.load, this.handleDataSetLoad);
     }
   }
 
-  @action
   initDefaultCheckRows() {
     const {
       props: {
@@ -261,7 +284,6 @@ export default class List extends Component<ListProps> {
     return getPrefixCls('list', prefixCls);
   }
 
-  @action
   updateStateKey(value, key) {
     if (value && !this.stateCheckedKeys.includes(key!)) {
       this.stateCheckedKeys = [...this.stateCheckedKeys, key]
@@ -301,7 +323,7 @@ export default class List extends Component<ListProps> {
         }
         const newKeys = this.updateStateKey(value, key);
         onChange(newKeys);
-        
+
       } else if (typeof rowSelection === 'boolean') {
         this.updateStateKey(value, key);
       }
@@ -396,7 +418,7 @@ export default class List extends Component<ListProps> {
       [`${prefixCls}-something-after-last-item`]: this.isSomethingAfterLastItem(),
     });
 
-    
+
     const largestPage = Math.ceil(
       total / pageSize,
     );

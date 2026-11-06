@@ -1,6 +1,6 @@
 ﻿import React, { Component, ReactElement } from 'react';
 import { observer } from 'mobx-react';
-import { action, observable } from 'mobx';
+import { action, observable, makeObservable } from 'mobx';
 import { BigNumber } from 'bignumber.js';
 import isString from 'lodash/isString';
 import isNumber from 'lodash/isNumber';
@@ -31,6 +31,15 @@ export interface TableSummaryBarProps {
 
 @observer
 export default class TableSummaryBar extends Component<TableSummaryBarProps> {
+  constructor(props, context) {
+    super(props, context);
+    if (!Object.prototype.hasOwnProperty.call(this, 'showMoreSummary')) this.showMoreSummary = undefined;
+    makeObservable(this, {
+      showMoreSummary: observable,
+      toggleShowMoreSummary: action,
+    });
+  }
+
   static displayName = 'TableSummaryBar';
 
   static get contextType(): typeof TableContext {
@@ -42,7 +51,7 @@ export default class TableSummaryBar extends Component<TableSummaryBarProps> {
   /**
    * 多行汇总
    */
-  @observable showMoreSummary: boolean | undefined;
+  showMoreSummary: boolean | undefined;
 
   /**
    * 渲染表头汇总列
@@ -146,7 +155,6 @@ export default class TableSummaryBar extends Component<TableSummaryBarProps> {
   /**
    * 点击汇总条展开收起
    */
-  @action
   toggleShowMoreSummary = () => {
     this.showMoreSummary = !this.showMoreSummary;
   };

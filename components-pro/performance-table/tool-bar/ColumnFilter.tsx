@@ -1,5 +1,5 @@
 import React, { Component, Key, ReactElement, ReactNode } from 'react';
-import { action, observable } from 'mobx';
+import { action, observable, makeObservable } from 'mobx';
 import { observer } from 'mobx-react';
 import Icon from 'choerodon-ui/lib/icon';
 import Menu, { Item } from 'choerodon-ui/lib/rc-components/menu/index';
@@ -29,12 +29,19 @@ export default class ColumnFilter extends Component<ColumnFilterProps> {
     return TableContext;
   }
 
-  @observable hidden;
+  hidden;
 
   menu?: Menu | null;
 
   constructor(props, context) {
     super(props, context);
+    if (!Object.prototype.hasOwnProperty.call(this, 'hidden')) this.hidden = undefined;
+    makeObservable(this, {
+      hidden: observable,
+      setDropDownHidden: action,
+      handleMenuSelect: action.bound,
+      handleMenuUnSelect: action.bound,
+    });
     this.setDropDownHidden(true);
   }
 
@@ -55,7 +62,6 @@ export default class ColumnFilter extends Component<ColumnFilterProps> {
     }
   }
 
-  @action
   setDropDownHidden(hidden) {
     this.hidden = hidden;
   }
@@ -82,8 +88,6 @@ export default class ColumnFilter extends Component<ColumnFilterProps> {
     );
   }
 
-  @autobind
-  @action
   handleMenuSelect({
     item: {
       props: { value },
@@ -95,8 +99,6 @@ export default class ColumnFilter extends Component<ColumnFilterProps> {
     node.forceUpdate();
   }
 
-  @autobind
-  @action
   handleMenuUnSelect({
     item: {
       props: { value },

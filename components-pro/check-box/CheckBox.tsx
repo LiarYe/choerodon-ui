@@ -1,5 +1,5 @@
 import React, { ReactNode } from 'react';
-import { action, runInAction } from 'mobx';
+import { runInAction } from 'mobx';
 import { observer } from 'mobx-react';
 import isNil from 'lodash/isNil';
 import { ShowHelp } from '../field/enum';
@@ -47,7 +47,7 @@ export class CheckBox<T extends CheckBoxProps> extends Radio<T & CheckBoxProps> 
   type = 'checkbox';
 
   get unCheckedValue() {
-    const { unCheckedValue } = this.props;
+    const { unCheckedValue } = this.reactiveProps;
     if (!isNil(unCheckedValue)) {
       return unCheckedValue;
     }
@@ -59,7 +59,7 @@ export class CheckBox<T extends CheckBoxProps> extends Radio<T & CheckBoxProps> 
   }
 
   get checkedValue() {
-    const { value } = this.props;
+    const { value } = this.reactiveProps;
     if (!isNil(value)) {
       return value;
     }
@@ -104,7 +104,7 @@ export class CheckBox<T extends CheckBoxProps> extends Radio<T & CheckBoxProps> 
 
   @autobind
   handleHelpMouseEnter(e) {
-    const { getTooltipTheme, getTooltipPlacement } = this.context;
+    const { getTooltipTheme, getTooltipPlacement } = this.reactiveContext;
     const { helpTooltipProps } = this;
     let helpTooltipCls = `${this.getContextConfig('proPrefixCls')}-tooltip-popup-help`;
     if (helpTooltipProps && helpTooltipProps.popupClassName) {
@@ -141,14 +141,14 @@ export class CheckBox<T extends CheckBoxProps> extends Radio<T & CheckBoxProps> 
   }
 
   getChildrenText() {
-    const { children, unCheckedChildren } = this.props;
+    const { children, unCheckedChildren } = this.reactiveProps;
     return this.isChecked() ? children : unCheckedChildren || children;
   }
 
   getWrapperClassNames(...args) {
     const {
       prefixCls,
-      props: { indeterminate },
+      reactiveProps: { indeterminate },
     } = this;
     return super.getWrapperClassNames(
       {
@@ -159,7 +159,7 @@ export class CheckBox<T extends CheckBoxProps> extends Radio<T & CheckBoxProps> 
   }
 
   isChecked() {
-    const { checked, indeterminate } = this.props;
+    const { checked, indeterminate } = this.reactiveProps;
     if (indeterminate) {
       return false;
     }
@@ -181,7 +181,6 @@ export class CheckBox<T extends CheckBoxProps> extends Radio<T & CheckBoxProps> 
     return [].concat(values);
   }
 
-  @action
   setValue(value: any, noVaidate?: boolean): void {
     const { record, checkedValue, multiple } = this;
     if (record) {
@@ -205,7 +204,6 @@ export class CheckBox<T extends CheckBoxProps> extends Radio<T & CheckBoxProps> 
     }
   }
 
-  @action
   setChecked(checked) {
     this.setValue(getFirstValue(checked ? this.checkedValue : this.unCheckedValue));
   }

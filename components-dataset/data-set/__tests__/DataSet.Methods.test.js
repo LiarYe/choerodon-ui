@@ -16,6 +16,7 @@ describe('DataSet Methods', () => {
   describe('query()', () => {
     // TODO: cache暂时没办法测试
     it('query(page, params, cache)', async () => {
+      expect.assertions(2);
       const testDs = new DataSet({
         ...commonDs,
         data,
@@ -33,6 +34,7 @@ describe('DataSet Methods', () => {
 
     // TODO: 不能得到查询后的结果
     it('queryMore(page, params, cache)', async () => {
+      expect.assertions(2);
       const testDs = new DataSet({
         ...commonDs,
         data,
@@ -346,9 +348,9 @@ describe('DataSet Methods', () => {
       expect(ds.length).toBe(data.slice(0, 4).length);
       ds.push(...addDs.records);
       expect(ds.length).toBe(data.length);
-      expect(ds.records.get(ds.length - 1).get('name')).toBe(data[data.length - 1].name);
-      expect(ds.records.get(ds.length - 1).get('userid')).toBe(data[data.length - 1].userid);
-      expect(ds.records.get(ds.length - 1).get('active')).toBe(data[data.length - 1].active);
+      expect(ds.records[ds.length - 1].get('name')).toBe(data[data.length - 1].name);
+      expect(ds.records[ds.length - 1].get('userid')).toBe(data[data.length - 1].userid);
+      expect(ds.records[ds.length - 1].get('active')).toBe(data[data.length - 1].active);
     })
   })
 
@@ -358,9 +360,9 @@ describe('DataSet Methods', () => {
       const addDs = new DataSet({ ...commonDs, data: data.slice(4) });
       ds.unshift(...addDs.records);
       expect(ds.length).toBe(data.length);
-      expect(ds.records.get(3).get('name')).toBe(data[data.length - 1].name);
-      expect(ds.records.get(3).get('userid')).toBe(data[data.length - 1].userid);
-      expect(ds.records.get(3).get('active')).toBe(data[data.length - 1].active);
+      expect(ds.records[3].get('name')).toBe(data[data.length - 1].name);
+      expect(ds.records[3].get('userid')).toBe(data[data.length - 1].userid);
+      expect(ds.records[3].get('active')).toBe(data[data.length - 1].active);
     })
   })
 
@@ -644,12 +646,12 @@ describe('DataSet Methods', () => {
       const childrenLength = 10;
       const ds = new DataSet({ ...mockTableTreeDs(parentLength, childrenLength) })
       expect(ds.getFromTree(0).isSelected).toBeFalsy();
-      expect(ds.getFromTree(0).children.get(2).isSelected).toBeFalsy();
+      expect(ds.getFromTree(0).children[2].isSelected).toBeFalsy();
       ds.treeSelect(ds.get(0));
       expect(ds.selected.length).toBe(childrenLength + 1);
       expect(ds.getFromTree(0).isSelected).toBeTruthy();
-      expect(ds.getFromTree(0).children.get(2).get('id')).toBe('0-2');
-      expect(ds.getFromTree(0).children.get(2).isSelected).toBeTruthy();
+      expect(ds.getFromTree(0).children[2].get('id')).toBe('0-2');
+      expect(ds.getFromTree(0).children[2].isSelected).toBeTruthy();
     })
   })
 
@@ -658,15 +660,15 @@ describe('DataSet Methods', () => {
       const parentLength = 2;
       const childrenLength = 10;
       const ds = new DataSet({ ...mockTableTreeDs(parentLength, childrenLength) });
-      expect(ds.getFromTree(0).children.get(2).get('id')).toBe('0-2');;
+      expect(ds.getFromTree(0).children[2].get('id')).toBe('0-2');
       ds.treeSelect(ds.getFromTree(0));
       expect(ds.selected.length).toBe(childrenLength + 1);
       expect(ds.getFromTree(0).isSelected).toBeTruthy();
-      expect(ds.getFromTree(0).children.get(2).isSelected).toBeTruthy();
+      expect(ds.getFromTree(0).children[2].isSelected).toBeTruthy();
       ds.treeUnSelect(ds.getFromTree(0));
       expect(ds.selected.length).toBe(0);
       expect(ds.getFromTree(0).isSelected).toBeFalsy();
-      expect(ds.getFromTree(0).children.get(2).isSelected).toBeFalsy();
+      expect(ds.getFromTree(0).children[2].isSelected).toBeFalsy();
     })
   })
 
@@ -822,7 +824,7 @@ describe('DataSet Methods', () => {
       const rightTotal = parentLength * childrenLength + parentLength;
       ds.appendData(treeTableData(parentLength, childrenLength), ds.get(0));
       expect(ds.length).toBe(rightTotal);
-      expect(ds.getFromTree(0).children.get(9).get('id')).toBe('0-8');
+      expect(ds.getFromTree(0).children[9].get('id')).toBe('0-8');
     })
   })
 

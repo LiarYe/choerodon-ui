@@ -150,13 +150,13 @@ describe('DataSet Props', () => {
   describe('autoLocateAfterCreate', () => {
     it('没有数据并打开autoLocateAfterCreate', () => {
       const testDs = new DataSet({...commonDs, autoLocateAfterCreate: true});
-      testDs.create(data.slice(0, 1));
+      testDs.create(data[0]);
       expect(testDs.get(0).isCurrent).toBeTruthy();
     });
 
     it('没有数据并关闭autoLocateAfterCreate', () => {
       const testDs = new DataSet({...commonDs, autoLocateAfterCreate: false});
-      testDs.create(data.slice(0, 1));
+      testDs.create(data[0]);
       expect(testDs.get(0).isCurrent).toBeFalsy();
     });
 
@@ -239,6 +239,7 @@ describe('DataSet Props', () => {
 
   describe('queryParameter', () => {
     it('queryParameter是否添加上查询参数', async () => {
+      expect.assertions(1);
       const testDs = new DataSet({
         ...commonDs,
         queryParameter: {page: 2, pageSize: 123},
@@ -254,6 +255,7 @@ describe('DataSet Props', () => {
 
   describe('combineSort', () => {
     it('combineSort 设置为 true', async () => {
+      expect.assertions(1);
       const testDs = new DataSet({
         ...commonDs,
         fields: commonDs.fields.map(field => {
@@ -272,6 +274,7 @@ describe('DataSet Props', () => {
     });
   
     it('combineSort 设置为 false', async () => {
+      expect.assertions(1);
       const testDs = new DataSet({
         ...commonDs,
         fields: commonDs.fields.map(field => {

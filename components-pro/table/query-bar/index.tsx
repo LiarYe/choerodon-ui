@@ -1,6 +1,7 @@
 import React, { cloneElement, Component, isValidElement, MouseEventHandler, ReactElement, ReactNode, useState } from 'react';
 import { observer } from 'mobx-react';
-import { action, isArrayLike, observable } from 'mobx';
+import { action, observable, makeObservable } from 'mobx';
+import isArrayLike from 'choerodon-ui/dataset/mobx-helper/isArrayLike';
 import isObject from 'lodash/isObject';
 import isString from 'lodash/isString';
 import isNil from 'lodash/isNil';
@@ -177,6 +178,15 @@ const ExportFooter = observer((props) => {
 
 @observer
 export default class TableQueryBar extends Component<TableQueryBarProps> {
+  constructor(props, context) {
+    super(props, context);
+    if (!Object.prototype.hasOwnProperty.call(this, 'showMoreSummary')) this.showMoreSummary = undefined;
+    makeObservable(this, {
+      showMoreSummary: observable,
+      handleExportButton: action.bound,
+    });
+  }
+
   static displayName = 'TableQueryBar';
 
   static get contextType(): typeof TableContext {
@@ -196,7 +206,7 @@ export default class TableQueryBar extends Component<TableQueryBarProps> {
   /**
    * 多行汇总
    */
-  @observable showMoreSummary: boolean | undefined;
+  showMoreSummary: boolean | undefined;
 
   static defaultProps = {
     summaryBarFieldWidth: 170,
@@ -401,8 +411,6 @@ export default class TableQueryBar extends Component<TableQueryBarProps> {
     return false;
   }
 
-  @autobind
-  @action
   handleExportButton(data: DataSetExportStatus, filename?: string) {
     const {
       dataSet,
@@ -727,7 +735,7 @@ export default class TableQueryBar extends Component<TableQueryBarProps> {
       if (this.queryFieldsElement.length && (
         (!current || (buttons && buttons.some(button => isString(button) && button in TableButtonType) && dataSet.status !== DataSetStatus.ready))
       )) return this.queryFieldsElement;
-      const cloneFields: Map<string, Field> = fields.toJS();
+      const cloneFields: Map<string, Field> = new Map(fields);
       const tlsKey = getConfig('tlsKey');
       const processField = (field, name) => {
         if (!field.get('bind', current) && !name.includes(tlsKey)) {

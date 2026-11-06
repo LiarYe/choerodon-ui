@@ -1,3 +1,5 @@
+require('./components/configure');
+
 const c7n = require('./components-pro');
 
 const req = require.context('./components-pro', true, /^\.\/locale-context\/.+_.+\.tsx$/);

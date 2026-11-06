@@ -33,3 +33,9 @@ if (process.env.REACT === '15') {
 }
 
 Enzyme.configure({ adapter: new Adapter() });
+
+if (typeof HTMLCanvasElement !== 'undefined') {
+  HTMLCanvasElement.prototype.getContext = function getContext() {
+    return { measureText: text => ({ width: String(text).length * 8 }) };
+  };
+}

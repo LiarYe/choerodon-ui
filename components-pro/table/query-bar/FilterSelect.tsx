@@ -9,7 +9,8 @@ import throttle from 'lodash/throttle';
 import isString from 'lodash/isString';
 import { observer } from 'mobx-react';
 import { isMoment } from 'moment';
-import { action, computed, IReactionDisposer, isArrayLike, observable, reaction, runInAction, toJS } from 'mobx';
+import { action, IReactionDisposer, observable, reaction, runInAction, toJS, makeObservable, override as mobxOverride } from 'mobx';
+import isArrayLike from 'choerodon-ui/dataset/mobx-helper/isArrayLike';
 import { pxToRem } from 'choerodon-ui/lib/_util/UnitConvertor';
 import KeyCode from 'choerodon-ui/lib/_util/KeyCode';
 import Icon from '../../icon';
@@ -53,30 +54,29 @@ export default class FilterSelect extends TextField<FilterSelectProps> {
   };
 
   getPrefix(): ReactNode {
-    const { prefix = <Icon type="filter_list" /> } = this.props;
+    const { prefix = <Icon type="filter_list" /> } = this.reactiveProps;
     if (prefix) {
       return this.wrapperPrefix(prefix);
     }
   }
 
-  @observable selectField?: Field;
+  selectField?: Field;
 
-  @observable filterText?: string;
+  filterText?: string;
 
   queryDataSet?: DataSet;
 
-  reaction: IReactionDisposer;
+  reaction?: IReactionDisposer;
 
   isDoClear: boolean;
 
-  @computed
   get value(): any {
-    const { filter } = this.props;
+    const { filter } = this.reactiveProps;
     const { value, queryDataSet } = this.observableProps;
     if (value) {
       return filter ? value.filter(filter) : value;
     }
-    const { paramName } = this.props;
+    const { paramName } = this.reactiveProps;
     if (queryDataSet) {
       const { current } = queryDataSet;
       if (current) {
@@ -118,9 +118,22 @@ export default class FilterSelect extends TextField<FilterSelectProps> {
 
   constructor(props, context) {
     super(props, context);
-    const { observableProps } = this;
-    this.on(observableProps.queryDataSet);
-    this.reaction = reaction(() => observableProps.queryDataSet, this.on);
+    if (!Object.prototype.hasOwnProperty.call(this, 'selectField')) this.selectField = undefined;
+    if (!Object.prototype.hasOwnProperty.call(this, 'filterText')) this.filterText = undefined;
+    makeObservable(this, {
+      selectField: observable,
+      filterText: observable,
+      setText: mobxOverride,
+      handleDataSetUpdate: action.bound,
+      setSelectField: action,
+      setQueryValue: action,
+      clear: mobxOverride,
+    });
+  }
+
+  componentDidMount() {
+    super.componentDidMount();
+    this.reaction = reaction(() => this.observableProps.queryDataSet, this.on, { fireImmediately: true });
   }
 
   getObservableProps(props, context: any) {
@@ -147,13 +160,18 @@ export default class FilterSelect extends TextField<FilterSelectProps> {
       queryDataSet.removeEventListener(DataSetEvents.update, this.handleDataSetUpdate);
       queryDataSet.removeEventListener(DataSetEvents.reset, this.handleDataSetReset);
     }
+    this.queryDataSet = undefined;
   }
 
   componentWillUnmount() {
     super.componentWillUnmount();
     this.setFilterText.cancel();
+    this.doQuery.cancel();
+    if (this.reaction) {
+      this.reaction();
+      this.reaction = undefined;
+    }
     this.off();
-    this.reaction();
   }
 
   doQuery = throttle(async () => {
@@ -166,7 +184,6 @@ export default class FilterSelect extends TextField<FilterSelectProps> {
     onQuery();
   }, 500);
 
-  @action
   setText(text) {
     super.setText(text);
     this.setFilterText(text);
@@ -198,7 +215,7 @@ export default class FilterSelect extends TextField<FilterSelectProps> {
 
   @autobind
   defaultRenderer({ value, repeat = 0 }: RenderProps) {
-    const { paramName } = this.props;
+    const { paramName } = this.reactiveProps;
     const { queryDataSet } = this.observableProps;
     if (queryDataSet) {
       const { current } = queryDataSet;
@@ -271,7 +288,7 @@ export default class FilterSelect extends TextField<FilterSelectProps> {
   }
 
   addQueryParams(value) {
-    const { paramName } = this.props;
+    const { paramName } = this.reactiveProps;
     if (paramName) {
       this.setQueryValue(paramName!, value);
     }
@@ -289,7 +306,7 @@ export default class FilterSelect extends TextField<FilterSelectProps> {
   }
 
   getQueryFieldMultiple(value) {
-    const { paramName } = this.props;
+    const { paramName } = this.reactiveProps;
     if (paramName !== value) {
       const field = this.getQueryField(value);
       if (field && field.get('multiple', this.getQueryRecord())) {
@@ -301,13 +318,11 @@ export default class FilterSelect extends TextField<FilterSelectProps> {
 
   @autobind
   handleDataSetReset() {
-    const { onReset = noop } = this.props;
+    const { onReset = noop } = this.reactiveProps;
     this.setValue(undefined);
     onReset();
   }
 
-  @autobind
-  @action
   handleDataSetUpdate({ name, value, record }) {
     const values = this.getValues();
     if (isArrayLike(value)) {
@@ -349,7 +364,6 @@ export default class FilterSelect extends TextField<FilterSelectProps> {
     }
   }
 
-  @autobind
   handleBlur(e) {
     super.handleBlur(e);
     if (!e.isDefaultPrevented()) {
@@ -358,7 +372,7 @@ export default class FilterSelect extends TextField<FilterSelectProps> {
   }
 
   isEditorReadOnly(): boolean {
-    const { paramName, editable } = this.props;
+    const { paramName, editable } = this.reactiveProps;
     return (this.getQueryValues(paramName).length > 0 && !this.selectField) || !editable;
   }
 
@@ -404,7 +418,6 @@ export default class FilterSelect extends TextField<FilterSelectProps> {
     // noop
   }
 
-  @action
   setSelectField(value) {
     this.selectField = value;
     this.setFilterText(undefined);
@@ -426,7 +439,6 @@ export default class FilterSelect extends TextField<FilterSelectProps> {
     // noop
   }
 
-  @action
   setQueryValue(fieldName: string, value: any) {
     const current = this.getQueryRecord();
     if (current) {
@@ -473,7 +485,7 @@ export default class FilterSelect extends TextField<FilterSelectProps> {
   }
 
   getFieldSelectOptions(): ReactElement<OptionProps>[] {
-    const { paramName } = this.props;
+    const { paramName } = this.reactiveProps;
     const { queryDataSet } = this.observableProps;
     const data: ReactElement<OptionProps>[] = [];
     if (queryDataSet) {
@@ -500,7 +512,7 @@ export default class FilterSelect extends TextField<FilterSelectProps> {
     const current = this.queryDataSet ? this.queryDataSet.current : undefined;
     const editor: ReactElement<FormFieldProps> = getEditorByField(selectField, current, true);
     const record = this.getQueryRecord();
-    const { editorProps = noop } = this.props;
+    const { editorProps = noop } = this.reactiveProps;
     const editorFunProps = editorProps({name: selectField.name, record, editor});
     const editorMergeProps: FormFieldProps = {
       ...editorFunProps,
@@ -516,7 +528,7 @@ export default class FilterSelect extends TextField<FilterSelectProps> {
     };
 
     if ((editor.type as any).__PRO_SELECT) {
-      (editorMergeProps as SelectProps).dropdownMenuStyle = this.props.dropdownMenuStyle;
+      (editorMergeProps as SelectProps).dropdownMenuStyle = this.reactiveProps.dropdownMenuStyle;
       (editorMergeProps as SelectProps).dropdownMatchSelectWidth = false;
     }
     return cloneElement<FormFieldProps>(editor, editorMergeProps);
@@ -525,7 +537,7 @@ export default class FilterSelect extends TextField<FilterSelectProps> {
   getFieldSelect(props): ReactElement<SelectProps> {
     const {
       filterText,
-      props: { dropdownMenuStyle },
+      reactiveProps: { dropdownMenuStyle },
     } = this;
     const editable = !this.isEditorReadOnly();
     const options =
@@ -550,7 +562,6 @@ export default class FilterSelect extends TextField<FilterSelectProps> {
     );
   }
 
-  @action
   clear() {
     const record = this.getQueryRecord();
     this.isDoClear = true;
@@ -565,7 +576,7 @@ export default class FilterSelect extends TextField<FilterSelectProps> {
   }
 
   renderWrapper(): ReactNode {
-    const { hiddenIfNone } = this.props;
+    const { hiddenIfNone } = this.reactiveProps;
     if (this.isEmpty() && hiddenIfNone) {
       return null;
     }

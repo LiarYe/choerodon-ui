@@ -1,6 +1,5 @@
 import React, { ReactNode, FocusEvent, KeyboardEvent } from 'react';
-import { observer } from 'mobx-react';
-import { action, observable, runInAction } from 'mobx';
+import { action, observable, runInAction, makeObservable } from 'mobx';
 import isNil from 'lodash/isNil';
 import Spin from 'choerodon-ui/lib/spin';
 import KeyCode from 'choerodon-ui/lib/_util/KeyCode';
@@ -47,7 +46,6 @@ export interface MentionsProps extends TextAreaProps {
   loading?: boolean;
 }
 
-@observer
 class Mentions<T extends MentionsProps = MentionsProps> extends TextArea<T> {
   static displayName = 'Mentions';
 
@@ -70,25 +68,40 @@ class Mentions<T extends MentionsProps = MentionsProps> extends TextArea<T> {
 
   focusId: number | undefined = undefined;
 
-  @observable measuring: boolean;
+  measuring: boolean;
 
-  @observable measureText: string | null;
+  measureText: string | null;
 
-  @observable measurePrefix: string;
+  measurePrefix: string;
 
-  @observable measureLocation: number;
+  measureLocation: number;
 
-  @observable activeIndex: number;
+  activeIndex: number;
 
   selectionLocation = -1;
 
   constructor(props: MentionsProps, context) {
     super(props, context);
-  
+    if (!Object.prototype.hasOwnProperty.call(this, 'measuring')) Object.assign(this, { measuring: undefined });
+    if (!Object.prototype.hasOwnProperty.call(this, 'measureText')) Object.assign(this, { measureText: undefined });
+    if (!Object.prototype.hasOwnProperty.call(this, 'measurePrefix')) Object.assign(this, { measurePrefix: undefined });
+    if (!Object.prototype.hasOwnProperty.call(this, 'measureLocation')) Object.assign(this, { measureLocation: undefined });
+    if (!Object.prototype.hasOwnProperty.call(this, 'activeIndex')) Object.assign(this, { activeIndex: undefined });
+    makeObservable(this, {
+      measuring: observable,
+      measureText: observable,
+      measurePrefix: observable,
+      measureLocation: observable,
+      activeIndex: observable,
+      initObservableObj: action,
+      setActiveIndex: action.bound,
+      startMeasure: action,
+      stopMeasure: action,
+    });
+
     this.initObservableObj();
   }
 
-  @action
   initObservableObj() {
     this.measuring = false;
     this.measureLocation = 0;
@@ -104,7 +117,7 @@ class Mentions<T extends MentionsProps = MentionsProps> extends TextArea<T> {
     if (this.measuring && this.measure && this.element) {
       this.measure.scrollTop = this.element.scrollTop;
     }
-  
+
     // 选择选项后设置输入框光标位置
     if (this.selectionLocation !== -1 && this.element) {
       setInputSelection(this.element, this.selectionLocation);
@@ -259,7 +272,6 @@ class Mentions<T extends MentionsProps = MentionsProps> extends TextArea<T> {
     this.handleBlur();
   }
 
-  @autobind
   handleFocus(event?: FocusEvent<HTMLTextAreaElement>) {
     window.clearTimeout(this.focusId);
     if (event) {
@@ -267,7 +279,6 @@ class Mentions<T extends MentionsProps = MentionsProps> extends TextArea<T> {
     }
   }
 
-  @autobind
   handleBlur(event?: FocusEvent<HTMLTextAreaElement>) {
     this.focusId = window.setTimeout(() => {
       this.stopMeasure();
@@ -302,8 +313,6 @@ class Mentions<T extends MentionsProps = MentionsProps> extends TextArea<T> {
     }
   }
 
-  @autobind
-  @action
   setActiveIndex(activeIndex: number) {
     this.activeIndex = activeIndex;
   }
@@ -340,7 +349,6 @@ class Mentions<T extends MentionsProps = MentionsProps> extends TextArea<T> {
     return list;
   }
 
-  @action
   startMeasure(measureText: string, measurePrefix: string, measureLocation: number) {
     this.measuring = true;
     this.measureText = measureText;
@@ -349,7 +357,6 @@ class Mentions<T extends MentionsProps = MentionsProps> extends TextArea<T> {
     this.activeIndex = 0;
   }
 
-  @action
   stopMeasure() {
     this.measuring = false;
     this.measureLocation = 0;

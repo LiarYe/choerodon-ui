@@ -11,7 +11,8 @@ import React, {
 } from 'react';
 import classNames from 'classnames';
 import { observer } from 'mobx-react';
-import { action as mobxAction, computed, isArrayLike, observable, runInAction, toJS } from 'mobx';
+import { action as mobxAction, observable, runInAction, toJS, makeObservable } from 'mobx';
+import isArrayLike from 'choerodon-ui/dataset/mobx-helper/isArrayLike';
 import isNumber from 'lodash/isNumber';
 import isString from 'lodash/isString';
 import noop from 'lodash/noop';
@@ -231,9 +232,9 @@ export default class Form extends DataSetComponent<FormProps, FormContextValue> 
 
   fields: FormField<FormFieldProps>[] = [];
 
-  @observable responsiveItems: any[];
+  responsiveItems: any[];
 
-  @observable isUnderForm?: boolean;
+  isUnderForm?: boolean;
 
   name = NameGen.next().value;
 
@@ -245,17 +246,23 @@ export default class Form extends DataSetComponent<FormProps, FormContextValue> 
 
   constructor(props, context) {
     super(props, context);
+    if (!Object.prototype.hasOwnProperty.call(this, 'responsiveItems')) Object.assign(this, { responsiveItems: undefined });
+    if (!Object.prototype.hasOwnProperty.call(this, 'isUnderForm')) this.isUnderForm = undefined;
+    makeObservable(this, {
+      componentDidMountOrUpdate: mobxAction,
+      handleResponsive: mobxAction.bound,
+      responsiveItems: observable,
+      isUnderForm: observable,
+    });
     runInAction(() => {
       this.responsiveItems = [];
     });
   }
 
-  @computed
   get axios(): AxiosInstance {
     return this.observableProps.axios || this.getContextConfig('axios') || axios;
   }
 
-  @computed
   get dataSet(): DataSet | undefined {
     const { record } = this;
     if (record) {
@@ -268,7 +275,6 @@ export default class Form extends DataSetComponent<FormProps, FormContextValue> 
     return observableProps.contextDataSet;
   }
 
-  @computed
   get record(): Record | undefined {
     const { observableProps } = this;
     if ('record' in observableProps) {
@@ -290,13 +296,11 @@ export default class Form extends DataSetComponent<FormProps, FormContextValue> 
     return observableProps.contextRecord;
   }
 
-  @computed
   get dataIndex(): number | undefined {
     const { dataIndex, contextDataIndex } = this.observableProps;
     return defaultTo(dataIndex, contextDataIndex);
   }
 
-  @computed
   get useColon(): boolean {
     const { useColon } = this.observableProps;
 
@@ -312,7 +316,6 @@ export default class Form extends DataSetComponent<FormProps, FormContextValue> 
     return false;
   }
 
-  @computed
   get requiredMarkAlign(): RequiredMarkAlign {
     const { requiredMarkAlign } = this.observableProps;
 
@@ -328,7 +331,6 @@ export default class Form extends DataSetComponent<FormProps, FormContextValue> 
     return RequiredMarkAlign.left;
   }
 
-  @computed
   get excludeUseColonTagList(): string[] {
     const { excludeUseColonTagList } = this.observableProps;
 
@@ -344,7 +346,6 @@ export default class Form extends DataSetComponent<FormProps, FormContextValue> 
     return defaultExcludeUseColonTag;
   }
 
-  @computed
   get columns(): number {
     const { columns } = this.observableProps;
     if (isNumber(columns)) {
@@ -359,7 +360,6 @@ export default class Form extends DataSetComponent<FormProps, FormContextValue> 
     return defaultColumns;
   }
 
-  @computed
   get labelWidth(): LabelWidth {
     let { labelWidth } = this.observableProps;
     if (isNil(labelWidth)) {
@@ -387,7 +387,6 @@ export default class Form extends DataSetComponent<FormProps, FormContextValue> 
     return defaultLabelWidth;
   }
 
-  @computed
   get labelWordBreak(): boolean {
     const { labelWidth: oriLabelWidth } = this;
     if (typeof oriLabelWidth === 'object' && !isArrayLike(oriLabelWidth) &&
@@ -401,7 +400,6 @@ export default class Form extends DataSetComponent<FormProps, FormContextValue> 
     return labelWordBreak;
   }
 
-  @computed
   get labelAlign(): LabelAlign {
     const { labelAlign } = this.observableProps;
     if (isString(labelAlign)) {
@@ -418,7 +416,6 @@ export default class Form extends DataSetComponent<FormProps, FormContextValue> 
       : this.getContextConfig('labelAlign') || LabelAlign.right);
   }
 
-  @computed
   get labelLayout(): LabelLayout {
     const { labelLayout } = this.observableProps;
     if (isString(labelLayout)) {
@@ -433,37 +430,31 @@ export default class Form extends DataSetComponent<FormProps, FormContextValue> 
     return this.getContextConfig('labelLayout') || LabelLayout.horizontal;
   }
 
-  @computed
   get labelTooltip(): LabelTooltip | [LabelTooltip, TooltipProps] |undefined {
     const { labelTooltip } = this.observableProps;
     if (labelTooltip) {
       return labelTooltip;
     }
-    const { getTooltip } = this.context;
+    const { getTooltip } = this.reactiveContext;
     return getTooltip('label');
   }
 
-  @computed
   get readOnly(): boolean {
     return this.observableProps.readOnly;
   }
 
-  @computed
   get pristine(): boolean {
     return this.observableProps.pristine;
   }
 
-  @computed
   get fieldHighlightRenderer(): boolean {
     return this.observableProps.fieldHighlightRenderer;
   }
 
-  @computed
   get showValidation(): ShowValidation {
     return this.observableProps.showValidation;
   }
 
-  @computed
   get showHelp(): ShowHelp {
     const { showHelp } = this.observableProps;
     if (isString(showHelp)) {
@@ -472,7 +463,6 @@ export default class Form extends DataSetComponent<FormProps, FormContextValue> 
     return this.getContextConfig('showHelp') || ShowHelp.newLine;
   }
 
-  @computed
   get separateSpacing(): SeparateSpacing | undefined {
     let { separateSpacing } = this.observableProps;
     if (isNil(separateSpacing)) {
@@ -501,7 +491,7 @@ export default class Form extends DataSetComponent<FormProps, FormContextValue> 
   }
 
   get spacingType(): SpacingTypeMap {
-    const { spacingType } = this.props;
+    const { spacingType } = this.reactiveProps;
     return normalizeSpacingType(spacingType);
   }
 
@@ -590,7 +580,7 @@ export default class Form extends DataSetComponent<FormProps, FormContextValue> 
 
   getHeader(): ReactNode {
     const {
-      props: { header },
+      reactiveProps: { header },
       prefixCls,
     } = this;
     if (header) {
@@ -653,7 +643,6 @@ export default class Form extends DataSetComponent<FormProps, FormContextValue> 
     }
   }
 
-  @mobxAction
   componentDidMountOrUpdate() {
     const { formNode } = this.context;
     const { element } = this;
@@ -676,7 +665,7 @@ export default class Form extends DataSetComponent<FormProps, FormContextValue> 
   }
 
   bubbleValidationReport(showInvalid: boolean) {
-    const { pristine } = this.props;
+    const { pristine } = this.reactiveProps;
     if (!pristine) {
       const onComponentValidationReport = this.getContextConfig('onComponentValidationReport');
       if (onComponentValidationReport) {
@@ -697,7 +686,7 @@ export default class Form extends DataSetComponent<FormProps, FormContextValue> 
       this.bubbleValidationReport(false);
     }
   }
-  
+
   @autobind
   handleDataSetRemove({ records, dataSet }) {
     if (records) {
@@ -711,7 +700,7 @@ export default class Form extends DataSetComponent<FormProps, FormContextValue> 
   handleDataSetValidate(props: { dataSet: DataSet; valid: boolean; errors: ValidationErrors[]; noLocate?: boolean }) {
     const { valid, errors: validationErrors, noLocate } = props;
     this.bubbleValidationReport(!valid);
-    const { autoValidationLocate } = this.props;
+    const { autoValidationLocate } = this.reactiveProps;
     if (autoValidationLocate !== false && !noLocate && !valid) {
       const [firstInvalidRecord] = validationErrors;
       if (firstInvalidRecord) {
@@ -732,7 +721,7 @@ export default class Form extends DataSetComponent<FormProps, FormContextValue> 
   @autobind
   handleHelpMouseEnter(e: MouseEvent, help: ReactNode, helpTooltipProps: TooltipProps) {
     const { target } = e;
-    const { getTooltipTheme, getTooltipPlacement } = this.context;
+    const { getTooltipTheme, getTooltipPlacement } = this.reactiveContext;
     show(target as HTMLElement, {
       title: help,
       theme: getTooltipTheme('help'),
@@ -773,7 +762,7 @@ export default class Form extends DataSetComponent<FormProps, FormContextValue> 
       readOnly: formReadOnly,
       showHelp,
       labelWordBreak: formLabelWordBreak,
-      props: { children },
+      reactiveProps: { children },
     } = this;
     const prefixCls = this.getContextProPrefixCls(FIELD_SUFFIX);
     const labelWidth = normalizeLabelWidth(this.labelWidth, columns);
@@ -1067,14 +1056,14 @@ export default class Form extends DataSetComponent<FormProps, FormContextValue> 
       disabled,
       readOnly,
       fieldHighlightRenderer,
-      props,
+      reactiveProps: props,
       useColon,
       requiredMarkAlign,
       showValidation,
       showHelp,
       labelWordBreak,
     } = this;
-    const { formNode, getConfig, getProPrefixCls, getPrefixCls, getCustomizable, getTooltip, getTooltipTheme, getTooltipPlacement } = this.context;
+    const { formNode, getConfig, getProPrefixCls, getPrefixCls, getCustomizable, getTooltip, getTooltipTheme, getTooltipPlacement } = this.reactiveContext;
     const value: FormContextValue = {
       formNode: formNode || this,
       dataSet,
@@ -1134,8 +1123,7 @@ export default class Form extends DataSetComponent<FormProps, FormContextValue> 
     );
   }
 
-  @autobind
-  @mobxAction
+
   handleResponsive(items) {
     this.responsiveItems = items;
   }
@@ -1154,7 +1142,7 @@ export default class Form extends DataSetComponent<FormProps, FormContextValue> 
         onSuccess = noop,
         onError = noop,
         onSubmit = noop,
-      } = this.props;
+      } = this.reactiveProps;
       onSubmit(e);
       try {
         if (dataSet) {
@@ -1174,7 +1162,7 @@ export default class Form extends DataSetComponent<FormProps, FormContextValue> 
 
   @autobind
   handleReset(e) {
-    const { onReset = noop } = this.props;
+    const { onReset = noop } = this.reactiveProps;
     const { record } = this;
     onReset(e);
     if (!e.isDefaultPrevented()) {
@@ -1188,7 +1176,7 @@ export default class Form extends DataSetComponent<FormProps, FormContextValue> 
 
   reportValidity(result: boolean) {
     const { prepareForReport } = this;
-    const { autoValidationLocate } = this.props;
+    const { autoValidationLocate } = this.reactiveProps;
     if (!result) {
       prepareForReport.result = result;
     }
@@ -1227,7 +1215,7 @@ export default class Form extends DataSetComponent<FormProps, FormContextValue> 
   }
 
   getFields(): FormField<FormFieldProps>[] {
-    const { id } = this.props;
+    const { id } = this.reactiveProps;
     if (id) {
       return ([] as FormField<FormFieldProps>[]).concat(this.fields, getFieldsById(id));
     }

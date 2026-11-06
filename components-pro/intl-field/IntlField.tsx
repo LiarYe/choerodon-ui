@@ -1,6 +1,6 @@
 import React, { ReactNode } from 'react';
-import { observer } from 'mobx-react';
-import { action, observable, computed, isArrayLike } from 'mobx';
+import { action, observable, makeObservable, override as mobxOverride } from 'mobx';
+import isArrayLike from 'choerodon-ui/dataset/mobx-helper/isArrayLike';
 import classNames from 'classnames';
 import { ProgressType } from 'choerodon-ui/lib/progress/enum';
 import KeyCode from 'choerodon-ui/lib/_util/KeyCode';
@@ -34,7 +34,6 @@ export interface IntlFieldProps extends TextAreaProps {
   displayOutput?: boolean;
 }
 
-@observer
 export default class IntlField extends TextArea<IntlFieldProps> {
   static displayName = 'IntlField';
 
@@ -51,10 +50,16 @@ export default class IntlField extends TextArea<IntlFieldProps> {
 
   locales?: object;
 
-  @observable loading?: boolean;
+  loading?: boolean;
 
   constructor(props, context) {
     super(props, context);
+    if (!Object.prototype.hasOwnProperty.call(this, 'loading')) this.loading = undefined;
+    makeObservable(this, {
+      loading: observable,
+      saveSuffixRef: mobxOverride,
+      setLoading: action,
+    });
     const suffixCls = this.props.displayOutput
       ? 'output'
       : (this.props.type !== IntlType.multipleLine ? 'input' : 'textarea');
@@ -65,30 +70,29 @@ export default class IntlField extends TextArea<IntlFieldProps> {
     return false;
   }
 
-  @computed
   get readOnly(): boolean {
-    if (this.props.displayOutput) {
+    if (this.reactiveProps.displayOutput) {
       return true;
     }
     return this.isReadOnly();
   }
 
   get resize(): ResizeType | undefined {
-    if (this.props.displayOutput) {
+    if (this.reactiveProps.displayOutput) {
       return ResizeType.none;
     }
     return super.resize;
   }
 
   get autoSize(): boolean | AutoSizeType | undefined {
-    if (this.props.displayOutput) {
+    if (this.reactiveProps.displayOutput) {
       return false;
     }
     return super.autoSize;
   }
 
   get border(): boolean | undefined {
-    if (this.props.displayOutput) {
+    if (this.reactiveProps.displayOutput) {
       return false;
     }
     return super.border;
@@ -98,33 +102,31 @@ export default class IntlField extends TextArea<IntlFieldProps> {
     if (this.disabled) {
       return super.tooltip;
     }
-    const { tooltip, type } = this.props;
-    const { getTooltip } = this.context;
+    const { tooltip, type } = this.reactiveProps;
+    const { getTooltip } = this.reactiveContext;
     return type === IntlType.multipleLine
       ? (tooltip || TextTooltip.none)
       : (tooltip || getTooltip('text-field'));
   }
 
-  @autobind
-  @action
   saveSuffixRef(node) {
     this.suffixRef = node;
   }
 
   getEditorTextInfo(rangeTarget?: 0 | 1): { text: string; width: number; placeholder?: string } {
     const superText = super.getEditorTextInfo(rangeTarget);
-    return this.props.displayOutput ? { ...superText, placeholder: undefined } : superText;
+    return this.reactiveProps.displayOutput ? { ...superText, placeholder: undefined } : superText;
   }
 
   getPlaceholders(): string[] {
-    if (this.props.displayOutput) {
+    if (this.reactiveProps.displayOutput) {
       return [];
     }
     return super.getPlaceholders();
   }
 
   isEditable(): boolean {
-    if (this.props.displayOutput) {
+    if (this.reactiveProps.displayOutput) {
       return false;
     }
     return super.isEditable();
@@ -187,7 +189,6 @@ export default class IntlField extends TextArea<IntlFieldProps> {
     }
   };
 
-  @action
   setLoading(loading) {
     this.loading = loading;
   }
@@ -228,14 +229,13 @@ export default class IntlField extends TextArea<IntlFieldProps> {
 
   @autobind
   handleKeyDown(e) {
-    if (e.keyCode === KeyCode.DOWN && this.props.type !== IntlType.multipleLine) {
+    if (e.keyCode === KeyCode.DOWN && this.reactiveProps.type !== IntlType.multipleLine) {
       stopEvent(e);
       this.openModal();
     }
     super.handleKeyDown(e);
   }
 
-  @autobind
   handleBlur(e) {
     if (this.modal) {
       e.preventDefault();
@@ -263,7 +263,7 @@ export default class IntlField extends TextArea<IntlFieldProps> {
   }
 
   getOmitPropsKeys(): string[] {
-    if (this.props.type === IntlType.multipleLine && !this.props.displayOutput) {
+    if (this.reactiveProps.type === IntlType.multipleLine && !this.reactiveProps.displayOutput) {
       return super.getOmitPropsKeys().concat([
         'type',
         'displayOutput',
@@ -283,7 +283,7 @@ export default class IntlField extends TextArea<IntlFieldProps> {
   }
 
   getOtherProps() {
-    if (this.props.type === IntlType.multipleLine) {
+    if (this.reactiveProps.type === IntlType.multipleLine) {
       return super.getOtherProps();
     }
     return TextField.prototype.getOtherProps.call(this);
@@ -301,7 +301,7 @@ export default class IntlField extends TextArea<IntlFieldProps> {
     if (!showSuffix) {
       return undefined;
     }
-    const { suffix } = this.props;
+    const { suffix } = this.reactiveProps;
     return this.wrapperSuffix(
       this.loading ? (
         <Progress size={Size.small} type={ProgressType.loading} />
@@ -315,7 +315,7 @@ export default class IntlField extends TextArea<IntlFieldProps> {
   }
 
   handleEnterDown(e) {
-    if (this.props.type === IntlType.multipleLine) {
+    if (this.reactiveProps.type === IntlType.multipleLine) {
       super.handleEnterDown(e);
     } else {
       TextField.prototype.handleEnterDown.call(this, e);
@@ -323,28 +323,25 @@ export default class IntlField extends TextArea<IntlFieldProps> {
   }
 
   componentWillReceiveProps(nextProps, nextContext) {
-    if (nextProps.type !== this.props.type ||
-      nextProps.displayOutput !== this.props.displayOutput
-    ) {
-      const suffixCls = nextProps.displayOutput
-        ? 'output'
-        : (nextProps.type !== IntlType.multipleLine ? 'input' : 'textarea');
-      this.prefixCls = this.getContextProPrefixCls(suffixCls, nextProps.prefixCls);
-    }
     super.componentWillReceiveProps(nextProps, nextContext);
+    const suffixCls = nextProps.displayOutput
+      ? 'output'
+      : (nextProps.type !== IntlType.multipleLine ? 'input' : 'textarea');
+    this.prefixCls = this.getContextProPrefixCls(suffixCls, nextProps.prefixCls);
   }
 
   componentWillUnmount() {
+    super.componentWillUnmount();
     if (this.modal) {
       this.modal.close();
     }
   }
 
   renderWrapper(): ReactNode {
-    if (this.props.displayOutput) {
+    if (this.reactiveProps.displayOutput) {
       return this.renderOutput();
     }
-    if (this.props.type === IntlType.multipleLine) {
+    if (this.reactiveProps.type === IntlType.multipleLine) {
       return super.renderWrapper();
     }
     return this.renderGroup();
@@ -354,9 +351,9 @@ export default class IntlField extends TextArea<IntlFieldProps> {
     if (super.showTooltip(e)) {
       return true;
     }
-    if (this.props.displayOutput) {
-      const { getTooltip, getTooltipTheme, getTooltipPlacement } = this.context;
-      const { tooltip = getTooltip('output') } = this.props;
+    if (this.reactiveProps.displayOutput) {
+      const { getTooltip, getTooltipTheme, getTooltipPlacement } = this.reactiveContext;
+      const { tooltip = getTooltip('output') } = this.reactiveProps;
       const { element, field } = this;
       if (element && !(field && field.get('multiLine', this.record)) && (tooltip === TextTooltip.always || (tooltip === TextTooltip.overflow && isOverflow(element)))) {
         const title = this.getRenderedValue();

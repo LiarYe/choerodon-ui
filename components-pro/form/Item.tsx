@@ -12,7 +12,7 @@ import React, {
   useRef,
   CSSProperties,
 } from 'react';
-import { isArrayLike } from 'mobx';
+import isArrayLike from 'choerodon-ui/dataset/mobx-helper/isArrayLike';
 import classNames from 'classnames';
 import { observer } from 'mobx-react-lite';
 import isNil from 'lodash/isNil';

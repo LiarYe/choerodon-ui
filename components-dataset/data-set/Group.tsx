@@ -1,4 +1,5 @@
-import { action, computed, observable, ObservableMap, runInAction } from 'mobx';
+import { makeObservable, action, computed, observable, ObservableMap, runInAction } from 'mobx';
+
 import Record, { EXPANDED_KEY } from './Record';
 import { getIf } from './utils';
 import { TABLE_SHOW_REMOVED_ROW } from './constant';
@@ -13,7 +14,7 @@ export default class Group {
 
   parentValue?: any;
 
-  @observable records: Record[];
+  records: Record[];
 
   readonly totalRecords: Record[];
 
@@ -27,7 +28,7 @@ export default class Group {
 
   readonly index: number;
 
-  @observable state?: ObservableMap<string, any>;
+  state?: ObservableMap<string, any> = undefined;
 
   // 同组下的树形子分组
   children?: Group[] | undefined;
@@ -51,7 +52,6 @@ export default class Group {
     return 0;
   }
 
-  @computed
   get expandedRecords(): Record[] {
     const { subGroups } = this;
     if (subGroups.length) {
@@ -68,6 +68,15 @@ export default class Group {
   }
 
   constructor(name: string | symbol, index: number, value?: any, parentGroup?: Group) {
+    Object.assign(this, {
+      records: undefined,
+    });
+    makeObservable(this, {
+      records: observable,
+      state: observable,
+      expandedRecords: computed,
+      setState: action,
+    });
     this.index = index;
     this.name = name;
     this.value = value;
@@ -84,7 +93,6 @@ export default class Group {
     return state && state.get(key);
   }
 
-  @action
   setState(key: string, value: any) {
     if (value !== undefined || this.state) {
       const state = getIf<Group, ObservableMap>(this, 'state', () => observable.map());

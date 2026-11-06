@@ -56,12 +56,12 @@ export default class DaysView<T extends DateViewProps> extends ViewComponent<T>
   static type = FieldType.date;
 
   get comboRangeMode(): boolean | undefined {
-    const { comboRangeMode } = this.props;
+    const { comboRangeMode } = this.reactiveProps;
     return comboRangeMode;
   }
 
   get startDate(): Moment | undefined {
-    const { dateRangeValue, rangeTarget, hoverValue } = this.props;
+    const { dateRangeValue, rangeTarget, hoverValue } = this.reactiveProps;
     if (rangeTarget === undefined || !dateRangeValue) return hoverValue;
     if (hoverValue) {
       const another = dateRangeValue[rangeTarget === 0 ? 1 : 0];
@@ -71,7 +71,7 @@ export default class DaysView<T extends DateViewProps> extends ViewComponent<T>
   }
 
   get endDate(): Moment | undefined {
-    const { dateRangeValue, rangeTarget, hoverValue } = this.props;
+    const { dateRangeValue, rangeTarget, hoverValue } = this.reactiveProps;
     if (rangeTarget === undefined || !dateRangeValue) return hoverValue;
     if (hoverValue) {
       const another = dateRangeValue[rangeTarget === 0 ? 1 : 0];
@@ -82,7 +82,7 @@ export default class DaysView<T extends DateViewProps> extends ViewComponent<T>
 
   getTargetDate(target?: 0 | 1): Moment {
     const { comboRangeMode } = this;
-    const { date, dateRangeValue, rangeTarget } = this.props;
+    const { date, dateRangeValue, rangeTarget } = this.reactiveProps;
     if (!comboRangeMode || !dateRangeValue || rangeTarget === undefined || target === undefined) return date;
 
     if (dateRangeValue[0] && dateRangeValue[1] && dateRangeValue[0].isSame(dateRangeValue[1], 'M')) {
@@ -110,7 +110,7 @@ export default class DaysView<T extends DateViewProps> extends ViewComponent<T>
   renderSingle(target?: 0 | 1) {
     const {
       prefixCls,
-      props: { className, extraFooterPlacement },
+      reactiveProps: { className, extraFooterPlacement },
     } = this;
     const classString = classNames(`${prefixCls}-view`, className, this.getViewClassName());
     return (
@@ -227,7 +227,7 @@ export default class DaysView<T extends DateViewProps> extends ViewComponent<T>
   handleKeyDownEnter(e) {
     e.preventDefault();
     if (this.comboRangeMode) return;
-    this.choose(this.props.date);
+    this.choose(this.reactiveProps.date);
   }
 
   handleCellClick(date: Moment): void {
@@ -235,22 +235,22 @@ export default class DaysView<T extends DateViewProps> extends ViewComponent<T>
   }
 
   choose(date: Moment, expand?: boolean) {
-    const { onSelect = noop } = this.props;
+    const { onSelect = noop } = this.reactiveProps;
     onSelect(date, expand);
   }
 
   changeSelectedDate(selectedDate: Moment, mode?: ViewMode) {
-    const { onSelectedDateChange = noop } = this.props;
+    const { onSelectedDateChange = noop } = this.reactiveProps;
     onSelectedDateChange(selectedDate, mode);
   }
 
   changeCursorDate(cursor: Moment, mode?: ViewMode) {
-    const { onCursorDateChange = noop, date } = this.props;
+    const { onCursorDateChange = noop, date } = this.reactiveProps;
     onCursorDateChange(cursor, date, mode);
   }
 
   changeViewMode(mode: ViewMode) {
-    const { onViewModeChange = noop } = this.props;
+    const { onViewModeChange = noop } = this.reactiveProps;
     onViewModeChange(mode);
   }
 
@@ -258,7 +258,7 @@ export default class DaysView<T extends DateViewProps> extends ViewComponent<T>
     const {
       prefixCls,
       comboRangeMode,
-      props: { yearFirst },
+      reactiveProps: { yearFirst },
     } = this;
     const date = this.getTargetDate(target);
     const startStyle: CSSProperties = comboRangeMode && target === 0 ? { visibility: 'hidden' } : {};
@@ -315,7 +315,7 @@ export default class DaysView<T extends DateViewProps> extends ViewComponent<T>
   get customFooter() {
     const {
       prefixCls,
-      props: { renderExtraFooter, handleCustomChoose },
+      reactiveProps: { renderExtraFooter, handleCustomChoose },
     } = this;
     return renderExtraFooter ? (
       <div className={`${prefixCls}-footer-extra`}>
@@ -327,7 +327,7 @@ export default class DaysView<T extends DateViewProps> extends ViewComponent<T>
   renderFooter(): ReactNode {
     const {
       prefixCls,
-      props: { disabledNow, isExistValue },
+      reactiveProps: { disabledNow, isExistValue },
     } = this;
     const footerProps = {
       className: classNames({
@@ -374,7 +374,7 @@ export default class DaysView<T extends DateViewProps> extends ViewComponent<T>
       comboRangeMode,
       startDate,
       endDate,
-      props: { renderer = this.renderCell, isValidDate = alwaysValidDate, onDateMouseLeave },
+      reactiveProps: { renderer = this.renderCell, isValidDate = alwaysValidDate, onDateMouseLeave },
     } = this;
     const date = this.getTargetDate(target);
     const selected = date.clone();
@@ -436,7 +436,7 @@ export default class DaysView<T extends DateViewProps> extends ViewComponent<T>
   }
 
   getDaysOfWeek(): ReactNode[] {
-    const locale = this.props.date.localeData();
+    const locale = this.reactiveProps.date.localeData();
     const days = locale.weekdaysMin();
     const first = locale.firstDayOfWeek();
     const dow: ReactNode[] = [];
@@ -453,6 +453,6 @@ export default class DaysView<T extends DateViewProps> extends ViewComponent<T>
   }
 
   getCloneDate(): Moment {
-    return this.props.date.clone();
+    return this.reactiveProps.date.clone();
   }
 }

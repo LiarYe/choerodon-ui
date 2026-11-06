@@ -1,6 +1,6 @@
 import React, { CSSProperties, FunctionComponent, memo, ReactNode, useCallback, useContext, useEffect, useRef } from 'react';
 import ConfigContext from 'choerodon-ui/lib/config-provider/ConfigContext';
-import { isArrayLike } from 'mobx';
+import isArrayLike from 'choerodon-ui/dataset/mobx-helper/isArrayLike';
 import { Tooltip as LabelTooltip } from '../core/enum';
 import isOverflow from '../overflow-tip/util';
 import { hide, show } from '../tooltip/singleton';

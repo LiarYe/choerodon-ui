@@ -1,7 +1,7 @@
 import React, { CSSProperties, ReactNode } from 'react';
 import { findDOMNode } from 'react-dom';
 import noop from 'lodash/noop';
-import { action, observable, runInAction } from 'mobx';
+import { action, observable, runInAction, makeObservable } from 'mobx';
 import Trigger from 'choerodon-ui/lib/trigger/Trigger';
 import { Action } from 'choerodon-ui/lib/trigger/enum';
 import { getIf } from '../data-set/utils';
@@ -95,7 +95,7 @@ export default abstract class TriggerField<T extends TriggerFieldProps = Trigger
 
   domNode: Element | Text | null;
 
-  @observable statePopup: boolean;
+  statePopup: boolean;
 
   get popup(): boolean {
     return this.statePopup;
@@ -103,6 +103,11 @@ export default abstract class TriggerField<T extends TriggerFieldProps = Trigger
 
   constructor(props, context) {
     super(props, context);
+    if (!Object.prototype.hasOwnProperty.call(this, 'statePopup')) Object.assign(this, { statePopup: undefined });
+    makeObservable(this, {
+      statePopup: observable,
+      setPopup: action,
+    });
     runInAction(() => {
       this.statePopup = false;
     });
@@ -127,12 +132,11 @@ export default abstract class TriggerField<T extends TriggerFieldProps = Trigger
     return super.isValidationMessageHidden(message) || this.popup;
   }
 
-  @action
   setPopup(statePopup: boolean) {
-    const { trigger = this.getContextConfig('selectTrigger') } = this.props;
+    const { trigger = this.getContextConfig('selectTrigger') } = this.reactiveProps;
     if (statePopup !== this.statePopup) {
       this.statePopup = statePopup;
-      const { onPopupHiddenChange = noop } = this.props;
+      const { onPopupHiddenChange = noop } = this.reactiveProps;
       onPopupHiddenChange(!statePopup);
       if (statePopup && !(trigger.includes(Action.hover))) {
         hide();
@@ -209,7 +213,7 @@ export default abstract class TriggerField<T extends TriggerFieldProps = Trigger
 
   @autobind
   renderPopupContent() {
-    const { popupContent } = this.props;
+    const { popupContent } = this.reactiveProps;
     if (popupContent === undefined) {
       return this.getPopupContent();
     }
@@ -231,7 +235,7 @@ export default abstract class TriggerField<T extends TriggerFieldProps = Trigger
   getWrappedEditor(renderedValue?: ReactNode) {
     const {
       prefixCls,
-      props: {
+      reactiveProps: {
         popupCls,
         popupStyle,
         popupPlacement,
@@ -301,7 +305,7 @@ export default abstract class TriggerField<T extends TriggerFieldProps = Trigger
   @autobind
   handlePopupMouseDown(e) {
     e.preventDefault();
-    const { onMouseDown = noop } = this.props;
+    const { onMouseDown = noop } = this.reactiveProps;
     onMouseDown(e);
   }
 
@@ -328,7 +332,7 @@ export default abstract class TriggerField<T extends TriggerFieldProps = Trigger
     const popupTask = getIf<TriggerField, TaskRunner>(this, 'popupTask', () => new TaskRunner());
     popupTask.cancel();
     if (!this.readOnly && !this.popup) {
-      popupTask.delay(this.props.triggerShowDelay as number, () => {
+      popupTask.delay(this.reactiveProps.triggerShowDelay as number, () => {
         this.setPopup(true);
       });
     }
@@ -340,10 +344,10 @@ export default abstract class TriggerField<T extends TriggerFieldProps = Trigger
     if (!this.readOnly && this.popup) {
       const { element } = this;
       // 如果当前焦点在popup中，将焦点换给输入框
-      let triggerHiddenDelay: number = this.props.triggerHiddenDelay!;
+      let triggerHiddenDelay: number = this.reactiveProps.triggerHiddenDelay!;
       if (this.isFocused && element !== document.activeElement) {
         element.focus();
-        const { triggerShowDelay } = this.props;
+        const { triggerShowDelay } = this.reactiveProps;
         triggerHiddenDelay += triggerShowDelay as number;
       }
       popupTask.delay(triggerHiddenDelay as number, () => {

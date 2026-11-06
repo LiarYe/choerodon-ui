@@ -1,5 +1,5 @@
 import React, { ReactNode } from 'react';
-import { action, toJS } from 'mobx';
+import { action, toJS, makeObservable } from 'mobx';
 import { observer } from 'mobx-react';
 import noop from 'lodash/noop';
 import { FormField, FormFieldProps } from '../field/FormField';
@@ -31,6 +31,13 @@ export interface RadioProps extends FormFieldProps {
 }
 
 export class Radio<T extends RadioProps> extends FormField<T & RadioProps> {
+  constructor(props, context) {
+    super(props, context);
+    makeObservable(this, {
+      setChecked: action,
+    });
+  }
+
   static displayName = 'Radio';
 
   static defaultProps = {
@@ -56,7 +63,7 @@ export class Radio<T extends RadioProps> extends FormField<T & RadioProps> {
   }
 
   get checkedValue() {
-    const { value = 'on' } = this.props;
+    const { value = 'on' } = this.reactiveProps;
     return value;
   }
 
@@ -100,7 +107,7 @@ export class Radio<T extends RadioProps> extends FormField<T & RadioProps> {
     if (labelRef && (labelTooltip === TextTooltip.always || (labelTooltip === TextTooltip.overflow && isOverflow(labelRef)))) {
       const labelText = this.getLabelText();
       if (labelText) {
-        const { getTooltipTheme, getTooltipPlacement } = this.context;
+        const { getTooltipTheme, getTooltipPlacement } = this.reactiveContext;
         show(labelRef, {
           title: labelText,
           theme: getTooltipTheme('label'),
@@ -153,7 +160,7 @@ export class Radio<T extends RadioProps> extends FormField<T & RadioProps> {
   }
 
   getChildrenText() {
-    return toJS(this.props.children);
+    return toJS(this.reactiveProps.children);
   }
 
   getLabelText() {
@@ -171,7 +178,7 @@ export class Radio<T extends RadioProps> extends FormField<T & RadioProps> {
   getWrapperClassNames(...args) {
     const {
       prefixCls,
-      props: { mode },
+      reactiveProps: { mode },
     } = this;
     return super.getWrapperClassNames(
       {
@@ -183,7 +190,7 @@ export class Radio<T extends RadioProps> extends FormField<T & RadioProps> {
   }
 
   isChecked() {
-    const { checked } = this.props;
+    const { checked } = this.reactiveProps;
     const { name, dataSet, checkedValue } = this;
     if (dataSet && name) {
       return this.getDataSetValue() === checkedValue;
@@ -194,7 +201,7 @@ export class Radio<T extends RadioProps> extends FormField<T & RadioProps> {
   @autobind
   handleMouseDown(e) {
     // e.stopPropagation();
-    const { onMouseDown } = this.props;
+    const { onMouseDown } = this.reactiveProps;
     if (typeof onMouseDown === 'function') {
       onMouseDown(e);
     }
@@ -202,13 +209,12 @@ export class Radio<T extends RadioProps> extends FormField<T & RadioProps> {
 
   @autobind
   handleChange(e) {
-    const { onClick = noop } = this.props;
+    const { onClick = noop } = this.reactiveProps;
     const { checked } = e.target;
     onClick(e);
     this.setChecked(checked);
   }
 
-  @action
   setChecked(checked: boolean) {
     if (checked) {
       this.setValue(this.checkedValue);

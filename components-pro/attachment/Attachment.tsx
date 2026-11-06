@@ -1,5 +1,5 @@
 import React, { ReactElement, ReactNode } from 'react';
-import { action as mobxAction, computed, IReactionDisposer, observable, reaction, runInAction, toJS } from 'mobx';
+import { action as mobxAction, IReactionDisposer, observable, reaction, runInAction, toJS, makeObservable } from 'mobx';
 import { observer } from 'mobx-react';
 import classNames from 'classnames';
 import omit from 'lodash/omit';
@@ -52,6 +52,11 @@ import OverflowTip from '../overflow-tip';
 import Dropdown from '../dropdown';
 import { DropdownButtonProps } from '../dropdown/interface';
 import Menu from '../menu';
+import warning from '../../components/_util/warning';
+
+function reportAttachmentError(error: unknown) {
+  warning(false, error instanceof Error ? error.message || String(error) : String(error));
+}
 
 export type AttachmentListType = 'text' | 'picture' | 'picture-card';
 
@@ -153,6 +158,33 @@ export default class Attachment extends FormField<AttachmentProps> {
 
   constructor(props, context) {
     super(props, context);
+    if (!Object.prototype.hasOwnProperty.call(this, 'sort')) this.sort = undefined;
+    if (!Object.prototype.hasOwnProperty.call(this, 'popup')) this.popup = undefined;
+    if (!Object.prototype.hasOwnProperty.call(this, 'dragState')) this.dragState = undefined;
+    if (!Object.prototype.hasOwnProperty.call(this, 'tempAttachmentUUID')) this.tempAttachmentUUID = undefined;
+    if (!Object.prototype.hasOwnProperty.call(this, 'uploadWithoutUuid')) this.uploadWithoutUuid = undefined;
+    if (!Object.prototype.hasOwnProperty.call(this, 'checkedAttachments')) this.checkedAttachments = undefined;
+    makeObservable(this, {
+      uploadAttachments: mobxAction,
+      handleChange: mobxAction.bound,
+      handleCheckAttachment: mobxAction.bound,
+      handleAllCheck: mobxAction.bound,
+      handleDeleteCheckedAttachments: mobxAction.bound,
+      handleAttachmentsChange: mobxAction.bound,
+      removeAttachment: mobxAction,
+      removeCheckedAttachments: mobxAction,
+      handleSort: mobxAction,
+      handleOrderChange: mobxAction.bound,
+      changeOrder: mobxAction,
+      setPopup: mobxAction,
+      setDragState: mobxAction,
+      sort: observable,
+      popup: observable,
+      dragState: observable,
+      tempAttachmentUUID: observable,
+      uploadWithoutUuid: observable,
+      checkedAttachments: observable,
+    });
     if (!this.secretLevelDataSet) {
       const secretLevelFlag = getConfigDefault('uploadSecretLevelFlag');
       const secretLevelOptions = getConfigDefault('uploadSecretLevelOptions');
@@ -171,23 +203,21 @@ export default class Attachment extends FormField<AttachmentProps> {
 
   static Group = AttachmentGroup;
 
-  @observable sort?: Sort;
+  sort?: Sort;
 
-  @observable popup?: boolean;
+  popup?: boolean;
 
-  @observable dragState?: string;
+  dragState?: string;
 
   uploader?: Uploader;
 
-  @observable oldValue?: string | undefined;
+  tempAttachmentUUID?: string | undefined;
 
-  @observable tempAttachmentUUID?: string | undefined;
-
-  @observable uploadWithoutUuid?: boolean;
+  uploadWithoutUuid?: boolean;
 
   tempRemovedAttachments?: AttachmentFile[];
 
-  @observable checkedAttachments?: AttachmentFile[];
+  checkedAttachments?: AttachmentFile[];
 
   secretLevelDataSet?: DataSet;
 
@@ -195,12 +225,11 @@ export default class Attachment extends FormField<AttachmentProps> {
     return this.getDisplayProp('help');
   }
 
-  @computed
   get showAttachmentHelp() {
     const defaultShowHelp = this.getContextConfig('showHelp');
-    const { viewMode } = this.props;
+    const { viewMode } = this.reactiveProps;
     const { showHelp } = this;
-    const { formNode } = this.context;
+    const { formNode } = this.reactiveContext;
     if (showHelp === ShowHelp.none ||
       (formNode && showHelp === ShowHelp.label) ||
       (viewMode === 'popup' && (showHelp || defaultShowHelp) === ShowHelp.label && formNode)) {
@@ -251,7 +280,7 @@ export default class Attachment extends FormField<AttachmentProps> {
         this.observableProps.attachments = attachments;
       }
       if (attachments) {
-        const { onAttachmentsChange } = this.props;
+        const { onAttachmentsChange } = this.reactiveProps;
         if (onAttachmentsChange) {
           onAttachmentsChange(attachments);
         }
@@ -287,36 +316,62 @@ export default class Attachment extends FormField<AttachmentProps> {
 
   get removeConfirm(): boolean | PopconfirmProps | undefined {
     const { removeConfirm: globalRemoveConfirm } = this.getContextConfig('attachment');
-    const { removeConfirm = globalRemoveConfirm } = this.props;
+    const { removeConfirm = globalRemoveConfirm } = this.reactiveProps;
     return removeConfirm;
   }
 
   get previewTarget(): string {
     const { previewTarget: globalPreviewTarget = ATTACHMENT_TARGET } = this.getContextConfig('attachment') as AttachmentConfig;
-    const { previewTarget = globalPreviewTarget } = this.props;
+    const { previewTarget = globalPreviewTarget } = this.reactiveProps;
     return previewTarget;
   }
 
   private reaction?: IReactionDisposer;
 
+  private attachmentOwner?: { uuid?: string; field: Attachment['field']; record: Attachment['record'] };
+
+  private listRequest?: object;
+
+  private countRequest?: object;
+
+  private attachmentUnmounted = false;
+
+  private syncAttachmentOwner() {
+    const uuid = this.tempAttachmentUUID || this.getValue();
+    const { field, record, attachmentOwner } = this;
+    if (!attachmentOwner || attachmentOwner.uuid !== uuid || attachmentOwner.field !== field || attachmentOwner.record !== record) {
+      this.attachmentOwner = { uuid, field, record };
+      this.listRequest = undefined;
+      this.countRequest = undefined;
+      if (attachmentOwner) {
+        runInAction(() => {
+          if (this.reactiveProps.attachments === undefined) this.observableProps.attachments = undefined;
+          if (this.reactiveProps.count === undefined) this.observableProps.count = undefined;
+        });
+      }
+    }
+    return this.attachmentOwner;
+  }
+
+  private isAttachmentOwner(owner: Attachment['attachmentOwner']) {
+    return !this.attachmentUnmounted && owner === this.attachmentOwner && !!owner &&
+      owner.uuid === (this.tempAttachmentUUID || this.getValue()) &&
+      owner.field === this.field && owner.record === this.record;
+  }
+
   componentDidMount() {
     super.componentDidMount();
     this.fetchCount();
-    this.reaction = reaction(() => this.record, () => this.fetchCount());
-  }
-
-  componentDidUpdate(prevProps: AttachmentProps) {
-    const { value, viewMode } = this.props;
-    if (prevProps.value !== value || prevProps.viewMode !== viewMode) {
-      this.fetchCount();
-    }
-    if (viewMode === 'popup' && this.oldValue !== this.getValue()) {
-      this.fetchCount();
-      runInAction(() => this.oldValue = this.getValue());
-    }
+    this.reaction = reaction(
+      () => [this.getValue(), this.tempAttachmentUUID, this.field, this.record, this.reactiveProps.viewMode],
+      () => this.fetchCount(),
+    );
   }
 
   componentWillUnmount() {
+    this.attachmentUnmounted = true;
+    this.listRequest = undefined;
+    this.countRequest = undefined;
     super.componentWillUnmount();
     const { reaction } = this;
     if (reaction) {
@@ -361,8 +416,9 @@ export default class Attachment extends FormField<AttachmentProps> {
   }
 
   fetchCount() {
+    const owner = this.syncAttachmentOwner();
     const { field } = this;
-    const { viewMode } = this.props;
+    const { viewMode } = this.reactiveProps;
     if (viewMode !== 'list') {
       if (isNil(this.count)) {
         const value = this.getValue();
@@ -370,9 +426,12 @@ export default class Attachment extends FormField<AttachmentProps> {
           const { isPublic } = this;
           if (field) {
             field.fetchAttachmentCount(value, isPublic, this.record);
+            if (field.fetchingCount) field.fetchingCount.catch(reportAttachmentError);
           } else {
             const { batchFetchCount } = this.getContextConfig('attachment');
-            if (batchFetchCount && !this.attachments) {
+            if (batchFetchCount && !this.attachments && !this.countRequest && !this.attachmentUnmounted) {
+              const request = {};
+              this.countRequest = request;
               const { bucketName, bucketDirectory, storageCode } = this;
               attachmentStore.fetchCountInBatch({
                 attachmentUUID: value,
@@ -380,9 +439,13 @@ export default class Attachment extends FormField<AttachmentProps> {
                 bucketDirectory,
                 storageCode,
                 isPublic,
-              }).then(mobxAction((count) => {
-                this.observableProps.count = count || 0;
-              }));
+              }, undefined, batchFetchCount).then(mobxAction((count) => {
+                if (this.isAttachmentOwner(owner) && this.countRequest === request && this.reactiveProps.count === undefined) {
+                  this.observableProps.count = count || 0;
+                }
+              })).finally(() => {
+                if (this.countRequest === request) this.countRequest = undefined;
+              }).catch(reportAttachmentError);
             }
           }
         }
@@ -394,9 +457,11 @@ export default class Attachment extends FormField<AttachmentProps> {
 
   @autobind
   updateCacheCount() {
-    const attachmentUUID = this.getValue();
+    const attachmentUUID = this.tempAttachmentUUID || this.getValue();
     if (attachmentUUID) {
-      attachmentStore.updateCacheCount(attachmentUUID, this.count);
+      const { field, bucketName, bucketDirectory, storageCode, isPublic } = this;
+      attachmentStore.updateCacheCount({ attachmentUUID, bucketName, bucketDirectory, storageCode, isPublic },
+        this.count, field, field ? undefined : this.getContextConfig('attachment').batchFetchCount);
     }
   }
 
@@ -484,17 +549,16 @@ export default class Attachment extends FormField<AttachmentProps> {
   }
 
   fetchAttachmentUUID(): Promise<string> | string {
-    const { getUUID = this.getContextConfig('attachment').getAttachmentUUID } = this.props;
+    const { getUUID = this.getContextConfig('attachment').getAttachmentUUID } = this.reactiveProps;
     if (!getUUID) {
       throw new Error('no getAttachmentUUID hook in global configure.');
     }
     return getUUID({ isPublic: this.isPublic });
   }
 
-  @mobxAction
   async uploadAttachments(attachments: AttachmentFile[]): Promise<void> {
     const max = this.getProp('max');
-    const { filesLengthLimitNotice, uploadImmediately } = this.props;
+    const { filesLengthLimitNotice, uploadImmediately } = this.reactiveProps;
     if (max > 0 && (this.count || 0) + attachments.length > max) {
       const defaultInfo = $l('Attachment', 'file_list_max_length', { count: max });
       if (typeof filesLengthLimitNotice === 'function') {
@@ -506,7 +570,7 @@ export default class Attachment extends FormField<AttachmentProps> {
     }
     const secretLevelFlag = getConfigDefault('uploadSecretLevelFlag');
     const secretLevelOptions = getConfigDefault('uploadSecretLevelOptions');
-    const { Modal: modalInProps } = this.props;
+    const { Modal: modalInProps } = this.reactiveProps;
     let secretLevelHeadersInfo = {};
     if (uploadImmediately && secretLevelFlag && secretLevelOptions && this.secretLevelDataSet && modalInProps) {
       const { formProps, modalProps } = secretLevelOptions;
@@ -564,7 +628,7 @@ export default class Attachment extends FormField<AttachmentProps> {
     const {
       action, data, headers, withCredentials,
       beforeUpload, onUploadProgress, onUploadSuccess, onUploadError,
-    } = this.props;
+    } = this.reactiveProps;
     return {
       accept, action, data, headers, fileKey, withCredentials, bucketName, bucketDirectory, storageCode, isPublic,
       fileSize, chunkSize, chunkThreads, useChunk, progressThrottle, beforeUpload, onUploadProgress, onUploadSuccess, onUploadError,
@@ -581,7 +645,7 @@ export default class Attachment extends FormField<AttachmentProps> {
     if (uploadAttachments.length > 0) {
       const secretLevelFlag = getConfigDefault('uploadSecretLevelFlag');
       const secretLevelOptions = getConfigDefault('uploadSecretLevelOptions');
-      const { Modal: modalInProps } = this.props;
+      const { Modal: modalInProps } = this.reactiveProps;
       let secretLevelHeadersInfo = {};
       if (secretLevelFlag && secretLevelOptions && this.secretLevelDataSet && modalInProps) {
         const { formProps, modalProps } = secretLevelOptions;
@@ -626,10 +690,10 @@ export default class Attachment extends FormField<AttachmentProps> {
         }
       }
       uploader.setProps(uploaderProps);
-      
+
       // 将uploader实例保存到组件中，以便后续中断
       this.uploader = uploader;
-      
+
       const result = await uploader.upload(attachment, this.attachments || [attachment], this.tempAttachmentUUID, attachment.isReplace);
       if (result === false) {
         this.removeAttachment(attachment);
@@ -667,7 +731,7 @@ export default class Attachment extends FormField<AttachmentProps> {
   }
 
   async confirmBatchUpload(files: File[]): Promise<File[] | false> {
-    const { batchMaxFileCount = getConfigDefault('uploadBatchMaxFileCount') } = this.props;
+    const { batchMaxFileCount = getConfigDefault('uploadBatchMaxFileCount') } = this.reactiveProps;
     if (!batchMaxFileCount || batchMaxFileCount <= 0 || files.length <= batchMaxFileCount) {
       return files;
     }
@@ -690,7 +754,7 @@ export default class Attachment extends FormField<AttachmentProps> {
   }
 
   processFiles(files: File[], attachmentUUID: string): AttachmentFile[] {
-    const { uploadImmediately } = this.props;
+    const { uploadImmediately } = this.reactiveProps;
     return files.map((file, index: number) => new AttachmentFile({
       uid: this.getUid(index),
       url: URL.createObjectURL(file),
@@ -705,10 +769,9 @@ export default class Attachment extends FormField<AttachmentProps> {
     }));
   }
 
-  @autobind
-  @mobxAction
+
   handleChange(e) {
-    const { accept = [], props: { directory } } = this;
+    const { accept = [], reactiveProps: { directory } } = this;
     const { target } = e;
     if (target.value) {
       let files: File[] = [...target.files];
@@ -723,7 +786,7 @@ export default class Attachment extends FormField<AttachmentProps> {
   }
 
   doRemove(attachment?: AttachmentFile, attachments: AttachmentFile[] = [], isReplace?: boolean): Promise<any> | undefined {
-    const { bucketName, bucketDirectory, storageCode, isPublic, multiple, props: { onRemove: onAttachmentRemove = noop } } = this;
+    const { bucketName, bucketDirectory, storageCode, isPublic, multiple, reactiveProps: { onRemove: onAttachmentRemove = noop } } = this;
     if (attachment) {
       return Promise.resolve(onAttachmentRemove(attachment)).then(mobxAction(ret => {
         if (ret !== false) {
@@ -811,8 +874,7 @@ export default class Attachment extends FormField<AttachmentProps> {
     }
   }
 
-  @autobind
-  @mobxAction
+
   handleCheckAttachment(attachment: AttachmentFile): void {
     const { checkedAttachments = [] } = this;
     if (checkedAttachments.find(a => a === attachment)) {
@@ -822,8 +884,7 @@ export default class Attachment extends FormField<AttachmentProps> {
     }
   }
 
-  @autobind
-  @mobxAction
+
   handleAllCheck(): void {
     const { attachments = [], checkedAttachments = [] } = this;
     if (attachments.length === checkedAttachments.length) {
@@ -833,10 +894,9 @@ export default class Attachment extends FormField<AttachmentProps> {
     }
   }
 
-  @autobind
-  @mobxAction
+
   handleDeleteCheckedAttachments(): void {
-    const { checkedAttachments = [], props: { onTempRemovedAttachmentsChange } } = this;
+    const { checkedAttachments = [], reactiveProps: { onTempRemovedAttachmentsChange } } = this;
     if (checkedAttachments.length > 0) {
       this.checkedAttachments = undefined;
       this.tempRemovedAttachments = undefined;
@@ -849,7 +909,7 @@ export default class Attachment extends FormField<AttachmentProps> {
 
   @autobind
   handleRemove(attachment: AttachmentFile): Promise<any> | undefined {
-    const { tempRemovedAttachments = [], props: { removeImmediately, onTempRemovedAttachmentsChange } } = this;
+    const { tempRemovedAttachments = [], reactiveProps: { removeImmediately, onTempRemovedAttachmentsChange } } = this;
     if (removeImmediately) {
       return this.doRemove(attachment);
     }
@@ -864,7 +924,7 @@ export default class Attachment extends FormField<AttachmentProps> {
 
   @autobind
   public remove() {
-    const { tempRemovedAttachments = [], props: { onTempRemovedAttachmentsChange } } = this;
+    const { tempRemovedAttachments = [], reactiveProps: { onTempRemovedAttachmentsChange } } = this;
     if (tempRemovedAttachments.length > 0) {
       this.tempRemovedAttachments = undefined;
       if (onTempRemovedAttachmentsChange) {
@@ -874,9 +934,8 @@ export default class Attachment extends FormField<AttachmentProps> {
     }
   }
 
-  @autobind
   public reset() {
-    const { attachments = [], tempRemovedAttachments = [], props: { onTempRemovedAttachmentsChange } } = this;
+    const { attachments = [], tempRemovedAttachments = [], reactiveProps: { onTempRemovedAttachmentsChange } } = this;
     if (tempRemovedAttachments.length > 0) {
       this.attachments = [...attachments, ...tempRemovedAttachments];
     }
@@ -886,41 +945,49 @@ export default class Attachment extends FormField<AttachmentProps> {
     }
   }
 
-  @autobind
-  @mobxAction
+
   handleAttachmentsChange(attachments: AttachmentFile[] | undefined) {
     this.observableProps.attachments = attachments;
   }
 
   @autobind
   handleFetchAttachment(fetchProps: { bucketName?: string; bucketDirectory?: string; storageCode?: string; attachmentUUID: string; isPublic?: boolean; }) {
-    const { field, props: { attachments } } = this;
+    const owner = this.syncAttachmentOwner();
+    if (this.attachmentUnmounted) return;
+    const request = {};
+    this.listRequest = request;
+    const { field, reactiveProps: { attachments } } = this;
     if (attachments) {
-      this.attachments = attachments as AttachmentFile[];
+      if (field) {
+        field.setAttachments(attachments.map(file => file instanceof AttachmentFile ? file : new AttachmentFile(file)), this.record, this.tempAttachmentUUID);
+      }
       return;
     }
     if (field) {
       field.fetchAttachments(fetchProps, this.record);
+      if (field.fetchingList) field.fetchingList.catch(reportAttachmentError);
     } else {
       const { fetchList } = this.getContextConfig('attachment');
       if (fetchList) {
-        fetchList(fetchProps).then((results) => {
-          this.attachments = results.map(file => new AttachmentFile(file));
-        });
+        Promise.resolve().then(() => fetchList(fetchProps)).then((results) => {
+          if (this.isAttachmentOwner(owner) && this.listRequest === request &&
+            fetchProps.attachmentUUID === owner!.uuid && this.reactiveProps.attachments === undefined) {
+            this.attachments = results.map(file => new AttachmentFile(file));
+          }
+        }).catch(reportAttachmentError);
       }
     }
   }
 
   @autobind
   handlePreview(attachment: AttachmentFile) {
-    const { onPreview } = this.props;
+    const { onPreview } = this.reactiveProps;
     if (onPreview) {
       onPreview(attachment);
     }
     this.setPopup(false);
   }
 
-  @mobxAction
   removeAttachment(attachment: AttachmentFile): undefined {
     const { attachments, checkedAttachments } = this;
     if (attachments) {
@@ -942,7 +1009,6 @@ export default class Attachment extends FormField<AttachmentProps> {
     return undefined;
   }
 
-  @mobxAction
   removeCheckedAttachments(checkedAttchs: AttachmentFile[]): undefined {
     const { attachments } = this;
     if (attachments) {
@@ -973,16 +1039,16 @@ export default class Attachment extends FormField<AttachmentProps> {
    */
   private abortSingleUpload(attachment: AttachmentFile): void {
     if (this.uploader) {
-      const { onUploadAbort } = this.props;
+      const { onUploadAbort } = this.reactiveProps;
       this.uploader.abortUpload(attachment);
-      
+
       // 确保状态更新
       runInAction(() => {
         if (attachment.status === 'uploading' && attachment.aborted) {
           attachment.status = 'aborted';
         }
       });
-      
+
       if (onUploadAbort) {
         onUploadAbort(attachment);
       }
@@ -993,7 +1059,7 @@ export default class Attachment extends FormField<AttachmentProps> {
    * 中断所有正在上传的附件
    */
   private abortAllUploads(): void {
-    const { attachments, props: { onUploadAbort } } = this;
+    const { attachments, reactiveProps: { onUploadAbort } } = this;
     let hasUploadingAttachment = false;
     if (attachments && this.uploader) {
       attachments.forEach(attachment => {
@@ -1004,7 +1070,7 @@ export default class Attachment extends FormField<AttachmentProps> {
           this.uploader?.abortUpload(attachment);
         }
       });
-      
+
       // 确保所有中断的附件状态同步
       runInAction(() => {
         attachments.forEach(attachment => {
@@ -1054,7 +1120,7 @@ export default class Attachment extends FormField<AttachmentProps> {
     if (!e || !e.isTrusted) {
       return;
     }
-    const { props: { listType } } = this;
+    const { reactiveProps: { listType } } = this;
     if (listType !== 'picture-card') {
       this.handleUploadClick(false, false);
     }
@@ -1062,7 +1128,7 @@ export default class Attachment extends FormField<AttachmentProps> {
     if (element) {
       element.click();
     }
-    const { onClick } = this.props;
+    const { onClick } = this.reactiveProps;
     if (onClick) {
       onClick(e);
     }
@@ -1074,7 +1140,7 @@ export default class Attachment extends FormField<AttachmentProps> {
   }
 
   renderHeaderLabel() {
-    const { viewMode } = this.props;
+    const { viewMode } = this.reactiveProps;
     if (this.hasFloatLabel || viewMode === 'popup') {
       const label = this.getLabel();
       if (label) {
@@ -1113,7 +1179,7 @@ export default class Attachment extends FormField<AttachmentProps> {
 
   renderTemplateDownloadButton(): ReactElement<ButtonProps> | undefined {
     if (!this.readOnly) {
-      const { templateDownloadButtonRenderer } = this.props;
+      const { templateDownloadButtonRenderer } = this.reactiveProps;
       const template = this.getProp('template');
       if (typeof templateDownloadButtonRenderer === 'function') {
         return templateDownloadButtonRenderer() as ReactElement<ButtonProps>;
@@ -1121,7 +1187,7 @@ export default class Attachment extends FormField<AttachmentProps> {
       if (template) {
         const { bucketName, bucketDirectory, storageCode, isPublic, attachmentUUID } = template;
         if (attachmentUUID) {
-          const { viewMode, color, funcType = viewMode === 'popup' ? FuncType.flat : FuncType.link } = this.props;
+          const { viewMode, color, funcType = viewMode === 'popup' ? FuncType.flat : FuncType.link } = this.reactiveProps;
           return (
             <TemplateDownloadButton
               attachmentUUID={attachmentUUID}
@@ -1145,7 +1211,7 @@ export default class Attachment extends FormField<AttachmentProps> {
       multiple,
       prefixCls,
       accept,
-      props: {
+      reactiveProps: {
         children, viewMode, countTextRenderer, directory,
       },
     } = this;
@@ -1167,7 +1233,7 @@ export default class Attachment extends FormField<AttachmentProps> {
       countText = countTextRenderer(count, max, countText);
     }
     const cardButtonInner = children || $l('Attachment', 'upload_picture');
-    const { _inTableRequired } = this.props;
+    const { _inTableRequired } = this.reactiveProps;
     const showTableRequired = _inTableRequired === 'partial' || _inTableRequired === 'all' && (this.getValidationResults() || [])
       .some(validationResult => validationResult.ruleName === 'valueMissing');
     const tableRequiredText = showTableRequired ? (
@@ -1249,7 +1315,7 @@ export default class Attachment extends FormField<AttachmentProps> {
     if (this.showValidation === ShowValidation.tooltip) {
       const message = this.getTooltipValidationMessage();
       if (message) {
-        showValidationMessage(e, message, this.context.getTooltipTheme('validation'), this.context.getTooltipPlacement('validation'), this.getContextConfig);
+        showValidationMessage(e, message, this.reactiveContext.getTooltipTheme('validation'), this.reactiveContext.getTooltipPlacement('validation'), this.getContextConfig);
         return true;
       }
     }
@@ -1257,7 +1323,7 @@ export default class Attachment extends FormField<AttachmentProps> {
   }
 
   renderViewButton(label?: ReactNode): ReactElement<ButtonProps> {
-    const { children, multiple, viewMode, countTextRenderer } = this.props;
+    const { children, multiple, viewMode, countTextRenderer } = this.reactiveProps;
     const max = this.getProp('max');
     const rest = this.getOtherProps();
     let countText: ReactNode = multiple ? this.count || 0 : undefined;
@@ -1278,13 +1344,11 @@ export default class Attachment extends FormField<AttachmentProps> {
     );
   }
 
-  @mobxAction
   handleSort(sort: Sort) {
     this.sort = sort;
   }
 
-  @autobind
-  @mobxAction
+
   handleOrderChange(props) {
     const { attachments } = props;
     this.attachments = attachments;
@@ -1292,14 +1356,13 @@ export default class Attachment extends FormField<AttachmentProps> {
     this.changeOrder();
   }
 
-  @mobxAction
   changeOrder() {
     this.sort = {
       ...defaultSort,
       ...this.sort,
       custom: true,
     };
-    const { sortable } = this.props;
+    const { sortable } = this.reactiveProps;
     if (sortable) {
       const { onOrderChange } = this.getContextConfig('attachment');
       if (onOrderChange) {
@@ -1328,7 +1391,7 @@ export default class Attachment extends FormField<AttachmentProps> {
   }
 
   renderSorter(): ReactNode {
-    const { sortable, viewMode } = this.props;
+    const { sortable, viewMode } = this.reactiveProps;
     if (sortable) {
       const { prefixCls, attachments } = this;
       if (attachments && attachments.length > 1) {
@@ -1365,7 +1428,7 @@ export default class Attachment extends FormField<AttachmentProps> {
       listType, sortable, listLimit, showHistory, showSize, buttons, getPreviewUrl, disabled, getDownloadUrl, enableDeleteAll,
       pictureCardShowName,
       alwaysShowActions = this.getContextConfig('uploadAlwaysShowActions'),
-    } = this.props;
+    } = this.reactiveProps;
     const mergeButtons: AttachmentButtons[] = [AttachmentButtonType.download, AttachmentButtonType.remove];
     if (showHistory) {
       mergeButtons.unshift(AttachmentButtonType.history);
@@ -1432,7 +1495,7 @@ export default class Attachment extends FormField<AttachmentProps> {
   }
 
   renderHeader(uploadBtn?: ReactNode) {
-    const { prefixCls, count, props: {
+    const { prefixCls, count, reactiveProps: {
       downloadAll,
       viewMode,
       __inGroup,
@@ -1542,7 +1605,7 @@ export default class Attachment extends FormField<AttachmentProps> {
   }
 
   renderEmpty() {
-    const { viewMode } = this.props;
+    const { viewMode } = this.reactiveProps;
     if (viewMode === 'popup' && !this.count) {
       return (
         <div className={`${this.prefixCls}-empty`}>
@@ -1555,7 +1618,7 @@ export default class Attachment extends FormField<AttachmentProps> {
   getWrapperClassNames() {
     const {
       prefixCls,
-      props: { className, size },
+      reactiveProps: { className, size },
     } = this;
     const required = this.getProp('required');
     return classNames(
@@ -1570,7 +1633,7 @@ export default class Attachment extends FormField<AttachmentProps> {
   }
 
   renderWrapperList(uploadBtn?: ReactNode) {
-    const { prefixCls, props: { viewMode, listType, __inGroup } } = this;
+    const { prefixCls, reactiveProps: { viewMode, listType, __inGroup } } = this;
     const isCard = listType === 'picture-card';
     const classes = [`${prefixCls}-list-wrapper`];
     if (viewMode !== 'popup') {
@@ -1593,13 +1656,13 @@ export default class Attachment extends FormField<AttachmentProps> {
   }
 
   getPictureWidth() {
-    const { pictureWidth, listType } = this.props;
+    const { pictureWidth, listType } = this.reactiveProps;
     return pictureWidth || (listType === 'picture-card' ? 100 : 48);
   }
 
   @autobind
   handleHelpMouseEnter(e) {
-    const { getTooltipTheme } = this.context;
+    const { getTooltipTheme } = this.reactiveContext;
     const { helpTooltipProps, help } = this;
     let helpTooltipCls = `${this.getContextConfig('proPrefixCls')}-tooltip-popup-help`;
     if (helpTooltipProps && helpTooltipProps.popupClassName) {
@@ -1624,7 +1687,7 @@ export default class Attachment extends FormField<AttachmentProps> {
       attachments,
       checkedAttachments,
       readOnly,
-      props: {
+      reactiveProps: {
         disabled,
         enableDeleteAll,
       },
@@ -1657,7 +1720,7 @@ export default class Attachment extends FormField<AttachmentProps> {
   }
 
   renderHelp(): ReactNode {
-    const { help, showAttachmentHelp, prefixCls, props: { viewMode } } = this;
+    const { help, showAttachmentHelp, prefixCls, reactiveProps: { viewMode } } = this;
     if (!help || showAttachmentHelp === ShowHelp.none) {
       if (viewMode !== 'popup') {
         return this.renderDeleteAll();
@@ -1689,8 +1752,8 @@ export default class Attachment extends FormField<AttachmentProps> {
   }
 
   get showValidation() {
-    const { viewMode, showValidation = viewMode === 'popup' ? ShowValidation.tooltip : ShowValidation.newLine } = this.props;
-    const { context: { showValidation: ctxShowValidation = showValidation } } = this;
+    const { viewMode, showValidation = viewMode === 'popup' ? ShowValidation.tooltip : ShowValidation.newLine } = this.reactiveProps;
+    const { reactiveContext: { showValidation: ctxShowValidation = showValidation } } = this;
     return ctxShowValidation;
   }
 
@@ -1699,12 +1762,10 @@ export default class Attachment extends FormField<AttachmentProps> {
     this.setPopup(!hidden);
   }
 
-  @mobxAction
   setPopup(popup) {
     this.popup = popup;
   }
 
-  @mobxAction
   setDragState(state) {
     this.dragState = state;
   }
@@ -1730,7 +1791,7 @@ export default class Attachment extends FormField<AttachmentProps> {
   }
 
   renderDragUploadArea() {
-    const { dragUpload, dragBoxRender, readOnly } = this.props;
+    const { dragUpload, dragBoxRender, readOnly } = this.reactiveProps;
     const { prefixCls, accept } = this;
     if (dragUpload) {
       const isDisabled = this.isDisabled() || readOnly;
@@ -1740,7 +1801,7 @@ export default class Attachment extends FormField<AttachmentProps> {
         [`${prefixCls}-drag-disabled`]: isDisabled,
       });
       const rcUploadProps = {
-        ...this.props,
+        ...this.reactiveProps,
         disabled: isDisabled,
         accept: accept ? accept.join(',') : undefined,
         beforeUpload: this.handleDragUpload,
@@ -1763,7 +1824,7 @@ export default class Attachment extends FormField<AttachmentProps> {
   }
 
   render() {
-    const { viewMode, listType, hidden } = this.props;
+    const { viewMode, listType, hidden } = this.reactiveProps;
     const { readOnly, prefixCls } = this;
     if (viewMode === 'popup') {
       const label = this.hasFloatLabel && this.getLabel();

@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { observer } from 'mobx-react';
-import { action, observable } from 'mobx';
+import { action, observable, makeObservable } from 'mobx';
 import { pxToRem } from 'choerodon-ui/lib/_util/UnitConvertor';
 import measureScrollbar from 'choerodon-ui/lib/_util/measureScrollbar';
 import IconItem from './IconItem';
@@ -28,12 +28,17 @@ export default class IconCategory extends Component<IconItemProps> {
     paging: true,
   };
 
-  @observable page: number;
+  page: number;
 
   ul?: HTMLUListElement | null;
 
   constructor(props) {
     super(props);
+    if (!Object.prototype.hasOwnProperty.call(this, 'page')) Object.assign(this, { page: undefined });
+    makeObservable(this, {
+      page: observable,
+      setPage: action,
+    });
     this.setPage(props.page);
   }
 
@@ -98,7 +103,6 @@ export default class IconCategory extends Component<IconItemProps> {
     }
   }
 
-  @action
   setPage(page = 1) {
     this.page = page;
   }

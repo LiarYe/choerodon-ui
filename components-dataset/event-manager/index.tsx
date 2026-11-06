@@ -1,4 +1,5 @@
-import { action } from 'mobx';
+import { makeObservable, action } from 'mobx';
+
 import isObject from 'lodash/isObject';
 import noop from 'lodash/noop';
 
@@ -78,6 +79,10 @@ export default class EventManager {
   el?: EventTarget | undefined | null;
 
   constructor(el?: EventTarget | undefined | null) {
+    makeObservable(this, {
+      fireEventSync: action,
+      fireEvent: action,
+    });
     this.setTarget(el);
   }
 
@@ -136,13 +141,11 @@ export default class EventManager {
     return this;
   }
 
-  @action
   fireEventSync(eventName: string, ...rest: any[]): boolean {
     const events: Handler[] | undefined = this.events[eventName.toLowerCase()];
     return events ? [...events].every(handle => callHandler(events, handle, ...rest) !== false) : true;
   }
 
-  @action
   fireEvent(eventName: string, ...rest: any[]): Promise<boolean> {
     const events: Handler[] | undefined = this.events[eventName.toLowerCase()];
     return events

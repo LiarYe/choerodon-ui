@@ -1,7 +1,6 @@
 import React, { Key, ReactElement, ReactNode } from 'react';
 import { observer } from 'mobx-react';
 import Menu, { Item } from 'choerodon-ui/lib/rc-components/menu';
-import { action } from 'mobx';
 import Record from '../data-set/Record';
 import autobind from '../_util/autobind';
 import { getItemKey, MORE_KEY, Select, SelectProps } from '../select/Select';
@@ -70,8 +69,6 @@ export default class AutoComplete<T extends AutoCompleteProps> extends Select<T>
       ? this.renderMeasuredLengthInfo(`${inputLength}/${maxLength}`) : null;
   }
 
-  @autobind
-  @action
   handleChange(e) {
     this.isChoose = false;
     super.handleChange(e);
@@ -82,14 +79,12 @@ export default class AutoComplete<T extends AutoCompleteProps> extends Select<T>
     super.choose(record);
   }
 
-  @autobind
   handleFocus(e) {
     const { target } = e;
     this.inputText = target ? target.value : '';
     super.handleFocus(e);
   }
 
-  @autobind
   handleBlur(e) {
     if (!e.isDefaultPrevented()) {
       if (!this.isChoose) {
@@ -122,7 +117,7 @@ export default class AutoComplete<T extends AutoCompleteProps> extends Select<T>
       disabled: menuDisabled,
       textField,
       valueField,
-      props: { dropdownMenuStyle, optionRenderer, onOption, matcher = defaultMatcher },
+      reactiveProps: { dropdownMenuStyle, optionRenderer, onOption, matcher = defaultMatcher },
     } = this;
     const optGroups: ReactElement<any>[] = [];
     const selectedKeys: Key[] = [];

@@ -9,7 +9,8 @@ import noop from 'lodash/noop';
 import isFunction from 'lodash/isFunction';
 import isObject from 'lodash/isObject';
 import isPromise from 'is-promise';
-import { action, computed, isArrayLike, observable, runInAction, toJS, IReactionDisposer, reaction } from 'mobx';
+import { action, observable, runInAction, toJS, IReactionDisposer, reaction, makeObservable, override as mobxOverride } from 'mobx';
+import isArrayLike from 'choerodon-ui/dataset/mobx-helper/isArrayLike';
 import { pxToRem, scaleSize, toPx } from 'choerodon-ui/lib/_util/UnitConvertor';
 import measureScrollbar from 'choerodon-ui/lib/_util/measureScrollbar';
 import KeyCode from 'choerodon-ui/lib/_util/KeyCode';
@@ -135,24 +136,39 @@ export default class Lov extends Select<LovProps> {
     popupSearchMode: PopupSearchMode.multiple,
   };
 
-  @observable modal: ModalProxy | undefined;
+  modal: ModalProxy | undefined;
 
   initedModalLovViewProps;
 
   fetched?: boolean;
 
-  @observable searching;
+  searching;
 
   fetchedReaction?: IReactionDisposer;
 
   constructor(props, context) {
     super(props, context);
+    if (!Object.prototype.hasOwnProperty.call(this, 'modal')) this.modal = undefined;
+    if (!Object.prototype.hasOwnProperty.call(this, 'searching')) this.searching = undefined;
+    makeObservable<this, 'openModal'>(this, {
+      modal: observable,
+      searching: observable,
+      handleSearchMatcherChange: action.bound,
+      removeValues: mobxOverride,
+      beforeOpen: action.bound,
+      afterOpen: action,
+      openModal: action,
+      setText: mobxOverride,
+      searchRemote: action,
+      handleLovViewAfterClose: action.bound,
+      selectSingle: action.bound,
+      saveSuffixRef: mobxOverride,
+    });
     runInAction(() => {
       this.searching = false;
     });
   }
 
-  @computed
   get searchMatcher(): SearchMatcher {
     const { searchMatcher } = this.observableProps;
     if (isString(searchMatcher)) {
@@ -171,7 +187,6 @@ export default class Lov extends Select<LovProps> {
     return textField;
   }
 
-  @computed
   get searchable(): boolean {
     const { searchable } = this.observableProps;
     if (searchable === false) {
@@ -184,7 +199,6 @@ export default class Lov extends Select<LovProps> {
     return true;
   }
 
-  @computed
   get lovCode(): string | undefined {
     const { field } = this;
     if (field) {
@@ -194,7 +208,7 @@ export default class Lov extends Select<LovProps> {
   }
 
   get popup(): boolean {
-    const { popupSearchMode } = this.props;
+    const { popupSearchMode } = this.reactiveProps;
     const { viewMode } = this;
     if (viewMode === TriggerViewMode.popup && popupSearchMode === PopupSearchMode.single) {
       return this.modal || (this.isSearchFieldInPopup() && !this.searchText) ? false : this.statePopup;
@@ -212,14 +226,14 @@ export default class Lov extends Select<LovProps> {
     const { treeFlag } = this.getConfig() || {};
     const { mode: tableMode } = this.getTableProps();
     const { viewMode } = this;
-    const { mode, autoSelectSingle: autoSelectSingleProp } = this.props;
+    const { mode, autoSelectSingle: autoSelectSingleProp } = this.reactiveProps;
     if (viewMode === TriggerViewMode.popup ||
       (mode === ViewMode.button && autoSelectSingleProp !== 'force')
       || treeFlag === 'Y' || tableMode === TableMode.tree) {
       return false;
     }
-    if ('autoSelectSingle' in this.props) {
-      return !!this.props.autoSelectSingle;
+    if ('autoSelectSingle' in this.reactiveProps) {
+      return !!this.reactiveProps.autoSelectSingle;
     }
     const autoSelectSingle = this.getContextConfig('lovAutoSelectSingle');
     if (typeof autoSelectSingle !== 'undefined') {
@@ -228,7 +242,6 @@ export default class Lov extends Select<LovProps> {
     return false;
   }
 
-  @computed
   get options(): DataSet {
     const { field, lovCode, record } = this;
     if (field) {
@@ -247,8 +260,8 @@ export default class Lov extends Select<LovProps> {
   }
 
   get showSelectedInView(): boolean {
-    if ('showSelectedInView' in this.props) {
-      return this.props.showSelectedInView!;
+    if ('showSelectedInView' in this.reactiveProps) {
+      return this.reactiveProps.showSelectedInView!;
     }
     const lovShowSelectedInView = this.getContextConfig('lovShowSelectedInView');
     if (isFunction(lovShowSelectedInView)) {
@@ -258,11 +271,10 @@ export default class Lov extends Select<LovProps> {
   }
 
   get showDetailWhenReadonly(): boolean {
-    const { readOnly, disabled, props: { showDetailWhenReadonly } } = this;
+    const { readOnly, disabled, reactiveProps: { showDetailWhenReadonly } } = this;
     return !!(showDetailWhenReadonly && (readOnly || disabled) && this.getValues().length);
   }
 
-  @computed
   get viewMode(): TriggerViewMode {
     const { viewMode } = this.observableProps;
     const { showDetailWhenReadonly } = this;
@@ -273,7 +285,7 @@ export default class Lov extends Select<LovProps> {
   }
 
   get doSearchUseDebounce(): boolean {
-    const { searchAction } = this.props;
+    const { searchAction } = this.reactiveProps;
     if (searchAction === SearchAction.blur) {
       return false;
     }
@@ -297,7 +309,7 @@ export default class Lov extends Select<LovProps> {
     if (searchFieldInPopup === undefined) {
       const { viewMode } = this;
       if (viewMode === TriggerViewMode.popup) {
-        const { popupSearchMode } = this.props;
+        const { popupSearchMode } = this.reactiveProps;
         return popupSearchMode !== PopupSearchMode.single;
       }
     }
@@ -310,19 +322,17 @@ export default class Lov extends Select<LovProps> {
 
   isEditable(): boolean {
     const { viewMode } = this;
-    const { popupSearchMode } = this.props;
+    const { popupSearchMode } = this.reactiveProps;
     if (viewMode === TriggerViewMode.popup) {
       return popupSearchMode === PopupSearchMode.single && this.popupEditable();
     }
     return super.isEditable()
   }
 
-  @autobind
-  @action
   handleSearchMatcherChange(searchMatcher) {
     this.observableProps.searchMatcher = searchMatcher;
     this.searchText = undefined;
-    const { onSearchMatcherChange = noop } = this.props;
+    const { onSearchMatcherChange = noop } = this.reactiveProps;
     onSearchMatcherChange(searchMatcher);
   }
 
@@ -366,7 +376,7 @@ export default class Lov extends Select<LovProps> {
     const config = this.getConfig();
     this.autoCreate();
     const { options, viewMode, showDetailWhenReadonly } = this;
-    const { popupSearchMode, onBeforeSelect, addNewOptionPrompt } = this.props;
+    const { popupSearchMode, onBeforeSelect, addNewOptionPrompt } = this.reactiveProps;
     if (config && options) {
       let lovViewProps;
       if (!this.popup) delete this.fetched;
@@ -394,7 +404,7 @@ export default class Lov extends Select<LovProps> {
           viewMode={viewMode}
           dataSet={options}
           config={config}
-          context={this.context}
+          context={this.reactiveContext}
           tableProps={mergedTableProps}
           onSelect={this.handleLovViewSelect}
           onBeforeSelect={onBeforeSelect}
@@ -430,7 +440,7 @@ export default class Lov extends Select<LovProps> {
       return;
     }
     const selectedRecords = this.multiple ? options.treeSelected : record;
-    const { onBeforeSelect = noop } = this.props;
+    const { onBeforeSelect = noop } = this.reactiveProps;
     const beforeSelect = onBeforeSelect(selectedRecords);
     const select = () => {
       if (this.multiple) {
@@ -467,7 +477,7 @@ export default class Lov extends Select<LovProps> {
       options,
       textField,
       valueField,
-      props: { dropdownMenuStyle, onOption, optionRenderer },
+      reactiveProps: { dropdownMenuStyle, onOption, optionRenderer },
     } = this;
     const menuPrefixCls = this.getMenuPrefixCls();
     const config = this.getConfig() as LovConfig | undefined;
@@ -537,7 +547,7 @@ export default class Lov extends Select<LovProps> {
 
   @autobind
   getPopupContent(): ReactNode {
-    const { searchAction } = this.props;
+    const { searchAction } = this.reactiveProps;
     const { viewMode, options, tree } = this;
     if (viewMode === TriggerViewMode.popup) {
       if (tree) {
@@ -576,7 +586,6 @@ export default class Lov extends Select<LovProps> {
     }
   }
 
-  @action
   removeValues(values: any[], index?: number) {
     super.removeValues(values, index);
     this.syncOptionsSelectedAfterValueRemove(values);
@@ -605,7 +614,7 @@ export default class Lov extends Select<LovProps> {
   @autobind
   loadEvents() {
     const { options, modal } = this;
-    const { addNewOptionPrompt } = this.props;
+    const { addNewOptionPrompt } = this.reactiveProps;
     if (addNewOptionPrompt && modal) {
       modal.update({
         footerExtra: !this.loading && options.length ? this.renderAddNewOptionPrompt('prompt', 'Lov') : undefined,
@@ -613,8 +622,6 @@ export default class Lov extends Select<LovProps> {
     }
   }
 
-  @autobind
-  @action
   beforeOpen(options: DataSet): Partial<LovViewProps> | undefined {
     const { multiple, primitive, valueField, viewMode } = this;
     options.selection = multiple ? DataSetSelection.multiple : DataSetSelection.single;
@@ -622,12 +629,12 @@ export default class Lov extends Select<LovProps> {
     if (multiple) {
       options.selectionStrategy = this.getProp('showCheckedStrategy') || CheckedStrategy.SHOW_ALL;
     }
-    const { viewRenderer } = this.props;
+    const { viewRenderer } = this.reactiveProps;
     const { selected } = options;
     if (viewMode === TriggerViewMode.modal || viewMode === TriggerViewMode.drawer) {
       options.unSelectAll();
       // TODO：lovEvents deprecated
-      const { lovEvents } = this.props;
+      const { lovEvents } = this.reactiveProps;
       if (lovEvents) {
         Object.keys(lovEvents).forEach(event => options.addEventListener(event, lovEvents[event]));
       }
@@ -709,9 +716,8 @@ export default class Lov extends Select<LovProps> {
     }
   }
 
-  @action
   afterOpen(options: DataSet, fetchSingle?: boolean) {
-    const { tableProps } = this.props;
+    const { tableProps } = this.reactiveProps;
     const { modal, viewMode, showDetailWhenReadonly, primitive, valueField } = this;
     // 模态框模式下， tableProps 支持获取 modal 实例
     if (isFunction(tableProps) && [TriggerViewMode.modal, TriggerViewMode.drawer].includes(viewMode) && modal) {
@@ -811,7 +817,7 @@ export default class Lov extends Select<LovProps> {
 
   @autobind
   private getSelectionProps() {
-    const { nodeRenderer, selectionProps } = this.props;
+    const { nodeRenderer, selectionProps } = this.reactiveProps;
     const lovSelectionProps = this.getContextConfig('lovSelectionProps');
     const props: SelectionProps = {
       ...lovSelectionProps,
@@ -825,11 +831,10 @@ export default class Lov extends Select<LovProps> {
     };
   }
 
-  @action
   private openModal(fetchSingle?: boolean) {
     this.collapse();
     const { viewMode, showDetailWhenReadonly } = this;
-    const { onBeforeSelect, viewRenderer, addNewOptionPrompt, Modal: modalContext } = this.props;
+    const { onBeforeSelect, viewRenderer, addNewOptionPrompt, Modal: modalContext } = this.reactiveProps;
     const drawer = viewMode === TriggerViewMode.drawer;
     if (viewMode === TriggerViewMode.modal || drawer) {
       const config = this.getConfig();
@@ -846,13 +851,13 @@ export default class Lov extends Select<LovProps> {
           const tableProps = this.getTableProps(lovViewProps && lovViewProps.tableProps);
           const valueField = this.getProp('valueField');
           const textField = this.getProp('textField');
-          const { tableProps: originalTableProps } = this.props;
+          const { tableProps: originalTableProps } = this.reactiveProps;
           this.initedModalLovViewProps = {
             ...lovViewProps,
             viewMode,
             dataSet: options,
             config,
-            context: this.context,
+            context: this.reactiveContext,
             tableProps,
             onSelect: this.handleLovViewSelect,
             onBeforeSelect,
@@ -900,7 +905,7 @@ export default class Lov extends Select<LovProps> {
   }
 
   getModalClassName(): string {
-    const { viewMode, props: { modalProps, addNewOptionPrompt } } = this;
+    const { viewMode, reactiveProps: { modalProps, addNewOptionPrompt } } = this;
     const isModalMode = viewMode === TriggerViewMode.modal && modalProps?.drawer !== true;
     return classNames({
       [`${this.prefixCls}-lov-selection-wrapper`]: isModalMode && this.showSelectedInView,
@@ -912,7 +917,6 @@ export default class Lov extends Select<LovProps> {
     });
   }
 
-  @action
   setText(text?: string): void {
     if (text === undefined || text === '') {
       this.searching = false;
@@ -926,7 +930,6 @@ export default class Lov extends Select<LovProps> {
    * 处理 Lov input 查询参数
    * @param text
    */
-  @action
   searchRemote(text?: string | string[] | undefined) {
     const { options, searchMatcher, viewMode } = this;
     let updateSearchingNow = true;
@@ -937,7 +940,7 @@ export default class Lov extends Select<LovProps> {
         const value = searchPara[key];
         options.setQueryParameter(key, value === '' ? undefined : value);
       });
-      if (this.isSearchFieldInPopup() || this.props.searchAction === SearchAction.input) {
+      if (this.isSearchFieldInPopup() || this.reactiveProps.searchAction === SearchAction.input) {
         updateSearchingNow = false;
         return options.query(1, undefined, true)
           .then(noop)
@@ -957,7 +960,9 @@ export default class Lov extends Select<LovProps> {
     super.handlePopupHiddenChange(hidden);
     const { viewMode } = this;
     if (viewMode === TriggerViewMode.popup && !this.multiple && this.searchText) {
-      this.searchText = undefined;
+      runInAction(() => {
+        this.searchText = undefined;
+      });
     }
     if (hidden) {
       delete this.fetched;
@@ -972,11 +977,9 @@ export default class Lov extends Select<LovProps> {
   /**
    * 关闭弹窗移除时间监听 后续废弃
    */
-  @autobind
-  @action
   handleLovViewAfterClose() {
     // TODO：lovEvents deprecated
-    const { options, props: { lovEvents } } = this;
+    const { options, reactiveProps: { lovEvents } } = this;
     if (lovEvents) {
       Object.keys(lovEvents).forEach(event => options.removeEventListener(event, lovEvents[event]));
     }
@@ -1045,14 +1048,14 @@ export default class Lov extends Select<LovProps> {
       stopEvent(e);
       this.handleOpenModal();
     }
-    if (e.keyCode === KeyCode.ENTER && this.props.searchAction === SearchAction.blur) {
+    if (e.keyCode === KeyCode.ENTER && this.reactiveProps.searchAction === SearchAction.blur) {
       stopEvent(e);
       this.blur();
     }
     if (!(e.keyCode === KeyCode.ENTER && this.searching && this.popup)) {
       super.handleKeyDown(e);
     }
-    if (e.keyCode === KeyCode.ENTER && this.props.popupSearchMode === PopupSearchMode.single) {
+    if (e.keyCode === KeyCode.ENTER && this.reactiveProps.popupSearchMode === PopupSearchMode.single) {
       const record = this.options.current;
       if (record && (!this.duplicateKeyConfig.disable || !this.duplicateOptionInfo.duplicateRecords.has(record))) {
         this.handleLovViewSelect(record);
@@ -1060,12 +1063,11 @@ export default class Lov extends Select<LovProps> {
     }
   }
 
-  @autobind
   handleBlur(e) {
     if (this.modal) {
       e.preventDefault();
     }
-    if (this.props.popupSearchMode !== PopupSearchMode.single) {
+    if (this.reactiveProps.popupSearchMode !== PopupSearchMode.single) {
       super.handleBlur(e);
     }
   }
@@ -1083,7 +1085,7 @@ export default class Lov extends Select<LovProps> {
   }
 
   getPopupClassName(defaultClassName: string | undefined): string | undefined {
-    const { viewMode, props: { addNewOptionPrompt } } = this;
+    const { viewMode, reactiveProps: { addNewOptionPrompt } } = this;
     return classNames(defaultClassName, {
       [`${this.prefixCls}-lov-popup`]: viewMode === TriggerViewMode.popup,
       [`${this.prefixCls}-lov-popup-new-option-prompt`]: isFunction(addNewOptionPrompt) || (addNewOptionPrompt && addNewOptionPrompt.path),
@@ -1092,7 +1094,7 @@ export default class Lov extends Select<LovProps> {
 
   syncValueOnBlur(value, event?: any) {
     const { textField } = this;
-    const { mode, searchAction, fetchSingle } = this.props;
+    const { mode, searchAction, fetchSingle } = this.reactiveProps;
     if (mode !== ViewMode.button) {
       let hasRecord = false;
       if (this.getValue()) {
@@ -1142,12 +1144,12 @@ export default class Lov extends Select<LovProps> {
   }
 
   getModalProps(): ModalProps {
-    const { modalProps } = this.props;
+    const { modalProps } = this.reactiveProps;
     return { ...this.getContextConfig('lovModalProps'), ...modalProps };
   }
 
   getTableProps(localTableProps?: Partial<TableProps>): Partial<TableProps> {
-    const { tableProps } = this.props;
+    const { tableProps } = this.reactiveProps;
     const lovTablePropsConfig = this.getContextConfig('lovTableProps');
     const lovTablePropsConfigData = isFunction(lovTablePropsConfig)
       ? lovTablePropsConfig(this.multiple)
@@ -1172,8 +1174,6 @@ export default class Lov extends Select<LovProps> {
     };
   }
 
-  @autobind
-  @action
   async selectSingle() {
     const { options } = this;
     this.resetOptions(options.length === 1);
@@ -1225,7 +1225,7 @@ export default class Lov extends Select<LovProps> {
   }
 
   getButtonProps() {
-    const { className, type } = this.props;
+    const { className, type } = this.reactiveProps;
     const { options } = this;
     const props: ButtonProps = {
       ...Button.defaultProps,
@@ -1246,7 +1246,6 @@ export default class Lov extends Select<LovProps> {
     return super.getInnerSpanButton(hidden);
   }
 
-  @computed
   get loading(): boolean {
     const { options, searching } = this;
     return searching || options.status === DataSetStatus.loading;
@@ -1259,8 +1258,6 @@ export default class Lov extends Select<LovProps> {
     return super.searchData(data);
   }
 
-  @autobind
-  @action
   saveSuffixRef(node) {
     this.suffixRef = node;
   }
@@ -1270,7 +1267,7 @@ export default class Lov extends Select<LovProps> {
     if (!showSuffix && !showDetailWhenReadonly) {
       return undefined;
     }
-    const { suffix } = this.props;
+    const { suffix } = this.reactiveProps;
     if (viewMode === TriggerViewMode.popup) {
       return super.getSuffix();
     }
@@ -1303,7 +1300,7 @@ export default class Lov extends Select<LovProps> {
   }
 
   select() {
-    const { mode } = this.props;
+    const { mode } = this.reactiveProps;
     if (mode !== ViewMode.button) {
       super.select();
     }
@@ -1311,7 +1308,7 @@ export default class Lov extends Select<LovProps> {
 
   @autobind
   async handleButtonClick(e) {
-    const { onClick } = this.props;
+    const { onClick } = this.reactiveProps;
     if (onClick) {
       await onClick(e);
     }
@@ -1321,12 +1318,12 @@ export default class Lov extends Select<LovProps> {
   }
 
   getTextByValue(value: any): ReactNode {
-    const { mode } = this.props;
+    const { mode } = this.reactiveProps;
     return mode === ViewMode.button ? this.processRenderer(value) : super.getTextByValue(value);
   }
 
   renderWrapper(): ReactNode {
-    const { mode, children, clearButton } = this.props;
+    const { mode, children, clearButton } = this.reactiveProps;
     if (mode === ViewMode.button) {
       const elements = [
         <Button

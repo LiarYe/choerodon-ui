@@ -1,19 +1,22 @@
-import {
-  _isComputingDerivation,
+import { makeObservable,
   action,
   computed,
   IComputedValue,
   IMapEntry,
-  isArrayLike,
+  intercept,
   isObservableArray,
   isObservableObject,
   observable,
   ObservableMap,
   runInAction,
+  set,
   toJS,
 } from 'mobx';
+
 import raf from 'raf';
+import { isElement, isPortal, isValidElementType } from 'react-is';
 import merge from 'lodash/merge';
+import mergeWith from 'lodash/mergeWith';
 import isObject from 'lodash/isObject';
 import pick from 'lodash/pick';
 import isNil from 'lodash/isNil';
@@ -21,6 +24,8 @@ import isString from 'lodash/isString';
 import isNumber from 'lodash/isNumber';
 import omit from 'lodash/omit';
 import isPlainObject from 'lodash/isPlainObject';
+import isArrayLike from '../mobx-helper/isArrayLike';
+import observableConfig, { observableConfigMap } from '../mobx-helper/observableConfig';
 import { isSame, warning } from '../utils';
 import DataSet, { addDataSetField, RecordValidationErrors } from './DataSet';
 import Field, { FieldProps, Fields } from './Field';
@@ -90,7 +95,16 @@ function initRecordField(record: Record, name: string, fieldProps?: FieldProps):
 
 function initRecordData(initData: object, dataSet: DataSet) {
   const { childrenField } = dataSet.props;
-  return observable.object(initData, childrenField && initData[childrenField] ? { [childrenField]: observable.ref } : undefined);
+  const refField = childrenField && initData[childrenField] ? childrenField : undefined;
+  const data = observable.object({}, {}, { deep: false });
+  intercept(data, change => {
+    if ((change.type === 'add' || change.type === 'update') && change.name !== refField) {
+      change.newValue = observableConfig(change.newValue);
+    }
+    return change;
+  });
+  Object.keys(initData).forEach(key => set(data, key, initData[key]));
+  return data;
 }
 
 export interface RecordBaseProps {
@@ -111,7 +125,6 @@ export default class Record {
 
   dataSet: DataSet;
 
-  @computed
   get fields(): Fields {
     warning(false, 'If you only want to get some property from dataSet field or calculated by `dynamicProps` or `computedProps`. Don\'t to iterate fields from `record.fields`, please use `dataSet.fields` instead. And then use `dsField.get(someProp, record)` to get the property which you needed.');
     const fields = new Map();
@@ -124,7 +137,7 @@ export default class Record {
     return observable.map(fields);
   }
 
-  @observable ownerFields: Fields;
+  ownerFields: Fields;
 
   tempFields?: Map<string, Field>;
 
@@ -140,21 +153,20 @@ export default class Record {
 
   validating?: boolean | undefined;
 
-  @observable data: object;
+  data: object;
 
-  @observable dirtyData?: ObservableMap<string, any> | undefined;
+  dirtyData?: ObservableMap<string, any> | undefined = undefined;
 
-  @observable validationErrors?: ObservableMap<string, ValidationResult[]>;
+  validationErrors?: ObservableMap<string, ValidationResult[]> = undefined;
 
-  @observable lookupTokens?: ObservableMap<string, string | undefined> | undefined;
+  lookupTokens?: ObservableMap<string, string | undefined> | undefined = undefined;
 
-  @observable attachmentCaches?: ObservableMap<string, AttachmentCache>;
+  attachmentCaches?: ObservableMap<string, AttachmentCache> = undefined;
 
   computedFieldProps?: Map<string | symbol, IComputedValue<any>>;
 
   lastDynamicFieldProps?: Map<string, { [key: string]: any } | undefined>;
 
-  @computed
   get pristineData(): object {
     const { dirtyData } = this;
     const data = toJS(this.data);
@@ -181,14 +193,19 @@ export default class Record {
             }
           });
         }
-        this.data = initRecordData(merge({}, data, newData), dataSet);
+        this.data = initRecordData(mergeWith({}, data, newData, (_value, source) => {
+          if (isElement(source) || isPortal(source) || isValidElementType(source)) {
+            return source;
+          }
+          return undefined;
+        }), dataSet);
       } else {
         this.data = initRecordData(data, dataSet);
       }
     });
   }
 
-  @observable status: RecordStatus;
+  status: RecordStatus;
 
   get selectedTimestamp(): number | undefined {
     return this.getState(SELECT_TIMESTAMP);
@@ -226,7 +243,6 @@ export default class Record {
     return this.dataSet.isAllPageSelection;
   }
 
-  @computed
   get isSelected(): boolean {
     if (this.isDataSetInAllPageSelection) {
       return !this.getState(UNSELECT_KEY);
@@ -252,21 +268,20 @@ export default class Record {
     }
   }
 
-  @observable isCurrent?: boolean;
+  isCurrent?: boolean = undefined;
 
-  @observable isCached?: boolean;
+  isCached?: boolean = undefined;
 
-  @observable editing?: boolean;
+  editing?: boolean = undefined;
 
-  @observable pending?: boolean;
+  pending?: boolean = undefined;
 
-  @observable childrenLoaded?: boolean;
+  childrenLoaded?: boolean = undefined;
 
   parentSelectToChildrenSynced?: boolean;
 
-  @observable state?: ObservableMap<string, any> | undefined;
+  state?: ObservableMap<string, any> | undefined = undefined;
 
-  @computed
   get key(): string | number {
     if (!this.isNew) {
       const { primaryKey } = this.dataSet.props;
@@ -280,12 +295,10 @@ export default class Record {
     return this.id;
   }
 
-  @computed
   get index(): number {
     return this.dataSet.indexOf(this);
   }
 
-  @computed
   get indexInParent(): number {
     const { parent } = this;
     if (parent && parent.children) {
@@ -302,7 +315,6 @@ export default class Record {
     return this.status === RecordStatus.add;
   }
 
-  @computed
   get isSelectionIndeterminate(): boolean {
     if (this.dataSet.selection === DataSetSelection.multiple) {
       const { children } = this;
@@ -331,7 +343,6 @@ export default class Record {
     return false;
   }
 
-  @computed
   get isIndeterminate(): boolean {
     const { dataSet } = this;
     const { checkField } = dataSet.props;
@@ -358,7 +369,6 @@ export default class Record {
     return false;
   }
 
-  @computed
   get isExpanded(): boolean {
     const { dataSet } = this;
     const { expandField } = dataSet.props;
@@ -390,7 +400,6 @@ export default class Record {
     }
   }
 
-  @computed
   get previousRecord(): Record | undefined {
     const { parent } = this;
     const children = parent ? parent.children : this.dataSet.treeData;
@@ -400,7 +409,6 @@ export default class Record {
     return undefined;
   }
 
-  @computed
   get nextRecord(): Record | undefined {
     const { parent } = this;
     const children = parent ? parent.children : this.dataSet.treeData;
@@ -410,7 +418,6 @@ export default class Record {
     return undefined;
   }
 
-  @computed
   get records(): Record[] {
     const { dataSet } = this;
     const { cascadeParent } = this;
@@ -420,11 +427,10 @@ export default class Record {
     return dataSet.records;
   }
 
-  @observable children?: Record[] | undefined;
+  children?: Record[] | undefined = undefined;
 
-  @observable parent?: Record | undefined;
+  parent?: Record | undefined = undefined;
 
-  @computed
   get parents(): Record[] {
     const { parent } = this;
     if (parent) {
@@ -433,7 +439,6 @@ export default class Record {
     return [];
   }
 
-  @computed
   get path(): Record[] {
     const path = [this, ...this.parents];
     path.reverse();
@@ -448,7 +453,6 @@ export default class Record {
     return 0;
   }
 
-  @computed
   get dirty(): boolean {
     const { status } = this;
     if (status === RecordStatus.update) {
@@ -461,7 +465,6 @@ export default class Record {
     return Object.keys(this.dataSet.children).some(key => (this.getCascadeRecordsIncludeDelete(key) || []).some(isDirtyRecord));
   }
 
-  @computed
   get cascadeParent(): Record | undefined {
     const { parent, parentName } = this.dataSet;
     if (parent && parentName) {
@@ -473,6 +476,58 @@ export default class Record {
   }
 
   constructor(data: object = {}, dataSet: DataSet = new DataSet(), status: RecordStatus = RecordStatus.add) {
+    Object.assign(this, {
+      ownerFields: undefined,
+      data: undefined,
+      status: undefined,
+    });
+    makeObservable<this, 'commitTls'>(this, {
+      fields: computed,
+      ownerFields: observable,
+      data: observable,
+      dirtyData: observable,
+      validationErrors: observable,
+      lookupTokens: observable,
+      attachmentCaches: observable,
+      pristineData: computed,
+      status: observable,
+      isSelected: computed,
+      isCurrent: observable,
+      isCached: observable,
+      editing: observable,
+      pending: observable,
+      childrenLoaded: observable,
+      state: observable,
+      key: computed,
+      index: computed,
+      indexInParent: computed,
+      isSelectionIndeterminate: computed,
+      isIndeterminate: computed,
+      isExpanded: computed,
+      previousRecord: computed,
+      nextRecord: computed,
+      records: computed,
+      children: observable,
+      parent: observable,
+      parents: computed,
+      path: computed,
+      dirty: computed,
+      cascadeParent: computed,
+      processTreeLevel: action,
+      addField: action,
+      set: action,
+      init: action,
+      tls: action,
+      reset: action,
+      save: action,
+      restore: action,
+      clear: action,
+      commit: action,
+      setState: action,
+      commitTls: action,
+      setValidationError: action,
+      clearValidationError: action,
+    });
     runInAction(() => {
       this.dataSet = dataSet;
       this.ownerFields = observable.map();
@@ -487,7 +542,6 @@ export default class Record {
     });
   }
 
-  @action
   processTreeLevel(props: { dataSet: DataSet; value: any; fieldName: string; }) {
     const { dataSet, value, fieldName } = props;
     const { parentField, idField, childrenField } = dataSet.props;
@@ -537,9 +591,6 @@ export default class Record {
     isCascadeSelect?: boolean,
     all = true,
   ): any {
-    if (_isComputingDerivation && _isComputingDerivation()) {
-      warning(false, 'Please do not use the `record.toData` method to get the value during the rendering phase, please use `record.get` instead.');
-    }
     const { status, dataSet } = this;
     const { dataToJSON, fields } = dataSet;
     const cascade = noCascade === undefined && dataToJSON ? useCascade(dataToJSON) : !noCascade;
@@ -665,7 +716,6 @@ export default class Record {
     return results;
   }
 
-  @action
   addField(name: string, fieldProps?: FieldProps): Field {
     const { dataSet, ownerFields } = this;
     if (!dataSet.getField(name)) {
@@ -765,7 +815,6 @@ export default class Record {
     );
   }
 
-  @action
   set(item: string | object, value?: any): Record {
     if (isString(item)) {
       const { dataSet } = this;
@@ -779,7 +828,7 @@ export default class Record {
       const { fields } = dataSet;
       if (!isSame(processToJSON(oldValue, field, this), newValueForCompare)) {
         ObjectChainValue.set(this.data, fieldName, newValue, fields, this);
-        const dirtyData = getIf<Record, ObservableMap<string, any>>(this, 'dirtyData', () => observable.map<string, any>());
+        const dirtyData = getIf<Record, ObservableMap<string, any>>(this, 'dirtyData', () => observableConfigMap<string, any>());
         if (!(dirtyData.has(fieldName))) {
           dirtyData.set(fieldName, oldValue);
           if (this.status === RecordStatus.sync) {
@@ -864,7 +913,6 @@ export default class Record {
     }
   }
 
-  @action
   init(item: string | object, value?: any): Record {
     const { data, dirtyData } = this;
     if (isString(item)) {
@@ -904,7 +952,6 @@ export default class Record {
     // return Promise.all([...this.fields.values()].map(field => field.ready()));
   }
 
-  @action
   async tls(name?: string): Promise<void> {
     const { dataSet } = this;
     const tlsKey = dataSet.getConfig('tlsKey');
@@ -943,7 +990,6 @@ export default class Record {
     }
   }
 
-  @action
   reset(): Record {
     this.cancelReportValidity();
     const { status, dataSet, dirty, isRemoved, validationErrors } = this;
@@ -967,13 +1013,11 @@ export default class Record {
     return this;
   }
 
-  @action
   save(): Record {
     this.memo = toJS(this.data);
     return this;
   }
 
-  @action
   restore(): Record {
     const { memo } = this;
     if (memo) {
@@ -983,13 +1027,11 @@ export default class Record {
     return this;
   }
 
-  @action
   clear(): Record {
     this.dataSet.fields.forEach((_, key) => this.set(key, null));
     return this;
   }
 
-  @action
   commit(data?: object, dataSet?: DataSet): Record {
     if (dataSet) {
       const { records } = this;
@@ -1058,7 +1100,6 @@ export default class Record {
     return this;
   }
 
-  @action
   setState(item: string | object, value?: any) {
     const state = getIf<Record, ObservableMap<string, any>>(this, 'state', () => observable.map<string, any>());
     if (isString(item)) {
@@ -1081,7 +1122,6 @@ export default class Record {
     return treeReduce<U, Record>([this], fn, initialValue);
   }
 
-  @action
   private commitTls(data = {}, name: string) {
     const { dataSet } = this;
     const tlsKey = dataSet.getConfig('tlsKey');
@@ -1134,7 +1174,6 @@ export default class Record {
     ObjectChainValue.set(this.data, chainFieldName, value, fields, this);
   }
 
-  @action
   setValidationError(name: string, result: ValidationResult[]) {
     const validationErrors = getIf<Record, ObservableMap<string, ValidationResult[]>>(this, 'validationErrors', () => observable.map());
     const originalResult = validationErrors.get(name);
@@ -1150,7 +1189,6 @@ export default class Record {
     }
   }
 
-  @action
   clearValidationError(name) {
     const { validationErrors } = this;
     if (validationErrors) {

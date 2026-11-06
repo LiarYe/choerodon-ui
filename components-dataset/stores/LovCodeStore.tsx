@@ -1,5 +1,5 @@
+import { makeObservable, action, observable, ObservableMap, runInAction } from 'mobx';
 import isNil from 'lodash/isNil';
-import { action, observable, ObservableMap, runInAction } from 'mobx';
 import { AxiosInstance, AxiosRequestConfig } from 'axios';
 import { warning } from '../utils';
 import DataSet, { DataSetProps } from '../data-set/DataSet';
@@ -103,11 +103,19 @@ function generateGridField(
 }
 
 export class LovCodeStore {
-  @observable lovCodes: ObservableMap<string, LovConfig>;
+  lovCodes: ObservableMap<string, LovConfig>;
 
   pendings = {};
 
   constructor() {
+    Object.assign(this, {
+      lovCodes: undefined,
+    });
+    makeObservable(this, {
+      lovCodes: observable,
+      init: action,
+      clearCache: action,
+    });
     this.init();
   }
 
@@ -158,7 +166,6 @@ export class LovCodeStore {
     return map;
   }
 
-  @action
   init() {
     this.lovCodes = observable.map<string, LovConfig>();
   }
@@ -269,6 +276,7 @@ export class LovCodeStore {
 
       if (lovItems && lovItems.length) {
         const { querys, fields } = lovItems
+          .slice()
           .sort(
             ({ conditionFieldSequence }, { conditionFieldSequence: conditionFieldSequence2 }) =>
               conditionFieldSequence - conditionFieldSequence2,
@@ -333,7 +341,6 @@ export class LovCodeStore {
     return lovQueryUrl as string;
   }
 
-  @action
   clearCache(codes?: string[]) {
     if (codes) {
       codes.forEach(code => {

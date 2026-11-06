@@ -1,5 +1,5 @@
 import { Key } from 'react';
-import { action, computed, observable } from 'mobx';
+import { action, computed, observable, makeObservable } from 'mobx';
 import Group from 'choerodon-ui/dataset/data-set/Group';
 import { ColumnProps, columnWidth } from './Column';
 import ColumnGroups from './ColumnGroups';
@@ -25,7 +25,7 @@ export default class ColumnGroup {
 
   key: Key;
 
-  @observable inView?: boolean | undefined;
+  inView?: boolean | undefined;
 
   get lock(): ColumnLock | false {
     return getColumnLock(this.column.lock);
@@ -61,7 +61,6 @@ export default class ColumnGroup {
     return children ? children.width : columnWidth(this.column, this.store);
   }
 
-  @computed
   get left(): number {
     const { prev } = this;
     if (prev) {
@@ -74,7 +73,6 @@ export default class ColumnGroup {
     return 0;
   }
 
-  @computed
   get right(): number {
     const { next } = this;
     if (next) {
@@ -87,7 +85,6 @@ export default class ColumnGroup {
     return 0;
   }
 
-  @computed
   get allLeafs(): ColumnGroup[] {
     const { children } = this;
     if (children) {
@@ -96,7 +93,6 @@ export default class ColumnGroup {
     return [this];
   }
 
-  @computed
   get leafs(): ColumnGroup[] {
     const { hidden } = this;
     if (!hidden) {
@@ -130,6 +126,15 @@ export default class ColumnGroup {
   }
 
   constructor(column: ColumnProps, parent: ColumnGroups, store: TableStore) {
+    if (!Object.prototype.hasOwnProperty.call(this, 'inView')) this.inView = undefined;
+    makeObservable(this, {
+      inView: observable,
+      left: computed,
+      right: computed,
+      allLeafs: computed,
+      leafs: computed,
+      setInView: action,
+    });
     this.store = store;
     this.column = column;
     this.key = getColumnKey(column);
@@ -145,7 +150,6 @@ export default class ColumnGroup {
     }
   }
 
-  @action
   setInView(inView?: boolean) {
     this.inView = inView;
   }

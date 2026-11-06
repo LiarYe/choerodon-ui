@@ -5,7 +5,7 @@ import Icon from 'choerodon-ui/lib/icon';
 import Tabs from 'choerodon-ui/lib/tabs';
 import { TabsType } from 'choerodon-ui/lib/tabs/enum';
 import { observer } from 'mobx-react';
-import { action, observable, runInAction } from 'mobx';
+import { action, observable, runInAction, makeObservable, override as mobxOverride } from 'mobx';
 import defaultTo from 'lodash/defaultTo';
 import isBoolean from 'lodash/isBoolean';
 import isNil from 'lodash/isNil';
@@ -91,29 +91,29 @@ export default class ColorPicker extends TriggerField<ColorPickerProps> {
     a: 1,
   };
 
-  @observable hueColor?: string;
+  hueColor?: string;
 
   footerEditFlag?: boolean;
 
-  @observable gradientHidden?: boolean;
+  gradientHidden?: boolean;
 
-  @observable gradienLeft?: number;
+  gradienLeft?: number;
 
   popupView: HTMLElement | null;
 
-  @observable activeMode: ColorMode;
+  activeMode: ColorMode;
 
-  @observable stops: PickerStop[];
+  stops: PickerStop[];
 
-  @observable selectedStop: number;
+  selectedStop: number;
 
-  @observable gradientType: Gradient['type'];
+  gradientType: Gradient['type'];
 
-  @observable gradientAngle: number;
+  gradientAngle: number;
 
-  @observable gradientText: string;
+  gradientText: string;
 
-  @observable gradientError: boolean;
+  gradientError: boolean;
 
   stopId = 0;
 
@@ -133,18 +133,18 @@ export default class ColorPicker extends TriggerField<ColorPickerProps> {
 
   pointerSyncDisposed = false;
 
-  @observable footerHex?: string;
+  footerHex?: string;
 
   footerHexOriginal?: string;
 
-  @observable stopColorDrafts: { [id: number]: string };
+  stopColorDrafts: { [id: number]: string };
 
-  @observable footerAlphaDraft?: string;
+  footerAlphaDraft?: string;
 
-  @observable stopAlphaDrafts: { [id: number]: string };
+  stopAlphaDrafts: { [id: number]: string };
 
   get colorModes(): ColorMode[] {
-    const { gradientMode } = this.props;
+    const { gradientMode } = this.reactiveProps;
     const modes = Array.isArray(gradientMode) ? gradientMode : [gradientMode || 'single'];
     const available = [...new Set(modes.filter(mode => mode === 'single' || mode === 'gradient'))];
     return available.length ? available : ['single'];
@@ -172,7 +172,7 @@ export default class ColorPicker extends TriggerField<ColorPickerProps> {
   }
 
   get preset(): boolean {
-    const { preset } = this.props;
+    const { preset } = this.reactiveProps;
     if (isBoolean(preset)) {
       return preset;
     }
@@ -283,6 +283,73 @@ export default class ColorPicker extends TriggerField<ColorPickerProps> {
 
   constructor(props, context) {
     super(props, context);
+    if (!Object.prototype.hasOwnProperty.call(this, 'hueColor')) this.hueColor = undefined;
+    if (!Object.prototype.hasOwnProperty.call(this, 'gradientHidden')) this.gradientHidden = undefined;
+    if (!Object.prototype.hasOwnProperty.call(this, 'gradienLeft')) this.gradienLeft = undefined;
+    if (!Object.prototype.hasOwnProperty.call(this, 'activeMode')) Object.assign(this, { activeMode: undefined });
+    if (!Object.prototype.hasOwnProperty.call(this, 'stops')) Object.assign(this, { stops: undefined });
+    if (!Object.prototype.hasOwnProperty.call(this, 'selectedStop')) Object.assign(this, { selectedStop: undefined });
+    if (!Object.prototype.hasOwnProperty.call(this, 'gradientType')) Object.assign(this, { gradientType: undefined });
+    if (!Object.prototype.hasOwnProperty.call(this, 'gradientAngle')) Object.assign(this, { gradientAngle: undefined });
+    if (!Object.prototype.hasOwnProperty.call(this, 'gradientText')) Object.assign(this, { gradientText: undefined });
+    if (!Object.prototype.hasOwnProperty.call(this, 'gradientError')) Object.assign(this, { gradientError: undefined });
+    if (!Object.prototype.hasOwnProperty.call(this, 'footerHex')) this.footerHex = undefined;
+    if (!Object.prototype.hasOwnProperty.call(this, 'stopColorDrafts')) Object.assign(this, { stopColorDrafts: undefined });
+    if (!Object.prototype.hasOwnProperty.call(this, 'footerAlphaDraft')) this.footerAlphaDraft = undefined;
+    if (!Object.prototype.hasOwnProperty.call(this, 'stopAlphaDrafts')) Object.assign(this, { stopAlphaDrafts: undefined });
+    makeObservable(this, {
+      hueColor: observable,
+      gradientHidden: observable,
+      gradienLeft: observable,
+      activeMode: observable,
+      stops: observable,
+      selectedStop: observable,
+      gradientType: observable,
+      gradientAngle: observable,
+      gradientText: observable,
+      gradientError: observable,
+      footerHex: observable,
+      stopColorDrafts: observable,
+      footerAlphaDraft: observable,
+      stopAlphaDrafts: observable,
+      handleChange: mobxOverride,
+      clear: mobxOverride,
+      handleStopAlphaInput: action,
+      handleStopAlphaBlur: action,
+      resetStopAlphaDraft: action,
+      syncPickerValue: action,
+      loadGradient: action,
+      initializeGradient: action,
+      resetEmptyState: action,
+      resetEmptyColor: action,
+      handleModeChange: action.bound,
+      commitGradient: action,
+      selectStop: action,
+      addStop: action,
+      removeStop: action.bound,
+      updateStopPosition: action,
+      updateStopColor: action,
+      updateStopAlpha: action,
+      handleStopColorBlur: action,
+      resetStopColorDraft: action,
+      handleDirectionChange: action.bound,
+      handleGradientTextInput: action.bound,
+      handleGradientTextBlur: action.bound,
+      handleNoFill: action.bound,
+      handlePresetOpacityInput: action.bound,
+      handlePresetOpacityBlur: action.bound,
+      changeOpacity: action,
+      setEditingColor: action,
+      setColor: action.bound,
+      handleHueClick: action.bound,
+      handleFooterInput: action.bound,
+      onExpandChange: action.bound,
+      handleFocus: mobxOverride,
+      handleFooterFocus: action.bound,
+      handleFooterBlur: action.bound,
+      setPopup: mobxOverride,
+      handlePreset: action.bound,
+    });
     runInAction(() => {
       this.gradientHidden = true;
       this.activeMode = 'single';
@@ -346,8 +413,6 @@ export default class ColorPicker extends TriggerField<ColorPickerProps> {
     }
   }
 
-  @autobind
-  @action
   handleChange(e) {
     this.footerHex = undefined;
     this.footerHexOriginal = undefined;
@@ -357,7 +422,6 @@ export default class ColorPicker extends TriggerField<ColorPickerProps> {
     }
   }
 
-  @action
   clear() {
     this.resetEmptyState();
     this.setText();
@@ -370,7 +434,7 @@ export default class ColorPicker extends TriggerField<ColorPickerProps> {
   }
 
   getPrefix(): ReactNode {
-    const { prefixCls, props: { mode, renderer } } = this;
+    const { prefixCls, reactiveProps: { mode, renderer } } = this;
     const backgroundColor = this.getValue();
     const isButtonMode = mode === ViewMode.button;
     if (isButtonMode && renderer) {
@@ -600,7 +664,6 @@ export default class ColorPicker extends TriggerField<ColorPickerProps> {
     return { draft: intermediate ? value : String(alpha), alpha };
   }
 
-  @action
   handleStopAlphaInput(id: number, value: string) {
     const { draft, alpha } = this.getAlphaInput(value);
     this.stopAlphaDrafts = { ...this.stopAlphaDrafts, [id]: draft };
@@ -609,7 +672,6 @@ export default class ColorPicker extends TriggerField<ColorPickerProps> {
     }
   }
 
-  @action
   handleStopAlphaBlur(id: number) {
     if (this.stopAlphaDrafts[id] === '') {
       this.updateStopAlpha(id, 1);
@@ -617,7 +679,6 @@ export default class ColorPicker extends TriggerField<ColorPickerProps> {
     this.resetStopAlphaDraft(id);
   }
 
-  @action
   resetStopAlphaDraft(id: number) {
     const drafts = { ...this.stopAlphaDrafts };
     delete drafts[id];
@@ -703,7 +764,6 @@ export default class ColorPicker extends TriggerField<ColorPickerProps> {
     );
   }
 
-  @action
   syncPickerValue() {
     this.footerHex = undefined;
     this.footerHexOriginal = undefined;
@@ -739,7 +799,6 @@ export default class ColorPicker extends TriggerField<ColorPickerProps> {
     }
   }
 
-  @action
   loadGradient(gradient: Gradient) {
     this.gradientType = gradient.type;
     this.gradientAngle = gradient.angle;
@@ -751,13 +810,11 @@ export default class ColorPicker extends TriggerField<ColorPickerProps> {
     this.gradientError = false;
   }
 
-  @action
   initializeGradient(seed = this.getValue()) {
     const color = parseColor(seed) ? seed as string : '#ff0000';
     this.loadGradient({ type: 'linear', angle: 135, stops: [{ color, position: 0 }, { color: mixWithWhite(color, 0.72) as string, position: 100 }] });
   }
 
-  @action
   resetEmptyState() {
     this.footerHex = undefined;
     this.footerAlphaDraft = undefined;
@@ -773,15 +830,12 @@ export default class ColorPicker extends TriggerField<ColorPickerProps> {
     this.resetEmptyColor();
   }
 
-  @action
   resetEmptyColor() {
     this.hueColor = undefined;
     this.HSV = { h: 0, s: 1, v: 1, a: 1 };
     this.RGBA = { r: 0, g: 0, b: 0, a: 0 };
   }
 
-  @autobind
-  @action
   handleModeChange(mode: ColorMode) {
     if (!this.colorModes.includes(mode) || mode === this.activeMode) {
       return;
@@ -804,7 +858,6 @@ export default class ColorPicker extends TriggerField<ColorPickerProps> {
     this.schedulePointerSync();
   }
 
-  @action
   commitGradient() {
     const value = this.gradientValue;
     if (value) {
@@ -815,7 +868,6 @@ export default class ColorPicker extends TriggerField<ColorPickerProps> {
     }
   }
 
-  @action
   selectStop(id: number) {
     const stop = this.stops.find(item => item.id === id);
     if (stop) {
@@ -826,7 +878,6 @@ export default class ColorPicker extends TriggerField<ColorPickerProps> {
     }
   }
 
-  @action
   addStop(position?: number) {
     const stops = this.sortedStops;
     if (stops.length < 2) {
@@ -863,8 +914,6 @@ export default class ColorPicker extends TriggerField<ColorPickerProps> {
     this.commitGradient();
   }
 
-  @autobind
-  @action
   removeStop(id = this.selectedStop) {
     if (this.stops.length <= 2) {
       return;
@@ -878,7 +927,6 @@ export default class ColorPicker extends TriggerField<ColorPickerProps> {
     this.commitGradient();
   }
 
-  @action
   updateStopPosition(position: number, id = this.selectedStop) {
     if (!Number.isFinite(position)) {
       return;
@@ -887,7 +935,6 @@ export default class ColorPicker extends TriggerField<ColorPickerProps> {
     this.commitGradient();
   }
 
-  @action
   updateStopColor(id: number, color: string) {
     this.resetStopAlphaDraft(id);
     this.stopColorDrafts = { ...this.stopColorDrafts, [id]: color };
@@ -904,7 +951,6 @@ export default class ColorPicker extends TriggerField<ColorPickerProps> {
     }
   }
 
-  @action
   updateStopAlpha(id: number, alpha: number) {
     const stop = this.stops.find(item => item.id === id);
     if (stop && Number.isFinite(alpha)) {
@@ -920,7 +966,6 @@ export default class ColorPicker extends TriggerField<ColorPickerProps> {
     }
   }
 
-  @action
   handleStopColorBlur(id: number) {
     const draft = this.stopColorDrafts[id]?.trim();
     if (draft && /^[\da-f]+$/i.test(draft)) {
@@ -929,7 +974,6 @@ export default class ColorPicker extends TriggerField<ColorPickerProps> {
     this.resetStopColorDraft(id);
   }
 
-  @action
   resetStopColorDraft(id: number) {
     const drafts = { ...this.stopColorDrafts };
     delete drafts[id];
@@ -979,8 +1023,6 @@ export default class ColorPicker extends TriggerField<ColorPickerProps> {
     this.eventManager.removeEventListener('mousemove', this.handleStopMove).removeEventListener('mouseup', this.handleStopMouseUp);
   }
 
-  @autobind
-  @action
   handleDirectionChange(e) {
     const { value } = e.target;
     if (value !== 'radial' && (value.trim() === '' || !Number.isFinite(Number(value)))) {
@@ -993,8 +1035,6 @@ export default class ColorPicker extends TriggerField<ColorPickerProps> {
     this.commitGradient();
   }
 
-  @autobind
-  @action
   handleGradientTextInput(e) {
     this.gradientText = e.target.value;
     this.gradientError = false;
@@ -1003,8 +1043,6 @@ export default class ColorPicker extends TriggerField<ColorPickerProps> {
     }
   }
 
-  @autobind
-  @action
   handleGradientTextBlur(e) {
     if (!e.target.value.trim()) {
       this.clear();
@@ -1019,14 +1057,10 @@ export default class ColorPicker extends TriggerField<ColorPickerProps> {
     }
   }
 
-  @autobind
-  @action
   handleNoFill() {
     this.clear();
   }
 
-  @autobind
-  @action
   handlePresetOpacityInput(e: React.ChangeEvent<HTMLInputElement>) {
     const { value } = e.target;
     if (value === '') {
@@ -1036,8 +1070,6 @@ export default class ColorPicker extends TriggerField<ColorPickerProps> {
     }
   }
 
-  @autobind
-  @action
   handlePresetOpacityBlur() {
     if (this.footerAlphaDraft === '') {
       this.changeOpacity(1);
@@ -1045,7 +1077,6 @@ export default class ColorPicker extends TriggerField<ColorPickerProps> {
     this.footerAlphaDraft = undefined;
   }
 
-  @action
   changeOpacity(alpha: number) {
     if (Number.isFinite(alpha)) {
       this.footerAlphaDraft = undefined;
@@ -1094,7 +1125,6 @@ export default class ColorPicker extends TriggerField<ColorPickerProps> {
     this.endColorDrag(this.handlePresetOpacityClick, this.handlePresetOpacityMouseUp);
   }
 
-  @action
   setEditingColor(color: string) {
     this.resetStopAlphaDraft(this.selectedStop);
     if (this.editingGradient) {
@@ -1147,8 +1177,6 @@ export default class ColorPicker extends TriggerField<ColorPickerProps> {
     }
   }
 
-  @autobind
-  @action
   setColor(color: string | undefined, commit = true) {
     const parsed = parseColor(color);
     if (parsed) {
@@ -1310,8 +1338,6 @@ export default class ColorPicker extends TriggerField<ColorPickerProps> {
     return { left, wrapW: safeWidth };
   }
 
-  @autobind
-  @action
   handleHueClick(e) {
     const { hue, huePointer, setSliderPointer, hsvToRGB, rgbToHEX } = this;
     if (hue && huePointer) {
@@ -1348,8 +1374,6 @@ export default class ColorPicker extends TriggerField<ColorPickerProps> {
     }
   }
 
-  @autobind
-  @action
   handleFooterInput(e: React.ChangeEvent<HTMLInputElement>) {
     const { target, target: { name } }: { target: any } = e;
     let { value } = target;
@@ -1451,23 +1475,17 @@ export default class ColorPicker extends TriggerField<ColorPickerProps> {
     this.endColorDrag(this.handleOpacityClick, this.onOpacityMouseUp);
   }
 
-  @autobind
-  @action
   onExpandChange(e) {
     e.stopPropagation();
     this.gradientHidden = !this.gradientHidden;
     this.schedulePointerSync();
   }
 
-  @autobind
-  @action
   handleFocus(e) {
     this.footerEditFlag = false;
     super.handleFocus(e);
   }
 
-  @autobind
-  @action
   handleFooterFocus() {
     this.footerEditFlag = true;
     this.footerHexOriginal = this.getValue();
@@ -1476,8 +1494,6 @@ export default class ColorPicker extends TriggerField<ColorPickerProps> {
     }
   }
 
-  @autobind
-  @action
   handleFooterBlur(e: React.FocusEvent<HTMLInputElement>) {
     if (e.target.name === 'a') {
       if (this.footerAlphaDraft === '' && parseColor(this.editingGradient ? this.currentStopColor : this.getValue())) {
@@ -1513,7 +1529,6 @@ export default class ColorPicker extends TriggerField<ColorPickerProps> {
     this.footerHexOriginal = undefined;
   }
 
-  @action
   setPopup(statePopup: boolean) {
     if (!statePopup && (this.draggingStop || this.draggingColor)) {
       return;
@@ -1540,8 +1555,6 @@ export default class ColorPicker extends TriggerField<ColorPickerProps> {
     }
   }
 
-  @autobind
-  @action
   handlePreset(color: string) {
     if (!parseColor(color)) {
       return;
@@ -1578,7 +1591,7 @@ export default class ColorPicker extends TriggerField<ColorPickerProps> {
   }
 
   getTriggerIconFont() {
-    const { mode } = this.props;
+    const { mode } = this.reactiveProps;
     if (mode !== ViewMode.button) {
       return 'palette';
     }
@@ -1588,7 +1601,7 @@ export default class ColorPicker extends TriggerField<ColorPickerProps> {
   getWrapperClassNames() {
     const { prefixCls } = this;
     return super.getWrapperClassNames({
-      [`${prefixCls}-button`]: this.props.mode === ViewMode.button,
+      [`${prefixCls}-button`]: this.reactiveProps.mode === ViewMode.button,
     });
   }
 

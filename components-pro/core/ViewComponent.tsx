@@ -12,7 +12,7 @@
 } from 'react';
 import { findDOMNode } from 'react-dom';
 import classNames from 'classnames';
-import { action, computed, observable, runInAction } from 'mobx';
+import { action, observable, runInAction, makeObservable } from 'mobx';
 import omit from 'lodash/omit';
 import defer from 'lodash/defer';
 import noop from 'lodash/noop';
@@ -264,15 +264,18 @@ export default class ViewComponent<P extends ViewComponentProps, C extends Confi
 
   code: string;
 
-  @observable isFocused: boolean;
+  isFocused: boolean;
 
-  @observable observableProps: any;
+  observableProps: any;
+
+  reactiveProps: Readonly<P> & Readonly<{ children?: ReactNode }>;
+
+  reactiveContext: C;
 
   prefixCls?: string;
 
   declare context: C;
 
-  @computed
   get lang(): Lang {
     const { lang } = this.observableProps;
     if (lang) {
@@ -281,13 +284,27 @@ export default class ViewComponent<P extends ViewComponentProps, C extends Confi
     return localeContext.locale.lang;
   }
 
-  @computed
   get disabled(): boolean {
     return this.isDisabled();
   }
 
   constructor(props, context) {
     super(props, context);
+    this.reactiveProps = props;
+    this.reactiveContext = context;
+    if (!Object.prototype.hasOwnProperty.call(this, 'isFocused')) Object.assign(this, { isFocused: undefined });
+    if (!Object.prototype.hasOwnProperty.call(this, 'observableProps')) this.observableProps = undefined;
+    makeObservable(this, {
+      isFocused: observable,
+      observableProps: observable.shallow,
+      reactiveProps: observable.ref,
+      reactiveContext: observable.ref,
+      setObservableProps: action,
+      updateObservableProps: action,
+      handleFocus: action.bound,
+      handleBlur: action.bound,
+      wrapperReference: action.bound,
+    });
     // why the props is undefined ?
     if (props) {
       this.setCode(props);
@@ -325,17 +342,19 @@ export default class ViewComponent<P extends ViewComponentProps, C extends Confi
     };
   }
 
-  @action
   setObservableProps(props, context: any) {
     this.observableProps = this.getObservableProps(props, context);
   }
 
-  @action
   updateObservableProps(props, context: any) {
-    Object.assign(
-      this.observableProps,
-      this.getObservableProps(props, context),
-    );
+    this.reactiveProps = props;
+    this.reactiveContext = context;
+    const next = this.getObservableProps(props, context);
+    this.prefixCls = this.getContextProPrefixCls(props.suffixCls!, props.prefixCls);
+    Object.keys(this.observableProps).forEach(key => {
+      if (!(key in next)) delete this.observableProps[key];
+    });
+    Object.assign(this.observableProps, next);
   }
 
   getOmitPropsKeys(): string[] {
@@ -372,7 +391,7 @@ export default class ViewComponent<P extends ViewComponentProps, C extends Confi
   }
 
   getOtherProps() {
-    const { props, disabled } = this;
+    const { reactiveProps: props, disabled } = this;
     const { tabIndex, lang, style = {} } = props;
     const otherProps: any = omit(props, this.getOmitPropsKeys());
     if (disabled) {
@@ -405,13 +424,13 @@ export default class ViewComponent<P extends ViewComponentProps, C extends Confi
   getClassName(...props): string | undefined {
     const {
       prefixCls,
-      props: { elementClassName },
+      reactiveProps: { elementClassName },
     } = this;
     return classNames(prefixCls, elementClassName, ...props);
   }
 
   getWrapperProps(props: any = {}): any {
-    const { style, hidden, onMouseEnter, onMouseLeave } = this.props;
+    const { style, hidden, onMouseEnter, onMouseLeave } = this.reactiveProps;
     const mergedStyle = props.style || style;
     const wrapperProps: any = {
       ref: this.wrapperReference,
@@ -436,7 +455,7 @@ export default class ViewComponent<P extends ViewComponentProps, C extends Confi
   getWrapperClassNames(...args): string {
     const {
       prefixCls,
-      props: { className, size },
+      reactiveProps: { className, size },
     } = this;
     return classNames(
       `${prefixCls}-wrapper`,
@@ -460,13 +479,11 @@ export default class ViewComponent<P extends ViewComponentProps, C extends Confi
     return true;
   }
 
-  @autobind
-  @action
   handleFocus(e) {
     this.isFocused = true;
     this.isFocus = true;
     const {
-      props: { onFocus = noop },
+      reactiveProps: { onFocus = noop },
       prefixCls,
     } = this;
     if (this.useFocusedClassName()) {
@@ -480,13 +497,11 @@ export default class ViewComponent<P extends ViewComponentProps, C extends Confi
 
   protected forceBlur(e) {
     const {
-      props: { onBlur = noop },
+      reactiveProps: { onBlur = noop },
     } = this;
     onBlur(e);
   }
 
-  @autobind
-  @action
   handleBlur(e) {
     if (!e.isDefaultPrevented()) {
       const { prefixCls } = this;
@@ -521,18 +536,12 @@ export default class ViewComponent<P extends ViewComponentProps, C extends Confi
     this.element = node;
   }
 
-  @autobind
-  @action
   wrapperReference(node) {
     this.wrapper = node;
   }
 
   componentWillReceiveProps(nextProps: P, nextContext) {
-    const { code, prefixCls, disabled, hidden } = this.props;
-    const { prefixCls: nextPrefixCls } = nextProps;
-    if (prefixCls !== nextPrefixCls) {
-      this.prefixCls = this.getContextProPrefixCls(nextProps.suffixCls!, nextPrefixCls);
-    }
+    const { code, disabled, hidden } = this.props;
     if (nextProps.code !== code) {
       this.setCode(nextProps);
     }
@@ -570,13 +579,13 @@ export default class ViewComponent<P extends ViewComponentProps, C extends Confi
 
   @autobind
   getContextConfig<T extends ConfigKeys>(key: T): T extends keyof DefaultConfig ? DefaultConfig[T] : Config[T] {
-    const { context } = this;
+    const context = this.reactiveContext;
     return context.getConfig(key);
   }
 
   @autobind
   getContextProPrefixCls(suffixCls: string, customizePrefixCls?: string): string {
-    const { context } = this;
+    const { reactiveContext: context } = this;
     return context.getProPrefixCls(suffixCls, customizePrefixCls);
   }
 }

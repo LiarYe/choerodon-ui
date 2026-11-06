@@ -1,0 +1,70 @@
+{
+  "legacy": [
+    "components-pro/attachment/__tests__/sort.test.js",
+    "components-pro/board/__tests__/card-command-display.test.js",
+    "components-pro/board/__tests__/card-command.test.js",
+    "components-pro/cascader/__tests__/migration.test.js",
+    "components-pro/code-area/__tests__/lifecycle.test.js",
+    "components-pro/core/__tests__/migration-regressions.test.js",
+    "components-pro/core/__tests__/mobx-components.test.js",
+    "components-pro/core/__tests__/pro-entry.test.js",
+    "components-pro/core/__tests__/render-props.test.js",
+    "components-pro/core/__tests__/review-lifecycle.test.js",
+    "components-pro/core/__tests__/upload-table-lifecycle.test.js",
+    "components-pro/date-picker/__tests__/lifecycle.test.js",
+    "components-pro/date-picker/__tests__/popup-visibility.test.js",
+    "components-pro/form/__tests__/option-react.test.js",
+    "components-pro/intl-field/__tests__/regression.test.js",
+    "components-pro/lov/__tests__/actions.test.js",
+    "components-pro/lov/__tests__/migration.test.js",
+    "components-pro/lov/__tests__/options-cache.test.js",
+    "components-pro/modal-container/__tests__/offsets.test.js",
+    "components-pro/performance-table/__tests__/columns-immutability.test.js",
+    "components-pro/performance-table/__tests__/migration.test.js",
+    "components-pro/performance-table/__tests__/query-bar-storage.test.js",
+    "components-pro/performance-table/__tests__/render-commit.test.js",
+    "components-pro/performance-table/__tests__/selection-customization.test.js",
+    "components-pro/table/__tests__/column-observable.test.js",
+    "components-pro/table/__tests__/editor-render-commit.test.js",
+    "components-pro/table/__tests__/filter-select-lifecycle.test.js",
+    "components-pro/table/__tests__/group-reaction.test.js",
+    "components-pro/table/__tests__/virtual-props.test.js",
+    "components-pro/text-area/__tests__/inheritance.test.js",
+    "components-pro/transfer/__tests__/render-loop.test.js",
+    "components-pro/use-computed/__tests__/index.test.js",
+    "components/config-provider/__tests__/config-updates.test.js",
+    "components/icon/__tests__/IconFont.test.js",
+    "components/list/__tests__/dataset-lifecycle.test.js",
+    "components/table/__tests__/sorting-immutability.test.js",
+    "components/tabs/__tests__/dataset-lifecycle.test.js",
+    "components/tabs/__tests__/validation-lifecycle.test.js"
+  ],
+  "added": [
+    "components-pro/attachment/__tests__/request-lifecycle.test.js",
+    "components-pro/attachment/__tests__/batch-count.test.js",
+    "components-pro/form/__tests__/index.test.js",
+    "components-pro/board/__tests__/card-command-rejection.test.js",
+    "components/config-provider/__tests__/use-data-set.test.js",
+    "components-pro/table/__tests__/group-inputs.test.js",
+    "components-pro/table/__tests__/customized-lifecycle.test.js",
+    "components-pro/performance-table/__tests__/customization-debounce.test.js",
+    "components-pro/select/__tests__/selected-data.test.js",
+    "components-pro/cascader/__tests__/selected-data.test.js",
+    "components-pro/performance-table/__tests__/customized-lifecycle.test.js",
+    "components-pro/form/__tests__/host-dom.test.js",
+    "components-pro/cascader/__tests__/host-dom.test.js",
+    "components-pro/lov/__tests__/host-dom.test.js"
+  ],
+  "cold": [
+    {
+      "name": "table-first-instance",
+      "file": "components-pro/table/__tests__/customized-lifecycle.test.js",
+      "testNamePattern": "^TableStore customization lifecycle F07 cold first and second instances preserve debounce action, arguments and flush$"
+    },
+    {
+      "name": "performance-table-first-instance",
+      "file": "components-pro/performance-table/__tests__/customization-debounce.test.js",
+      "testNamePattern": "^PerformanceTable customization debounce keeps the cold first and second instance saves inside actions with forwarded arguments$"
+    }
+  ]
+}

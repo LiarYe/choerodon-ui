@@ -1,5 +1,5 @@
 import React, { ReactNode } from 'react';
-import { action, computed, observable, runInAction } from 'mobx';
+import { action, observable, runInAction, makeObservable } from 'mobx';
 import { observer } from 'mobx-react';
 import classNames from 'classnames';
 import isObject from 'lodash/isObject';
@@ -67,6 +67,16 @@ function defaultItemRender(page: number, type: PagerType) {
 
 @observer
 export default class Pagination extends DataSetComponent<PaginationProps> {
+  constructor(props, context) {
+    super(props, context);
+    if (!Object.prototype.hasOwnProperty.call(this, 'pageInput')) this.pageInput = undefined;
+    makeObservable(this, {
+      pageInput: observable,
+      handleJumpGo: action.bound,
+      getOptions: action,
+    });
+  }
+
   static displayName = 'Pagination';
 
   static defaultProps = {
@@ -82,11 +92,10 @@ export default class Pagination extends DataSetComponent<PaginationProps> {
     simple: false,
   };
 
-  @observable pageInput?: number | '';
+  pageInput?: number | '';
 
   private container: ObserverSelect;
 
-  @computed
   get pageSize(): number {
     const { dataSet, pageSize } = this.observableProps;
     if (dataSet) {
@@ -95,7 +104,6 @@ export default class Pagination extends DataSetComponent<PaginationProps> {
     return pageSize!;
   }
 
-  @computed
   get page(): number {
     const { dataSet, page } = this.observableProps;
     if (dataSet) {
@@ -104,7 +112,6 @@ export default class Pagination extends DataSetComponent<PaginationProps> {
     return page!;
   }
 
-  @computed
   get total(): number | undefined {
     const { dataSet, total } = this.observableProps;
     if (dataSet) {
@@ -113,7 +120,6 @@ export default class Pagination extends DataSetComponent<PaginationProps> {
     return total;
   }
 
-  @computed
   get totalPage(): number {
     const { dataSet } = this.observableProps;
     const { total, pageSize } = this;
@@ -126,7 +132,6 @@ export default class Pagination extends DataSetComponent<PaginationProps> {
     return 1;
   }
 
-  @computed
   get next(): boolean {
     const { dataSet } = this.observableProps;
     const { total = 0, pageSize, page } = this;
@@ -155,7 +160,7 @@ export default class Pagination extends DataSetComponent<PaginationProps> {
       this.handleTooltipEnter(value);
       return false;
     }
-    const { dataSet } = this.props;
+    const { dataSet } = this.reactiveProps;
     if (dataSet) {
       return dataSet.modifiedCheck();
     }
@@ -168,7 +173,7 @@ export default class Pagination extends DataSetComponent<PaginationProps> {
   }
 
   async handleChange(page: number, pageSize: number) {
-    const { dataSet, onChange, beforeChange = noop } = this.props;
+    const { dataSet, onChange, beforeChange = noop } = this.reactiveProps;
     let pageChange = page;
     if (this.pageSize !== pageSize && await beforeChange(page, pageSize) !== false) {
       pageChange = 1;
@@ -209,7 +214,7 @@ export default class Pagination extends DataSetComponent<PaginationProps> {
   }
 
   async jumpPage(page) {
-    const { dataSet, beforeChange = noop } = this.props;
+    const { dataSet, beforeChange = noop } = this.reactiveProps;
     let modifiedCheckResult;
     if (dataSet) {
       modifiedCheckResult = await dataSet.modifiedCheck();
@@ -227,7 +232,7 @@ export default class Pagination extends DataSetComponent<PaginationProps> {
 
   @autobind
   handleJumpChange(value) {
-    const { page, totalPage, props: { showQuickJumper, simple, showPager } } = this;
+    const { page, totalPage, reactiveProps: { showQuickJumper, simple, showPager } } = this;
     value = Number(value);
     let forceUpdate = false;
     if (isNaN(value) || value < 1) {
@@ -253,8 +258,6 @@ export default class Pagination extends DataSetComponent<PaginationProps> {
     }
   }
 
-  @autobind
-  @action
   handleJumpGo(e) {
     if (e.keyCode === KeyCode.ENTER || e.type === 'click') {
       const { pageInput } = this;
@@ -288,7 +291,6 @@ export default class Pagination extends DataSetComponent<PaginationProps> {
     ]);
   }
 
-  @action
   getOptions(): ReactNode {
     const { Option } = ObserverSelect;
     return this.observableProps.pageSizeOptions.map(option => (
@@ -301,7 +303,7 @@ export default class Pagination extends DataSetComponent<PaginationProps> {
   getInputNode(tooltip?: boolean): ReactNode {
     const {
       page,
-      props: { disabled },
+      reactiveProps: { disabled },
     } = this;
     const otherProps: any = {};
     if (tooltip) {
@@ -323,7 +325,7 @@ export default class Pagination extends DataSetComponent<PaginationProps> {
   getPager(page: number, type: PagerType, active = false, disabledSender?: boolean) {
     const {
       prefixCls,
-      props: { itemRender = defaultItemRender, disabled = false },
+      reactiveProps: { itemRender = defaultItemRender, disabled = false },
     } = this;
     const disabledValue = disabledSender || disabled;
     const classNamePager = isString(type) ? `${prefixCls}-pager-${type}` : ``;
@@ -342,7 +344,7 @@ export default class Pagination extends DataSetComponent<PaginationProps> {
   }
 
   renderPagers(page: number): ReactNode {
-    const { totalPage, prefixCls, props: { showPager } } = this;
+    const { totalPage, prefixCls, reactiveProps: { showPager } } = this;
     const bufferSize = 1;
     const pagerList: any[] = [];
     if (totalPage <= 3 + bufferSize * 2) {
@@ -407,7 +409,7 @@ export default class Pagination extends DataSetComponent<PaginationProps> {
       showSizeChanger,
       sizeChangerOptionRenderer,
       disabled,
-    } = this.props;
+    } = this.reactiveProps;
     if (showSizeChanger) {
       const { pageSizeEditable } = this.observableProps;
       const { prefixCls } = this;
@@ -439,7 +441,7 @@ export default class Pagination extends DataSetComponent<PaginationProps> {
   }
 
   renderTotal(pageSize: number, page: number, total: number): ReactNode {
-    const { prefixCls, props: { showTotal }, dataSet } = this;
+    const { prefixCls, reactiveProps: { showTotal }, dataSet } = this;
     const from = pageSize * (page - 1) + 1;
     const counting = dataSet && dataSet.counting;
     const noCount = dataSet && dataSet.paging === 'noCount';
@@ -463,7 +465,7 @@ export default class Pagination extends DataSetComponent<PaginationProps> {
    */
   renderQuickGo(): ReactNode {
     const { prefixCls, page } = this;
-    const { disabled, showQuickJumper } = this.props;
+    const { disabled, showQuickJumper } = this.reactiveProps;
     let gotoButton: any = null;
 
     if (isObject(showQuickJumper) && showQuickJumper.goButton) {
@@ -506,7 +508,7 @@ export default class Pagination extends DataSetComponent<PaginationProps> {
       total,
       pageSize,
       page,
-      props: { hideOnSinglePage, simple },
+      reactiveProps: { hideOnSinglePage, simple },
       prefixCls,
     } = this;
     if (total === undefined || pageSize === undefined || page === undefined) {
@@ -518,7 +520,7 @@ export default class Pagination extends DataSetComponent<PaginationProps> {
 
     const {
       totalPage,
-      props: { children, sizeChangerPosition, showTotal, showPager, showQuickJumper, quickJumperPosition },
+      reactiveProps: { children, sizeChangerPosition, showTotal, showPager, showQuickJumper, quickJumperPosition },
     } = this;
 
     const { dataSet } = this.observableProps;

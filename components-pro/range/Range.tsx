@@ -40,7 +40,7 @@ export default class Range extends NumberField<RangeProps> {
   };
 
   getWrapperClassNames(...args): string {
-    const { prefixCls, props: { vertical } } = this;
+    const { prefixCls, reactiveProps: { vertical } } = this;
     return super.getWrapperClassNames(
       {
         [`${prefixCls}-wrapper-vertical`]: vertical,
@@ -67,7 +67,7 @@ export default class Range extends NumberField<RangeProps> {
 
   renderTrack() {
     const {
-      props: { onChange = noop, ...otherProps },
+      reactiveProps: { onChange = noop, ...otherProps },
       prefixCls,
       readOnly,
       dataSet,
@@ -96,7 +96,7 @@ export default class Range extends NumberField<RangeProps> {
         <Slider prefixCls={prefixCls} {...otherProps} {...props} onChange={this.handleValueChange} />
       );
     }
-    
+
     return (
       <Slider prefixCls={prefixCls} {...otherProps} onChange={!readOnly ? onChange : undefined} />
     );

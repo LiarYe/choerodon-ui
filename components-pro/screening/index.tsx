@@ -1,6 +1,6 @@
 import React, { Children, ReactElement, cloneElement } from 'react';
 import { observer } from 'mobx-react';
-import { observable, computed, action, runInAction, toJS } from 'mobx';
+import { observable, action, runInAction, toJS, makeObservable } from 'mobx';
 import Tag from 'choerodon-ui/lib/tag';
 import isNumber from 'lodash/isNumber';
 import isString from 'lodash/isString';
@@ -35,7 +35,7 @@ export default class Screening extends DataSetComponent<ScreeningProps> {
 
   static ScreeningItem = ScreeningItem;
 
-  @observable mergeValue: any;
+  mergeValue: any;
 
   emptyValue?: any = null;
 
@@ -48,6 +48,12 @@ export default class Screening extends DataSetComponent<ScreeningProps> {
 
   constructor(props, context) {
     super(props, context);
+    if (!Object.prototype.hasOwnProperty.call(this, 'mergeValue')) this.mergeValue = undefined;
+    makeObservable(this, {
+      mergeValue: observable,
+      handleConfirm: action,
+      handleCloseItem: action,
+    });
     const dataSet = this.dataSet;
     const record = this.record;
     runInAction(() => {
@@ -64,7 +70,6 @@ export default class Screening extends DataSetComponent<ScreeningProps> {
   /**
    * return the record: dataIndex record, current, undefined
    */
-  @computed
   get record(): Record | undefined {
     const { record, dataSet, dataIndex } = this.observableProps;
     if (record) {
@@ -79,7 +84,6 @@ export default class Screening extends DataSetComponent<ScreeningProps> {
     return undefined;
   }
 
-  @computed
   get dataSet(): DataSet | undefined {
     const { record } = this;
     if (record) {
@@ -95,7 +99,6 @@ export default class Screening extends DataSetComponent<ScreeningProps> {
     }
   };
 
-  @action
   handleConfirm = ({ value, fieldName }) => {
     const oldValue = omit(toJS(this.mergeValue), '__dirty');
     if (fieldName) {
@@ -109,7 +112,6 @@ export default class Screening extends DataSetComponent<ScreeningProps> {
     }
   };
 
-  @action
   handleCloseItem = (filedName) => {
     const { dataSet } = this.props;
     if (dataSet && filedName) {
@@ -201,7 +203,7 @@ export default class Screening extends DataSetComponent<ScreeningProps> {
 
   render() {
     const dataSet = this.dataSet;
-    const { children } = this.props;
+    const { children } = this.reactiveProps;
     let mergeValue = toJS(this.mergeValue);
     mergeValue = omit(mergeValue, ['__dirty']);
     const filteredChildren = Children.toArray(children).filter(c => !!c);

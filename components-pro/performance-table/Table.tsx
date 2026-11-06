@@ -1,6 +1,7 @@
 // @ts-nocheck
 import * as React from 'react';
-import { action, get, isArrayLike, runInAction } from 'mobx';
+import { action, get, runInAction } from 'mobx';
+import isArrayLike from 'choerodon-ui/dataset/mobx-helper/isArrayLike';
 import classNames from 'classnames';
 import isFunction from 'lodash/isFunction';
 import flatten from 'lodash/flatten';
@@ -459,6 +460,15 @@ const propTypeKeys = [
 export const CUSTOMIZED_KEY = '__customized-column__'; // TODO:Symbol
 const CUSTOMIZATION_HEADER_WIDTH = 28;
 
+function TableHeight({ tableStore, height }: { tableStore: TableStore; height: number }) {
+  React.useLayoutEffect(() => {
+    runInAction(() => {
+      tableStore.totalHeight = height;
+    });
+  }, [tableStore, height]);
+  return null;
+}
+
 function getRowSelection(props: TableProps): TableRowSelection {
   return props.rowSelection || {};
 }
@@ -586,7 +596,6 @@ export default class PerformanceTable extends React.Component<TableProps, TableS
     super(props, context);
     const {
       width,
-      height,
       data,
       rowKey,
       defaultExpandAllRows,
@@ -623,7 +632,6 @@ export default class PerformanceTable extends React.Component<TableProps, TableS
       cacheData: data,
       data: isTree ? flattenData(data) : data,
       width: width || 0,
-      height: height || 0,
       columnWidth: 0,
       dataKey: 0,
       contentHeight: 0,
@@ -670,7 +678,9 @@ export default class PerformanceTable extends React.Component<TableProps, TableS
   }
 
   setSelectionColumn = (props) => {
-    const { rowSelection, columns = [], children = [] } = props;
+    const { rowSelection, columns: propColumns = [], children: propChildren = [] } = props;
+    const columns = propColumns.slice();
+    const children = Array.isArray(propChildren) ? propChildren.slice() : propChildren;
     const index = columns.findIndex(column => column.key === 'rowSelection');
     if (rowSelection) {
       if (index > -1) columns.splice(index, 1);
@@ -752,6 +762,7 @@ export default class PerformanceTable extends React.Component<TableProps, TableS
   }
 
   componentDidMount() {
+    this.syncStoreContext();
     this.calculateTableWidth();
     this.calculateTableContextHeight();
     this.calculateRowMaxHeight();
@@ -786,6 +797,7 @@ export default class PerformanceTable extends React.Component<TableProps, TableS
   }
 
   shouldComponentUpdate(nextProps: TableProps, nextState: TableState) {
+    this.tableStore.syncProps(nextProps, this.context);
     const nextPropsRowSelection = getRowSelection(nextProps);
     const _cacheChildrenSize = flatten((nextProps.children as any[] || nextProps.columns) || []).length;
     const hasRowSelection = nextProps.columns?.some(column => column.key === 'rowSelection');
@@ -840,9 +852,9 @@ export default class PerformanceTable extends React.Component<TableProps, TableS
   }
 
   componentDidUpdate(prevProps: TableProps, prevState: TableState) {
+    this.syncStoreContext();
     const { rowHeight, data, autoHeight, height, virtualized, children, columns, rowDraggable } = prevProps;
     const { props, state } = this;
-    const rowSelection = getRowSelection(this.props);
     const { data: nextData, autoHeight: nextAutoHeight, onDataUpdated, shouldUpdateScroll, columns: nextColumns, children: nextChildren, rowDraggable: nextRowDraggable, customDragDropContenxt } = props;
     if (data !== nextData) {
       if (customDragDropContenxt) {
@@ -863,23 +875,6 @@ export default class PerformanceTable extends React.Component<TableProps, TableS
 
     if (columns !== nextColumns || children !== nextChildren || this.tableStore.customizable) {
       let shouldFixedColumn = false;
-
-      if ((!columns || columns.length === 0) && rowSelection && nextColumns && nextColumns.length) {
-        let rowSelectionFixed: any = 'left';
-        if ('fixed' in rowSelection) {
-          rowSelectionFixed = rowSelection.fixed;
-        }
-        const columnsWithRowSelectionProps: ColumnProps = {
-          title: $l('Table', 'select_current_page'),
-          key: 'rowSelection',
-          width: 50,
-          align: 'center',
-          fixed: rowSelectionFixed,
-        };
-        runInAction(() => {
-          this.tableStore.originalColumns = nextColumns.splice(rowSelection.columnIndex || 0, 0, columnsWithRowSelectionProps);
-        });
-      }
 
       if (nextChildren) {
         shouldFixedColumn = Array.from(nextChildren as Iterable<any>).some(
@@ -935,6 +930,7 @@ export default class PerformanceTable extends React.Component<TableProps, TableS
   }
 
   componentWillUnmount() {
+    this.tableStore.dispose();
     this.wrapResizeObserver.disconnect();
     this.wheelHandler = null;
     const { current } = this.tableRef;
@@ -1059,9 +1055,6 @@ export default class PerformanceTable extends React.Component<TableProps, TableS
         }
       }
 
-      this.setState({
-        height: tableHeight,
-      });
     }
 
     if ((data.length === 0 && !autoHeight)) {
@@ -3674,6 +3667,16 @@ export default class PerformanceTable extends React.Component<TableProps, TableS
     );
   }
 
+  syncStoreContext() {
+    const contextChanged = this.tableStore.context !== this.context;
+    this.tableStore.syncProps(this.props, this.context);
+    this.tableStore.syncCustomized();
+    if (contextChanged) {
+      this._cacheCells = null;
+      this.forceUpdate();
+    }
+  }
+
   render() {
     const {
       children,
@@ -3717,10 +3720,6 @@ export default class PerformanceTable extends React.Component<TableProps, TableS
       ...style,
     };
 
-    runInAction(() => {
-      this.tableStore.totalHeight = height;
-    });
-
     const unhandled = getUnhandledProps(propTypeKeys, rest);
 
     const { tableStore, translateDOMPositionXY } = this;
@@ -3757,6 +3756,7 @@ export default class PerformanceTable extends React.Component<TableProps, TableS
         }}
       >
         <ModalProvider>
+          <TableHeight tableStore={tableStore} height={height} />
           {queryBar === false ? null : <PerformanceTableQueryBar />}
           {this.renderTableToolbar()}
           {

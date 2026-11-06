@@ -1,5 +1,5 @@
 import { isValidElement, ReactNode } from 'react';
-import { isArrayLike } from 'mobx';
+import isArrayLike from 'choerodon-ui/dataset/mobx-helper/isArrayLike';
 import isNil from 'lodash/isNil';
 import isBoolean from 'lodash/isBoolean';
 import isNumber from 'lodash/isNumber';

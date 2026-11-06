@@ -1,5 +1,5 @@
 import React, { ReactNode } from 'react';
-import { action, observable, runInAction } from 'mobx';
+import { action, observable, runInAction, makeObservable } from 'mobx';
 import { observer } from 'mobx-react';
 import uniqBy from 'lodash/uniqBy';
 import isEmpty from 'lodash/isEmpty';
@@ -8,7 +8,6 @@ import { T } from 'choerodon-ui/lib/upload/utils';
 import { getConfig as getConfigDefault } from 'choerodon-ui/lib/configure/utils';
 import Button from '../button/Button';
 import { ButtonColor } from '../button/enum';
-import autobind from '../_util/autobind';
 import { FormField, FormFieldProps } from '../field/FormField';
 import Icon from '../icon';
 import message from '../message';
@@ -190,7 +189,7 @@ export interface UploadProps extends FormFieldProps {
    * @memberof UploadProps
    */
   partialUpload?: boolean;
-  
+
   Modal?: ModalContextValue;
 }
 
@@ -232,7 +231,7 @@ export default class Upload extends FormField<UploadProps> {
    * @type {UploadFile[]}
    * @memberof Upload
    */
-  @observable fileList: UploadFile[];
+  fileList: UploadFile[];
 
   /**
    * 原生<input>元素的引用
@@ -247,6 +246,19 @@ export default class Upload extends FormField<UploadProps> {
 
   constructor(props, context) {
     super(props, context);
+    if (!Object.prototype.hasOwnProperty.call(this, 'fileList')) Object.assign(this, { fileList: undefined });
+    makeObservable(this, {
+      fileList: observable,
+      componentWillReceiveProps: action,
+      handleChange: action.bound,
+      uploadFiles: action.bound,
+      upload: action.bound,
+      handleSuccess: action,
+      handleProgress: action,
+      handleError: action,
+      handleRemove: action,
+      removeFileItem: action,
+    });
     runInAction(() => {
       this.fileList = props.uploadFileList || props.defaultFileList || [];
     });
@@ -260,8 +272,8 @@ export default class Upload extends FormField<UploadProps> {
     }
   }
 
-  @action
-  componentWillReceiveProps(nextProps) {
+  componentWillReceiveProps(nextProps, nextContext) {
+    super.componentWillReceiveProps(nextProps, nextContext);
     const { uploadFileList } = nextProps;
     if (uploadFileList !== this.fileList && uploadFileList !== undefined) {
       this.fileList = uniqBy(uploadFileList, (item: UploadFile) => item.uid);
@@ -315,7 +327,7 @@ export default class Upload extends FormField<UploadProps> {
   render() {
     const {
       prefixCls,
-      props: {
+      reactiveProps: {
         action: formAction,
         children,
         multiple,
@@ -431,13 +443,11 @@ export default class Upload extends FormField<UploadProps> {
    * @param {*} e <input>元素的change事件对象
    * @memberof Upload
    */
-  @autobind
-  @action
   handleChange(e: any) {
     if (e.target.value === '') {
       return;
     }
-    const { appendUpload, defaultFileList, uploadFileList } = this.props;
+    const { appendUpload, defaultFileList, uploadFileList } = this.reactiveProps;
     const fileList = e.target.files;
     const files: any = Array.from(fileList).slice(0);
     const tempFileList =
@@ -453,7 +463,7 @@ export default class Upload extends FormField<UploadProps> {
       fileBuffer.push(file);
     });
     this.fileList = [...tempFileList, ...fileBuffer];
-    const { uploadImmediately, onFileChange } = this.props;
+    const { uploadImmediately, onFileChange } = this.reactiveProps;
     e.target.value = '';
     if (uploadImmediately) {
       if (!isEmpty(fileBuffer)) {
@@ -472,15 +482,13 @@ export default class Upload extends FormField<UploadProps> {
    * @returns {Promise<void>}
    * @memberof Upload
    */
-  @autobind
-  @action
   async uploadFiles(fileList: UploadFile[]): Promise<void> {
     const {
       action: formAction,
       accept,
       fileListMaxLength = 0, // <-- convince ts
       partialUpload,
-    } = this.props;
+    } = this.reactiveProps;
     if (!formAction) {
       Modal.error($l('Upload', 'upload_path_unset'));
       return;
@@ -497,7 +505,7 @@ export default class Upload extends FormField<UploadProps> {
 
     const secretLevelFlag = getConfigDefault('uploadSecretLevelFlag');
     const secretLevelOptions = getConfigDefault('uploadSecretLevelOptions');
-    const { Modal: modalInProps } = this.props;
+    const { Modal: modalInProps } = this.reactiveProps;
     let secretLevelHeadersInfo = {};
     if (secretLevelFlag && secretLevelOptions && this.secretLevelDataSet && modalInProps) {
       const { formProps, modalProps } = secretLevelOptions;
@@ -538,8 +546,6 @@ export default class Upload extends FormField<UploadProps> {
    */
 
   /* istanbul ignore next */
-  @autobind
-  @action
   upload(file: any, extraHeaders?: object): void {
     const {
       data,
@@ -547,7 +553,7 @@ export default class Upload extends FormField<UploadProps> {
       headers,
       name: filename,
       withCredentials: xhrWithCredentials,
-    } = this.props;
+    } = this.reactiveProps;
     if (typeof XMLHttpRequest === 'undefined') {
       return;
     }
@@ -619,11 +625,10 @@ export default class Upload extends FormField<UploadProps> {
    * @param {UploadFile} file 文件对象
    * @returns
    */
-  @action
   handleSuccess(status: number, response: any, file: UploadFile) {
     const targetItem = this.getFileItem(file);
     if (targetItem) {
-      const { onUploadSuccess } = this.props;
+      const { onUploadSuccess } = this.reactiveProps;
       targetItem.status = status === 200 ? 'success' : 'done';
       targetItem.response = response;
       if (onUploadSuccess) {
@@ -641,9 +646,8 @@ export default class Upload extends FormField<UploadProps> {
    * @param {UploadFile} file 文件对象
    * @returns
    */
-  @action
   handleProgress(percent: number, file: UploadFile) {
-    const { onUploadProgress } = this.props;
+    const { onUploadProgress } = this.reactiveProps;
     const targetItem = this.getFileItem(file);
     if (targetItem) {
       targetItem.percent = percent;
@@ -662,9 +666,8 @@ export default class Upload extends FormField<UploadProps> {
    * @param {UploadFile} file 文件对象
    * @returns
    */
-  @action
   handleError(error: Error, responseText: string, response: any, file: UploadFile) {
-    const { onUploadError } = this.props;
+    const { onUploadError } = this.reactiveProps;
     const targetItem = this.getFileItem(file);
     if (targetItem) {
       targetItem.status = 'error';
@@ -677,7 +680,6 @@ export default class Upload extends FormField<UploadProps> {
     }
   }
 
-  @action
   handleRemove = (file: UploadFile) => {
     // this.removeFileItem(file);
     // this.upload.abort(file);
@@ -686,7 +688,7 @@ export default class Upload extends FormField<UploadProps> {
   };
 
   handleOnRemove(file: UploadFile) {
-    const { onRemoveFile } = this.props;
+    const { onRemoveFile } = this.reactiveProps;
     Promise.resolve(typeof onRemoveFile === 'function' ? onRemoveFile(file) : onRemoveFile).then(
       ret => {
         if (ret === false) {
@@ -706,7 +708,7 @@ export default class Upload extends FormField<UploadProps> {
    * @memberof Upload
    */
   isAcceptFiles(fileList: UploadFile[]): boolean {
-    const { accept } = this.props;
+    const { accept } = this.reactiveProps;
     if (!accept) {
       return true;
     }
@@ -756,11 +758,10 @@ export default class Upload extends FormField<UploadProps> {
    * @returns {UploadFile[]}
    * @memberof Upload
    */
-  @action
   removeFileItem(file: UploadFile): void {
     const matchKey = file.uid !== undefined ? 'uid' : 'name';
     const index = this.fileList.findIndex(item => item[matchKey] === file[matchKey]);
-    const { uploadFileList } = this.props;
+    const { uploadFileList } = this.reactiveProps;
     if (uploadFileList && uploadFileList.length) {
       uploadFileList.splice(index, 1);
       this.fileList.splice(index, 1);

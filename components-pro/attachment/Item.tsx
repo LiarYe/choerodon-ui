@@ -1,6 +1,6 @@
 import React, { cloneElement, FunctionComponent, isValidElement, MouseEventHandler, ReactNode, useCallback, useContext, useEffect, useRef, CSSProperties, useState } from 'react';
 import { observer } from 'mobx-react-lite';
-import { isArrayLike } from 'mobx';
+import isArrayLike from 'choerodon-ui/dataset/mobx-helper/isArrayLike';
 import classnames from 'classnames';
 import { DraggableProvided } from 'react-beautiful-dnd';
 import isString from 'lodash/isString';

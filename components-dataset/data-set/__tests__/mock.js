@@ -1350,9 +1350,15 @@ export const commonDs = {
   transport: {
     read: () => {
       return {
-        // 此处设置的url无效，但是官网是可行的
-        url: 'https://www.fastmock.site/mock/423302b318dd24f1712751d9bfc1cbbc/mock/guide/user',
+        url: '/test/users',
         method: 'GET',
+        adapter: async config => ({
+          data: { rows: data.map(record => ({ ...record })), total: data.length },
+          status: 200,
+          statusText: 'OK',
+          headers: {},
+          config,
+        }),
       };
     }
   },

@@ -1,5 +1,6 @@
 import React from 'react';
 import { mount } from 'enzyme';
+import { act } from 'react-dom/test-utils';
 import moment from 'moment';
 import MonthsPicker from '../../month-picker';
 import focusTest from '../../../tests/shared/focusTest';
@@ -40,15 +41,31 @@ describe('months-picker-pro', () => {
   });
 
   it('should has min-max value', () => {
-    const wrapper = mount(<MonthsPicker min={moment('2021-01-01')} />);
-    wrapper.find('.c7n-pro-calendar-picker-wrapper').simulate('click');
-    jest.runAllTimers();
-    expect(
-      wrapper
-        .find('Popup')
-        .at(0)
-        .hasClass('c7n-pro-calendar-picker-popup'),
-    ).toBe(true);
+    const container = document.createElement('div');
+    document.body.appendChild(container);
+    const wrapper = mount(<MonthsPicker min={moment('2021-01-01')} />, { attachTo: container });
+    const node = wrapper.instance().trigger.domNode;
+    Object.defineProperty(node, 'offsetWidth', { configurable: true, value: 120 });
+    Object.defineProperty(node, 'offsetHeight', { configurable: true, value: 32 });
+    try {
+      act(() => { wrapper.find('input').simulate('click'); });
+      wrapper.update();
+      expect(wrapper.instance().popup).toBe(true);
+      expect(
+        wrapper
+          .find('Popup')
+          .at(0)
+          .hasClass('c7n-pro-calendar-picker-popup'),
+      ).toBe(true);
+      act(() => { jest.advanceTimersByTime(1000); });
+      wrapper.update();
+      expect(wrapper.instance().popup).toBe(true);
+      expect(wrapper.find('Popup').prop('hidden')).toBe(false);
+    } finally {
+      wrapper.unmount();
+      document.body.removeChild(container);
+      jest.clearAllTimers();
+    }
   });
 
   it('the choose method should render correctly', () => {

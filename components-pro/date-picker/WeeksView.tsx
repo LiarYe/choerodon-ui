@@ -43,7 +43,7 @@ export default class WeeksView<T extends DateViewProps> extends DaysView<T> impl
       comboRangeMode,
       startDate,
       endDate,
-      props: { renderer = this.renderCell, onDateMouseLeave },
+      reactiveProps: { renderer = this.renderCell, onDateMouseLeave },
     } = this;
     const date = this.getTargetDate(target);
     const selected = date.clone();
@@ -128,7 +128,7 @@ export default class WeeksView<T extends DateViewProps> extends DaysView<T> impl
   }
 
   renderFooter(): ReactNode {
-    const { prefixCls, props: { disabledNow, isExistValue } } = this;
+    const { prefixCls, reactiveProps: { disabledNow, isExistValue } } = this;
     const footerProps = {
       className: classNames(`${prefixCls}-footer-now-btn`, {
         [`${prefixCls}-now-disabled`]: disabledNow,

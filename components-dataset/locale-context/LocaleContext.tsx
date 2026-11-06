@@ -1,4 +1,4 @@
-import { action, observable, runInAction } from 'mobx';
+import { action, makeObservable, observable } from 'mobx';
 import moment from 'moment';
 import defaultTo from 'lodash/defaultTo';
 import { Lang } from './enum';
@@ -12,18 +12,18 @@ function setMomentLocale(locale: Locale) {
 }
 
 export class LocaleContext {
-  @observable locale: Locale;
+  @observable locale: Locale = defaultLocale;
 
   // 数字格式化使用的国际化语言编码， 未设置时使用 locale.lang
   @observable numberFormatLanguage: Lang;
 
-  @observable supports: Supports;
+  @observable supports: Supports = defaultSupports;
 
   constructor() {
-    runInAction(() => {
-      this.locale = defaultLocale;
-      this.supports = defaultSupports;
+    Object.assign(this, {
+      numberFormatLanguage: undefined,
     });
+    makeObservable(this);
   }
 
   @action

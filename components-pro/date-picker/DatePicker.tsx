@@ -9,7 +9,8 @@ import isNil from 'lodash/isNil';
 import noop from 'lodash/noop';
 import isArray from 'lodash/isArray';
 import { observer } from 'mobx-react';
-import { action, computed, isArrayLike, observable, runInAction, toJS, autorun, IReactionDisposer } from 'mobx';
+import { action, observable, runInAction, toJS, autorun, IReactionDisposer, makeObservable, override as mobxOverride } from 'mobx';
+import isArrayLike from 'choerodon-ui/dataset/mobx-helper/isArrayLike';
 import { TimeStep } from 'choerodon-ui/dataset/interface';
 import KeyCode from 'choerodon-ui/lib/_util/KeyCode';
 import warning from 'choerodon-ui/lib/_util/warning';
@@ -74,7 +75,7 @@ function getInRangeDefaultTime(defaultTime = createDefaultTime(), min?: Moment |
       }
     }
   }
-  
+
   if (minExcl && defaultTime.isSameOrBefore(minExcl)) {
     defaultTime.year(minExcl.year());
     defaultTime.month(minExcl.month());
@@ -181,6 +182,26 @@ export interface DatePickerKeyboardEvent {
 @observer
 export default class DatePicker extends TriggerField<DatePickerProps>
   implements DatePickerKeyboardEvent {
+  constructor(props, context) {
+    super(props, context);
+    if (!Object.prototype.hasOwnProperty.call(this, 'cursorDate')) this.cursorDate = undefined;
+    if (!Object.prototype.hasOwnProperty.call(this, 'mode')) this.mode = undefined;
+    if (!Object.prototype.hasOwnProperty.call(this, 'hoverValue')) this.hoverValue = undefined;
+    makeObservable(this, {
+      cursorDate: observable,
+      mode: observable,
+      hoverValue: observable,
+      handlePopupRangeEditorBlur: action.bound,
+      handleDateMouseEnter: action,
+      handleDateMouseLeave: action,
+      handleKeyDownTab: action,
+      handleEnterDown: action,
+      prepareSetValue: mobxOverride,
+      changeCursorDate: action,
+      setRangeTarget: mobxOverride,
+    });
+  }
+
   static displayName = 'DatePicker';
 
   static defaultProps = {
@@ -197,6 +218,7 @@ export default class DatePicker extends TriggerField<DatePickerProps>
   }
 
   componentWillUnmount() {
+    super.componentWillUnmount();
     if (this.timeID) {
       clearTimeout(this.timeID);
       delete this.timeID;
@@ -206,7 +228,6 @@ export default class DatePicker extends TriggerField<DatePickerProps>
     }
   }
 
-  @computed
   get value(): any | undefined {
     const { value } = this.observableProps;
     const { range } = this;
@@ -245,27 +266,22 @@ export default class DatePicker extends TriggerField<DatePickerProps>
     };
   }
 
-  @computed
   get min(): Moment | undefined | null {
     return floorMillisecond(this.getLimit('min'));
   }
 
-  @computed
   get max(): Moment | undefined | null {
     return floorMillisecond(this.getLimit('max'));
   }
 
-  @computed
   get minExcl(): Moment | undefined | null {
     return floorMillisecond(this.getLimit('minExcl'));
   }
 
-  @computed
   get maxExcl(): Moment | undefined | null {
     return floorMillisecond(this.getLimit('maxExcl'));
   }
 
-  @computed
   get comboRangeMode(): boolean | undefined {
     const { range } = this;
     let { comboRangeMode } = this.observableProps;
@@ -283,8 +299,8 @@ export default class DatePicker extends TriggerField<DatePickerProps>
   }
 
   get disabledTimeLoopRoll(): boolean | undefined {
-    if ('disabledTimeLoopRoll' in this.props) {
-      return this.props.disabledTimeLoopRoll;
+    if ('disabledTimeLoopRoll' in this.reactiveProps) {
+      return this.reactiveProps.disabledTimeLoopRoll;
     }
     return this.getContextConfig('disabledTimeLoopRoll');
   }
@@ -293,9 +309,9 @@ export default class DatePicker extends TriggerField<DatePickerProps>
 
   view: DatePickerKeyboardEvent | null;
 
-  @observable cursorDate?: Moment | undefined;
+  cursorDate?: Moment | undefined;
 
-  @observable mode?: ViewMode;
+  mode?: ViewMode;
 
   timeID?: number;
 
@@ -304,7 +320,7 @@ export default class DatePicker extends TriggerField<DatePickerProps>
   /**
    * hover 时显示值
    */
-  @observable hoverValue?: Moment | undefined;
+  hoverValue?: Moment | undefined;
 
   popupInputEditor?: HTMLInputElement | ObserverTextField | null;
 
@@ -331,7 +347,7 @@ export default class DatePicker extends TriggerField<DatePickerProps>
   }
 
   isEditable(): boolean {
-    return super.isEditable() && !this.isEditableLike() && this.getViewMode() !== ViewMode.week && !this.props.inputReadOnly;
+    return super.isEditable() && !this.isEditableLike() && this.getViewMode() !== ViewMode.week && !this.reactiveProps.inputReadOnly;
   }
 
   isEditableLike(): boolean {
@@ -374,7 +390,7 @@ export default class DatePicker extends TriggerField<DatePickerProps>
     const mode = this.getDefaultViewMode();
     const { value } = props;
     if (value && [ViewMode.time, ViewMode.dateTime].includes(mode)) {
-      const { timeZone = this.getContextConfig('formatter').timeZone } = this.props;
+      const { timeZone = this.getContextConfig('formatter').timeZone } = this.reactiveProps;
       if (timeZone) {
         const renderedTimeZone = typeof timeZone === 'function' ? timeZone(value) : value.format(timeZone);
         if (isString(renderedTimeZone)) {
@@ -387,7 +403,7 @@ export default class DatePicker extends TriggerField<DatePickerProps>
   }
 
   getDefaultTime(): [Moment, Moment] {
-    const { defaultTime = createDefaultTime() } = this.props;
+    const { defaultTime = createDefaultTime() } = this.reactiveProps;
     const viewMode = this.getDefaultViewMode();
     const { min, max, minExcl, maxExcl } = this;
     if (isArrayLike(defaultTime)) {
@@ -415,8 +431,6 @@ export default class DatePicker extends TriggerField<DatePickerProps>
     );
   }
 
-  @autobind
-  @action
   handlePopupRangeEditorBlur() {
     const { text } = this;
     if (text) {
@@ -489,7 +503,7 @@ export default class DatePicker extends TriggerField<DatePickerProps>
   }
 
   getHoverValue(isPopup: boolean): string | undefined {
-    const { editorInPopup } = this.props;
+    const { editorInPopup } = this.reactiveProps;
     if (((isPopup && editorInPopup) || (!isPopup && !editorInPopup))) {
       const { hoverValue } = this;
       if (hoverValue) {
@@ -498,19 +512,17 @@ export default class DatePicker extends TriggerField<DatePickerProps>
     }
   }
 
-  @action
   handleDateMouseEnter = (currentDate?: Moment): void => {
     this.hoverValue = currentDate;
   };
 
-  @action
   handleDateMouseLeave = (): void => {
     this.hoverValue = undefined;
   };
 
   // 处理 hover 值显示
   getEditorTextInfo(rangeTarget?: 0 | 1): { text: string; width: number; placeholder?: string } {
-    const { isFlat } = this.props;
+    const { isFlat } = this.reactiveProps;
     const hoverValue = this.getHoverValue(false);
     if (hoverValue !== undefined) {
       if (rangeTarget === undefined || (rangeTarget === 0 && this.rangeTarget === 0) || (rangeTarget === 1 && this.rangeTarget === 1)) {
@@ -540,7 +552,7 @@ export default class DatePicker extends TriggerField<DatePickerProps>
   }
 
   get yearFirst(): boolean | undefined {
-    const { yearFirst = this.getContextConfig('datePickerYearFirst') } = this.props;
+    const { yearFirst = this.getContextConfig('datePickerYearFirst') } = this.reactiveProps;
     return yearFirst;
   }
 
@@ -615,7 +627,7 @@ export default class DatePicker extends TriggerField<DatePickerProps>
   }
 
   getCellRenderer(mode: ViewMode): RenderFunction | undefined {
-    const { cellRenderer = noop } = this.props;
+    const { cellRenderer = noop } = this.reactiveProps;
     return cellRenderer(mode);
   }
 
@@ -959,7 +971,6 @@ export default class DatePicker extends TriggerField<DatePickerProps>
     }
   }
 
-  @action
   handleKeyDownTab() {
     // this.collapse();
     if ((!this.range || this.rangeTarget === 1) && !isNil(this.hoverValue)) {
@@ -1026,7 +1037,6 @@ export default class DatePicker extends TriggerField<DatePickerProps>
     }
   }
 
-  @action
   handleEnterDown(e) {
     super.handleEnterDown(e);
     if (this.multiple && this.range) {
@@ -1036,10 +1046,9 @@ export default class DatePicker extends TriggerField<DatePickerProps>
     }
   }
 
-  @action
   prepareSetValue(...value: any[]): void {
     let cursorDate;
-    const { useInvalidDate } = this.props;
+    const { useInvalidDate } = this.reactiveProps;
     super.prepareSetValue(...value.reduce((values, v) => {
       if (v === null) {
         values.push(null);
@@ -1086,7 +1095,7 @@ export default class DatePicker extends TriggerField<DatePickerProps>
 
   exchangeRangeValue(start: Moment, end: Moment) {
     this.rangeValueExchange = true;
-    const { defaultTime } = this.props;
+    const { defaultTime } = this.reactiveProps;
     if (defaultTime) {
       const [startDefaultTime, endDefaultTime] = this.getDefaultTime();
       const startHour = start.hour();
@@ -1115,7 +1124,6 @@ export default class DatePicker extends TriggerField<DatePickerProps>
     super.exchangeRangeValue(start, end);
   }
 
-  @action
   changeCursorDate(cursorDate: Moment) {
     if (this.rangeValueExchange) {
       if (this.range && !isNil(this.rangeTarget) && this.rangeValue) {
@@ -1161,7 +1169,6 @@ export default class DatePicker extends TriggerField<DatePickerProps>
     }
   }
 
-  @action
   setRangeTarget(target) {
     if (this.isFocused && (target !== undefined && target !== this.rangeTarget)) {
       this.expand();
@@ -1176,7 +1183,7 @@ export default class DatePicker extends TriggerField<DatePickerProps>
       }
       this.timeID = window.setTimeout(action(() => {
         this.cursorDate = undefined;
-      }), (this.props.triggerHiddenDelay || 50) + 20);
+      }), (this.reactiveProps.triggerHiddenDelay || 50) + 20);
     }
     super.setRangeTarget(target);
   }
@@ -1246,7 +1253,7 @@ export default class DatePicker extends TriggerField<DatePickerProps>
   }
 
   isDateOutOfFilter(currentDate: Moment, selected: Moment, mode?: ViewMode): boolean {
-    const { filter } = this.props;
+    const { filter } = this.reactiveProps;
     if (filter) {
       return filter(currentDate, selected, mode || this.getViewMode(), this.rangeTarget, toJS(this.rangeValue));
     }
@@ -1260,7 +1267,7 @@ export default class DatePicker extends TriggerField<DatePickerProps>
 
   @autobind
   isValidNowDate(selected: Moment): boolean {
-    const { filter } = this.props;
+    const { filter } = this.reactiveProps;
     const isValid = this.isUnderRange(moment());
     if (isValid && filter) {
       return filter(moment(), selected, this.getViewMode(), this.rangeTarget, toJS(this.rangeValue));

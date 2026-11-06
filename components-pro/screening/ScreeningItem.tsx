@@ -2,7 +2,8 @@ import React, { isValidElement, Key, ReactElement, ReactNode } from 'react';
 import { observer } from 'mobx-react';
 import Icon from 'choerodon-ui/lib/icon';
 import warning from 'choerodon-ui/lib/_util/warning';
-import { action, computed, isArrayLike, observable, runInAction, toJS } from 'mobx';
+import { action, computed, observable, runInAction, toJS, makeObservable } from 'mobx';
+import isArrayLike from 'choerodon-ui/dataset/mobx-helper/isArrayLike';
 import isNumber from 'lodash/isNumber';
 import isNil from 'lodash/isNil';
 import noop from 'lodash/noop';
@@ -78,6 +79,7 @@ export interface Confirm {
 export interface ScreeningItemProps extends DataSetComponentProps {
   multiple?: boolean;
   dataSet?: DataSet;
+  options?: DataSet;
   name: string;
   primitiveValue?: boolean;
   onChange?: (value, oldValue, formNode) => void;
@@ -94,9 +96,9 @@ export default class Screening extends DataSetComponent<ScreeningItemProps, Form
 
   static displayName = 'ScreeningItem';
 
-  @observable iconExpanded: boolean;
+  iconExpanded: boolean;
 
-  @observable screeningMultiple: boolean;
+  screeningMultiple: boolean;
 
   emptyValue?: any = null;
 
@@ -104,6 +106,18 @@ export default class Screening extends DataSetComponent<ScreeningItemProps, Form
 
   constructor(props, context) {
     super(props, context);
+    if (!Object.prototype.hasOwnProperty.call(this, 'iconExpanded')) Object.assign(this, { iconExpanded: undefined });
+    if (!Object.prototype.hasOwnProperty.call(this, 'screeningMultiple')) Object.assign(this, { screeningMultiple: undefined });
+    makeObservable(this, {
+      iconExpanded: observable,
+      screeningMultiple: observable,
+      options: computed,
+      handleExpanedClick: action,
+      setValue: action,
+      prepareSetValue: action,
+      handleMultiple: action,
+      handleClear: action,
+    });
     runInAction(() => {
       this.iconExpanded = false;
       this.screeningMultiple = false;
@@ -135,7 +149,6 @@ export default class Screening extends DataSetComponent<ScreeningItemProps, Form
   /**
    * return the record: dataIndex record, current, undefined
    */
-  @computed
   get record(): Record | undefined {
     const { record, dataSet, dataIndex } = this.observableProps;
     if (record) {
@@ -150,7 +163,6 @@ export default class Screening extends DataSetComponent<ScreeningItemProps, Form
     return undefined;
   }
 
-  @computed
   get value(): any | undefined {
     return this.observableProps.value;
   }
@@ -169,9 +181,8 @@ export default class Screening extends DataSetComponent<ScreeningItemProps, Form
   /**
    * 判断是否展示更多按钮
    */
-  @computed
   get needExpandButton(): boolean {
-    const { colProps } = this.props;
+    const { colProps } = this.reactiveProps;
     if (colProps) {
       const { span } = colProps;
       if (isNumber(span) && span >= 1) {
@@ -184,12 +195,10 @@ export default class Screening extends DataSetComponent<ScreeningItemProps, Form
     return true;
   }
 
-  @computed
   get name(): string | undefined {
     return this.observableProps.name;
   }
 
-  @computed
   get primitive(): boolean {
     const type = this.getProp('type');
     return this.observableProps.primitiveValue !== false && type !== FieldType.object;
@@ -198,7 +207,6 @@ export default class Screening extends DataSetComponent<ScreeningItemProps, Form
   /**
    * get field message: recordField,dsField,undefined
    */
-  @computed
   get field(): Field | undefined {
     const { dataSet, name, observableProps } = this;
     const { displayName } = this.constructor as any;
@@ -214,7 +222,7 @@ export default class Screening extends DataSetComponent<ScreeningItemProps, Form
 
   getProp(propName: string) {
     const { field } = this;
-    return defaultTo(field && field.get(propName, this.record), this.props[propName]);
+    return defaultTo(field && field.get(propName, this.record), this.reactiveProps[propName]);
   }
 
   @autobind
@@ -223,7 +231,6 @@ export default class Screening extends DataSetComponent<ScreeningItemProps, Form
     e.stopPropagation();
   }
 
-  @computed
   get options(): DataSet {
     const {
       field,
@@ -231,7 +238,7 @@ export default class Screening extends DataSetComponent<ScreeningItemProps, Form
       textField,
       valueField,
       multiple,
-      observableProps: { children, options },
+      reactiveProps: { children, options },
     } = this;
     return (
       options ||
@@ -240,17 +247,14 @@ export default class Screening extends DataSetComponent<ScreeningItemProps, Form
     );
   }
 
-  @computed
   get multiple(): boolean {
     return toJS(this.screeningMultiple) || !!this.getProp('multiple');
   }
 
-  @computed
   get textField(): string {
     return this.getProp('textField') || 'meaning';
   }
 
-  @computed
   get valueField(): string {
     return this.getProp('valueField') || 'value';
   }
@@ -264,7 +268,6 @@ export default class Screening extends DataSetComponent<ScreeningItemProps, Form
     return getDateFormatByField(this.field, this.getFieldType(), this.record);
   }
 
-  @action
   handleExpanedClick = () => {
     this.iconExpanded = !this.iconExpanded;
   };
@@ -367,13 +370,12 @@ export default class Screening extends DataSetComponent<ScreeningItemProps, Form
   isReadOnly(): boolean {
     return (
       (this.getProp('readOnly') as boolean) ||
-      (!this.props.onChange)
+      (!this.reactiveProps.onChange)
     );
   }
 
-  @action
   setValue(value: any): void {
-    const { onConfirm } = this.props;
+    const { onConfirm } = this.reactiveProps;
     if (!this.isReadOnly()) {
       if (
         this.multiple
@@ -387,8 +389,8 @@ export default class Screening extends DataSetComponent<ScreeningItemProps, Form
         dataSet,
         observableProps: { dataIndex },
       } = this;
-      const { onChange = noop } = this.props;
-      const { formNode } = this.context;
+      const { onChange = noop } = this.reactiveProps;
+      const { formNode } = this.reactiveContext;
       const old = this.getOldValue();
       if (dataSet && name && !this.multiple) {
         (this.record || dataSet.create({}, dataIndex)).set(name, value);
@@ -434,7 +436,6 @@ export default class Screening extends DataSetComponent<ScreeningItemProps, Form
     }
   };
 
-  @action
   prepareSetValue(...value: any[]): void {
     const values = value.filter(item => !isEmpty(item));
     this.addValue(...values);
@@ -529,7 +530,7 @@ export default class Screening extends DataSetComponent<ScreeningItemProps, Form
     const {
       record,
       dataSet,
-      props: { renderer, onConfirm },
+      reactiveProps: { renderer, onConfirm },
     } = this;
     const text = this.processText(this.getText(value));
     return renderer
@@ -639,12 +640,10 @@ export default class Screening extends DataSetComponent<ScreeningItemProps, Form
     return this.getProp('label');
   }
 
-  @action
   handleMultiple = () => {
     this.screeningMultiple = !this.screeningMultiple;
   };
 
-  @action
   handleClear = () => {
     this.setValue(this.emptyValue);
     this.value = this.emptyValue;
@@ -658,7 +657,7 @@ export default class Screening extends DataSetComponent<ScreeningItemProps, Form
 
   render() {
     const { iconExpanded, prefixCls, multiple } = this;
-    const { renderer, onConfirm } = this.props;
+    const { renderer, onConfirm } = this.reactiveProps;
     const label = this.getLabel();
     const multipleButton = (
       <div className={`${prefixCls}-multiple`} onClick={this.handleMultiple}>

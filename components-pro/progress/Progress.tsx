@@ -22,13 +22,13 @@ export default class Progress extends FormField<ProgressProps & { format?: Field
     if (isNumber(value)) {
       return value;
     }
-    return this.props.percent;
+    return this.reactiveProps.percent;
   }
 
   render() {
     return (
       <C7NProgress
-        {...omit(this.props, ['dataSet', 'showHelp', 'renderer', 'overMaxTagCountTooltip'])}
+        {...omit(this.reactiveProps, ['dataSet', 'showHelp', 'renderer', 'overMaxTagCountTooltip'])}
         percent={this.getValue()}
       />
     );

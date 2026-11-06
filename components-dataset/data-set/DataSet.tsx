@@ -1,4 +1,4 @@
-import { _isComputingDerivation, action, computed, get, IMapEntry, isArrayLike, observable, ObservableMap, runInAction, set, toJS } from 'mobx';
+import { makeObservable, action, computed, get, IMapEntry, observable, ObservableMap, runInAction, set, toJS } from 'mobx';
 import axiosStatic, { AxiosInstance, AxiosPromise, AxiosRequestConfig } from 'axios';
 import omit from 'lodash/omit';
 import flatMap from 'lodash/flatMap';
@@ -12,6 +12,9 @@ import isPlainObject from 'lodash/isPlainObject';
 import isFunction from 'lodash/isFunction';
 import debounce from 'lodash/debounce';
 import union from 'lodash/union';
+import isArrayLike from '../mobx-helper/isArrayLike';
+import mapToObject from '../mobx-helper/mapToObject';
+import observableConfig from '../mobx-helper/observableConfig';
 import { isEmpty, warning } from '../utils';
 import { Config, ConfigKeys, DefaultConfig, getConfig } from '../configure';
 import localeContext, { $l } from '../locale-context';
@@ -532,20 +535,19 @@ export default class DataSet extends EventManager {
   children: DataSetChildren = {};
 
   private prepareForReport?: { result: ValidationErrors[]; timeout?: number; valid: boolean };
-  
+
   private lastRequestSource;
 
-  @computed
   get queryParameter(): object {
     const queryParameterMap: ObservableMap<string, any> = this.getState(QUERY_PARAMETER);
     if (queryParameterMap) {
-      return queryParameterMap.toPOJO();
+      return mapToObject(queryParameterMap);
     }
     return {};
   }
 
   set queryParameter(queryParameter: object) {
-    this.setState(QUERY_PARAMETER, observable.map(queryParameter));
+    this.setState(QUERY_PARAMETER, observable.map<string, any>({ ...queryParameter }));
   }
 
   private pending: PromiseQueue = new PromiseQueue();
@@ -570,32 +572,31 @@ export default class DataSet extends EventManager {
 
   context?: DataSetContext | undefined;
 
-  @observable lookupCaches?: ObservableMap<string, LookupCache>;
+  lookupCaches?: ObservableMap<string, LookupCache> = undefined;
 
-  @observable selectionStrategy?: CheckedStrategy;
+  selectionStrategy?: CheckedStrategy = undefined;
 
-  @observable parent?: DataSet;
+  parent?: DataSet = undefined;
 
-  @observable name?: string;
+  name?: string = undefined;
 
-  @observable parentName?: string;
+  parentName?: string = undefined;
 
-  @observable records: Record[];
+  records: Record[];
 
-  @observable fields: Fields;
+  fields: Fields;
 
-  @observable props: DataSetProps;
+  props: DataSetProps;
 
-  @observable pageSize: number;
+  pageSize: number;
 
-  @observable combineSort?: boolean;
+  combineSort?: boolean = undefined;
 
   /**
    * 多列排序保存排序字段顺序(内部使用)
    */
-  @observable combineSortFieldNames?: ObservableMap<string, SortOrder>;
+  combineSortFieldNames?: ObservableMap<string, SortOrder> = undefined;
 
-  @computed
   get totalCount(): number {
     const total = this.getState(TOTAL_KEY);
     if (total !== undefined && isFinite(total)) {
@@ -616,19 +617,18 @@ export default class DataSet extends EventManager {
     return this.getState(TOTAL_KEY);
   }
 
-  @observable status: DataSetStatus;
+  status: DataSetStatus;
 
-  @observable counting?: Promise<any>;
+  counting?: Promise<any> = undefined;
 
-  @observable exportStatus: DataSetExportStatus | undefined;
+  exportStatus: DataSetExportStatus | undefined = undefined;
 
-  @observable exportProgress: number;
+  exportProgress: number;
 
-  @observable currentPage: number;
+  currentPage: number;
 
-  @observable selection: DataSetSelection | false;
+  selection: DataSetSelection | false;
 
-  @computed
   get cachedSelected(): Record[] {
     const { isAllPageSelection } = this;
     return this.cachedRecords.filter(r => isAllPageSelection ? !r.isSelected : r.isSelected);
@@ -638,7 +638,6 @@ export default class DataSet extends EventManager {
     this.setCachedSelected(cachedSelected);
   }
 
-  @computed
   get cachedUnSelected(): Record[] {
     return this.cachedRecords.filter(r => !r.isSelected);
   }
@@ -668,22 +667,18 @@ export default class DataSet extends EventManager {
     return [created, updated, destroyed];
   }
 
-  @computed
   get cachedCreated(): Record[] {
     return this.cachedDirtyRecords[0];
   }
 
-  @computed
   get cachedUpdated(): Record[] {
     return this.cachedDirtyRecords[1];
   }
 
-  @computed
   get cachedDestroyed(): Record[] {
     return this.cachedDirtyRecords[2];
   }
 
-  @computed
   get cachedModified(): Record[] {
     return this.cachedCreated.concat(this.cachedUpdated, this.cachedDestroyed);
   }
@@ -692,11 +687,11 @@ export default class DataSet extends EventManager {
     this.setCachedModified(cachedModified);
   }
 
-  @observable dataToJSON: DataToJSON;
+  dataToJSON: DataToJSON;
 
-  @observable state: ObservableMap<string, any>;
+  state: ObservableMap<string, any>;
 
-  @observable validationSelfErrors: ValidationSelfErrors[] | undefined;
+  validationSelfErrors: ValidationSelfErrors[] | undefined = undefined;
 
   $needToSortFields?: boolean;
 
@@ -704,7 +699,6 @@ export default class DataSet extends EventManager {
     return this.getState(ALL_PAGE_SELECTION) === true;
   }
 
-  @computed
   get cascadeRecords(): Record[] {
     const { parent, parentName } = this;
     if (parent && parentName) {
@@ -852,7 +846,6 @@ export default class DataSet extends EventManager {
     });
   }
 
-  @computed
   get transport(): Transport {
     return new Transport(this.props.transport, this);
   }
@@ -864,7 +857,6 @@ export default class DataSet extends EventManager {
     };
   }
 
-  @computed
   get data(): Record[] {
     return this.records.filter(record => !record.isRemoved);
   }
@@ -873,7 +865,6 @@ export default class DataSet extends EventManager {
     this.loadData(records);
   }
 
-  @computed
   get dirtyRecords(): [Record[], Record[], Record[]] {
     const created: Record[] = [];
     const updated: Record[] = [];
@@ -927,7 +918,7 @@ export default class DataSet extends EventManager {
    * 获取选中的记录集
    * @return 记录集
    */
-  @computed
+
   get selected(): Record[] {
     const selected = this.currentSelected.concat(this.cachedSelected.filter(record => record.isSelected));
     return Array.from(new Set(selected));
@@ -937,23 +928,20 @@ export default class DataSet extends EventManager {
    * 获取未选中的记录集， 在 isAllPageSelection 为 true 时有效
    * @return 记录集
    */
-  @computed
+
   get unSelected(): Record[] {
     const unSelected = this.currentUnSelected.concat(this.cachedSelected.filter(record => !record.isSelected));
     return Array.from(new Set(unSelected));
   }
 
-  @computed
   get currentSelected(): Record[] {
     return this.records.filter(record => record.isSelected);
   }
 
-  @computed
   get currentUnSelected(): Record[] {
     return this.records.filter(record => !record.isSelected);
   }
 
-  @computed
   get treeSelected(): Record[] {
     const { selected, selectionStrategy } = this;
     if (selectionStrategy === CheckedStrategy.SHOW_CHILD) {
@@ -974,7 +962,6 @@ export default class DataSet extends EventManager {
 
   // 如果paging为server 返回root父节点的排序
 
-  @computed
   get currentIndex(): number {
     const { current, pageSize, currentPage } = this;
     if (current) {
@@ -1009,12 +996,10 @@ export default class DataSet extends EventManager {
     return Object.keys(this.children).length > 0;
   }
 
-  @computed
   get treeRecords(): Record[] {
     return this.records.filter(record => !record.parent);
   }
 
-  @computed
   get treeData(): Record[] {
     return this.filter(record => !record.parent);
   }
@@ -1052,7 +1037,6 @@ export default class DataSet extends EventManager {
     });
   }
 
-  @computed
   get groups(): string[] {
     return iteratorReduce<IMapEntry<string, Field>, string[]>(this.fields.entries(), (arr, [name, field]) => {
       const group = field.get('group');
@@ -1065,13 +1049,11 @@ export default class DataSet extends EventManager {
     }, []).filter(group => group !== undefined);
   }
 
-  @computed
   get groupedRecords(): Group[] {
     const { groups, records } = this;
     return normalizeGroups(groups, [], records);
   }
 
-  @computed
   get groupedTreeRecords(): Group[] {
     const { groups, treeRecords } = this;
     return normalizeGroups(groups, [], treeRecords);
@@ -1081,7 +1063,7 @@ export default class DataSet extends EventManager {
    * 获取当前索引的记录
    * @return record 记录
    */
-  @computed
+
   get current(): Record | undefined {
     return this.all.find(record => record.isCurrent);
   }
@@ -1110,7 +1092,6 @@ export default class DataSet extends EventManager {
     }
   }
 
-  @computed
   get uniqueKeys(): string[] | undefined {
     const { primaryKey } = this.props;
     if (primaryKey) {
@@ -1151,14 +1132,14 @@ export default class DataSet extends EventManager {
     }
   }
 
-  @observable cachedRecords: Record[];
+  cachedRecords: Record[];
 
   /**
    * 获取所有记录包括缓存的选择记录
    * @param index 索引
    * @returns {Record}
    */
-  @computed
+
   get all(): Record[] {
     const all = this.records.concat(this.cachedRecords);
     return Array.from(new Set(all));
@@ -1177,12 +1158,123 @@ export default class DataSet extends EventManager {
 
   constructor(props?: DataSetProps, context?: DataSetContext) {
     super();
+    Object.assign(this, {
+      records: undefined,
+      fields: undefined,
+      props: undefined,
+      pageSize: undefined,
+      status: undefined,
+      exportProgress: undefined,
+      currentPage: undefined,
+      selection: undefined,
+      dataToJSON: undefined,
+      state: undefined,
+      cachedRecords: undefined,
+    });
+    makeObservable<this, 'doClientExport' | 'initCombineSort' | 'storeRecords' | 'changeStatus' | 'changeSubmitStatus' | 'handleSubmitSuccess' | 'handleSubmitFail' | 'syncChild'>(this, {
+      queryParameter: computed,
+      lookupCaches: observable,
+      selectionStrategy: observable,
+      parent: observable,
+      name: observable,
+      parentName: observable,
+      records: observable,
+      fields: observable,
+      props: observable,
+      pageSize: observable,
+      combineSort: observable,
+      combineSortFieldNames: observable,
+      totalCount: computed,
+      status: observable,
+      counting: observable,
+      exportStatus: observable,
+      exportProgress: observable,
+      currentPage: observable,
+      selection: observable,
+      cachedSelected: computed,
+      cachedUnSelected: computed,
+      cachedCreated: computed,
+      cachedUpdated: computed,
+      cachedDestroyed: computed,
+      cachedModified: computed,
+      dataToJSON: observable,
+      state: observable,
+      validationSelfErrors: observable,
+      cascadeRecords: computed,
+      transport: computed,
+      data: computed,
+      dirtyRecords: computed,
+      selected: computed,
+      unSelected: computed,
+      currentSelected: computed,
+      currentUnSelected: computed,
+      treeSelected: computed,
+      currentIndex: computed,
+      treeRecords: computed,
+      treeData: computed,
+      groups: computed,
+      groupedRecords: computed,
+      groupedTreeRecords: computed,
+      current: computed,
+      uniqueKeys: computed,
+      cachedRecords: observable,
+      all: computed,
+      setState: action,
+      restore: action,
+      setAllPageSelection: action,
+      doClientExport: action,
+      reset: action,
+      create: action,
+      remove: action,
+      removeAll: action,
+      deleteAll: action,
+      push: action,
+      unshift: action,
+      pop: action,
+      shift: action,
+      splice: action,
+      move: action,
+      reverse: action,
+      sort: action,
+      select: action,
+      unSelect: action,
+      selectAll: action,
+      unSelectAll: action,
+      batchSelect: action,
+      batchUnSelect: action,
+      treeSelect: action,
+      treeUnSelect: action,
+      clearCachedRecords: action,
+      clearCachedSelected: action,
+      setCachedSelected: action,
+      setCachedCreated: action,
+      setCachedUpdated: action,
+      setCachedDestroyed: action,
+      setCachedModified: action,
+      clearValidationError: action,
+      validateSelf: action,
+      addField: action,
+      commitData: action,
+      bind: action,
+      setQueryParameter: action,
+      appendData: action,
+      loadData: action,
+      processData: action,
+      initCombineSort: action,
+      storeRecords: action,
+      releaseCachedRecords: action,
+      changeStatus: action,
+      changeSubmitStatus: action,
+      handleSubmitSuccess: action,
+      handleSubmitFail: action,
+      syncChild: action,
+    });
     if (context && !isFunction(context.getConfig)) {
       throw new Error('The type of the second parameter of the DataSet constructor is wrong. Please not pass the parameter or pass a DataSetContext type parameter instead.');
     }
     runInAction(() => {
       props = { ...DataSet.defaultProps, ...props } as DataSetProps;
-      this.props = props;
+      this.props = observableConfig(props);
       this.context = context;
       const {
         data,
@@ -1249,7 +1341,6 @@ export default class DataSet extends EventManager {
     this.clear();
   }
 
-  @action
   setState(item: string | object, value?: any): DataSet {
     if (isString(item)) {
       this.state.set(item, value);
@@ -1267,7 +1358,6 @@ export default class DataSet extends EventManager {
     return new DataSetSnapshot(this);
   }
 
-  @action
   restore(snapshot: DataSetSnapshot): DataSet {
     if (snapshot.dataSet !== this) {
       this.events = {};
@@ -1286,7 +1376,6 @@ export default class DataSet extends EventManager {
     return this;
   }
 
-  @action
   setAllPageSelection(enable: boolean) {
     if (this.selection === DataSetSelection.multiple) {
       const processAfterAllPageSelection: Function[] = [];
@@ -1325,9 +1414,6 @@ export default class DataSet extends EventManager {
   }
 
   toData(): object[] {
-    if (_isComputingDerivation && _isComputingDerivation()) {
-      warning(false, 'Please do not use the `dataSet.toData` method during the rendering phase.');
-    }
     return generateData([...this.cachedModified, ...this.records]).data;
   }
 
@@ -1337,9 +1423,6 @@ export default class DataSet extends EventManager {
    * @param noCascade
    */
   toJSONData(isSelected?: boolean, noCascade?: boolean): object[] {
-    if (_isComputingDerivation && _isComputingDerivation()) {
-      warning(false, 'Please do not use the `dataSet.toJSONData` method during the rendering phase.');
-    }
     const dataToJSON = adapterDataToJSON(isSelected, noCascade) || this.dataToJSON;
     const records = useSelected(dataToJSON) ? this.selected : this.all;
     return generateJSONData(this, records).data;
@@ -1561,7 +1644,7 @@ export default class DataSet extends EventManager {
    * @param quantity 输入一次导出数量
    * @param isFile 是否导出为文件
    */
-  @action
+
   private async doClientExport(data: any, quantity: number, isFile = true): Promise<any[] | void> {
     const columnsExport = data._HAP_EXCEL_EXPORT_COLUMNS;
     delete data._HAP_EXCEL_EXPORT_COLUMNS;
@@ -1654,7 +1737,7 @@ export default class DataSet extends EventManager {
   /**
    * 重置更改
    */
-  @action
+
   reset(): DataSet {
     this.resetInBatch = true;
     try {
@@ -1853,7 +1936,7 @@ export default class DataSet extends EventManager {
    * @param dataIndex 记录所在的索引
    * @return 新建的记录
    */
-  @action
+
   create(data: object = {}, dataIndex?: number): Record {
     if (data === null) {
       data = {};
@@ -1950,7 +2033,7 @@ export default class DataSet extends EventManager {
    * @param records 记录或者记录数组
    * @param locate 是否需要进行定位操作
    */
-  @action
+
   remove(records?: Record | Record[], forceRemove?: boolean, locate?: boolean): void {
     if (records) {
       const data = isArrayLike(records) ? records.slice() : [records];
@@ -1983,7 +2066,7 @@ export default class DataSet extends EventManager {
   /**
    * 临时删除所有记录
    */
-  @action
+
   removeAll(forceRemove?: boolean) {
     const { current, data } = this;
     if (data.length) {
@@ -1999,7 +2082,7 @@ export default class DataSet extends EventManager {
    * 删除所有记录
    * @param confirmMessage 提示信息或弹窗的属性
    */
-  @action
+
   async deleteAll(confirmMessage?: any) {
     if (
       this.records.length > 0 &&
@@ -2015,7 +2098,7 @@ export default class DataSet extends EventManager {
    * @param records 数据集
    * @return 堆栈数量
    */
-  @action
+
   push(...records: Record[]): number {
     checkParentByInsert(this);
     return this.records.push(...this.transferRecords(records));
@@ -2026,7 +2109,7 @@ export default class DataSet extends EventManager {
    * @param records 数据集
    * @return 堆栈数量
    */
-  @action
+
   unshift(...records: Record[]): number {
     checkParentByInsert(this);
     return this.records.unshift(...this.transferRecords(records));
@@ -2036,7 +2119,7 @@ export default class DataSet extends EventManager {
    * 从记录堆栈顶部获取记录
    * @return 记录
    */
-  @action
+
   pop(): Record | undefined {
     return this.deleteRecord(this.data.pop());
   }
@@ -2045,7 +2128,7 @@ export default class DataSet extends EventManager {
    * 从记录堆栈底部获取记录
    * @return 记录
    */
-  @action
+
   shift(): Record | undefined {
     return this.deleteRecord(this.data.shift());
   }
@@ -2059,7 +2142,7 @@ export default class DataSet extends EventManager {
    * @param records 插入的若干新记录
    * @return 被删除的记录集
    */
-  @action
+
   splice(from: number, deleteCount: number, ...items: Record[]): (Record | undefined)[] {
     const fromRecord = this.get(from);
     const deleted = this.slice(from, from + deleteCount).map(record => this.deleteRecord(record));
@@ -2080,7 +2163,7 @@ export default class DataSet extends EventManager {
   /**
    * 切换记录的顺序
    */
-  @action
+
   move(from: number, to: number) {
     arrayMove(this.records, from, to);
   }
@@ -2203,7 +2286,7 @@ export default class DataSet extends EventManager {
   /**
    * 反转记录的顺序。
    */
-  @action
+
   reverse(): Record[] {
     return (this.records = this.records.reverse());
   }
@@ -2213,7 +2296,7 @@ export default class DataSet extends EventManager {
    *
    * @param sortInfo 字段名 或 有顺序的字段列表
    */
-  @action
+
   async sort(sortInfo: string | Map<string, SortOrder>): Promise<void> {
     const { combineSort } = this.props;
     const { combineSort: nowCombineSort } = this;
@@ -2269,7 +2352,7 @@ export default class DataSet extends EventManager {
    * 选中记录
    * @param recordOrIndex 记录或记录索引
    */
-  @action
+
   select(recordOrIndex: Record | number): void {
     const { selection } = this;
     if (selection) {
@@ -2304,7 +2387,7 @@ export default class DataSet extends EventManager {
    * 取消选中记录
    * @param recordOrIndex 记录或记录索引
    */
-  @action
+
   unSelect(recordOrIndex: Record | number): void {
     if (this.selection) {
       let record: Record | undefined = recordOrIndex as Record;
@@ -2330,7 +2413,7 @@ export default class DataSet extends EventManager {
   /**
    * 全选
    */
-  @action
+
   selectAll(filter?: (record: Record) => boolean): void {
     const { selection } = this;
     if (selection) {
@@ -2364,7 +2447,7 @@ export default class DataSet extends EventManager {
   /**
    * 取消全选
    */
-  @action
+
   unSelectAll(filter?: (record: Record) => boolean): void {
     if (this.selection) {
       this.inBatchSelection = true;
@@ -2387,7 +2470,7 @@ export default class DataSet extends EventManager {
   /**
    * 批量勾选
    */
-  @action
+
   batchSelect(recordOrId: (Record | number)[]): void {
     const { selection } = this;
     if (selection) {
@@ -2426,7 +2509,7 @@ export default class DataSet extends EventManager {
   /**
    * 批量取消勾选
    */
-  @action
+
   batchUnSelect(recordOrId: (Record | number)[]): void {
     const { selection } = this;
     if (selection) {
@@ -2450,7 +2533,6 @@ export default class DataSet extends EventManager {
     }
   }
 
-  @action
   treeSelect(record: Record) {
     const { selection } = this;
     if (selection && selection === DataSetSelection.multiple) {
@@ -2466,7 +2548,6 @@ export default class DataSet extends EventManager {
     }
   }
 
-  @action
   treeUnSelect(record: Record) {
     const { selection } = this;
     if (selection && selection === DataSetSelection.multiple) {
@@ -2482,7 +2563,6 @@ export default class DataSet extends EventManager {
     }
   }
 
-  @action
   clearCachedRecords() {
     const { cachedRecords } = this;
     const cachedSelected = cachedRecords.filter(record => record.isSelected);
@@ -2490,14 +2570,12 @@ export default class DataSet extends EventManager {
     this.fireEvent(DataSetEvents.batchUnSelect, { dataSet: this, records: cachedSelected });
   }
 
-  @action
   clearCachedSelected(): void {
     const cachedSelected = this.cachedSelected.slice();
     this.setCachedSelected([]);
     this.fireEvent(DataSetEvents.batchUnSelect, { dataSet: this, records: cachedSelected });
   }
 
-  @action
   setCachedSelected(cachedSelected: Record[]): void {
     if (this.cacheModifiedKeys) {
       const { cachedRecords } = this;
@@ -2519,17 +2597,14 @@ export default class DataSet extends EventManager {
     }
   }
 
-  @action
   setCachedCreated(cachedCreated: Record[]): void {
     updateCachedRecords(this, cachedCreated, RecordStatus.add);
   }
 
-  @action
   setCachedUpdated(cachedUpdated: Record[]): void {
     updateCachedRecords(this, cachedUpdated, RecordStatus.update);
   }
 
-  @action
   setCachedDestroyed(cachedDestroyed: Record[]): void {
     updateCachedRecords(this, cachedDestroyed, RecordStatus.delete);
   }
@@ -2538,7 +2613,6 @@ export default class DataSet extends EventManager {
     this.setCachedModified([]);
   }
 
-  @action
   setCachedModified(cachedModified: Record[]): void {
     updateCachedRecords(this, cachedModified);
   }
@@ -2592,7 +2666,7 @@ export default class DataSet extends EventManager {
   /**
    * 清除校验结果
    */
-  @action
+
   clearValidationError() {
     this.validationSelfErrors = undefined;
   }
@@ -2651,7 +2725,7 @@ export default class DataSet extends EventManager {
    * 校验dataSet是否有效
    * @return true | false
    */
-  @action
+
   validateSelf(): boolean {
     if (this.status === DataSetStatus.ready) {
       const errors = this.getValidationSelfErrors();
@@ -2849,7 +2923,7 @@ export default class DataSet extends EventManager {
    * @param field 字段属性
    * @return 新增字段
    */
-  @action
+
   addField(name: string, fieldProps?: FieldProps): Field {
     this.$needToSortFields = true;
     const { fields } = this;
@@ -2873,7 +2947,6 @@ export default class DataSet extends EventManager {
     return field;
   }
 
-  @action
   commitData(allData: any[], total?: number, onlyDelete?: boolean, submitRecords?: Record[], strictPageSizeArg = true): DataSet {
     const { autoQueryAfterSubmit, primaryKey, strictPageSize = this.getConfig('strictPageSize') } = this.props;
     if (strictPageSize && strictPageSizeArg) {
@@ -2967,7 +3040,7 @@ Then the query method will be auto invoke.`,
    * @param ds 头数据集
    * @param name 头数据集字段名
    */
-  @action
+
   bind(ds: DataSet, name: string) {
     if (!name) {
       warning(false, 'DataSet: cascade binding need a name');
@@ -2993,7 +3066,7 @@ Then the query method will be auto invoke.`,
    * @param {string} para 参数名.
    * @param {any} value 参数值.
    */
-  @action
+
   setQueryParameter(para: string, value: any) {
     const queryParameter = this.getState(QUERY_PARAMETER);
     if (queryParameter) {
@@ -3017,7 +3090,6 @@ Then the query method will be auto invoke.`,
     }
   }
 
-  @action
   appendData(allData: (object | Record)[] = [], parent?: Record, dataIndex?: number): DataSet {
     const sortedData = sortData(allData, this);
     this.fireEvent(DataSetEvents.beforeAppend, { dataSet: this, data: sortedData });
@@ -3027,7 +3099,6 @@ Then the query method will be auto invoke.`,
     return this;
   }
 
-  @action
   loadData(allData: (object | Record)[] = [], total?: number, cache?: boolean): DataSet {
     const {
       paging,
@@ -3100,7 +3171,6 @@ Then the query method will be auto invoke.`,
     return this;
   }
 
-  @action
   processData(allData: (object | Record)[], status: RecordStatus = RecordStatus.sync, parent?: Record, dataIndex?: number): Record[] {
     const { childrenField, parentField, idField } = this.props;
     if (parentField && idField && !childrenField) {
@@ -3247,7 +3317,6 @@ Then the query method will be auto invoke.`,
     return this;
   }
 
-  @action
   private initCombineSort(): void {
     const { combineSort } = this.props;
     this.combineSort = combineSort;
@@ -3409,7 +3478,6 @@ Then the query method will be auto invoke.`,
     }
   }
 
-  @action
   private storeRecords(cacheModified = true) {
     const { cacheSelectionKeys, cacheModifiedKeys, records, cachedRecords, isAllPageSelection } = this;
     if (cacheSelectionKeys || (cacheModified && cacheModifiedKeys)) {
@@ -3427,7 +3495,6 @@ Then the query method will be auto invoke.`,
     }
   }
 
-  @action
   releaseCachedRecords(cache?: boolean) {
     const { cacheSelectionKeys, cacheModifiedKeys } = this;
     if (cacheModifiedKeys || cacheSelectionKeys) {
@@ -3471,12 +3538,10 @@ Then the query method will be auto invoke.`,
     this.releaseCachedRecords();
   }
 
-  @action
   private changeStatus(status: DataSetStatus) {
     this.status = status;
   }
 
-  @action
   private changeSubmitStatus(status: DataSetStatus) {
     this.status = status;
     Object.values(this.children).forEach(ds => {
@@ -3514,7 +3579,6 @@ Then the query method will be auto invoke.`,
     }
   }
 
-  @action
   private handleSubmitSuccess(resp: any[], onlyDelete?: boolean, submitRecords?: Record[], strictPageSize = true) {
     const { dataKey, totalKey } = this;
     const { submitSuccess = defaultFeedback.submitSuccess } = this.feedback;
@@ -3551,7 +3615,6 @@ Then the query method will be auto invoke.`,
     return result;
   }
 
-  @action
   private handleSubmitFail(e) {
     const { current } = this;
     const { submitFailed = defaultFeedback.submitFailed } = this.feedback;
@@ -3600,7 +3663,6 @@ Then the query method will be auto invoke.`,
     }
   }
 
-  @action
   private syncChild(
     ds: DataSet,
     currentRecord: Record,

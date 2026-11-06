@@ -1,5 +1,6 @@
 import React, { CSSProperties, ReactNode } from 'react';
-import { action, computed, isArrayLike, observable, runInAction } from 'mobx';
+import { action, observable, runInAction, makeObservable } from 'mobx';
+import isArrayLike from 'choerodon-ui/dataset/mobx-helper/isArrayLike';
 import { observer } from 'mobx-react';
 import flatten from 'lodash/flatten';
 import KeyCode from 'choerodon-ui/lib/_util/KeyCode';
@@ -31,30 +32,26 @@ export default class IconPicker extends TriggerField<IconPickerProps> {
     pageSize: 100,
   };
 
-  @observable activeCategory: CategoryType;
+  activeCategory: CategoryType;
 
-  @observable selected?: string;
+  selected?: string;
 
-  @observable categoryPages: { [key: string]: number };
+  categoryPages: { [key: string]: number };
 
-  @computed
   get categories(): { [key: string]: string[] } {
-    const { icons: propsIcon } = this.props;
+    const { icons: propsIcon } = this.reactiveProps;
     const icons = propsIcon || this.getContextConfig('icons');
     return isArrayLike(icons) ? { default: icons } : icons;
   }
 
-  @computed
   get categoryKeys(): CategoryType[] {
     return Object.keys(this.categories) as CategoryType[];
   }
 
-  @computed
   get selectedIndex(): number {
     return this.categories[this.activeCategory].indexOf(this.selectedIcon);
   }
 
-  @computed
   get filteredIcons(): string[] {
     const { text, categories } = this;
     if (text) {
@@ -67,7 +64,6 @@ export default class IconPicker extends TriggerField<IconPickerProps> {
     return [];
   }
 
-  @computed
   get selectedIcon() {
     const { categories } = this;
     return this.selected || this.getValue() || categories[this.activeCategory][0];
@@ -75,6 +71,17 @@ export default class IconPicker extends TriggerField<IconPickerProps> {
 
   constructor(props, context) {
     super(props, context);
+    if (!Object.prototype.hasOwnProperty.call(this, 'activeCategory')) Object.assign(this, { activeCategory: undefined });
+    if (!Object.prototype.hasOwnProperty.call(this, 'selected')) this.selected = undefined;
+    if (!Object.prototype.hasOwnProperty.call(this, 'categoryPages')) Object.assign(this, { categoryPages: undefined });
+    makeObservable(this, {
+      activeCategory: observable,
+      selected: observable,
+      categoryPages: observable,
+      setActiveCategory: action,
+      setCategoryPage: action,
+      changeSelected: action,
+    });
     runInAction(() => {
       this.categoryPages = {};
       this.activeCategory = this.categoryKeys[0];
@@ -93,17 +100,15 @@ export default class IconPicker extends TriggerField<IconPickerProps> {
     ]);
   }
 
-  @action
   setActiveCategory(category: CategoryType) {
     this.activeCategory = category;
     const page = this.categoryPages[category];
-    this.changeSelected(this.categories[category][(page - 1) * this.props.pageSize!]);
+    this.changeSelected(this.categories[category][(page - 1) * this.reactiveProps.pageSize!]);
   }
 
-  @action
   setCategoryPage(page: number, category: string) {
     this.categoryPages[category] = page;
-    this.changeSelected(this.categories[category][(page - 1) * this.props.pageSize!]);
+    this.changeSelected(this.categories[category][(page - 1) * this.reactiveProps.pageSize!]);
   }
 
   @autobind
@@ -183,7 +188,7 @@ export default class IconPicker extends TriggerField<IconPickerProps> {
     const {
       activeCategory,
       categoryPages,
-      props: { pageSize },
+      reactiveProps: { pageSize },
     } = this;
     const category = this.categories[activeCategory];
     const page = categoryPages[activeCategory] || 1;
@@ -194,7 +199,7 @@ export default class IconPicker extends TriggerField<IconPickerProps> {
     const {
       activeCategory,
       categoryPages,
-      props: { pageSize },
+      reactiveProps: { pageSize },
     } = this;
     const category = this.categories[activeCategory];
     const page = categoryPages[activeCategory] || 1;
@@ -208,7 +213,7 @@ export default class IconPicker extends TriggerField<IconPickerProps> {
       categoryPages,
       categories,
       categoryKeys,
-      props: { pageSize },
+      reactiveProps: { pageSize },
     } = this;
     const step = isLeft ? -1 : 1;
     let category = categories[activeCategory];
@@ -243,7 +248,7 @@ export default class IconPicker extends TriggerField<IconPickerProps> {
       activeCategory,
       selectedIndex,
       categoryPages,
-      props: { pageSize },
+      reactiveProps: { pageSize },
     } = this;
     const step = isUP ? -1 : 1;
     const category = this.categories[activeCategory];
@@ -287,7 +292,7 @@ export default class IconPicker extends TriggerField<IconPickerProps> {
       activeCategory,
       selectedIndex,
       categoryPages,
-      props: { pageSize },
+      reactiveProps: { pageSize },
     } = this;
     const page = categoryPages[activeCategory] || 1;
     const category = this.categories[activeCategory];
@@ -302,7 +307,7 @@ export default class IconPicker extends TriggerField<IconPickerProps> {
       activeCategory,
       selectedIndex,
       categoryPages,
-      props: { pageSize },
+      reactiveProps: { pageSize },
     } = this;
     const page = categoryPages[activeCategory] || 1;
     const category = this.categories[activeCategory];
@@ -328,7 +333,6 @@ export default class IconPicker extends TriggerField<IconPickerProps> {
     this.expand();
   }
 
-  @action
   changeSelected(selected?: string) {
     this.selected = selected;
   }
@@ -381,7 +385,7 @@ export default class IconPicker extends TriggerField<IconPickerProps> {
   }
 
   getPrefix() {
-    const { customFontName } = this.props;
+    const { customFontName } = this.reactiveProps;
     const value = this.getValue();
     if (value) {
       return this.wrapperPrefix(<Icon customFontName={customFontName} type={value} />);
@@ -390,7 +394,7 @@ export default class IconPicker extends TriggerField<IconPickerProps> {
 
   renderFilteredIcons(): ReactNode {
     const { prefixCls } = this;
-    const { customFontName } = this.props;
+    const { customFontName } = this.reactiveProps;
     return (
       <div className={`${prefixCls}-single-tab`} onMouseDown={preventDefault}>
         <IconCategory
@@ -409,7 +413,7 @@ export default class IconPicker extends TriggerField<IconPickerProps> {
     const {
       activeCategory,
       prefixCls,
-      props: { pageSize, customFontName },
+      reactiveProps: { pageSize, customFontName },
       categories,
       categoryKeys,
       categoryPages,

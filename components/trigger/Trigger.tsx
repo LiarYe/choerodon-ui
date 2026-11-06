@@ -2,7 +2,7 @@ import React, { Children, Component, CSSProperties, isValidElement, Key, MouseEv
 import { findDOMNode } from 'react-dom';
 import classNames from 'classnames';
 import raf from 'raf';
-import { action as mobxAction, observable, runInAction } from 'mobx';
+import { action as mobxAction, observable, runInAction, makeObservable } from 'mobx';
 import { observer } from 'mobx-react';
 import debounce from 'lodash/debounce';
 import noop from 'lodash/noop';
@@ -148,9 +148,9 @@ export default class Trigger extends Component<TriggerProps> {
 
   animateFrameId = 0;
 
-  @observable popupHidden?: boolean;
+  popupHidden?: boolean;
 
-  @observable mounted?: boolean;
+  mounted?: boolean;
 
   activeElement?: HTMLElement | null;
 
@@ -178,6 +178,15 @@ export default class Trigger extends Component<TriggerProps> {
 
   constructor(props, context) {
     super(props, context);
+    if (!Object.prototype.hasOwnProperty.call(this, 'popupHidden')) this.popupHidden = undefined;
+    if (!Object.prototype.hasOwnProperty.call(this, 'mounted')) this.mounted = undefined;
+    makeObservable(this, {
+      componentWillReceiveProps: mobxAction,
+      componentDidMount: mobxAction,
+      setPopupHidden: mobxAction,
+      popupHidden: observable,
+      mounted: observable,
+    });
     runInAction(() => {
       this.popupHidden = 'popupHidden' in props ? props.popupHidden : props.defaultPopupHidden;
       this.align = getPopupAlign(props);
@@ -281,7 +290,6 @@ export default class Trigger extends Component<TriggerProps> {
     return [newChildren, popup];
   }
 
-  @mobxAction
   componentWillReceiveProps(nextProps) {
     const { popupHidden } = nextProps;
     if (popupHidden !== this.popupHidden && popupHidden !== undefined) {
@@ -293,7 +301,6 @@ export default class Trigger extends Component<TriggerProps> {
     }
   }
 
-  @mobxAction
   componentDidMount() {
     this.mounted = true;
     this.domNode = findDOMNode(this);
@@ -740,7 +747,6 @@ export default class Trigger extends Component<TriggerProps> {
     return true;
   }
 
-  @mobxAction
   setPopupHidden(hidden: boolean) {
     this.cancelPopupTask();
     if (this.popupHidden !== hidden) {

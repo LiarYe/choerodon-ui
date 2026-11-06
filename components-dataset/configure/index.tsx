@@ -1,10 +1,11 @@
-import { observable, ObservableMap, runInAction, toJS } from 'mobx';
+import { ObservableMap, runInAction, toJS } from 'mobx';
 import { AxiosError, AxiosInstance, AxiosPromise, AxiosRequestConfig, Method } from 'axios';
 import { Moment, MomentInput } from 'moment';
 import noop from 'lodash/noop';
 import isObject from 'lodash/isObject';
 import BigNumber from 'bignumber.js';
 import { PopconfirmProps } from 'choerodon-ui/lib/popconfirm';
+import { observableConfigMap } from '../mobx-helper/observableConfig';
 import { LovConfig } from '../interface';
 import { ExportMode, RecordStatus, FieldType, DownloadAllMode } from '../data-set/enum';
 import { ValidationMessages } from '../validator/Validator';
@@ -239,10 +240,10 @@ const defaultConfig = {
 
 export type DefaultConfig = typeof defaultConfig;
 
-const defaultGlobalConfig: ObservableMap<ConfigKeys, Config[ConfigKeys]> = observable.map<ConfigKeys,
+const defaultGlobalConfig: ObservableMap<ConfigKeys, Config[ConfigKeys]> = observableConfigMap<ConfigKeys,
   Config[ConfigKeys]>(defaultConfig);
 
-const globalConfig: ObservableMap<ConfigKeys, Config[ConfigKeys]> = observable.map<ConfigKeys,
+const globalConfig: ObservableMap<ConfigKeys, Config[ConfigKeys]> = observableConfigMap<ConfigKeys,
   Config[ConfigKeys]>();
 
 const baseMergeProps: (keyof Config)[] = ['transport', 'feedback', 'formatter', 'attachment'];

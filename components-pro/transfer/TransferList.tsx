@@ -1,5 +1,4 @@
 import React, { ReactNode } from 'react';
-import { computed } from 'mobx';
 import { observer } from 'mobx-react';
 import classNames from 'classnames';
 import scrollIntoView from 'scroll-into-view-if-needed';
@@ -36,7 +35,6 @@ export default class TransferList extends Select<TransferListProps> {
     return true;
   }
 
-  @computed
   get header(): ReactNode {
     const {
       prefixCls,
@@ -54,7 +52,6 @@ export default class TransferList extends Select<TransferListProps> {
     return undefined;
   }
 
-  @computed
   get footer(): ReactNode {
     const {
       prefixCls,
@@ -78,7 +75,12 @@ export default class TransferList extends Select<TransferListProps> {
         const selectedDom = findSelectedDom[currentIndex] as HTMLLIElement;
         scrollIntoView(selectedDom, { block: 'end', behavior: 'smooth', scrollMode: 'if-needed', boundary: contentDom });
       }
-      this.options.setState('targetFilteredOptions', this.filteredOptions);
+      const { options, filteredOptions } = this;
+      const previousOptions: Record[] | undefined = options.getState('targetFilteredOptions');
+      if (!previousOptions || previousOptions.length !== filteredOptions.length ||
+        previousOptions.some((record, index) => record !== filteredOptions[index])) {
+        options.setState('targetFilteredOptions', filteredOptions);
+      }
     }
   }
 
@@ -118,7 +120,7 @@ export default class TransferList extends Select<TransferListProps> {
 
   @autobind
   handleSelectAllChange(value) {
-    const { onSelectAll } = this.props;
+    const { onSelectAll } = this.reactiveProps;
     if (onSelectAll) {
       onSelectAll(value ? this.filteredOptions.filter(record => !record.get(DISABLED_FIELD)) : []);
     }
@@ -134,7 +136,7 @@ export default class TransferList extends Select<TransferListProps> {
       filteredOptions: { length },
       multiple,
       prefixCls,
-      props: {
+      reactiveProps: {
         selected: { length: selectedLength },
       },
     } = this;
@@ -163,7 +165,7 @@ export default class TransferList extends Select<TransferListProps> {
   }
 
   getSearchField(): ReactNode {
-    const { prefixCls, props: { direction, placeholder } } = this;
+    const { prefixCls, reactiveProps: { direction, placeholder } } = this;
     const plstr = direction === 'left' ? 'search_placeholder_left' : 'search_placeholder_right';
     return (
       <div className={`${prefixCls}-body-search-wrapper`}>
@@ -192,7 +194,7 @@ export default class TransferList extends Select<TransferListProps> {
       prefixCls,
       multiple,
       options,
-      props: { oneWay, optionRenderer },
+      reactiveProps: { oneWay, optionRenderer },
     } = this;
     if (oneWay && !multiple) {
       const renderer: ReactNode = (
@@ -215,7 +217,7 @@ export default class TransferList extends Select<TransferListProps> {
       textField,
       valueField,
       multiple,
-      props: { selected, onSelect, onSelectAll, setTargetOption, children, targetOption, direction },
+      reactiveProps: { selected, onSelect, onSelectAll, setTargetOption, children, targetOption, direction },
     } = this;
     const searchField = searchable && this.getSearchField();
     const classString = classNames(`${prefixCls}-body`, {
@@ -260,7 +262,7 @@ export default class TransferList extends Select<TransferListProps> {
     // noop
   }
 
-  @autobind
+
   handleBlur(e) {
     ViewComponent.prototype.handleBlur.call(this, e);
   }
@@ -270,7 +272,7 @@ export default class TransferList extends Select<TransferListProps> {
   }
 
   renderWrapper() {
-    const { header, footer, props: { style, children } } = this;
+    const { header, footer, reactiveProps: { style, children } } = this;
     const isCustom = typeof children === 'function';
     return (
       <div {...this.getOtherProps()} style={style}>

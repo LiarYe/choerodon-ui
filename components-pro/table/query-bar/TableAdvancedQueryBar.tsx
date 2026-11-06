@@ -1,5 +1,6 @@
 import React, { cloneElement, Component, CSSProperties, ReactElement, ReactNode } from 'react';
 import { observer } from 'mobx-react';
+import { action, makeObservable, observable } from 'mobx';
 import isFunction from 'lodash/isFunction';
 import noop from 'lodash/noop';
 import classNames from 'classnames';
@@ -38,6 +39,21 @@ export interface TableAdvancedQueryBarProps extends ElementProps {
 
 @observer
 export default class TableAdvancedQueryBar extends Component<TableAdvancedQueryBarProps> {
+  reactiveProps: TableAdvancedQueryBarProps;
+
+  constructor(props, context) {
+    super(props, context);
+    this.reactiveProps = props;
+    makeObservable(this, {
+      reactiveProps: observable.ref,
+      componentWillReceiveProps: action,
+    });
+  }
+
+  componentWillReceiveProps(props: TableAdvancedQueryBarProps) {
+    this.reactiveProps = props;
+  }
+
   static get contextType(): typeof TableContext {
     return TableContext;
   }
@@ -80,7 +96,7 @@ export default class TableAdvancedQueryBar extends Component<TableAdvancedQueryB
 
   @autobind
   valueFilter(value: string): boolean {
-    const { queryFields, queryFieldsLimit } = this.props;
+    const { queryFields, queryFieldsLimit } = this.reactiveProps;
     return queryFields.slice(0, queryFieldsLimit).every(element => element.props.name !== value);
   }
 

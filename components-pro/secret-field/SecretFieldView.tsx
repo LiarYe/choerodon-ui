@@ -1,7 +1,7 @@
 ﻿import React, { Component } from 'react';
 import ConfigContext, { ConfigContextValue } from 'choerodon-ui/lib/config-provider/ConfigContext';
 import { observer } from 'mobx-react';
-import { action, observable, runInAction } from 'mobx';
+import { action, observable, runInAction, makeObservable } from 'mobx';
 
 import autobind from '../_util/autobind';
 
@@ -58,6 +58,26 @@ export default class SecretFieldView extends Component<SecretFieldViewProps> {
 
   constructor(props, context) {
     super(props, context);
+    if (!Object.prototype.hasOwnProperty.call(this, 'formDs')) this.formDs = undefined;
+    if (!Object.prototype.hasOwnProperty.call(this, 'captchaKey')) this.captchaKey = undefined;
+    if (!Object.prototype.hasOwnProperty.call(this, 'captcha')) this.captcha = undefined;
+    if (!Object.prototype.hasOwnProperty.call(this, 'validate')) this.validate = undefined;
+    if (!Object.prototype.hasOwnProperty.call(this, 'flag')) this.flag = undefined;
+    if (!Object.prototype.hasOwnProperty.call(this, 'verifyTypeObj')) this.verifyTypeObj = undefined;
+    makeObservable(this, {
+      formDs: observable,
+      setFormDs: action,
+      captchaKey: observable,
+      setCaptchaKey: action,
+      captcha: observable,
+      setCaptcha: action,
+      validate: observable,
+      setValidate: action,
+      flag: observable,
+      setFlag: action,
+      verifyTypeObj: observable,
+      setVerifyTypeObj: action,
+    });
     runInAction(() => {
       this.setFlag('verify');
       this.setVerifyTypeObj();
@@ -226,9 +246,8 @@ export default class SecretFieldView extends Component<SecretFieldViewProps> {
     }
   }
 
-  @observable formDs;
+  formDs;
 
-  @action
   setFormDs() {
     const { name, label, pattern, required, countDown } = this.props;
     const { verifyTypeObj } = this;
@@ -285,39 +304,34 @@ export default class SecretFieldView extends Component<SecretFieldViewProps> {
     );
   }
 
-  @observable captchaKey;
+  captchaKey;
 
-  @action
   setCaptchaKey(value) {
     this.captchaKey = value;
   }
 
-  @observable captcha;
+  captcha;
 
-  @action
   setCaptcha(value) {
     this.captcha = value;
   }
 
   // 对编辑的值进行正则校验
-  @observable validate;
+  validate;
 
-  @action
   setValidate(value) {
     this.validate = value;
   }
 
   // 模态框页面显示。verify:验证页，slider:滑块，edit:编辑页
-  @observable flag;
+  flag;
 
-  @action
   setFlag(value) {
     this.flag = value;
   }
 
-  @observable verifyTypeObj;
+  verifyTypeObj;
 
-  @action
   setVerifyTypeObj() {
     const { context } = this;
     // 从配置项获取验证方式

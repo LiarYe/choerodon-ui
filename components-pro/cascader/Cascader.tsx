@@ -7,7 +7,8 @@ import isEmpty from 'lodash/isEmpty';
 import noop from 'lodash/noop';
 import isPlainObject from 'lodash/isPlainObject';
 import { observer } from 'mobx-react';
-import { action, computed, IReactionDisposer, isArrayLike, observable, reaction, runInAction, toJS } from 'mobx';
+import { action, computed, IReactionDisposer, observable, reaction, runInAction, toJS, makeObservable, override as mobxOverride } from 'mobx';
+import isArrayLike from 'choerodon-ui/dataset/mobx-helper/isArrayLike';
 import { Menus, SingleMenu } from 'choerodon-ui/lib/rc-components/cascader';
 import { defaultFieldNames } from 'choerodon-ui/lib/rc-components/cascader/Cascader';
 import { CHILDREN_PAGE_INFO } from 'choerodon-ui/dataset/data-set/DataSet';
@@ -219,13 +220,13 @@ export class Cascader<T extends CascaderProps> extends TriggerField<T> {
     onOption: defaultOnOption,
   };
 
-  @observable activeValues;
+  activeValues;
 
-  @observable menuItemWith: number;
+  menuItemWith: number;
 
-  @observable clickTab;
+  clickTab;
 
-  @observable moreQuerying;
+  moreQuerying;
 
   optionsIsChange: boolean | undefined;
 
@@ -252,6 +253,30 @@ export class Cascader<T extends CascaderProps> extends TriggerField<T> {
 
   constructor(props, context) {
     super(props, context);
+    if (!Object.prototype.hasOwnProperty.call(this, 'activeValues')) this.activeValues = undefined;
+    if (!Object.prototype.hasOwnProperty.call(this, 'menuItemWith')) Object.assign(this, { menuItemWith: undefined });
+    if (!Object.prototype.hasOwnProperty.call(this, 'clickTab')) this.clickTab = undefined;
+    if (!Object.prototype.hasOwnProperty.call(this, 'moreQuerying')) this.moreQuerying = undefined;
+    makeObservable(this, {
+      activeValues: observable,
+      menuItemWith: observable,
+      clickTab: observable,
+      moreQuerying: observable,
+      optionsData: computed.struct,
+      options: computed,
+      textField: computed,
+      valueField: computed,
+      idField: computed,
+      parentField: computed,
+      multiple: computed,
+      setActiveValue: action,
+      setIsClickTab: action,
+      setItemMenuWidth: action,
+      removeValues: mobxOverride,
+      setText: mobxOverride,
+      handleChange: mobxOverride,
+      clear: mobxOverride,
+    });
     this.setActiveValue({});
     this.setItemMenuWidth(0);
     this.setIsClickTab(false);
@@ -280,17 +305,15 @@ export class Cascader<T extends CascaderProps> extends TriggerField<T> {
     return result;
   }
 
-  @action
   setActiveValue(activeValues: any) {
     this.optionsIsChange = false;
     this.activeValues = activeValues;
   }
 
-  @action setIsClickTab(isClickTab: boolean) {
+  setIsClickTab(isClickTab: boolean) {
     this.clickTab = isClickTab;
   }
 
-  @action
   setItemMenuWidth(width: number) {
     this.menuItemWith = width;
   }
@@ -314,7 +337,6 @@ export class Cascader<T extends CascaderProps> extends TriggerField<T> {
     return this.getProp('valueField') || 'value';
   }
 
-  @computed
   get cascadeOptions(): Record[] {
     const { record, field, options } = this;
     const { data } = options;
@@ -356,7 +378,11 @@ export class Cascader<T extends CascaderProps> extends TriggerField<T> {
     return searchMatcher;
   }
 
-  @computed
+  get optionsData(): CascaderOptionType[] | undefined {
+    const { options } = this.reactiveProps;
+    return isArrayLike(options) ? cloneDeep(toJS(options)) as CascaderOptionType[] : undefined;
+  }
+
   get options(): DataSet {
     const {
       field,
@@ -375,7 +401,7 @@ export class Cascader<T extends CascaderProps> extends TriggerField<T> {
         idField,
         disabledField,
         multiple,
-        data: toJS(options),
+        data: this.optionsData,
         parentField,
         getConfig: this.getContextConfig,
       });
@@ -387,7 +413,6 @@ export class Cascader<T extends CascaderProps> extends TriggerField<T> {
     );
   }
 
-  @computed
   get filteredOptions(): Record[] {
     const { text } = this;
     return this.searchData(this.cascadeOptions, text);
@@ -411,13 +436,17 @@ export class Cascader<T extends CascaderProps> extends TriggerField<T> {
   }
 
   get checkable(): boolean {
-    const { checkable, multiple, async, loadData } = this.props;
+    const { checkable, multiple, async, loadData } = this.reactiveProps;
     return !!(checkable && multiple && !async && !loadData);
   }
 
   checkValueReaction?: IReactionDisposer;
 
   checkComboReaction?: IReactionDisposer;
+
+  private selectedDataGeneration = 0;
+
+  private selectedDataDisposed = false;
 
   checkValue() {
     this.checkValueReaction = reaction(() => this.cascadeOptions, () => this.processSelectedData());
@@ -431,6 +460,7 @@ export class Cascader<T extends CascaderProps> extends TriggerField<T> {
   }
 
   clearCheckValue() {
+    this.selectedDataGeneration += 1;
     if (this.checkValueReaction) {
       this.checkValueReaction();
       this.checkValueReaction = undefined;
@@ -449,12 +479,22 @@ export class Cascader<T extends CascaderProps> extends TriggerField<T> {
     this.clearCheckCombo();
   }
 
+  componentDidMount() {
+    super.componentDidMount();
+    this.checkValue();
+  }
+
   componentWillUnmount() {
+    this.selectedDataDisposed = true;
+    this.doSearch.cancel();
     super.componentWillUnmount();
     this.clearReaction();
   }
 
   componentWillReceiveProps(nextProps, nextContext) {
+    if (['record', 'dataSet', 'name', 'options', 'combo', 'multiple'].some(key => nextProps[key] !== this.props[key])) {
+      this.selectedDataGeneration += 1;
+    }
     super.componentWillReceiveProps(nextProps, nextContext);
   }
 
@@ -511,7 +551,7 @@ export class Cascader<T extends CascaderProps> extends TriggerField<T> {
   }
 
   getPagingOptionContent() {
-    const { pagingOptionContent } = this.props;
+    const { pagingOptionContent } = this.reactiveProps;
     if (pagingOptionContent !== undefined) {
       return pagingOptionContent;
     }
@@ -535,7 +575,7 @@ export class Cascader<T extends CascaderProps> extends TriggerField<T> {
   }
 
   getNotFoundContent() {
-    const { notFoundContent } = this.props;
+    const { notFoundContent } = this.reactiveProps;
     if (notFoundContent !== undefined) {
       return notFoundContent;
     }
@@ -579,7 +619,7 @@ export class Cascader<T extends CascaderProps> extends TriggerField<T> {
 
   @autobind
   handleLoadData(event): Promise<any> {
-    const { loadData, childrenPaging, async } = this.props;
+    const { loadData, childrenPaging, async } = this.reactiveProps;
     const dataSet = this.options;
     const promises: Promise<any>[] = [];
     if (dataSet) {
@@ -631,7 +671,7 @@ export class Cascader<T extends CascaderProps> extends TriggerField<T> {
       textField,
       valueField,
       checkable,
-      props: {
+      reactiveProps: {
         dropdownMenuStyle,
         expandTrigger,
         onOption,
@@ -847,7 +887,7 @@ export class Cascader<T extends CascaderProps> extends TriggerField<T> {
   getMenuItem({ record, text, value, isFilterSearch }: RenderProps): string | ReactNode {
     const {
       options,
-      props: { optionRenderer },
+      reactiveProps: { optionRenderer },
     } = this;
     return optionRenderer
       ? optionRenderer({ dataSet: options, record, text, value, isFilterSearch })
@@ -904,7 +944,7 @@ export class Cascader<T extends CascaderProps> extends TriggerField<T> {
   @autobind
   getPopupStyleFromAlign(target): CSSProperties | undefined {
     if (target) {
-      if (this.props.dropdownMatchSelectWidth) {
+      if (this.reactiveProps.dropdownMatchSelectWidth) {
         const { width } = target.getBoundingClientRect();
         this.setItemMenuWidth(width);
         return {
@@ -1078,7 +1118,6 @@ export class Cascader<T extends CascaderProps> extends TriggerField<T> {
     }
   }
 
-  @autobind
   handleBlur(e) {
     if (!e.isDefaultPrevented()) {
       super.handleBlur(e);
@@ -1100,7 +1139,7 @@ export class Cascader<T extends CascaderProps> extends TriggerField<T> {
   }
 
   findByText(text): Record | undefined {
-    const { textField, props: { changeOnSelect } } = this;
+    const { textField, reactiveProps: { changeOnSelect } } = this;
     const findTreeItem = (options, valueItem, index) => {
       let sameItemTreeNode;
       if (valueItem.length > 0) {
@@ -1124,7 +1163,7 @@ export class Cascader<T extends CascaderProps> extends TriggerField<T> {
   }
 
   findByValue(value): Record | undefined {
-    const { valueField, props: { changeOnSelect } } = this;
+    const { valueField, reactiveProps: { changeOnSelect } } = this;
     const findTreeItem = (options, valueItem, index) => {
       let sameItemTreeNode;
       if (valueItem.length > 0) {
@@ -1198,7 +1237,7 @@ export class Cascader<T extends CascaderProps> extends TriggerField<T> {
   // 触发下拉框事件,增加了触发方式判断优化trigger类型
   @autobind
   handleMenuSelect(targetOption, _menuIndex, isClickTab, trigger) {
-    const { onChoose, onUnChoose, changeOnSelect, async, loadData } = this.props;
+    const { onChoose, onUnChoose, changeOnSelect, async, loadData } = this.reactiveProps;
     if (!targetOption || targetOption.disabled) {
       return;
     }
@@ -1344,7 +1383,6 @@ export class Cascader<T extends CascaderProps> extends TriggerField<T> {
   }
 
   // 移除所选值
-  @action
   removeValues(values: any[], index = 0) {
     if (!this.multiple) {
       const oldValues = this.getValues();
@@ -1363,7 +1401,6 @@ export class Cascader<T extends CascaderProps> extends TriggerField<T> {
     // noop
   }
 
-  @action
   setText(text?: string): void {
     super.setText(text);
     if (this.searchable) {
@@ -1417,8 +1454,6 @@ export class Cascader<T extends CascaderProps> extends TriggerField<T> {
     });
   }
 
-  @autobind
-  @action
   handleChange(e) {
     const { value } = e.target;
     this.setText(value);
@@ -1545,7 +1580,6 @@ export class Cascader<T extends CascaderProps> extends TriggerField<T> {
     return value;
   }
 
-  @action
   clear() {
     this.setText(undefined);
     this.setActiveValue({});
@@ -1571,7 +1605,6 @@ export class Cascader<T extends CascaderProps> extends TriggerField<T> {
     this.forcePopupAlign();
   }
 
-  @autobind
   reset() {
     super.reset();
     this.resetFilter();
@@ -1623,11 +1656,22 @@ export class Cascader<T extends CascaderProps> extends TriggerField<T> {
   }
 
   async processSelectedData() {
-    const values = this.getValues();
-    const { field } = this;
+    const generation = ++this.selectedDataGeneration;
+    const { field, record, dataSet, options, name } = this;
+    if (this.selectedDataDisposed) {
+      return;
+    }
     if (field) {
       await field.ready();
     }
+    if (
+      this.selectedDataDisposed || generation !== this.selectedDataGeneration ||
+      field !== this.field || record !== this.record || dataSet !== this.dataSet ||
+      options !== this.options || name !== this.name
+    ) {
+      return;
+    }
+    const values = this.getValues();
     const {
       observableProps: { combo },
     } = this;

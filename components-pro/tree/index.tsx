@@ -1,6 +1,6 @@
 import React, { Component, Key } from 'react';
 import { observer } from 'mobx-react';
-import { action, computed, observable, runInAction } from 'mobx';
+import { action, observable, runInAction, makeObservable } from 'mobx';
 import defaultTo from 'lodash/defaultTo';
 import noop from 'lodash/noop';
 import xor from 'lodash/xor';
@@ -87,11 +87,11 @@ export default class Tree extends Component<TreeProps> {
 
   static TreeNode: typeof TreeNode = TreeNode;
 
-  @observable stateCheckedKeys: string[];
+  stateCheckedKeys: string[];
 
-  @observable stateExpandedKeys: string[];
+  stateExpandedKeys: string[];
 
-  @observable stateLoadedKeys: string[];
+  stateLoadedKeys: string[];
 
   inCheckExpansion = false;
 
@@ -136,7 +136,6 @@ export default class Tree extends Component<TreeProps> {
     this.initDefaultLoadedRows();
   }
 
-  @action
   initDefaultExpandedRows() {
     const {
       props: {
@@ -148,7 +147,6 @@ export default class Tree extends Component<TreeProps> {
     this.stateExpandedKeys = this.dealDefaultCheckExpand(dataSet, defaultExpandedKeys, defaultExpandAll);
   }
 
-  @action
   initDefaultCheckRows() {
     const {
       props: {
@@ -176,12 +174,10 @@ export default class Tree extends Component<TreeProps> {
     }
   }
 
-  @action
   initDefaultLoadedRows() {
     this.stateLoadedKeys = [];
   }
 
-  @action
   initDefaultSelectRows() {
     const {
       props: {
@@ -236,7 +232,6 @@ export default class Tree extends Component<TreeProps> {
     return defaultStateKeys;
   }
 
-  @computed
   get expandedKeys(): string[] {
     const { dataSet } = this.props;
     if (dataSet) {
@@ -273,7 +268,6 @@ export default class Tree extends Component<TreeProps> {
     return this.stateCheckedKeys;
   }
 
-  @computed
   get selectedKeys(): string[] {
     const { dataSet } = this.props;
     if (dataSet) {
@@ -296,6 +290,18 @@ export default class Tree extends Component<TreeProps> {
 
   constructor(props, context) {
     super(props, context);
+    if (!Object.prototype.hasOwnProperty.call(this, 'stateCheckedKeys')) Object.assign(this, { stateCheckedKeys: undefined });
+    if (!Object.prototype.hasOwnProperty.call(this, 'stateExpandedKeys')) Object.assign(this, { stateExpandedKeys: undefined });
+    if (!Object.prototype.hasOwnProperty.call(this, 'stateLoadedKeys')) Object.assign(this, { stateLoadedKeys: undefined });
+    makeObservable(this, {
+      stateCheckedKeys: observable,
+      stateExpandedKeys: observable,
+      stateLoadedKeys: observable,
+      initDefaultExpandedRows: action,
+      initDefaultCheckRows: action,
+      initDefaultLoadedRows: action,
+      initDefaultSelectRows: action,
+    });
     runInAction(() => {
       this.stateCheckedKeys = [];
       this.stateExpandedKeys = [];

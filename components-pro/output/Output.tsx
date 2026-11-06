@@ -1,6 +1,6 @@
 import React, { ReactNode } from 'react';
 import { observer } from 'mobx-react';
-import { isArrayLike } from 'mobx';
+import isArrayLike from 'choerodon-ui/dataset/mobx-helper/isArrayLike';
 import isPlainObject from 'lodash/isPlainObject';
 import isNil from 'lodash/isNil';
 import { FormField, FormFieldProps, RenderProps } from '../field/FormField';
@@ -106,7 +106,7 @@ export default class Output extends FormField<OutputProps> {
       record,
       dataSet,
       prefixCls,
-      props: { renderer },
+      reactiveProps: { renderer },
     } = this;
     const { lines, multipleValidateMessageLength } = renderMultiLine({
       name,
@@ -118,7 +118,7 @@ export default class Output extends FormField<OutputProps> {
       renderValidationResult: this.renderValidationResult,
       isValidationMessageHidden: this.isValidationMessageHidden,
       processValue: this.processValue.bind(this),
-      tooltip: this.props.tooltip,
+      tooltip: this.reactiveProps.tooltip,
       labelTooltip: this.labelTooltip,
     });
     this.multipleValidateMessageLength = multipleValidateMessageLength;
@@ -166,8 +166,8 @@ export default class Output extends FormField<OutputProps> {
     if (super.showTooltip(e)) {
       return true;
     }
-    const { getTooltip, getTooltipTheme, getTooltipPlacement } = this.context;
-    const { tooltip = getTooltip('output') } = this.props;
+    const { getTooltip, getTooltipTheme, getTooltipPlacement } = this.reactiveContext;
+    const { tooltip = getTooltip('output') } = this.reactiveProps;
     const { element, field } = this;
     const { isOverflowMaxTagCount } = this.renderMultipleValues(true);
     const title = this.getTooltipTitle();
@@ -187,7 +187,7 @@ export default class Output extends FormField<OutputProps> {
 
   renderWrapper(): ReactNode {
     const result = this.getRenderedValue();
-    const { renderEmpty } = this.props;
+    const { renderEmpty } = this.reactiveProps;
     const text = isEmpty(result) || (isArrayLike(result) && !result.length) ? renderEmpty ? renderEmpty() : this.getContextConfig('renderEmpty')('Output') : result;
     const floatLabel = this.renderFloatLabel();
     return floatLabel ? (

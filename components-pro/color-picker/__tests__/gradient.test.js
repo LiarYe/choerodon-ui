@@ -3,6 +3,7 @@ import { mount } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import { configure, runInAction } from 'mobx';
 import ColorPicker from '..';
+import observeAction from './observeAction';
 import { parseColor, parseGradient } from '../../../components-dataset/utils/color';
 import localeContext from '../../locale-context/LocaleContext';
 import en from '../../locale-context/en_US';
@@ -123,7 +124,7 @@ describe('ColorPicker gradient editing', () => {
   it('renders popup content without initializing color state', () => {
     const picker = open({ defaultValue: '#123456' });
     runInAction(() => { picker.hueColor = undefined; });
-    const setColor = jest.spyOn(picker, 'setColor');
+    const setColor = observeAction(picker, 'setColor');
     const hsv = { ...picker.HSV };
     const rgba = { ...picker.RGBA };
     try {

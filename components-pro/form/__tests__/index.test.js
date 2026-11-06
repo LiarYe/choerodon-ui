@@ -192,14 +192,50 @@ describe('Select', () => {
   });
   it('disable test', () => {
     const wrapper = mount(<FormTest disabled />);
-    jest.runAllTimers();
-    expect(wrapper).toMatchSnapshot();
+    try {
+      jest.runAllTimers();
+      const dataSet = wrapper.instance().ds;
+      const record = dataSet.current;
+      const original = record.toData();
+      const host = wrapper.getDOMNode();
+      const inputs = () => Array.from(host.querySelectorAll('input[name]:not([type="hidden"])'));
+      const buttons = () => Array.from(host.querySelectorAll('button'));
+      const expectHost = (disabled) => {
+        expect(host.tagName).toBe('FORM');
+        expect(host.querySelectorAll('input')).toHaveLength(5);
+        expect(host.querySelectorAll('input.c7n-pro-password-fix-autofill')).toHaveLength(1);
+        expect(inputs().map(input => input.name)).toEqual(['phone', 'password', 'age', 'email']);
+        expect(inputs().map(input => input.value)).toEqual(['1800000000', '', '18', 'xxx@choerodon.io']);
+        expect(buttons().map(button => button.textContent.trim())).toEqual([
+          '注册', '重置', '设置代码描述的textField',
+        ]);
+        expect(buttons().map(button => button.type)).toEqual(['submit', 'reset', 'button']);
+        expect(inputs().map(input => input.disabled)).toEqual(Array(4).fill(disabled));
+        expect(buttons().map(button => button.disabled)).toEqual(Array(3).fill(disabled));
+        expect(wrapper.instance().ds).toBe(dataSet);
+        expect(dataSet.current).toBe(record);
+        expect(record.toData()).toEqual(original);
+      };
+      expectHost(true);
+      wrapper.setProps({ disabled: false });
+      expectHost(false);
+      wrapper.setProps({ disabled: true });
+      expectHost(true);
+    } finally {
+      wrapper.unmount();
+    }
   });
 
   it('useColon test', () => {
     const wrapper = mount(<FormTest useColon />);
     jest.runAllTimers();
-    expect(wrapper.find('.c7n-pro-field-label-useColon')).toHaveLength(4);
+    expect(wrapper.find('.c7n-pro-field-label-useColon').hostNodes()).toHaveLength(4);
+    expect(wrapper.getDOMNode().querySelectorAll('td.c7n-pro-field-label-useColon')).toHaveLength(4);
+    wrapper.setProps({ useColon: false });
+    expect(wrapper.getDOMNode().querySelectorAll('.c7n-pro-field-label-useColon')).toHaveLength(0);
+    wrapper.setProps({ useColon: true });
+    expect(wrapper.getDOMNode().querySelectorAll('td.c7n-pro-field-label-useColon')).toHaveLength(4);
+    wrapper.unmount();
   });
 
   // 测试嵌套写法

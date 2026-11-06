@@ -1,4 +1,4 @@
-import { computed } from 'mobx';
+import { computed, makeObservable } from 'mobx';
 import Group from 'choerodon-ui/dataset/data-set/Group';
 import { ColumnProps, columnWidth } from './Column';
 import ColumnGroup from './ColumnGroup';
@@ -17,22 +17,18 @@ export default class ColumnGroups {
     return this.store.aggregation;
   }
 
-  @computed
   get wide(): number {
     return this.columns.reduce((sum, { colSpan, hidden }) => (hidden ? sum : sum + colSpan), 0);
   }
 
-  @computed
   get deep(): number {
     return Math.max(...this.columns.map(({ deep }) => deep));
   }
 
-  @computed
   get hidden(): boolean {
     return this.columns.every(({ hidden }) => hidden);
   }
 
-  @computed
   get width(): number {
     return this.columns.reduce((sum, { width }) => sum + width, 0);
   }
@@ -59,24 +55,20 @@ export default class ColumnGroups {
     return length ? leafs[length - 1] : undefined;
   }
 
-  @computed
   get allLeafs(): ColumnGroup[] {
     const { aggregation } = this;
     return this.columns.reduce<ColumnGroup[]>((leafs, group) => leafs.concat(aggregation && group.column.aggregation ? group : group.allLeafs), []);
   }
 
-  @computed
   get inView(): boolean {
     return this.allLeafs.some(group => group.inView !== false);
   }
 
-  @computed
   get leafs(): ColumnGroup[] {
     const { aggregation, hidden } = this;
     return hidden ? [] : this.columns.reduce<ColumnGroup[]>((leafs, group) => group.hidden ? leafs : leafs.concat(aggregation && group.column.aggregation ? group : group.leafs), []);
   }
 
-  @computed
   get leftLeafs(): ColumnGroup[] {
     if (!this.parent) {
       const { aggregation } = this;
@@ -88,7 +80,6 @@ export default class ColumnGroups {
     return [];
   }
 
-  @computed
   get rightLeafs(): ColumnGroup[] {
     if (!this.parent) {
       const { aggregation } = this;
@@ -134,6 +125,17 @@ export default class ColumnGroups {
   }
 
   constructor(columns: ColumnProps[], store: TableStore, parent?: ColumnGroup) {
+    makeObservable(this, {
+      wide: computed,
+      deep: computed,
+      hidden: computed,
+      width: computed,
+      allLeafs: computed,
+      inView: computed,
+      leafs: computed,
+      leftLeafs: computed,
+      rightLeafs: computed,
+    });
     this.store = store;
     this.parent = parent;
     let prev: ColumnGroup | undefined;

@@ -1,6 +1,7 @@
 import React, { ReactNode } from 'react';
 import { observer } from 'mobx-react';
-import { action, runInAction, isArrayLike } from 'mobx';
+import { action, runInAction, makeObservable, override as mobxOverride } from 'mobx';
+import isArrayLike from 'choerodon-ui/dataset/mobx-helper/isArrayLike';
 
 import { TextField, TextFieldProps } from '../text-field/TextField';
 import Icon from '../icon';
@@ -31,6 +32,12 @@ export default class SecretField extends TextField<SecretFieldProps> {
 
   constructor(props, context) {
     super(props, context);
+    makeObservable<this, 'openModal'>(this, {
+      setSecretEnable: action,
+      openModal: action,
+      handleSecretFieldViewClose: action.bound,
+      clear: mobxOverride,
+    });
     runInAction(() => {
       this.setSecretEnable();
     });
@@ -55,7 +62,6 @@ export default class SecretField extends TextField<SecretFieldProps> {
     return this.secretEnable;
   }
 
-  @action
   setSecretEnable() {
     const secretFieldEnableConfig = this.getContextConfig('secretFieldEnable');
     if (secretFieldEnableConfig) {
@@ -64,7 +70,6 @@ export default class SecretField extends TextField<SecretFieldProps> {
     }
   }
 
-  @action
   private openModal() {
     if (!this.modal) {
       const label = this.getLabel();
@@ -76,7 +81,7 @@ export default class SecretField extends TextField<SecretFieldProps> {
       const pattern = this.getProp('pattern');
       const restrict = this.getProp('restrict');
       const required = this.getProp('required');
-      const { modalProps } = this.props;
+      const { modalProps } = this.reactiveProps;
       this.modal = open({
         title: label,
         ...modalProps,
@@ -103,8 +108,6 @@ export default class SecretField extends TextField<SecretFieldProps> {
     }
   }
 
-  @autobind
-  @action
   handleSecretFieldViewClose() {
     this.modal = undefined;
   }
@@ -123,7 +126,7 @@ export default class SecretField extends TextField<SecretFieldProps> {
   }
 
   getSuffix(): ReactNode {
-    const { readOnly, record, name, isSecretEnable, props, disabled, showSuffix } = this;
+    const { readOnly, record, name, isSecretEnable, reactiveProps: props, disabled, showSuffix } = this;
     if (!showSuffix) {
       return undefined;
     }
@@ -187,7 +190,6 @@ export default class SecretField extends TextField<SecretFieldProps> {
     return super.clearButton;
   }
 
-  @action
   clear() {
     const { isSecretEnable } = this;
     // 只有显示为textField时，退格键正常删除内容
@@ -199,7 +201,7 @@ export default class SecretField extends TextField<SecretFieldProps> {
   renderWrapper(): ReactNode {
     const { readOnly, prefixCls } = this;
     const result = this.getRenderedValue();
-    const { renderEmpty } = this.props;
+    const { renderEmpty } = this.reactiveProps;
     // 脱敏组件只读且值为空时，renderEmpty
     return readOnly && (isEmpty(result) || (isArrayLike(result) && !result.length)) ? (
       <span {...this.getMergedProps()}>

@@ -17,6 +17,9 @@ jobs:
           paths:
             - node_modules
           key: v2-node18-dependencies-{{ checksum "package.json" }}-{{ checksum "package-lock.json" }}
+      - run: npm run test:mobx-source
+      - store_artifacts:
+          path: output/mobx-source-gate
       - run: npm run lint
 
   release_publish:
@@ -32,6 +35,9 @@ jobs:
           - v2-node18-dependencies-{{ checksum "package.json" }}-{{ checksum "package-lock.json" }}
           - v2-node18-dependencies-
       - run: npm install
+      - run: npm run test:mobx-source
+      - store_artifacts:
+          path: output/mobx-source-gate
       - run: echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" >> ~/.npmrc
       - run: npm run pub
 

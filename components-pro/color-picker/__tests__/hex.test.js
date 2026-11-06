@@ -82,9 +82,9 @@ describe('ColorPicker footer HEX draft', () => {
   it('keeps every deletion draft unchanged and restores the original color on partial blur', () => {
     const onChange = jest.fn();
     const picker = open({ onChange });
-    expect(isAction(ColorPicker.prototype.handleFooterInput)).toBe(true);
-    expect(isAction(ColorPicker.prototype.handleFooterFocus)).toBe(true);
-    expect(isAction(ColorPicker.prototype.handleFooterBlur)).toBe(true);
+    expect(isAction(picker.handleFooterInput)).toBe(true);
+    expect(isAction(picker.handleFooterFocus)).toBe(true);
+    expect(isAction(picker.handleFooterBlur)).toBe(true);
     expect(picker.footerHexOriginal).toBe('#123456');
     ['12345', '1234', '123', '12', '1'].forEach(value => {
       input(value);

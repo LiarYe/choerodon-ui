@@ -5,7 +5,8 @@ import omit from 'lodash/omit';
 import noop from 'lodash/noop';
 import debounce from 'lodash/debounce';
 import isString from 'lodash/isString';
-import { computed, observable, runInAction, action, isArrayLike } from 'mobx';
+import { observable, runInAction, action, makeObservable } from 'mobx';
+import isArrayLike from 'choerodon-ui/dataset/mobx-helper/isArrayLike';
 import { observer } from 'mobx-react';
 import isPromise from 'is-promise';
 import { isFragment as isReactFragment } from 'react-is';
@@ -156,9 +157,8 @@ export default class Button extends DataSetComponent<ButtonProps> {
     iconPlacement: IconPlacementType.start,
   };
 
-  @observable hasTwoCNChar: boolean;
+  hasTwoCNChar: boolean;
 
-  @computed
   get loading(): boolean {
     const { type, dataSet, loading } = this.observableProps;
     return (
@@ -179,6 +179,11 @@ export default class Button extends DataSetComponent<ButtonProps> {
 
   constructor(props, context) {
     super(props, context);
+    if (!Object.prototype.hasOwnProperty.call(this, 'hasTwoCNChar')) Object.assign(this, { hasTwoCNChar: undefined });
+    makeObservable(this, {
+      hasTwoCNChar: observable,
+      fixTwoCNChar: action.bound,
+    });
     this.handleClickWait = this.getHandleClick(props);
   }
 
@@ -192,8 +197,6 @@ export default class Button extends DataSetComponent<ButtonProps> {
     };
   }
 
-  @autobind
-  @action
   fixTwoCNChar() {
     // For HOC usage
     const autoInsertSpace = this.getContextConfig('autoInsertSpaceInButton') !== false;
@@ -249,7 +252,7 @@ export default class Button extends DataSetComponent<ButtonProps> {
   @autobind
   handleClickIfBubble(e) {
     if (isFunction(e.persist)) e.persist();
-    const { wait, waitType } = this.props;
+    const { wait, waitType } = this.reactiveProps;
     if (wait && waitType) {
       e.stopPropagation();
       this.handleClickWait(e);
@@ -260,14 +263,14 @@ export default class Button extends DataSetComponent<ButtonProps> {
 
   @autobind
   async handleClick(e) {
-    const onButtonClick = this.context.getConfig('onButtonClick');
+    const onButtonClick = this.reactiveContext.getConfig('onButtonClick');
     if (onButtonClick && e) {
       const { target } = e;
-      const { children, icon } = this.props;
+      const { children, icon } = this.reactiveProps;
       const promise = Promise.resolve(target && (target as HTMLButtonElement | HTMLAnchorElement).textContent || getReactNodeText(children));
       promise.then(title => onButtonClick({ icon, title }));
     }
-    const { onClick } = this.props;
+    const { onClick } = this.reactiveProps;
     if (onClick) {
       const afterClick: any = onClick(e);
       if (isPromise(afterClick)) {
@@ -283,8 +286,8 @@ export default class Button extends DataSetComponent<ButtonProps> {
 
   @autobind
   handleMouseEnter(e) {
-    const { getTooltip, getTooltipTheme, getTooltipPlacement } = this.context;
-    const { tooltip = getTooltip('button'), children } = this.props;
+    const { getTooltip, getTooltipTheme, getTooltipPlacement } = this.reactiveContext;
+    const { tooltip = getTooltip('button'), children } = this.reactiveProps;
     const { element } = this;
     if (tooltip === ButtonTooltip.always || (tooltip === ButtonTooltip.overflow && isOverflow(element))) {
       show(element, {
@@ -307,15 +310,15 @@ export default class Button extends DataSetComponent<ButtonProps> {
         this.isTooltipShown = true;
       }
     }
-    const { onMouseEnter = noop } = this.props;
+    const { onMouseEnter = noop } = this.reactiveProps;
     onMouseEnter(e);
   }
 
   @autobind
   handleMouseLeave(e) {
     if (this.isTooltipShown) {
-      const { getTooltip } = this.context;
-      const { tooltip = getTooltip('button') } = this.props;
+      const { getTooltip } = this.reactiveContext;
+      const { tooltip = getTooltip('button') } = this.reactiveProps;
       if(isArrayLike(tooltip)) {
         const buttonTooltipProps = tooltip[1] || {};
         const duration: number = (buttonTooltipProps.mouseLeaveDelay || 0.1) * 1000;
@@ -325,7 +328,7 @@ export default class Button extends DataSetComponent<ButtonProps> {
       }
       delete this.isTooltipShown;
     }
-    const { onMouseLeave = noop } = this.props;
+    const { onMouseLeave = noop } = this.reactiveProps;
     onMouseLeave(e);
   }
 
@@ -346,8 +349,8 @@ export default class Button extends DataSetComponent<ButtonProps> {
 
   getOtherProps() {
     const otherProps = super.getOtherProps();
-    const { getTooltip } = this.context;
-    const { tooltip = getTooltip('button') } = this.props;
+    const { getTooltip } = this.reactiveContext;
+    const { tooltip = getTooltip('button') } = this.reactiveProps;
     if (!this.disabled && !this.loading) {
       otherProps.onClick = this.handleClickIfBubble;
     }
@@ -363,7 +366,7 @@ export default class Button extends DataSetComponent<ButtonProps> {
 
   isNeedInserted() {
     const {
-      props: {
+      reactiveProps: {
         funcType = this.getContextConfig('buttonFuncType'),
         children,
         icon,
@@ -372,11 +375,10 @@ export default class Button extends DataSetComponent<ButtonProps> {
     return Children.count(children) === 1 && !icon && !(funcType === FuncType.link || funcType === FuncType.flat);
   }
 
-
   getClassName(...props): string | undefined {
     const {
       prefixCls,
-      props: {
+      reactiveProps: {
         color = this.getContextConfig('buttonColor'),
         funcType = this.getContextConfig('buttonFuncType'),
         children,
@@ -405,14 +407,14 @@ export default class Button extends DataSetComponent<ButtonProps> {
   }
 
   hasEllipsisStyle(): boolean {
-    const { style = {} } = this.props;
+    const { style = {} } = this.reactiveProps;
     const { width, maxWidth, overflow, whiteSpace, textOverflow } = style;
     const result = !!(width || maxWidth) && overflow === 'hidden' && whiteSpace === 'nowrap' && textOverflow === 'ellipsis';
     return result;
   }
 
   render() {
-    const { children, icon, href, funcType, hidden, iconPlacement } = this.props;
+    const { children, icon, href, funcType, hidden, iconPlacement } = this.reactiveProps;
     const { loading, disabled } = this;
     const autoInsertSpace = this.getContextConfig('autoInsertSpaceInButton') !== false;
     const iconHiddenStyle: CSSProperties = {

@@ -1258,7 +1258,7 @@ export default class Table<T> extends Component<TableProps<T>, TableState<T>> {
 
   recursiveSort(data: T[], sorterFn: (a: any, b: any) => number): T[] {
     const { childrenColumnName = 'children' } = this.props;
-    return data.sort(sorterFn).map((item: any) =>
+    return data.slice().sort(sorterFn).map((item: any) =>
       item[childrenColumnName]
         ? {
           ...item,

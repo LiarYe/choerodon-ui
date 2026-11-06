@@ -1,5 +1,5 @@
-import { isArrayLike } from 'mobx';
 import isNil from 'lodash/isNil';
+import isArrayLike from '../../mobx-helper/isArrayLike';
 import { isEmpty, toRangeValue } from '../../utils';
 import ValidationResult from '../ValidationResult';
 import { $l } from '../../locale-context';

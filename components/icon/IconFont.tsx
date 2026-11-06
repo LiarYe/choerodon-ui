@@ -60,7 +60,7 @@ export default function create(options: CustomIconOptions = {}): IIconFont {
   ) {
     if (Array.isArray(scriptUrl)) {
       // 因为iconfont资源会把svg插入before，所以前加载相同type会覆盖后加载，为了数组覆盖顺序，倒叙插入
-      createScriptUrlElements(scriptUrl.reverse());
+      createScriptUrlElements(scriptUrl.slice().reverse());
     } else {
       createScriptUrlElements([scriptUrl]);
     }

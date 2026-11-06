@@ -1,6 +1,6 @@
 import React, { ReactNode, CSSProperties } from 'react';
 import { observer } from 'mobx-react';
-import { observable, action } from 'mobx';
+import { observable, action, makeObservable } from 'mobx';
 import debounce from 'lodash/debounce';
 import defaultTo from 'lodash/defaultTo';
 import isNil from 'lodash/isNil';
@@ -35,10 +35,14 @@ export default class Segmented extends SelectBox<SegmentedProps> {
 
   constructor(props, context) {
     super(props, context);
+    if (!Object.prototype.hasOwnProperty.call(this, 'activeRadio')) this.activeRadio = undefined;
+    makeObservable(this, {
+      activeRadio: observable,
+      saveActiveNode: action.bound,
+    });
     this.initValue();
   }
 
-  @observable
   activeRadio?: ObserverRadio | null;
 
   get multiple(): boolean {
@@ -76,7 +80,7 @@ export default class Segmented extends SelectBox<SegmentedProps> {
 
   initValue() {
     const value = this.getValue();
-    const { filteredOptions, valueField, options, props: { onOption } } = this;
+    const { filteredOptions, valueField, options, reactiveProps: { onOption } } = this;
     if (filteredOptions.length > 0 &&
       (isNil(value) || filteredOptions.every(record => record.get(valueField) !== value))) {
       const firstNotDisabled = filteredOptions.find(record => {
@@ -87,8 +91,6 @@ export default class Segmented extends SelectBox<SegmentedProps> {
     }
   }
 
-  @autobind
-  @action
   saveActiveNode(node) {
     this.activeRadio = node;
   }
@@ -100,7 +102,7 @@ export default class Segmented extends SelectBox<SegmentedProps> {
   }
 
   getWrapperClassNames(...args): string {
-    const { prefixCls, props: { vertical, fullWidth } } = this;
+    const { prefixCls, reactiveProps: { vertical, fullWidth } } = this;
     return super.getWrapperClassNames(
       {
         [`${prefixCls}-wrapper-vertical`]: vertical,
@@ -113,7 +115,7 @@ export default class Segmented extends SelectBox<SegmentedProps> {
   getClassName(...props): string | undefined {
     const {
       prefixCls,
-      props: { fullWidth },
+      reactiveProps: { fullWidth },
     } = this;
     return super.getClassName(
       {
@@ -124,7 +126,7 @@ export default class Segmented extends SelectBox<SegmentedProps> {
   }
 
   renderSegmentedActive() {
-    const { vertical } = this.props;
+    const { vertical } = this.reactiveProps;
     let segActiveStyle: CSSProperties = { visibility: 'hidden' };
     if (this.activeRadio) {
       const radioInputDom = this.activeRadio;

@@ -47,7 +47,7 @@ export default class Switch extends CheckBox<SwitchProps> {
   showTooltip(e): boolean{
     const { currentTarget } = e;
     const {
-      props: { children, unCheckedChildren },
+      reactiveProps: { children, unCheckedChildren },
     } = this;
     const switchLabel = currentTarget.nextElementSibling;
     const text = this.isChecked() ? children : unCheckedChildren || children;
@@ -70,7 +70,7 @@ export default class Switch extends CheckBox<SwitchProps> {
     if (super.isDisabled()) {
       return true;
     }
-    const { loading = false } = this.props;
+    const { loading = false } = this.reactiveProps;
     return loading;
   }
 
@@ -81,7 +81,7 @@ export default class Switch extends CheckBox<SwitchProps> {
   getTextNode() {
     const {
       prefixCls,
-      props: { children, unCheckedChildren },
+      reactiveProps: { children, unCheckedChildren },
     } = this;
     const text = this.isChecked() ? children : unCheckedChildren || children;
     return (
@@ -94,7 +94,7 @@ export default class Switch extends CheckBox<SwitchProps> {
   getWrapperClassNames() {
     const {
       prefixCls,
-      props: {
+      reactiveProps: {
         loading,
       },
     } = this;
@@ -117,7 +117,7 @@ export default class Switch extends CheckBox<SwitchProps> {
   }
 
   renderInner(): ReactNode {
-    const { loading } = this.props;
+    const { loading } = this.reactiveProps;
     if (loading) {
       return (
         <Progress

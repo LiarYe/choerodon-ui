@@ -55,7 +55,7 @@ export default class DateTimesView<T extends DateViewProps> extends DaysView<T> 
   }
 
   choose(date: Moment, expand = true) {
-    const { onSelect = noop, date: selectedDate, isValidDate = alwaysValidDate } = this.props;
+    const { onSelect = noop, date: selectedDate, isValidDate = alwaysValidDate } = this.reactiveProps;
     const selected = selectedDate.clone();
     if (isValidDate(date, selected) && isValidDate(date, selected, ViewMode.time)) {
       onSelect(date, expand);
@@ -65,7 +65,7 @@ export default class DateTimesView<T extends DateViewProps> extends DaysView<T> 
   renderFooter(): ReactNode {
     const {
       prefixCls,
-      props: { disabledNow, okButton },
+      reactiveProps: { disabledNow, okButton },
     } = this;
     const footerProps = {
       className: classNames(`${prefixCls}-footer-now-btn`, {
@@ -82,7 +82,7 @@ export default class DateTimesView<T extends DateViewProps> extends DaysView<T> 
           okButton && (
             <a
               className={`${prefixCls}-footer-view-select`}
-              onClick={this.choose.bind(this, this.props.date, false)}
+              onClick={this.choose.bind(this, this.reactiveProps.date, false)}
             >
               {$l('DatePicker', 'ok')}
             </a>
@@ -108,7 +108,7 @@ export default class DateTimesView<T extends DateViewProps> extends DaysView<T> 
   render() {
     const {
       prefixCls,
-      props: { className, extraFooterPlacement },
+      reactiveProps: { className, extraFooterPlacement },
     } = this;
     const classString = classNames(`${prefixCls}-view`, className, this.getViewClassName());
     return (

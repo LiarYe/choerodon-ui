@@ -17,7 +17,7 @@ import debounce from 'lodash/debounce';
 import classNames from 'classnames';
 import classes from 'component-classes';
 import { pxToPercent, pxToRem, toPx } from 'choerodon-ui/lib/_util/UnitConvertor';
-import { observable, runInAction } from 'mobx';
+import { observable, runInAction, makeObservable } from 'mobx';
 import KeyCode from 'choerodon-ui/lib/_util/KeyCode';
 import math from 'choerodon-ui/dataset/math';
 import ViewComponent, { ViewComponentProps } from '../core/ViewComponent';
@@ -182,7 +182,7 @@ export default class Modal extends ViewComponent<ModalProps> {
 
   minHeight: number;
 
-  @observable tempCustomized: ModalCustomized;
+  tempCustomized: ModalCustomized;
 
   get okBtn(): ReactElement<ButtonProps> {
     const {
@@ -190,7 +190,7 @@ export default class Modal extends ViewComponent<ModalProps> {
       okText = $l('Modal', 'ok'),
       drawer,
       buttonTrigger = this.getContextConfig('modalButtonTrigger'),
-    } = this.props;
+    } = this.reactiveProps;
     const modalButtonProps = this.getContextConfig('modalButtonProps');
     const iconProps = { icon: this.getModalOkAndCancelIcon('okIconType') };
     let handleMouseDownOk = {};
@@ -223,7 +223,7 @@ export default class Modal extends ViewComponent<ModalProps> {
       cancelText = $l('Modal', 'cancel'),
       drawer,
       buttonTrigger = this.getContextConfig('modalButtonTrigger'),
-    } = this.props;
+    } = this.reactiveProps;
     const modalButtonProps = this.getContextConfig('modalButtonProps');
     const iconProps = { icon: this.getModalOkAndCancelIcon('cancelIconType') };
     let handleMouseDownCancel = {};
@@ -251,25 +251,25 @@ export default class Modal extends ViewComponent<ModalProps> {
   }
 
   get drawerTransitionName(): DrawerTransitionName {
-    const { drawerTransitionName = this.getContextConfig('drawerTransitionName') } = this.props;
+    const { drawerTransitionName = this.getContextConfig('drawerTransitionName') } = this.reactiveProps;
     return toUsefulDrawerTransitionName(drawerTransitionName);
   }
 
   get drawerHeaderFooterCombined(): boolean {
-    const { drawer } = this.props;
+    const { drawer } = this.reactiveProps;
     return this.getContextConfig('drawerHeaderFooterCombined') && !!drawer;
   }
 
   get modalClosable(): boolean {
-    if ('closable' in this.props) {
-      return this.props.closable!;
+    if ('closable' in this.reactiveProps) {
+      return this.reactiveProps.closable!;
     }
     return this.getContextConfig('modalClosable');
   }
 
   get modalAutoFocus(): boolean {
-    if ('autoFocus' in this.props) {
-      return this.props.autoFocus!;
+    if ('autoFocus' in this.reactiveProps) {
+      return this.reactiveProps.autoFocus!;
     }
     return this.getContextConfig('modalAutoFocus');
   }
@@ -284,7 +284,7 @@ export default class Modal extends ViewComponent<ModalProps> {
   }
 
   get autoWidth(): boolean {
-    const { contentStyle } = this.props;
+    const { contentStyle } = this.reactiveProps;
     if (contentStyle && contentStyle.width) {
       return true;
     }
@@ -301,6 +301,10 @@ export default class Modal extends ViewComponent<ModalProps> {
 
   constructor(props, context) {
     super(props, context);
+    if (!Object.prototype.hasOwnProperty.call(this, 'tempCustomized')) Object.assign(this, { tempCustomized: undefined });
+    makeObservable(this, {
+      tempCustomized: observable,
+    });
     const { close = noop, update = noop } = props;
     this.childrenProps = {
       close,
@@ -361,7 +365,7 @@ export default class Modal extends ViewComponent<ModalProps> {
   }
 
   getModalOkAndCancelIcon(icon: keyof ModalOkAndCancelIconItem): string | undefined {
-    const { modalOkAndCancelIcon = this.getContextConfig('modalOkAndCancelIcon') } = this.props;
+    const { modalOkAndCancelIcon = this.getContextConfig('modalOkAndCancelIcon') } = this.reactiveProps;
     if (modalOkAndCancelIcon === true) {
       return icon === 'okIconType' ? 'done' : 'close';
     }
@@ -455,8 +459,8 @@ export default class Modal extends ViewComponent<ModalProps> {
   }
 
   async loadCustomized() {
-    const { getCustomizable } = this.context;
-    const { customizable = getCustomizable('Modal'), customizedCode, drawer } = this.props;
+    const { getCustomizable } = this.reactiveContext;
+    const { customizable = getCustomizable('Modal'), customizedCode, drawer } = this.reactiveProps;
     if (customizable && customizedCode) {
       const temp = await this.getContextConfig('customizedLoad')(customizedCode, 'Modal');
       if (temp) {
@@ -495,8 +499,8 @@ export default class Modal extends ViewComponent<ModalProps> {
   }
 
   saveCustomized() {
-    const { getCustomizable } = this.context;
-    const { customizable = getCustomizable('Modal'), customizedCode } = this.props;
+    const { getCustomizable } = this.reactiveContext;
+    const { customizable = getCustomizable('Modal'), customizedCode } = this.reactiveProps;
     if (customizable && customizedCode) {
       const customizedSave = this.getContextConfig('customizedSave');
       customizedSave(customizedCode, this.tempCustomized || {}, 'Modal');
@@ -517,7 +521,7 @@ export default class Modal extends ViewComponent<ModalProps> {
 
   getOtherProps() {
     const otherProps = super.getOtherProps();
-    const { hidden, mousePosition, keyboardClosable = this.getContextConfig('modalKeyboard'), style = {}, drawer, onTop } = this.props;
+    const { hidden, mousePosition, keyboardClosable = this.getContextConfig('modalKeyboard'), style = {}, drawer, onTop } = this.reactiveProps;
     const currentStyle = { ...style, ...this.getTempCustomized() };
     if (keyboardClosable) {
       otherProps.autoFocus = true;
@@ -569,7 +573,7 @@ export default class Modal extends ViewComponent<ModalProps> {
     const {
       prefixCls,
       autoWidth,
-      props: {
+      reactiveProps: {
         style = this.tempCustomized || {},
         fullScreen,
         drawer,
@@ -597,7 +601,7 @@ export default class Modal extends ViewComponent<ModalProps> {
   }
 
   getDrawerOffset(drawerTransitionName): number {
-    const { style } = this.props;
+    const { style } = this.reactiveProps;
     if (style) {
       switch (drawerTransitionName) {
         case 'slide-right':
@@ -618,7 +622,7 @@ export default class Modal extends ViewComponent<ModalProps> {
   @autobind
   handleResize(e) {
     e.persist();
-    const { drawer, fullScreen } = this.props;
+    const { drawer, fullScreen } = this.reactiveProps;
     if (e.target && !fullScreen && this.contentNode) {
       const mousemove = !drawer ? this.handleModalMouseResize(e) : this.handleDrawerMouseResize(e);
       if (mousemove) {
@@ -670,7 +674,7 @@ export default class Modal extends ViewComponent<ModalProps> {
       minHeight,
       minWidth,
       prefixCls,
-      props: { drawer, autoCenter = this.getContextConfig('modalAutoCenter') },
+      reactiveProps: { drawer, autoCenter = this.getContextConfig('modalAutoCenter') },
     } = this;
     const { clientWidth: docClientWidth, clientHeight: docClientHeight } = this.selfDoc.documentElement || this.selfDoc.body;
     const clientX = transformZoomData(e.clientX);
@@ -755,7 +759,7 @@ export default class Modal extends ViewComponent<ModalProps> {
       prefixCls,
       drawerHeaderFooterCombined,
       drawerTransitionName,
-      props: { contentStyle, drawer, resizable = this.getContextConfig('modalResizable'), fullScreen },
+      reactiveProps: { contentStyle, drawer, resizable = this.getContextConfig('modalResizable'), fullScreen },
     } = this;
     const header = this.getHeader();
     const body = this.getBody();
@@ -810,7 +814,6 @@ export default class Modal extends ViewComponent<ModalProps> {
       this.sentinelEndRef.focus();
     }
   }
-  
 
   componentWillUpdate({ hidden }) {
     if (hidden === false && hidden !== this.props.hidden) {
@@ -826,7 +829,7 @@ export default class Modal extends ViewComponent<ModalProps> {
 
   @autobind
   handleMouseDown(e) {
-    const { onMouseDown = noop, onTop = noop, eventKey } = this.props;
+    const { onMouseDown = noop, onTop = noop, eventKey } = this.reactiveProps;
     onMouseDown(e);
     if (!e.isDefaultPrevented()) {
       onTop(eventKey);
@@ -835,7 +838,7 @@ export default class Modal extends ViewComponent<ModalProps> {
 
   @autobind
   handleHeaderMouseDown(downEvent: ReactMouseEvent<HTMLDivElement, MouseEvent>) {
-    const { element, contentNode, props: { autoCenter = this.getContextConfig('modalAutoCenter') } } = this;
+    const { element, contentNode, reactiveProps: { autoCenter = this.getContextConfig('modalAutoCenter') } } = this;
     if (element && contentNode) {
       const { prefixCls } = this;
       const {
@@ -915,7 +918,7 @@ export default class Modal extends ViewComponent<ModalProps> {
 
   @autobind
   handleHeaderTouchStart(downEvent: React.TouchEvent<HTMLDivElement>) {
-    const { element, contentNode, props: { autoCenter = this.getContextConfig('modalAutoCenter') } } = this;
+    const { element, contentNode, reactiveProps: { autoCenter = this.getContextConfig('modalAutoCenter') } } = this;
     if (element && contentNode && downEvent.touches.length === 1) {
       const { prefixCls } = this;
       const {
@@ -997,7 +1000,7 @@ export default class Modal extends ViewComponent<ModalProps> {
 
   @autobind
   async handleOk() {
-    const { onOk = noop, buttonTrigger = this.getContextConfig('modalButtonTrigger') } = this.props;
+    const { onOk = noop, buttonTrigger = this.getContextConfig('modalButtonTrigger') } = this.reactiveProps;
     if (buttonTrigger === ModalButtonTrigger.MOUSEDOWN) {
       document.removeEventListener('mouseup', this.handleDelayOk);
     }
@@ -1017,7 +1020,7 @@ export default class Modal extends ViewComponent<ModalProps> {
 
   @autobind
   async handleCancel() {
-    const { onCancel = noop, buttonTrigger = this.getContextConfig('modalButtonTrigger') } = this.props;
+    const { onCancel = noop, buttonTrigger = this.getContextConfig('modalButtonTrigger') } = this.reactiveProps;
     if (buttonTrigger === ModalButtonTrigger.MOUSEDOWN) {
       document.removeEventListener('mouseup', this.handleDelayCancel);
     }
@@ -1069,7 +1072,7 @@ export default class Modal extends ViewComponent<ModalProps> {
     const {
       header = this.getDefaultHeader,
       title,
-    } = this.props;
+    } = this.reactiveProps;
 
     if (typeof header === 'function') {
       const closeButton = this.getCloseButton();
@@ -1085,7 +1088,7 @@ export default class Modal extends ViewComponent<ModalProps> {
     const {
       drawerHeaderFooterCombined,
       prefixCls,
-      props: { title, movable = this.getContextConfig('modalMovable'), fullScreen, drawer },
+      reactiveProps: { title, movable = this.getContextConfig('modalMovable'), fullScreen, drawer },
       modalClosable,
     } = this;
     const footer = this.getFooter();
@@ -1127,7 +1130,7 @@ export default class Modal extends ViewComponent<ModalProps> {
   }
 
   getBody(): ReactNode {
-    const { children } = this.props;
+    const { children } = this.reactiveProps;
     return this.renderChildren(
       typeof children === 'function'
         ? asyncComponent(children as AsyncCmpLoadingFunction)
@@ -1138,7 +1141,7 @@ export default class Modal extends ViewComponent<ModalProps> {
   getFooter(): ReactNode {
     const {
       footer = this.getDefaultFooter,
-    } = this.props;
+    } = this.reactiveProps;
 
     if (typeof footer === 'function') {
       return this.getWrappedFooter(footer(this.okBtn, this.cancelBtn, this.childrenProps));
@@ -1152,7 +1155,7 @@ export default class Modal extends ViewComponent<ModalProps> {
   getWrappedFooter(footer: ReactNode) {
     const { prefixCls, drawerHeaderFooterCombined } = this;
 
-    const { drawer, footerExtra } = this.props;
+    const { drawer, footerExtra } = this.reactiveProps;
 
     const className = classNames({
       [`${prefixCls}-footer`]: !drawerHeaderFooterCombined,
@@ -1225,7 +1228,7 @@ export default class Modal extends ViewComponent<ModalProps> {
 
   renderChildren(children: ReactNode): ReactNode {
     if (children) {
-      const { prefixCls, props } = this;
+      const { prefixCls, reactiveProps: props } = this;
       const { bodyStyle, drawer } = props;
       return (
         <div className={classNames(`${prefixCls}-body`, { [`${prefixCls}-drawer-body`]: drawer })} style={bodyStyle}>
@@ -1237,7 +1240,7 @@ export default class Modal extends ViewComponent<ModalProps> {
 
   @autobind
   close() {
-    const { close = noop } = this.props;
+    const { close = noop } = this.reactiveProps;
     close();
   }
 }

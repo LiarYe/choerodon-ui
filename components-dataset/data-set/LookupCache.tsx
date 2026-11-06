@@ -1,7 +1,14 @@
-import { observable } from 'mobx';
+import { makeObservable, observable } from 'mobx';
 
 export default class LookupCache {
-  @observable items?: object[];
+  items?: object[] = undefined;
 
-  @observable promise?: Promise<object[]> | undefined;
+  promise?: Promise<object[]> | undefined = undefined;
+
+  constructor() {
+    makeObservable(this, {
+      items: observable,
+      promise: observable,
+    });
+  }
 }

@@ -1,6 +1,6 @@
 import React, { Component, CSSProperties, Key, memo, forwardRef, ForwardRefExoticComponent, PropsWithoutRef, RefAttributes } from 'react';
 import { createPortal, render } from 'react-dom';
-import { action, computed, observable, runInAction } from 'mobx';
+import { action, observable, runInAction, makeObservable } from 'mobx';
 import { observer } from 'mobx-react';
 import classNames from 'classnames';
 import isPromise from 'is-promise';
@@ -130,19 +130,26 @@ export class ModalContainerClass extends Component<ModalContainerProps> implemen
     modals: [],
   };
 
+  reactiveProps: ModalContainerProps;
+
+  mount: HTMLElement | undefined = undefined;
+
   saveMount = (mount) => {
     if (mount) {
+      runInAction(() => {
+        this.mount = mount;
+      });
       this.setState({
         mount,
       });
     }
   };
 
-  @observable maskHidden: boolean;
+  maskHidden: boolean;
 
-  @observable active: boolean;
+  active: boolean;
 
-  @observable drawerOffsets: DrawerOffsets;
+  drawerOffsets: DrawerOffsets;
 
   maskStyle?: CSSProperties | undefined;
 
@@ -152,7 +159,6 @@ export class ModalContainerClass extends Component<ModalContainerProps> implemen
 
   timeID?: number;
 
-  @computed
   get baseOffsets() {
     const offsets = {
       'slide-up': 0, 'slide-right': 0, 'slide-down': 0, 'slide-left': 0,
@@ -173,7 +179,6 @@ export class ModalContainerClass extends Component<ModalContainerProps> implemen
     return offsets;
   }
 
-  @computed
   get isTop(): boolean {
     let is = true;
     containerInstances.some(instance => {
@@ -200,6 +205,19 @@ export class ModalContainerClass extends Component<ModalContainerProps> implemen
 
   constructor(props, context) {
     super(props, context);
+    this.reactiveProps = props;
+    if (!Object.prototype.hasOwnProperty.call(this, 'maskHidden')) Object.assign(this, { maskHidden: undefined });
+    if (!Object.prototype.hasOwnProperty.call(this, 'active')) Object.assign(this, { active: undefined });
+    if (!Object.prototype.hasOwnProperty.call(this, 'drawerOffsets')) Object.assign(this, { drawerOffsets: undefined });
+    makeObservable(this, {
+      reactiveProps: observable.ref,
+      mount: observable.ref,
+      maskHidden: observable,
+      active: observable,
+      drawerOffsets: observable,
+      top: action,
+      updateModals: action,
+    });
     runInAction(() => {
       this.maskHidden = true;
       this.active = false;
@@ -279,10 +297,15 @@ export class ModalContainerClass extends Component<ModalContainerProps> implemen
     }
   };
 
-  @action
   top(): IModalContainer {
     ModalManager.addInstance(this);
     return this;
+  }
+
+  componentWillReceiveProps(nextProps: ModalContainerProps) {
+    runInAction(() => {
+      this.reactiveProps = nextProps;
+    });
   }
 
   componentDidUpdate(prevProps) {
@@ -333,7 +356,6 @@ export class ModalContainerClass extends Component<ModalContainerProps> implemen
     }
   };
 
-  @action
   updateModals(modals: ModalProps[]) {
     this.top();
     let maskHidden = true;
@@ -620,7 +642,7 @@ export class ModalContainerClass extends Component<ModalContainerProps> implemen
   }
 
   getContainer(): HTMLElement | undefined {
-    const { getContainer: getModalContainer } = this.props;
+    const { getContainer: getModalContainer } = this.reactiveProps;
     if (typeof getModalContainer === 'function') {
       return getModalContainer();
     }
@@ -631,7 +653,7 @@ export class ModalContainerClass extends Component<ModalContainerProps> implemen
   }
 
   getOffsetContainer(): HTMLElement | null {
-    const { mount } = this.state;
+    const { mount } = this;
     if (mount) {
       const { parentElement } = mount;
       if (parentElement) {

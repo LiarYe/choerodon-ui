@@ -4,7 +4,7 @@ import isEmpty from 'lodash/isEmpty';
 import isUndefined from 'lodash/isUndefined';
 import isNil from 'lodash/isNil';
 import sortBy from 'lodash/sortBy';
-import { action, toJS } from 'mobx';
+import { action, toJS, makeObservable } from 'mobx';
 import { observer } from 'mobx-react';
 import { LovConfig } from 'choerodon-ui/dataset/interface';
 import Tag from 'choerodon-ui/lib/tag';
@@ -56,6 +56,13 @@ export function getRecords(records: Record[], textField: string): Record[] {
 
 @observer
 export default class SelectionList extends Component<SelectionListProps> {
+  constructor(props, context) {
+    super(props, context);
+    makeObservable(this, {
+      unSelect: action,
+    });
+  }
+
   get prefixCls() {
     const { context: { getProPrefixCls } } = this.props;
     return getProPrefixCls('modal');
@@ -70,7 +77,6 @@ export default class SelectionList extends Component<SelectionListProps> {
     this.selectionNode = node;
   }
 
-  @action
   unSelect = (record: Record) => {
     const { dataSet, treeFlag } = this.props;
     if (treeFlag === 'Y') {

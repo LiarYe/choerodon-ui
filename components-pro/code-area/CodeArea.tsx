@@ -2,7 +2,7 @@ import React, { ComponentClass, ReactNode } from 'react';
 import { findDOMNode } from 'react-dom';
 import classes from 'component-classes';
 import classNames from 'classnames';
-import { action, autorun, IReactionDisposer, observable, runInAction } from 'mobx';
+import { action, autorun, IReactionDisposer, observable, runInAction, makeObservable } from 'mobx';
 import { observer } from 'mobx-react';
 import { IControlledCodeMirror as CodeMirrorProps, IInstance } from 'react-codemirror2';
 import ResizeObserver from 'resize-observer-polyfill';
@@ -92,13 +92,13 @@ export default class CodeArea extends FormField<CodeAreaProps> {
 
   cmOptions: any = this.getCodeMirrorOptions();
 
-  @observable text?: string;
+  text?: string;
 
   midText: string;
 
-  disposer: IReactionDisposer;
+  disposer?: IReactionDisposer;
 
-  @observable theme?: string;
+  theme?: string;
 
   editor?: IInstance;
 
@@ -116,9 +116,24 @@ export default class CodeArea extends FormField<CodeAreaProps> {
 
   constructor(props, content) {
     super(props, content);
+    if (!Object.prototype.hasOwnProperty.call(this, 'text')) this.text = undefined;
+    if (!Object.prototype.hasOwnProperty.call(this, 'theme')) this.theme = undefined;
+    makeObservable(this, {
+      text: observable,
+      theme: observable,
+      setTheme: action,
+      setText: action,
+    });
     const { options } = props;
     const theme = options && options.theme ? options.theme : props.themeSwitch;
     this.setTheme(defaultTo(theme, defaultCodeMirrorOptions.theme));
+    this.handleChangeWait = this.getHandleChange(props);
+  }
+
+  componentDidMount() {
+    super.componentDidMount();
+    let previousFormatter: CodeAreaProps['formatter'];
+    let previousOptions: CodeAreaProps['prettierOptions'];
     this.disposer = autorun(() => {
       // 在绑定dataSet的情况下
       // 当手动修改过codeArea里面的值以后 再使用record.set去更新值 组件不会更新
@@ -127,25 +142,26 @@ export default class CodeArea extends FormField<CodeAreaProps> {
       // 原因在于 record 中的值为 raw的非格式化数据 blur后因为进行了一次record数据的修改 所以再次重新那数据必然导致
       // 当数据存在错误的时候  codeArea去格式化 因为格式化失败了
       // 当数据不存在存在错误的时候即使特地将其去格式化也依旧会被格式化
-      const { formatter, prettierOptions } = props;
+      const { formatter, prettierOptions } = this.reactiveProps;
       const recordValue = this.getValue();
       const value = formatter ? formatter.getFormatted(recordValue, prettierOptions) : recordValue;
       // 分别监听 受控 及 DataSet 进行管理时值的变化
-      if (recordValue !== this.midText || (this.dataSet && this.name)) {
+      if (recordValue !== this.midText || (this.dataSet && this.name) || formatter !== previousFormatter || prettierOptions !== previousOptions) {
         this.setText(value);
       }
+      previousFormatter = formatter;
+      previousOptions = prettierOptions;
     });
-    this.handleChangeWait = this.getHandleChange(props);
-  }
-
-  componentDidMount() {
-    super.componentDidMount();
 
     this.handleMountRefresh();
   }
 
   componentWillUnmount(): void {
-    this.disposer();
+    super.componentWillUnmount();
+    if (this.disposer) {
+      this.disposer();
+      this.disposer = undefined;
+    }
     this.disconnect();
     this.editorRefreshDebounce.cancel();
     this.handleChangeWait.cancel();
@@ -158,7 +174,7 @@ export default class CodeArea extends FormField<CodeAreaProps> {
   }
 
   handleMountRefresh() {
-    const { wrapper, context, element } = this;
+    const { wrapper, reactiveContext: context, element } = this;
     if (wrapper) {
       this.resizeObserver = new ResizeObserver((entries: ResizeObserverEntry[]) => {
         entries.forEach(entry => {
@@ -224,14 +240,14 @@ export default class CodeArea extends FormField<CodeAreaProps> {
   handleBeforeChange(editor: IInstance, _data, value) {
     this.setText(value);
     this.editorRefreshDebounce();
-    if (this.props.valueChangeAction === ValueChangeAction.input) {
+    if (this.reactiveProps.valueChangeAction === ValueChangeAction.input) {
       this.handleChangeWait(editor, undefined, true);
     }
   }
 
   @autobind
   handleCodeMirrorKeyDown(cm, e) {
-    const { onKeyDown = noop, onEnterDown = noop } = this.props;
+    const { onKeyDown = noop, onEnterDown = noop } = this.reactiveProps;
     switch (e.keyCode) {
       case KeyCode.ENTER:
         onEnterDown(e);
@@ -245,7 +261,7 @@ export default class CodeArea extends FormField<CodeAreaProps> {
   }
 
   getCodeMirrorOptions(options: any = this.props.options!): any {
-    let { placeholder } = this.props;
+    let { placeholder } = this.reactiveProps;
     if (this.labelLayout === LabelLayout.placeholder && !this.isFocused) {
       placeholder = this.getDisplayProp('label');
     } else if (this.labelLayout === LabelLayout.float && !this.isFocused) {
@@ -282,7 +298,7 @@ export default class CodeArea extends FormField<CodeAreaProps> {
 
   setThemeWrapper(nextProps) {
     const { options, themeSwitch } = nextProps;
-    const { options: preOptions, themeSwitch: preThemeSwitch } = this.props;
+    const { options: preOptions, themeSwitch: preThemeSwitch } = this.reactiveProps;
     const preOptionsTheme = preOptions && preOptions.theme;
     const optionsTheme = options && options.theme;
     if (preOptionsTheme !== optionsTheme || preThemeSwitch !== themeSwitch) {
@@ -296,6 +312,7 @@ export default class CodeArea extends FormField<CodeAreaProps> {
 
     const { wait, waitType } = this.props;
     if (wait !== nextProps.wait || waitType !== nextProps.waitType) {
+      this.handleChangeWait.cancel();
       this.handleChangeWait = this.getHandleChange(nextProps);
     }
   }
@@ -342,7 +359,7 @@ export default class CodeArea extends FormField<CodeAreaProps> {
 
   @autobind
   handleHelpMouseEnter(e) {
-    const { getTooltipTheme, getTooltipPlacement } = this.context;
+    const { getTooltipTheme, getTooltipPlacement } = this.reactiveContext;
     const { helpTooltipProps } = this;
     let helpTooltipCls = `${this.getContextConfig('proPrefixCls')}-tooltip-popup-help`;
     if (helpTooltipProps && helpTooltipProps.popupClassName) {
@@ -405,14 +422,12 @@ export default class CodeArea extends FormField<CodeAreaProps> {
     }
   }
 
-  @action
   setTheme(theme?: string): void {
     if (theme !== this.theme) {
       this.theme = theme;
     }
   }
 
-  @action
   setText(text?: string): void {
     this.text = text;
   }
@@ -423,7 +438,7 @@ export default class CodeArea extends FormField<CodeAreaProps> {
 
   processValue(value: any): ReactNode {
     const text = super.processValue(value);
-    const { formatter, prettierOptions } = this.props;
+    const { formatter, prettierOptions } = this.reactiveProps;
     return formatter && isString(text) ? formatter.getFormatted(text, prettierOptions) : text;
   }
 

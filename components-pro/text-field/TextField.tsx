@@ -22,7 +22,8 @@ import noop from 'lodash/noop';
 import defaultTo from 'lodash/defaultTo';
 import debounce from 'lodash/debounce';
 import classNames from 'classnames';
-import { action, computed, observable, runInAction, toJS, isArrayLike } from 'mobx';
+import { action, observable, runInAction, toJS, makeObservable, override as mobxOverride } from 'mobx';
+import isArrayLike from 'choerodon-ui/dataset/mobx-helper/isArrayLike';
 import { observer } from 'mobx-react';
 import { global } from 'choerodon-ui/shared';
 import Progress from 'choerodon-ui/lib/progress';
@@ -181,7 +182,7 @@ export class TextField<T extends TextFieldProps> extends FormField<T> {
     waitType: WaitType.debounce,
   };
 
-  @observable text?: string;
+  text?: string;
 
   type = 'text';
 
@@ -197,19 +198,19 @@ export class TextField<T extends TextFieldProps> extends FormField<T> {
 
   addonBeforeRef?: HTMLDivElement | null;
 
-  @observable suffixRef?: HTMLDivElement | null;
+  suffixRef?: HTMLDivElement | null;
 
-  @observable renderedText?: {
+  renderedText?: {
     text: string;
     width: number;
   } | undefined;
 
-  @observable renderedStartText?: {
+  renderedStartText?: {
     text: string;
     width: number;
   } | undefined;
 
-  @observable renderedEndText?: {
+  renderedEndText?: {
     text: string;
     width: number;
   } | undefined;
@@ -218,7 +219,7 @@ export class TextField<T extends TextFieldProps> extends FormField<T> {
 
   lengthElement?: ReactNode;
 
-  @observable lengthInfoWidth?: number;
+  lengthInfoWidth?: number;
 
   suffixWidth?: number;
 
@@ -230,10 +231,10 @@ export class TextField<T extends TextFieldProps> extends FormField<T> {
 
   preCompositionValue?: string;
 
-  @observable showMaxLengthWarningFlag?: 'input' | 'paste';
+  showMaxLengthWarningFlag?: 'input' | 'paste';
 
   get clearButton(): boolean {
-    const { clearButton } = this.props;
+    const { clearButton } = this.reactiveProps;
     return !!clearButton && !this.readOnly && !this.disabled;
   }
 
@@ -247,38 +248,35 @@ export class TextField<T extends TextFieldProps> extends FormField<T> {
   /**
    * 是否显示长度信息
    */
-  @computed
   get valueChangeAction(): ValueChangeAction | undefined {
-    if ('valueChangeAction' in this.props) {
-      return this.props.valueChangeAction;
+    if ('valueChangeAction' in this.reactiveProps) {
+      return this.reactiveProps.valueChangeAction;
     }
     return this.getContextConfig('valueChangeAction');
   }
 
-  @computed
   get showLengthInfo(): boolean | 'auto' | undefined {
-    if ('showLengthInfo' in this.props) {
-      return this.props.showLengthInfo;
+    if ('showLengthInfo' in this.reactiveProps) {
+      return this.reactiveProps.showLengthInfo;
     }
     return this.getContextConfig('showLengthInfo');
   }
 
-  @computed
   get showHelp(): ShowHelp {
     const { showHelp } = this.observableProps;
     if (isString(showHelp)) {
       return showHelp as ShowHelp;
     }
-    return this.context.showHelp || this.getContextConfig('showHelp') || ShowHelp.newLine;
+    return this.reactiveContext.showHelp || this.getContextConfig('showHelp') || ShowHelp.newLine;
   }
 
   get border(): boolean | undefined {
-    return this.props.border;
+    return this.reactiveProps.border;
   }
 
   get tooltip(): TextTooltip | [TextTooltip, TooltipProps] | undefined {
-    const { getTooltip } = this.context;
-    const { tooltip: inputTooltip } = this.props;
+    const { getTooltip } = this.reactiveContext;
+    const { tooltip: inputTooltip } = this.reactiveProps;
     const disabledTooltip = getTooltip('text-field-disabled');
     const configTooltip = getTooltip('text-field');
     const tooltip = this.disabled ? (inputTooltip || disabledTooltip) : (inputTooltip || configTooltip);
@@ -286,8 +284,8 @@ export class TextField<T extends TextFieldProps> extends FormField<T> {
   }
 
   get placeholderTooltip(): TextTooltip | [TextTooltip, TooltipProps] | undefined {
-    const { getTooltip } = this.context;
-    const { placeholderTooltip } = this.props;
+    const { getTooltip } = this.reactiveContext;
+    const { placeholderTooltip } = this.reactiveProps;
     const configPlaceholderTooltip = getTooltip('text-field-placeholder');
     const tooltip = placeholderTooltip || configPlaceholderTooltip;
     return tooltip;
@@ -315,14 +313,39 @@ export class TextField<T extends TextFieldProps> extends FormField<T> {
   }
 
   get fieldFocusMode(): FieldFocusMode | undefined {
-    if ('fieldFocusMode' in this.props) {
-      return this.props.fieldFocusMode;
+    if ('fieldFocusMode' in this.reactiveProps) {
+      return this.reactiveProps.fieldFocusMode;
     }
     return this.getContextConfig('fieldFocusMode');
   }
 
   constructor(props, context) {
     super(props, context);
+    if (!Object.prototype.hasOwnProperty.call(this, 'text')) this.text = undefined;
+    if (!Object.prototype.hasOwnProperty.call(this, 'suffixRef')) this.suffixRef = undefined;
+    if (!Object.prototype.hasOwnProperty.call(this, 'renderedText')) this.renderedText = undefined;
+    if (!Object.prototype.hasOwnProperty.call(this, 'renderedStartText')) this.renderedStartText = undefined;
+    if (!Object.prototype.hasOwnProperty.call(this, 'renderedEndText')) this.renderedEndText = undefined;
+    if (!Object.prototype.hasOwnProperty.call(this, 'lengthInfoWidth')) this.lengthInfoWidth = undefined;
+    if (!Object.prototype.hasOwnProperty.call(this, 'showMaxLengthWarningFlag')) this.showMaxLengthWarningFlag = undefined;
+    makeObservable(this, {
+      text: observable,
+      suffixRef: observable,
+      renderedText: observable,
+      renderedStartText: observable,
+      renderedEndText: observable,
+      lengthInfoWidth: observable,
+      showMaxLengthWarningFlag: observable,
+      showLengthExceedWarning: action.bound,
+      handleRenderedValueChange: action.bound,
+      saveSuffixRef: action.bound,
+      handleLengthInfoWidthChange: action.bound,
+      wrapperSuffix: action,
+      handleBlur: mobxOverride,
+      setValue: mobxOverride,
+      setText: action,
+      handleChange: action.bound,
+    });
     this.handleChangeWait = this.getHandleChange(props);
     this.showLengthExceedWarningDeb = debounce(this.showLengthExceedWarning, 1000, { leading: true, trailing: false });
   }
@@ -337,8 +360,6 @@ export class TextField<T extends TextFieldProps> extends FormField<T> {
     return inputLengthExceedWarning;
   }
 
-  @autobind
-  @action
   showLengthExceedWarning(type?: 'input' | 'paste') {
     const inputLengthExceedWarning = this.getInputLengthExceedWarning(type);
     const maxLength = this.getProp('maxLength');
@@ -362,8 +383,6 @@ export class TextField<T extends TextFieldProps> extends FormField<T> {
     }
   }
 
-  @autobind
-  @action
   handleRenderedValueChange(text: string, width: number, rangeTarget?: 0 | 1) {
     if (this.showSelectLoading) {
       return;
@@ -453,10 +472,8 @@ export class TextField<T extends TextFieldProps> extends FormField<T> {
     this.addonBeforeRef = node;
   }
 
-  @autobind
-  @action
   saveSuffixRef(node) {
-    const { suffix = this.getDefaultSuffix() } = this.props;
+    const { suffix = this.getDefaultSuffix() } = this.reactiveProps;
     if (suffix && isValidElement<any>(suffix) &&
       (!suffix.props || !suffix.props.style || !suffix.props.style.width || !toPx(suffix.props.style.width))) {
       this.suffixRef = node;
@@ -475,7 +492,7 @@ export class TextField<T extends TextFieldProps> extends FormField<T> {
   }
 
   getEditorTextInfo(rangeTarget?: 0 | 1): { text: string; width: number; placeholder?: string } {
-    const { isFlat } = this.props;
+    const { isFlat } = this.reactiveProps;
     const [startPlaceHolder, endPlaceHolder = startPlaceHolder] = this.hasFloatLabel && !this.isFocused ? [] : this.getPlaceholders();
     const { text } = this;
     if (rangeTarget === undefined) {
@@ -612,12 +629,12 @@ export class TextField<T extends TextFieldProps> extends FormField<T> {
     otherProps.maxLength = this.getProp('maxLength');
     otherProps.onKeyDown = this.handleKeyDown;
     otherProps.onPaste = this.handlePaste;
-    otherProps.autoComplete = this.props.autoComplete || this.getContextConfig('textFieldAutoComplete') || 'off';
+    otherProps.autoComplete = this.reactiveProps.autoComplete || this.getContextConfig('textFieldAutoComplete') || 'off';
     return otherProps;
   }
 
   forceBlur(e) {
-    const { addonBefore, addonAfter, _inTable } = this.props;
+    const { addonBefore, addonAfter, _inTable } = this.reactiveProps;
     if (!_inTable || (!addonBefore && !addonAfter)) {
       super.forceBlur(e);
     }
@@ -625,7 +642,7 @@ export class TextField<T extends TextFieldProps> extends FormField<T> {
 
   @autobind
   handleAddonBeforeKeyDown(e) {
-    const { _inTable, onKeyDown } = this.props;
+    const { _inTable, onKeyDown } = this.reactiveProps;
     if (_inTable && onKeyDown && e.keyCode === KeyCode.TAB && e.shiftKey) {
       onKeyDown(e);
     }
@@ -633,7 +650,7 @@ export class TextField<T extends TextFieldProps> extends FormField<T> {
 
   @autobind
   handleAddonAfterKeyDown(e) {
-    const { _inTable, onKeyDown } = this.props;
+    const { _inTable, onKeyDown } = this.reactiveProps;
     if (_inTable && onKeyDown && e.keyCode === KeyCode.TAB && !e.shiftKey) {
       onKeyDown(e);
     }
@@ -642,7 +659,7 @@ export class TextField<T extends TextFieldProps> extends FormField<T> {
   @autobind
   handleMultipleMouseEnter(e) {
     const { onMouseEnter } = this.getOtherProps();
-    const { overMaxTagCountTooltip, isFlat } = this.props;
+    const { overMaxTagCountTooltip, isFlat } = this.reactiveProps;
     // 禁用时 ViewComponent 会在 wrapper 层触发 mouseEnter
     if (!this.disabled && onMouseEnter) {
       onMouseEnter(e);
@@ -669,7 +686,7 @@ export class TextField<T extends TextFieldProps> extends FormField<T> {
 
   @autobind
   handleHelpMouseEnter(e) {
-    const { getTooltipTheme, getTooltipPlacement } = this.context;
+    const { getTooltipTheme, getTooltipPlacement } = this.reactiveContext;
     const { helpTooltipProps } = this;
     let helpTooltipCls = `${this.getContextConfig('proPrefixCls')}-tooltip-popup-help`;
     if (helpTooltipProps && helpTooltipProps.popupClassName) {
@@ -691,7 +708,7 @@ export class TextField<T extends TextFieldProps> extends FormField<T> {
   }
 
   getWrapperClassNames(...args): string {
-    const { prefixCls, multiple, range, border, showMaxLengthWarningFlag, isFocus, props: { isFlat } } = this;
+    const { prefixCls, multiple, range, border, showMaxLengthWarningFlag, isFocus, reactiveProps: { isFlat } } = this;
     const suffix = this.getSuffix();
     const prefix = this.getPrefix();
     return super.getWrapperClassNames(
@@ -735,7 +752,7 @@ export class TextField<T extends TextFieldProps> extends FormField<T> {
     if (super.showTooltip(e)) {
       return true;
     }
-    const { getTooltipTheme, getTooltipPlacement } = this.context;
+    const { getTooltipTheme, getTooltipPlacement } = this.reactiveContext;
     const { element, renderedValue, tooltip } = this;
     const title = this.getRenderedValue();
     const judgeOverflowElement = renderedValue ? element.parentNode.previousElementSibling : element;
@@ -776,7 +793,7 @@ export class TextField<T extends TextFieldProps> extends FormField<T> {
 
   showPlaceholderTooltip(_): boolean {
     if (this.isEmpty() && !this.disabled && !this.readOnly && (this.getPlaceholders() || []).some(holder => holder)) {
-      const { getTooltipTheme, getTooltipPlacement } = this.context;
+      const { getTooltipTheme, getTooltipPlacement } = this.reactiveContext;
       const { wrapper, element, prefixCls, placeholderTooltip: tooltip } = this;
       const title = this.getRenderedPlaceholder();
       const tooltipPlacement = getTooltipPlacement('text-field-placeholder') || getTooltipPlacement('text-field');
@@ -818,7 +835,7 @@ export class TextField<T extends TextFieldProps> extends FormField<T> {
   }
 
   renderInputElement(): ReactNode {
-    const { addonBefore, addonAfter, isFlat } = this.props;
+    const { addonBefore, addonAfter, isFlat } = this.reactiveProps;
     const renderedValue = this.renderRenderedValue(undefined, { isFlat });
     this.renderedValue = renderedValue;
     // 先计算lengthElement,然后计算suffix,再计算clearButton,设置right和输入框paddingRight,避免重叠
@@ -891,7 +908,7 @@ export class TextField<T extends TextFieldProps> extends FormField<T> {
     const {
       showHelp,
       prefixCls,
-      props: { addonBefore, addonAfter, addonBeforeStyle, addonAfterStyle, groupClassName, _inTable, onBlur, tabIndex },
+      reactiveProps: { addonBefore, addonAfter, addonBeforeStyle, addonAfterStyle, groupClassName, _inTable, onBlur, tabIndex },
     } = this;
     const inputElement = this.renderInputElement();
     const help = showHelp === ShowHelp.tooltip ? this.renderTooltipHelp() : null;
@@ -939,8 +956,6 @@ export class TextField<T extends TextFieldProps> extends FormField<T> {
     }
   }
 
-  @autobind
-  @action
   handleLengthInfoWidthChange(width?: number) {
     if (this.lengthInfoWidth !== width) {
       this.lengthInfoWidth = width;
@@ -970,7 +985,7 @@ export class TextField<T extends TextFieldProps> extends FormField<T> {
 
   // 处理 form 中的 labelLayout 为 placeholder 情况避免以前 placeholder 和 label 无法区分彼此。
   getPlaceholders(): string[] {
-    const { dataSet, record, props, labelLayout } = this;
+    const { dataSet, record, reactiveProps: props, labelLayout } = this;
     const placeholderOrigin = this.getProp('placeholder');
     let placeholder = placeholderOrigin;
     if (labelLayout === LabelLayout.placeholder) {
@@ -1005,7 +1020,7 @@ export class TextField<T extends TextFieldProps> extends FormField<T> {
   }
 
   renderRangeEditor(props) {
-    const { isFlat, forceShowRangeSeparator } = this.props;
+    const { isFlat, forceShowRangeSeparator } = this.reactiveProps;
     const { prefixCls, rangeTarget, isFocused, editable } = this;
     const [startValue = '', endValue = ''] = this.processRangeValue(this.isEditableLike() ? undefined : this.rangeValue);
     const startRenderedValue = this.renderRenderedValue(startValue, {
@@ -1290,7 +1305,7 @@ export class TextField<T extends TextFieldProps> extends FormField<T> {
     const {
       multiple,
       range,
-      props: { isFlat },
+      reactiveProps: { isFlat },
     } = this;
     const {
       onFocus,
@@ -1427,7 +1442,7 @@ export class TextField<T extends TextFieldProps> extends FormField<T> {
     if (!showSuffix) {
       return undefined;
     }
-    const { suffix = this.getDefaultSuffix() } = this.props;
+    const { suffix = this.getDefaultSuffix() } = this.reactiveProps;
     if (suffix) {
       return this.wrapperSuffix(suffix);
     }
@@ -1438,13 +1453,12 @@ export class TextField<T extends TextFieldProps> extends FormField<T> {
     return undefined;
   }
 
-  @action
   wrapperSuffix(children: ReactNode, props?: any): ReactNode {
     const suffixEvents = ['MouseDown', 'MouseUp', 'Click', 'DoubleClick', 'ContextMenu'];
     const {
       prefixCls,
       clearButton,
-      props: {
+      reactiveProps: {
         onMouseDown,
         onMouseUp,
         onClick,
@@ -1529,7 +1543,7 @@ export class TextField<T extends TextFieldProps> extends FormField<T> {
   }
 
   getPrefix(): ReactNode {
-    const { prefix } = this.props;
+    const { prefix } = this.reactiveProps;
     let wrapperPrefixNode;
     if (prefix) {
       wrapperPrefixNode = this.wrapperPrefix(prefix);
@@ -1572,7 +1586,7 @@ export class TextField<T extends TextFieldProps> extends FormField<T> {
   }
 
   renderMultipleHolder() {
-    const { name, multiple, props: { isFlat } } = this;
+    const { name, multiple, reactiveProps: { isFlat } } = this;
     let width: string | number = 'auto';
     if (isFlat) {
       const hasValue = !this.isEmpty();
@@ -1710,7 +1724,7 @@ export class TextField<T extends TextFieldProps> extends FormField<T> {
   @autobind
   handleTagAnimateEnter() {
     const { tagContainer } = this;
-    const { style } = this.props;
+    const { style } = this.reactiveProps;
     if (tagContainer && style && style.height) {
       if (tagContainer.scrollTo) {
         tagContainer.scrollTo(0, tagContainer.getBoundingClientRect().height);
@@ -1802,7 +1816,7 @@ export class TextField<T extends TextFieldProps> extends FormField<T> {
         });
       }
       if (e.keyCode === KeyCode.TAB) {
-        const { _inTable } = this.props;
+        const { _inTable } = this.reactiveProps;
         if (_inTable) {
           if (e.shiftKey) {
             const { addonBeforeRef } = this;
@@ -1850,7 +1864,7 @@ export class TextField<T extends TextFieldProps> extends FormField<T> {
           }
         }
       } else {
-        const { clearButton } = this.props;
+        const { clearButton } = this.reactiveProps;
         if (clearButton && !this.editable) {
           switch (e.keyCode) {
             case KeyCode.DELETE:
@@ -1904,7 +1918,6 @@ export class TextField<T extends TextFieldProps> extends FormField<T> {
     this.clear();
   }
 
-  @autobind
   handleFocus(e) {
     if (this.element && isFunction(this.element.getBoundingClientRect)) {
       const elementRect = this.element.getBoundingClientRect();
@@ -1919,8 +1932,6 @@ export class TextField<T extends TextFieldProps> extends FormField<T> {
     defer(() => this.isFocused && this.select());
   }
 
-  @autobind
-  @action
   handleBlur(e) {
     if (!e.isDefaultPrevented()) {
       if (this.editable || this.isEditableLike()) {
@@ -1941,7 +1952,6 @@ export class TextField<T extends TextFieldProps> extends FormField<T> {
     }
   }
 
-  @action
   setValue(value: any, noVaidate?: boolean, reserveParam?: boolean, triggerHiddenDelay?: number): void {
     super.setValue(value, noVaidate);
     if (!reserveParam) {
@@ -1959,7 +1969,6 @@ export class TextField<T extends TextFieldProps> extends FormField<T> {
     return this.text === undefined || this.isEditableLike() ? super.getTextNode(value) : this.text;
   }
 
-  @action
   setText(text?: string): void {
     this.text = text;
   }
@@ -1986,15 +1995,13 @@ export class TextField<T extends TextFieldProps> extends FormField<T> {
     return debounce(this.prepareSetValue, 0);
   }
 
-  @autobind
-  @action
   handleChange(e) {
     const {
       target,
       target: { value },
     } = e;
     this.hideTooltip();
-    const { valueChangeAction, showMaxLengthWarningFlag, props: { wait, waitType } } = this;
+    const { valueChangeAction, showMaxLengthWarningFlag, reactiveProps: { wait, waitType } } = this;
     const restricted = this.restrictInput(value);
     if (restricted !== value) {
       const selectionEnd = target.selectionEnd + restricted.length - value.length;
@@ -2018,7 +2025,7 @@ export class TextField<T extends TextFieldProps> extends FormField<T> {
   }
 
   restrictInput(value: string): string {
-    const { restrict } = this.props;
+    const { restrict } = this.reactiveProps;
     if (restrict && !this.lock) {
       const pattern = isRegExp(restrict) ? restrict : new RegExp(`[^${restrict}]+`, 'g');
       return value.replace(pattern, '');

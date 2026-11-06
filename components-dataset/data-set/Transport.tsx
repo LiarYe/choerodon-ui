@@ -1,4 +1,5 @@
-import { observable, runInAction } from 'mobx';
+import { makeObservable, observable, runInAction } from 'mobx';
+
 import { AxiosRequestConfig } from 'axios';
 import DataSet from './DataSet';
 
@@ -36,7 +37,7 @@ export type TransportProps = {
 };
 
 export default class Transport {
-  @observable props: TransportProps;
+  props: TransportProps;
 
   dataSet: DataSet;
 
@@ -131,6 +132,12 @@ export default class Transport {
   }
 
   constructor(props: TransportProps = {}, dataSet: DataSet) {
+    Object.assign(this, {
+      props: undefined,
+    });
+    makeObservable(this, {
+      props: observable,
+    });
     runInAction(() => {
       this.props = props;
       this.dataSet = dataSet;

@@ -1,6 +1,6 @@
 import React, { ReactElement, ReactNode } from 'react';
 import { observer } from 'mobx-react';
-import { isArrayLike } from 'mobx';
+import isArrayLike from 'choerodon-ui/dataset/mobx-helper/isArrayLike';
 import classNames from 'classnames';
 import { Select, SelectProps } from '../select/Select';
 import ObserverRadio from '../radio/Radio';
@@ -59,7 +59,7 @@ export class SelectBox<T extends SelectBoxProps = SelectBoxProps> extends Select
   }
 
   get mode(): ViewMode | undefined {
-    return this.props.mode;
+    return this.reactiveProps.mode;
   }
 
   get showInputPrompt(): ReactNode | undefined {
@@ -79,7 +79,7 @@ export class SelectBox<T extends SelectBoxProps = SelectBoxProps> extends Select
   getClassName(...props): string | undefined {
     const {
       prefixCls,
-      props: { vertical },
+      reactiveProps: { vertical },
     } = this;
     return super.getClassName(
       {
@@ -95,7 +95,7 @@ export class SelectBox<T extends SelectBoxProps = SelectBoxProps> extends Select
 
   renderSearcher(): ReactNode {
     if (this.searchable) {
-      const { placeholder } = this.props;
+      const { placeholder } = this.reactiveProps;
       return (
         <TextField
           prefix={<Icon type="search" />}
@@ -114,7 +114,7 @@ export class SelectBox<T extends SelectBoxProps = SelectBoxProps> extends Select
 
   renderWrapper(): ReactNode {
     const { name, options, filteredOptions, textField, valueField, readOnly, disabled, mode } = this;
-    const { autoFocus, onOption, optionRenderer, optionsFilter } = this.props;
+    const { autoFocus, onOption, optionRenderer, optionsFilter } = this.reactiveProps;
     const highlight = this.getDisplayProp('highlight');
     let hasRef = false;
     const items = filteredOptions.reduce<ReactElement<any>[]>((arr, record, index, data) => {
@@ -181,7 +181,7 @@ export class SelectBox<T extends SelectBoxProps = SelectBoxProps> extends Select
   @autobind
   renderSelectItems(items: ReactNode): ReactNode {
     const className = this.getClassName();
-    const Element = this.context.formNode ? 'div' : 'form';
+    const Element = this.reactiveContext.formNode ? 'div' : 'form';
     return (
       <Element className={className} onMouseEnter={this.handleMouseEnter} onMouseLeave={this.handleMouseLeave}>
         {items}

@@ -1,6 +1,7 @@
 import React, { FunctionComponent, useCallback, ReactElement, MouseEventHandler, ReactNode, isValidElement, cloneElement, useEffect, useState } from 'react';
 import { observer } from 'mobx-react-lite'
-import { isArrayLike } from 'mobx';
+import isArrayLike from 'choerodon-ui/dataset/mobx-helper/isArrayLike';
+import warning from 'choerodon-ui/lib/_util/warning';
 import isPromise from 'is-promise';
 import classNames from 'classnames';
 import isString from 'lodash/isString';
@@ -31,18 +32,20 @@ type CardCommandProps = {
   commandsLimit?: number;
 };
 
+const defaultRenderCommand = ({ command }) => command;
+
 const CardCommand: FunctionComponent<CardCommandProps> = function CardCommand(props) {
   const {
     buttonDisplay,
     record,
     prefixCls,
     command,
-    renderCommand = ({ command }) => command,
+    renderCommand = defaultRenderCommand,
     dataSet,
     viewMode,
     commandsLimit = 1,
   } = props;
-  const [item, setItem] = useState<any>(null);
+  const [resolvedCommand, setResolvedCommand] = useState<{ promise: PromiseLike<any>; result: any } | null>(null);
 
   const cardCommand = useComputed(() => {
     if (typeof command === 'function') {
@@ -50,19 +53,42 @@ const CardCommand: FunctionComponent<CardCommandProps> = function CardCommand(pr
       return renderCommand({ command: colC, viewMode, dataSet, record })
     }
     return renderCommand({ command, viewMode, dataSet, record })
-  }, [record, command, dataSet, renderCommand]);
+  }, [record, command, dataSet, renderCommand, viewMode]);
 
   const handleCommandDelete = useCallback((e) => {
     e.stopPropagation();
     dataSet.delete(record);
   }, [dataSet, record]);
 
-  const renderCommands = useCallback(async () => {
+  useEffect(() => {
+    let current = true;
+    if (isPromise(cardCommand)) {
+      const resolveCommand = async () => {
+        try {
+          const result = await cardCommand;
+          if (current) {
+            setResolvedCommand({ promise: cardCommand, result });
+          }
+        } catch (error) {
+          if (current) {
+            setResolvedCommand({ promise: cardCommand, result: null });
+            warning(false, error instanceof Error ? error.message : String(error));
+          }
+        }
+      };
+      resolveCommand();
+    }
+    return () => { current = false; };
+  }, [cardCommand]);
+
+  const result = isPromise(cardCommand)
+    ? resolvedCommand && resolvedCommand.promise === cardCommand ? resolvedCommand.result : null
+    : cardCommand;
+  const item = useComputed(() => {
     const classString = classNames(`${prefixCls}-command`);
-    if (cardCommand) {
+    if (result) {
       const commands: ReactElement<ButtonProps>[] = [];
-      const result = isPromise(cardCommand) ? await cardCommand : cardCommand;
-      result.forEach(button => {
+      (result || []).forEach(button => {
         let tableButtonProps: TableButtonProps = {};
         if (isArrayLike(button)) {
           tableButtonProps = button[1] || {};
@@ -129,17 +155,12 @@ const CardCommand: FunctionComponent<CardCommandProps> = function CardCommand(pr
       });
       return commands;
     }
-  }, [prefixCls, record, cardCommand, handleCommandDelete]);
-
-  useEffect(() => {
-    const renderMenuItem = async () => {
-      const result = await renderCommands();
-      setItem(result); // 更新状态
-    };
-    renderMenuItem();
-  }, []);
+  }, [prefixCls, result, handleCommandDelete]);
 
   const renderMoreBtns = useCallback(() => {
+    if (!item) {
+      return null;
+    }
     const thiscCommandsLimit = buttonDisplay === 'limit' ?  commandsLimit : 0;
     if (thiscCommandsLimit >= item.length) {
       return null;
@@ -161,7 +182,7 @@ const CardCommand: FunctionComponent<CardCommandProps> = function CardCommand(pr
         onClick={(e) => e.stopPropagation()}
       />
     </Dropdown>);
-  }, [item, commandsLimit]);
+  }, [item, commandsLimit, buttonDisplay, prefixCls, record]);
 
   return (
     item ? (

@@ -1,5 +1,6 @@
 import React, { isValidElement, ReactNode } from 'react';
-import { action, computed, isArrayLike, runInAction } from 'mobx';
+import { action, runInAction, makeObservable } from 'mobx';
+import isArrayLike from 'choerodon-ui/dataset/mobx-helper/isArrayLike';
 import { observer } from 'mobx-react';
 import isString from 'lodash/isString';
 import isPlainObject from 'lodash/isPlainObject';
@@ -137,6 +138,14 @@ export interface NumberFieldProps<V = number> extends TextFieldProps<V> {
 }
 
 export class NumberField<T extends NumberFieldProps> extends TextField<T & NumberFieldProps> {
+  constructor(props, context) {
+    super(props, context);
+    makeObservable(this, {
+      getInnerSpanButton: action,
+      handleEnterDown: action,
+    });
+  }
+
   static displayName = 'NumberField';
 
   static defaultProps = {
@@ -160,7 +169,6 @@ export class NumberField<T extends NumberFieldProps> extends TextField<T & Numbe
 
   cursorPos?: number | null;
 
-  @computed
   get lang(): Lang {
     const { lang } = this.observableProps;
     if (lang) {
@@ -191,7 +199,6 @@ export class NumberField<T extends NumberFieldProps> extends TextField<T & Numbe
     return field ? field.get('type', this.record) === FieldType.bigNumber : false;
   }
 
-  @computed
   get allowDecimal(): boolean {
     const { min, nonStrictStep } = this;
     const precision = this.getProp('precision');
@@ -206,7 +213,6 @@ export class NumberField<T extends NumberFieldProps> extends TextField<T & Numbe
     return !step || !math.eq(math.mod(step, 1), 0) || (!!min && !math.eq(math.mod(min, 1), 0));
   }
 
-  @computed
   get nonStrictStep(): boolean {
     const nonStrictStep = this.getProp('nonStrictStep');
     if (nonStrictStep !== undefined) {
@@ -219,23 +225,19 @@ export class NumberField<T extends NumberFieldProps> extends TextField<T & Numbe
     return false;
   }
 
-  @computed
   get allowNegative(): boolean {
     const { min } = this;
     return isNil(min) || (min as number) < 0;
   }
 
-  @computed
   get min(): BigNumber.Value | undefined | null {
     return this.getLimit('min');
   }
 
-  @computed
   get max(): BigNumber.Value | undefined | null {
     return this.getLimit('max');
   }
 
-  @computed
   get value(): any | undefined {
     const { value } = this.observableProps;
     if (isArrayLike(value)) {
@@ -278,8 +280,8 @@ export class NumberField<T extends NumberFieldProps> extends TextField<T & Numbe
   }
 
   get keyboard(): boolean {
-    if ('keyboard' in this.props) {
-      return this.props.keyboard!;
+    if ('keyboard' in this.reactiveProps) {
+      return this.reactiveProps.keyboard!;
     }
     return this.getContextConfig('numberFieldKeyboard') !== false;
   }
@@ -366,10 +368,9 @@ export class NumberField<T extends NumberFieldProps> extends TextField<T & Numbe
     }
   }
 
-  @action
   getInnerSpanButton(): ReactNode {
     const { prefixCls, range, clearButton } = this;
-    const { longPressPlus } = this.props;
+    const { longPressPlus } = this.reactiveProps;
     const step = this.getProp('step');
     const isMob = isMobile();
     const plusEvent = longPressPlus ? this.handlePlus : this.handleOncePlus;
@@ -441,7 +442,6 @@ export class NumberField<T extends NumberFieldProps> extends TextField<T & Numbe
     }, ...args);
   }
 
-  @action
   handleEnterDown(e) {
     if (this.multiple && this.range && this.text) {
       this.prepareSetValue(this.text);

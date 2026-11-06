@@ -16,7 +16,8 @@ import React, {
   MouseEvent,
 } from 'react';
 import { observer } from 'mobx-react-lite';
-import { isArrayLike, action } from 'mobx';
+import { action } from 'mobx';
+import isArrayLike from 'choerodon-ui/dataset/mobx-helper/isArrayLike';
 import raf from 'raf';
 import classNames from 'classnames';
 import isNil from 'lodash/isNil';

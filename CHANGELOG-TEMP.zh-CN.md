@@ -1,3 +1,11 @@
+## 2026-11-06
+
+- 升级 MobX 至 6.16.1、mobx-react 至 9.2.2，新增 mobx-react-lite 依赖，同步依赖声明、锁文件及文档站解析配置。
+- 完成 DataSet、Store 及 Pro 组件的 MobX 6 响应式初始化与 action/computed 适配，兼容继承、方法绑定及 React props/context 更新。
+- 修复配置引用身份与 useDataSet 重建问题，完善表格异步配置、附件计数缓存及组件卸载清理，并避免排序修改原始数据。
+- 补齐 Pro 入口默认配置初始化及 sideEffects 声明，防止打包优化移除必要配置。
+- 补充 MobX 迁移、配置更新、缓存和生命周期等回归测试，增强行为断言、源码测试门禁与构建产物检查，并接入 CI。
+
 ## 2026-10-28
 
 - 升级 TypeScript 至 `^5.9.3`、ESLint 至 8.57.1、typescript-eslint 至 8.x、Airbnb 配置至 19.x，并匹配 Jest、React Hooks lint 插件及依赖锁文件。

@@ -1,5 +1,5 @@
 import React, { cloneElement, Component, isValidElement, ReactElement } from 'react';
-import { action, IReactionDisposer, observable, reaction, runInAction } from 'mobx';
+import { action, IReactionDisposer, observable, reaction, runInAction, makeObservable } from 'mobx';
 import { observer } from 'mobx-react';
 import classNames from 'classnames';
 import raf from 'raf';
@@ -108,6 +108,20 @@ const LAST_ROW_LENGTH_INFO_THRESHOLD = 10;
 
 @observer
 export default class TableEditor extends Component<TableEditorProps> {
+  constructor(props, context) {
+    super(props, context);
+    if (!Object.prototype.hasOwnProperty.call(this, 'height')) this.height = undefined;
+    if (!Object.prototype.hasOwnProperty.call(this, 'rendered')) this.rendered = undefined;
+    if (!Object.prototype.hasOwnProperty.call(this, 'shouldStickLengthInfoOnTop')) this.shouldStickLengthInfoOnTop = undefined;
+    makeObservable(this, {
+      height: observable,
+      rendered: observable,
+      shouldStickLengthInfoOnTop: observable,
+      alignEditor: action,
+      hideEditor: action.bound,
+    });
+  }
+
   static displayName = 'TableEditor';
 
   static get contextType(): typeof TableContext {
@@ -120,11 +134,11 @@ export default class TableEditor extends Component<TableEditorProps> {
 
   width?: any;
 
-  @observable height?: number;
+  height?: number;
 
-  @observable rendered?: boolean;
+  rendered?: boolean;
 
-  @observable shouldStickLengthInfoOnTop?: boolean;
+  shouldStickLengthInfoOnTop?: boolean;
 
   inTab = false;
 
@@ -212,6 +226,7 @@ export default class TableEditor extends Component<TableEditorProps> {
   }
 
   componentDidMount() {
+    this.syncRendered();
     const { column: { name } } = this.props;
     if (name) {
       const {
@@ -232,6 +247,7 @@ export default class TableEditor extends Component<TableEditorProps> {
   }
 
   componentDidUpdate(): void {
+    this.syncRendered();
     const { editor, cellNode, cellEditor } = this;
     const { tableStore, dataSet, rowHeight } = this.context;
     const { aggregation } = tableStore;
@@ -586,7 +602,6 @@ export default class TableEditor extends Component<TableEditorProps> {
     return bodyRect.bottom - rowRect.bottom < LAST_ROW_LENGTH_INFO_THRESHOLD;
   }
 
-  @action
   alignEditor(cellNode?: HTMLSpanElement | undefined, height?: number) {
     const { wrap, editor } = this;
     const { tableStore } = this.context;
@@ -636,8 +651,6 @@ export default class TableEditor extends Component<TableEditorProps> {
     }
   }
 
-  @autobind
-  @action
   hideEditor(keep?: boolean) {
     this.inTab = false;
     if (keep) {
@@ -805,6 +818,15 @@ export default class TableEditor extends Component<TableEditorProps> {
     this.cellNode = undefined;
   }
 
+  syncRendered() {
+    const { tableStore } = this.context;
+    if (this.rendered && !this.wrap && !tableStore.inlineEdit) {
+      runInAction(() => {
+        this.rendered = false;
+      });
+    }
+  }
+
   render() {
     if (this.rendered) {
       const editor = this.renderEditor();
@@ -817,12 +839,6 @@ export default class TableEditor extends Component<TableEditorProps> {
           className: classNames(`${prefixCls}-editor`, { [`${prefixCls}-editor-lock`]: isStickySupport() && lock }),
         };
         return <div {...props} ref={this.saveWrap}>{editor}</div>;
-      }
-      const { tableStore } = this.context;
-      if (!tableStore.inlineEdit) {
-        runInAction(() => {
-          this.rendered = false;
-        });
       }
     }
     return null;

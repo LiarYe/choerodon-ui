@@ -8,7 +8,8 @@
   ReactNode,
 } from 'react';
 import { observer } from 'mobx-react';
-import { action, isArrayLike, observable, runInAction, toJS } from 'mobx';
+import { action, observable, runInAction, toJS, makeObservable } from 'mobx';
+import isArrayLike from 'choerodon-ui/dataset/mobx-helper/isArrayLike';
 import uniq from 'lodash/uniq';
 import pull from 'lodash/pull';
 import noop from 'lodash/noop';
@@ -140,19 +141,19 @@ export default class TableComboBar extends Component<TableComboBarProps> {
     });
   }
 
-  @observable moreFields: Field[];
+  moreFields: Field[];
 
   /**
    * 控制添加筛选下拉显隐
    */
-  @observable fieldSelectHidden: boolean;
+  fieldSelectHidden: boolean;
 
   /**
    * 搜索值
    */
-  @observable searchText: string;
+  searchText: string;
 
-  @observable shouldLocateData: boolean;
+  shouldLocateData: boolean;
 
   refDropdown: HTMLDivElement | null = null;
 
@@ -166,6 +167,23 @@ export default class TableComboBar extends Component<TableComboBarProps> {
 
   constructor(props, context) {
     super(props, context);
+    if (!Object.prototype.hasOwnProperty.call(this, 'moreFields')) Object.assign(this, { moreFields: undefined });
+    if (!Object.prototype.hasOwnProperty.call(this, 'fieldSelectHidden')) Object.assign(this, { fieldSelectHidden: undefined });
+    if (!Object.prototype.hasOwnProperty.call(this, 'searchText')) Object.assign(this, { searchText: undefined });
+    if (!Object.prototype.hasOwnProperty.call(this, 'shouldLocateData')) Object.assign(this, { shouldLocateData: undefined });
+    makeObservable(this, {
+      moreFields: observable,
+      fieldSelectHidden: observable,
+      searchText: observable,
+      shouldLocateData: observable,
+      handleClickOut: action,
+      handleTableHeight: action,
+      handleResize: action.bound,
+      setOriginalConditionFields: action,
+      initConditionFields: action.bound,
+      handleSelect: action,
+      handleUnSelect: action,
+    });
     runInAction(() => {
       this.fieldSelectHidden = true;
     });
@@ -215,14 +233,12 @@ export default class TableComboBar extends Component<TableComboBarProps> {
     }
   }
 
-  @action
   handleClickOut = e => {
     if (this.refDropdown && !this.refDropdown.contains(e.target)) {
       this.fieldSelectHidden = true;
     }
   };
 
-  @action
   handleTableHeight = () => {
     const { tableStore } = this.context;
     if (tableStore) {
@@ -230,7 +246,6 @@ export default class TableComboBar extends Component<TableComboBarProps> {
     }
   };
 
-  @action
   handleResize = () => {
     const { tableStore } = this.context;
     if (tableStore) {
@@ -294,7 +309,6 @@ export default class TableComboBar extends Component<TableComboBarProps> {
     }
   }
 
-  @action
   setOriginalConditionFields = code => {
     const { queryDataSet, dataSet } = this.props;
     if (!code) {
@@ -377,8 +391,6 @@ export default class TableComboBar extends Component<TableComboBarProps> {
    * 初始化勾选值、条件字段
    * @param props
    */
-  @autobind
-  @action
   initConditionFields(props) {
     const { dataSet, record } = props;
     const originalValue = record ? omit(record.toData(), ['__dirty']) : {};
@@ -743,7 +755,6 @@ export default class TableComboBar extends Component<TableComboBarProps> {
    * @param code
    * @param record
    */
-  @action
   handleSelect = (code, record?: Record) => {
     const { dataSet } = this.props;
     const codes = Array.isArray(code) ? code : [code];
@@ -761,7 +772,6 @@ export default class TableComboBar extends Component<TableComboBarProps> {
    * 取消勾选
    * @param code
    */
-  @action
   handleUnSelect = code => {
     const { queryDataSet, dataSet } = this.props;
     const codes = Array.isArray(code) ? code : [code];
@@ -1073,7 +1083,7 @@ export default class TableComboBar extends Component<TableComboBarProps> {
         fields,
         props: { fields: propFields = [] },
       } = queryDataSet;
-      const cloneFields: Map<string, Field> = fields.toJS();
+      const cloneFields: Map<string, Field> = new Map(fields);
       propFields.forEach(({ name }) => {
         if (name) {
           const field = cloneFields.get(name);

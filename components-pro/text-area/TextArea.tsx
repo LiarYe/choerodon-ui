@@ -1,6 +1,6 @@
 import React, { CSSProperties, ReactNode } from 'react';
 import { observer } from 'mobx-react';
-import { action, observable, runInAction } from 'mobx';
+import { action, observable, runInAction, makeObservable } from 'mobx';
 import isString from 'lodash/isString';
 import throttle from 'lodash/throttle';
 import ReactResizeObserver from 'choerodon-ui/lib/_util/resizeObserver';
@@ -36,6 +36,17 @@ export interface TextAreaProps extends TextFieldProps {
 
 @observer
 export default class TextArea<T extends TextAreaProps> extends TextField<T> {
+  constructor(props, context) {
+    super(props, context);
+    if (!Object.prototype.hasOwnProperty.call(this, 'resized')) this.resized = undefined;
+    if (!Object.prototype.hasOwnProperty.call(this, 'autoSizeCalcHeight')) this.autoSizeCalcHeight = undefined;
+    makeObservable(this, {
+      resized: observable,
+      autoSizeCalcHeight: observable,
+      handleResize: action.bound,
+    });
+  }
+
   static displayName = 'TextArea';
 
   static defaultProps = {
@@ -47,9 +58,9 @@ export default class TextArea<T extends TextAreaProps> extends TextField<T> {
   // eslint-disable-next-line camelcase
   static __PRO_TEXTAREA = true;
 
-  @observable resized?: boolean;
+  resized?: boolean;
 
-  @observable autoSizeCalcHeight?: CSSProperties;
+  autoSizeCalcHeight?: CSSProperties;
 
   throttleHandleAutoSize = throttle(this.handleAutoSize, 80);
 
@@ -58,7 +69,7 @@ export default class TextArea<T extends TextAreaProps> extends TextField<T> {
   }
 
   get resize(): ResizeType | undefined {
-    const { autoSize, resize } = this.props;
+    const { autoSize, resize } = this.reactiveProps;
     if (autoSize) {
       const { minRows, maxRows } = autoSize as AutoSizeType;
       if (minRows && minRows === maxRows) {
@@ -69,7 +80,7 @@ export default class TextArea<T extends TextAreaProps> extends TextField<T> {
   }
 
   get autoSize(): boolean | AutoSizeType | undefined {
-    const { autoSize } = this.props;
+    const { autoSize } = this.reactiveProps;
     if (autoSize) {
       const { minRows, maxRows } = autoSize as AutoSizeType;
       if (minRows && minRows === maxRows) {
@@ -80,7 +91,7 @@ export default class TextArea<T extends TextAreaProps> extends TextField<T> {
   }
 
   get rows(): number {
-    const { rows = 4, autoSize } = this.props;
+    const { rows = 4, autoSize } = this.reactiveProps;
     if (autoSize) {
       const { minRows } = autoSize as AutoSizeType;
       return minRows || rows;
@@ -92,7 +103,7 @@ export default class TextArea<T extends TextAreaProps> extends TextField<T> {
     if (this.disabled) {
       return super.tooltip;
     }
-    const { tooltip } = this.props;
+    const { tooltip } = this.reactiveProps;
     return tooltip || TextTooltip.none;
   }
 
@@ -173,10 +184,8 @@ export default class TextArea<T extends TextAreaProps> extends TextField<T> {
     return otherProps;
   }
 
-  @autobind
-  @action
   handleResize(width: number, height: number, target: Element | null) {
-    const { onResize } = this.props;
+    const { onResize } = this.reactiveProps;
     if (!this.resized) {
       const { element } = this;
       if (element && element.style.width) {
@@ -200,7 +209,7 @@ export default class TextArea<T extends TextAreaProps> extends TextField<T> {
     const inputLength = editorTextInfo.text.length;
     const maxLength = this.getProp('maxLength');
     const lengthElement = this.renderLengthInfo(maxLength, inputLength);
-    if (this.props._inTable && this.props.shouldStickLengthInfoOnTop && React.isValidElement(lengthElement)) {
+    if (this.reactiveProps._inTable && this.reactiveProps.shouldStickLengthInfoOnTop && React.isValidElement(lengthElement)) {
       return React.cloneElement(lengthElement, {
         style: { top: '-0.2rem', right: 0, left: 'auto' },
       } as any);
@@ -233,7 +242,7 @@ export default class TextArea<T extends TextAreaProps> extends TextField<T> {
         width: 'auto',
       };
     }
-    if (lengthElement && !this.props._inTable) {
+    if (lengthElement && !this.reactiveProps._inTable) {
       const { style: wrapperStyle } = wrapperProps;
       wrapperProps.style = {
         ...wrapperStyle,
