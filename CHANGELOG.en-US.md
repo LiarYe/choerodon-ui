@@ -15,6 +15,12 @@ timeline: true
 
 ---
 
+- 🐞 `<pro>Board`: Fixed an error when switching views if customizedLoad returns the Table fallback configuration.
+
+## 1.6.9
+
+`2026-11-12`
+
 - 🌟 `configure`: Added `selectBeforeCreateComboOption`, `uploadBatchMaxFileCount`, `attachment.previewTarget`, `lovModalAutoWidth`, `duplicateKey`, `uploadAlwaysShowActions` properties.
 - 🌟 `<pro>Table`: A `type` parameter has been added to the `onReset` event of the search bar to distinguish the triggering scenarios.
 - 🌟 `<pro>Button`: Added `iconPlacement` property.
@@ -34,6 +40,11 @@ timeline: true
 - 🌟 `<pro>Cascader`: Added `childrenPaging` property.
 - 🌟 `<pro>PerformanceTable`: Added `headWordWrap` property and optimized the effect of `wordWrap`.
 - 🌟 `<pro>ColorPicker`: Added `gradientMode` to support solid colors, linear and radial gradients, and switching between solid and gradient modes; supports editing gradient stops and CSS gradient values.
+- 🌟 `<pro>ColorPicker`: Added `showNoFill` property to show the no-fill option.
+- 🌟 `<pro>Attachment`: Added `preview` button.
+- 🌟 `<pro>Attachment`: Added `onCustomPreview` property.
+- 🌟 `<pro>Select`: Added `popupMainField`, `popupShowAvatar` properties.
+- 🌟 `<pro>TextField`: Added `tagSeparatorRenderer` property.
 - 💄 `<pro>FormField`: Optimize the `help` style of the `newLine` type and enable the display of overflow `Tooltip`.
 - 💄 `Tabs`: When the current `tab` changes, the previous or next `tab` is displayed simultaneously.
 - 💄 `<pro>Attachment`: Optimize the display of incompletely visible filenames by displaying the full filename via a tooltip. 
@@ -85,6 +96,9 @@ timeline: true
 - 💄 `<pro>Table`: When `fuzzyQueryOnly` is true, display the refresh button based on the `refreshBtn` configuration.
 - 💄 `<pro>Table`: Optimize the paste logic to support appending values to a single cell.
 - 💄 `<pro>Table.Column`: Add the `renderPlacement` parameter to the `header` hook function, which can return elements based on the rendering position.
+- 💄 `configure`: `fieldMaxTagCount` supports responsive configuration.
+- 💄 `<pro>FormField`: `maxTagCount` supports responsive configuration.
+- 💄 `<pro>Lov`: Optimize the display effect of dropdown mode.
 - 🐞 `<pro>Attachment`: Fixed the issue where the count of attachments could not be obtained through the field property `attachmentCount` in `onAttachmentsChange` when uploading a file for the first time.
 - 🐞 `<pro>Attachment`: Fixed an issue where the `getPreviewUrl` property of the configuration component could cause abnormal refreshing of thumbnails in the attachment list.
 - 🐞 `<pro>Lov`: Fixed the issue where the order of selected data was inconsistent with the initial selection order when reopening the modal.
@@ -137,7 +151,9 @@ timeline: true
 - 🐞 `<pro>TextArea`: Fixed the issue where the Tooltip was displayed when `tooltip` was set to `overflow`, even though the wrapped content was fully visible.
 - 🐞 `<pro>TextField`: Fixed the issue where the length info width calculation was inaccurate.
 - 🐞 `<pro>Lov`: Fixed an issue where the Lov component could remain stuck in the loading state after entering text with a Chinese IME and pressing Enter.
-
+- 🐞 `<pro>Form`: Fixed the issue where the first error input box was not focused when the Form component validated dynamically.
+- 🐞 `Trigger`: Fixed the issue where the Trigger component would focus on the element that triggered it after the popup was closed.
+- 🐞 `<pro>Output`: Fixed an issue where the Output entry could export `undefined` due to circular dependencies.
 
 ## 1.6.8
 

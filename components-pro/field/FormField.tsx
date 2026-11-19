@@ -237,7 +237,7 @@ export interface FormFieldProps<V = any> extends DataSetComponentProps {
   /**
    * 多值标签最大数量
    */
-  maxTagCount?: number;
+  maxTagCount?: number | 'responsive';
   /**
    * 多值标签文案最大长度
    */
@@ -1410,9 +1410,13 @@ export class FormField<T extends FormFieldProps = FormFieldProps> extends DataSe
       const blocks = wrapper.querySelectorAll(`.${prefixCls}-multiple-block`);
       for (let i = 0; i < blocks.length; i++) {
         const block = blocks[i] as HTMLElement;
+        if (block.closest(`.${prefixCls}-responsive-measure`)) {
+          continue;
+        }
         // TextField 标签结构为 li > div，检查 div；Output 标签为 span，检查自身
         const target = block.className && block.className.includes('-output') ? block : block.querySelector('div') || block;
-        if (isOverflow(target as HTMLElement)) {
+        // 忽略浏览器缩放带来的亚像素文本测量误差。
+        if (isOverflow(target as HTMLElement, 1)) {
           return true;
         }
       }
@@ -1420,7 +1424,7 @@ export class FormField<T extends FormFieldProps = FormFieldProps> extends DataSe
     return false;
   }
 
-  renderMultipleValues(readOnly?: boolean) {
+  renderMultipleValues(readOnly?: boolean, responsiveTagCount?: number, measurement?: { placeholderOnly?: boolean }) {
     const {
       prefixCls,
       range,
@@ -1431,10 +1435,15 @@ export class FormField<T extends FormFieldProps = FormFieldProps> extends DataSe
         tagRenderer,
       },
     } = this;
-    delete this.isOverflowMaxTagTextLength;
+    const isOverflowMaxTagTextLength = this.isOverflowMaxTagTextLength;
+    if (!measurement) {
+      delete this.isOverflowMaxTagTextLength;
+    }
     const values = renderMultipleValues(this.getValue(), {
       range,
       maxTagCount,
+      responsiveTagCount,
+      placeholderOnly: measurement?.placeholderOnly,
       maxTagPlaceholder,
       prefixCls,
       disabled,
@@ -1453,8 +1462,12 @@ export class FormField<T extends FormFieldProps = FormFieldProps> extends DataSe
       record: this.record,
       field: this.field,
     });
-    this.multipleValidateMessageLength = values.multipleValidateMessageLength;
-    this.isOverflowMaxTagCount = values.isOverflowMaxTagCount;
+    if (measurement) {
+      this.isOverflowMaxTagTextLength = isOverflowMaxTagTextLength;
+    } else {
+      this.multipleValidateMessageLength = values.multipleValidateMessageLength;
+      this.isOverflowMaxTagCount = values.isOverflowMaxTagCount;
+    }
     return values;
   }
 

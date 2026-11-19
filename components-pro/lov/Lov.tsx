@@ -8,6 +8,7 @@ import defaultTo from 'lodash/defaultTo';
 import noop from 'lodash/noop';
 import isFunction from 'lodash/isFunction';
 import isObject from 'lodash/isObject';
+import isNil from 'lodash/isNil';
 import isPromise from 'is-promise';
 import { action, observable, runInAction, toJS, IReactionDisposer, reaction, makeObservable, override as mobxOverride } from 'mobx';
 import isArrayLike from 'choerodon-ui/dataset/mobx-helper/isArrayLike';
@@ -17,6 +18,7 @@ import KeyCode from 'choerodon-ui/lib/_util/KeyCode';
 import { Size } from 'choerodon-ui/lib/_util/enum';
 import { LovConfig as DataSetLovConfig, LovConfigItem } from 'choerodon-ui/dataset/interface';
 import { LovViewTarget } from 'choerodon-ui/lib/configure';
+import { C7nTreeNodeProps } from 'choerodon-ui/lib/tree';
 import Icon from '../icon';
 import LovView, { LovViewProps } from './LovView';
 import Modal, { ModalProps } from '../modal/Modal';
@@ -51,6 +53,8 @@ import mergeProps from '../_util/mergeProps';
 import { getRecords } from './SelectionList';
 import Tree, { defaultRenderer } from '../tree';
 import { getTreeNodes } from '../tree/util';
+import Output from '../output';
+import { Tooltip as TextTooltip } from '../core/enum';
 
 export type Events = { [key: string]: Function };
 
@@ -139,6 +143,8 @@ export default class Lov extends Select<LovProps> {
   modal: ModalProxy | undefined;
 
   initedModalLovViewProps;
+
+  popupLovView: LovView | null;
 
   fetched?: boolean;
 
@@ -401,6 +407,7 @@ export default class Lov extends Select<LovProps> {
       return (
         <LovView
           {...lovViewProps}
+          ref={node => { this.popupLovView = node; }}
           viewMode={viewMode}
           dataSet={options}
           config={config}
@@ -410,6 +417,13 @@ export default class Lov extends Select<LovProps> {
           onBeforeSelect={onBeforeSelect}
           multiple={this.multiple}
           values={this.getValues()}
+          textField={this.textField}
+          valueField={this.valueField}
+          popupMainField={this.reactiveProps.popupMainField}
+          popupShowAvatar={this.reactiveProps.popupShowAvatar}
+          optionRenderer={this.reactiveProps.optionRenderer}
+          popupSearchField={popupSearchMode !== PopupSearchMode.single && this.renderSearchField({ queryDataSet: options.queryDataSet })}
+          popupOptionDisabled={record => this.getOptionDisabled(record)}
           popupHidden={!this.popup}
           showDetailWhenReadonly={showDetailWhenReadonly}
           lang={this.lang}
@@ -484,6 +498,32 @@ export default class Lov extends Select<LovProps> {
     const tableProps = this.getTableProps(config && config.tableProps);
     const { treeAsync = config && config.delayLoad === 'Y', treeLoadData } = tableProps;
     const { expandFlag } = config || {};
+    const treePrefix = `${this.prefixCls}-lov-tree-menu`;
+    const mainField = this.reactiveProps.popupMainField || textField || (config && config.textField) || '';
+    const columns = (config ? LovView.getLovColumns({
+      config,
+      tableProps,
+      context: this.reactiveContext,
+      lang: this.lang,
+    }) || [] : []).map(column => ({
+      ...column,
+      ...((config && config.tableProps && config.tableProps.columns || []).find(item => item.name === column.name)),
+      ...((tableProps.columns || []).find(item => item.name === column.name)),
+    }));
+    const secondaryColumns = columns.filter(column => column.name && !column.hidden && column.name !== mainField);
+    const renderField = (record: Record, name: string) => {
+      const column = columns.find(item => item.name === name);
+      const { lang } = this;
+      return (
+        <Output
+          record={record}
+          name={name}
+          lang={lang}
+          tooltip={TextTooltip.overflow}
+          renderer={column && column.renderer ? props => column.renderer!({ ...props, rowIndex: options.indexOf(record) }) : undefined}
+        />
+      );
+    };
     const { idField } = options.props;
     const selectedKeys = options.reduce<Key[]>((keys, record) => (
       this.isSelected(record) ? keys.concat(String(idField ? record.get(idField) : record.key)) : keys
@@ -505,9 +545,36 @@ export default class Lov extends Select<LovProps> {
         if (record) {
           const text = record.get(textField);
           const value = record.get(valueField);
-          return {
+          const optionProps = {
+            ...record.get('__treeNodeProps'),
             ...onOption({ dataSet: options, record }),
-            title: optionRenderer ? optionRenderer({ dataSet: options, record, text, value }) : text,
+          } as C7nTreeNodeProps;
+          const visibleSecondaryColumns = secondaryColumns.filter(column => {
+            const fieldValue = record.get(column.name!);
+            return !isNil(fieldValue) && !(typeof fieldValue === 'string' && fieldValue.trim() === '') &&
+              !(Array.isArray(fieldValue) && fieldValue.length === 0);
+          });
+          return {
+            ...optionProps,
+            className: classNames(`${treePrefix}-node`, {
+              [`${treePrefix}-node-with-secondary`]: !!visibleSecondaryColumns.length,
+            }, optionProps.className),
+            disabled: this.getOptionDisabled(record, optionProps),
+            ...(this.multiple ? { selectable: false, disableCheckbox: optionProps.disableCheckbox || optionProps.selectable === false || !record.selectable } : {}),
+            title: (
+              <span className={`${treePrefix}-content`}>
+                <span className={`${treePrefix}-main`}>
+                  {optionRenderer ? optionRenderer({ dataSet: options, record, text, value }) : renderField(record, mainField)}
+                </span>
+                {!!visibleSecondaryColumns.length && (
+                  <span className={`${treePrefix}-secondary`}>
+                    {visibleSecondaryColumns.map(column => (
+                      <span key={column.name} className={`${treePrefix}-field`}>{renderField(record, column.name!)}</span>
+                    ))}
+                  </span>
+                )}
+              </span>
+            ),
           };
         }
         return {};
@@ -521,6 +588,8 @@ export default class Lov extends Select<LovProps> {
         eventKey: MORE_KEY,
         title: <Spin style={{ left: 0 }} size={Size.small}>{this.getPagingOptionContent()}</Spin>,
         className: `${menuPrefixCls}-item ${menuPrefixCls}-item-more`,
+        checkable: false,
+        selectable: true,
         isLeaf: true,
       });
     }
@@ -533,11 +602,14 @@ export default class Lov extends Select<LovProps> {
         onMouseDown={preventDefault}
         onSelect={this.handleTreeSelect}
         style={dropdownMenuStyle}
-        selectable
+        selectable={!this.multiple}
+        checkable={this.multiple}
+        checkedKeys={this.multiple ? selectedKeys : undefined}
+        onCheck={this.multiple ? (_keys, event) => this.handleTreeSelect([], event) : undefined}
         focusable={false}
         defaultExpandAll={expandFlag === 'Y'}
         selectedKeys={selectedKeys}
-        className={menuPrefixCls}
+        className={classNames(menuPrefixCls, treePrefix)}
         multiple={this.multiple}
         async={treeAsync}
         loadData={treeLoadData && ((event: any) => treeLoadData({ record: event.props.record, dataSet: options }))}
@@ -553,8 +625,10 @@ export default class Lov extends Select<LovProps> {
       if (tree) {
         this.initPopupTree();
         return [
-          this.searchable && this.isSearchFieldInPopup() && this.renderSearchField(),
-          this.getTreeMenu(),
+          this.searchable && this.isSearchFieldInPopup() && this.renderSearchField({ queryDataSet: options.queryDataSet }),
+          <Spin key="menu" spinning={this.loading}>
+            {this.getTreeMenu()}
+          </Spin>,
           (!this.loading && options.length ? this.renderAddNewOptionPrompt('prompt', 'Select') : undefined),
         ];
       }
@@ -564,7 +638,11 @@ export default class Lov extends Select<LovProps> {
       ];
     }
     if (searchAction === SearchAction.input) {
-      return this.tree ? this.getTreeMenu() : super.getPopupContent();
+      return tree ? (
+        <Spin key="menu" spinning={this.loading}>
+          {this.getTreeMenu()}
+        </Spin>
+      ) : super.getPopupContent();
     }
     return null;
   }
@@ -653,7 +731,7 @@ export default class Lov extends Select<LovProps> {
       });
     }
     // 勾选 value 对应的单选框
-    const needSingleSelected = !multiple && options.selection && this.getValues().length > 0 
+    const needSingleSelected = !multiple && options.selection && this.getValues().length > 0
       && (selectionMode === SelectionMode.rowbox || selectionMode === SelectionMode.dblclick || alwaysShowRowBox);
     if (multiple || needSingleSelected) {
       const needToFetch = new Map();
@@ -1044,6 +1122,13 @@ export default class Lov extends Select<LovProps> {
 
   @autobind
   handleKeyDown(e) {
+    if (this.popup && this.viewMode === TriggerViewMode.popup && !this.tree && this.popupLovView
+      && [KeyCode.UP, KeyCode.DOWN, KeyCode.HOME, KeyCode.END, KeyCode.ENTER].includes(e.keyCode)) {
+      if (!(e.keyCode === KeyCode.ENTER && this.searching)) {
+        this.popupLovView.handlePopupListKeyDown(e);
+      }
+      return;
+    }
     if (!this.popup && e.keyCode === KeyCode.DOWN) {
       stopEvent(e);
       this.handleOpenModal();
@@ -1088,6 +1173,7 @@ export default class Lov extends Select<LovProps> {
     const { viewMode, reactiveProps: { addNewOptionPrompt } } = this;
     return classNames(defaultClassName, {
       [`${this.prefixCls}-lov-popup`]: viewMode === TriggerViewMode.popup,
+      [`${this.prefixCls}-lov-tree-popup`]: this.tree,
       [`${this.prefixCls}-lov-popup-new-option-prompt`]: isFunction(addNewOptionPrompt) || (addNewOptionPrompt && addNewOptionPrompt.path),
     });
   }

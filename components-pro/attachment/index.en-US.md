@@ -49,13 +49,14 @@ title: Attachment
 | attachments | 附件列表 | (AttachmentFile \| FileLike)[] |  |
 | showValidation | 校验信息展示方式 | `newLine` \| `tooltip` | `viewMode` == `popup` ? `tooltip` : `newLine` |
 | getUUID | 获取 uuid | () => Promise<string> \| string | [attachment.getAttachmentUUID](/components/configure/#AttachmentConfig) |
-| buttons | 功能按钮，默认存在`download` 和 `remove`值，可传递数组、自定义按钮或按钮配置属性对象，数组为可选值字符串+按钮配置属性对象（非默认按钮需添加唯一 key） | string[] \| \[string, object\] \| ReactNode[] \| object \| (({ attachment: AttachmentFile, bucketName?: string, bucketDirectory?: string, storageCode?:string, attachmentUUID: string, isPublic?: boolean, readOnly?: boolean, disabled?: boolean }) => ReactElement<ButtonProps\>)\[\] | [['download', 'remove']] |
+| buttons | 功能按钮，默认存在`preview`, `download` 和 `remove`值，可传递数组、自定义按钮或按钮配置属性对象，数组为可选值字符串+按钮配置属性对象（非默认按钮需添加唯一 key） | string[] \| \[string, object\] \| ReactNode[] \| object \| (({ attachment: AttachmentFile, bucketName?: string, bucketDirectory?: string, storageCode?:string, attachmentUUID: string, isPublic?: boolean, readOnly?: boolean, disabled?: boolean }) => ReactElement<ButtonProps\>)\[\] | [['preview', 'download', 'remove']] |
 | onAttachmentsChange | 附件列表变更事件 | (AttachmentFile[]) => void |  |
 | beforeUpload | 上传文件之前的钩子，参数为上传的文件，可对文件在上传之前进行校验操作若返回 false 则停止上传并从列表充删除。支持返回一个 Promise 对象，Promise 对象 reject 或 resolve(false) 时则停止上传，resolve 时开始上传。 | (attachment: AttachmentFile, list: AttachmentFile[]) => (boolean \| Promise) | - |
 | onUploadProgress | 上传进度变化的回调 | (percent: number, attachment: AttachmentFile) => void | 无 |
 | onUploadSuccess | 上传成功的回调 | (response: any, attachment: AttachmentFile) => void | 无 |
 | onUploadError | 上传出错的回调 | (error: Error, attachment: AttachmentFile) => void | 无 |
 | onUploadAbort | 上传取消的回调，入参存在时是取消单个文件上传，不存在时是取消所有文件上传 | (attachment?: AttachmentFile) => void | 无 |
+| onCustomPreview | Custom manual preview behavior that does not affect the acquisition of thumbnail preview URLs | (props: AttachmentFileProps) => void | - |
 | getPreviewUrl | 获取预览地址，默认使用 AttachmentFile.url，返回空则不可预览。其中函数的返回值为 (() => string \| Promise< string>) 时，仅支持 listType 为 text 的情况 | ({ attachment: AttachmentFile, bucketName?: string, bucketDirectory?: string, storageCode?:string, attachmentUUID: string, isPublic?: boolean }) => (string \| (() => string \| Promise< string>) \| undefined) \| Promise<(string \| (() => string \| Promise< string>) \| undefined)> |  |
 | uploadImmediately | Whether to upload immediately. If turned off, you need to manually call the component instance method `upload` to upload | boolean | true |
 | removeImmediately | Whether to remove immediately. If turned off, you need to manually call the component instance method `remove` to remove | boolean | true |

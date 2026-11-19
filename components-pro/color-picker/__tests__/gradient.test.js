@@ -60,7 +60,7 @@ describe('ColorPicker gradient editing', () => {
     expect(wrapper.find('TabPane').map(tab => tab.prop('tab'))).toEqual(['Solid', 'Gradient']);
     picker.handleModeChange('gradient');
     wrapper.update();
-    expect(wrapper.find('.c7n-pro-color-picker-stop-list-header span').text()).toBe('Color stops');
+    expect(wrapper.find('.c7n-pro-color-picker-stop-list-header span').map(node => node.text())).toEqual(['Position', 'Color value', 'Opacity']);
     expect(wrapper.find('button.c7n-pro-color-picker-stop-add').prop('aria-label')).toBe('Add color stop');
     expect(wrapper.find('.c7n-pro-color-picker-direction-options button').at(0).prop('aria-label')).toBe('Gradient direction 135 degrees');
     expect(wrapper.find('.c7n-pro-color-picker-stop-row').at(0).find('input').map(input => input.prop('aria-label'))).toEqual([
@@ -81,7 +81,7 @@ describe('ColorPicker gradient editing', () => {
     localeContext.setLocale(zh);
     wrapper.update();
     expect(labels()).toEqual(englishLabels);
-    expect(wrapper.find('.c7n-pro-color-picker-stop-list-header span').text()).toBe('色标');
+    expect(wrapper.find('.c7n-pro-color-picker-stop-list-header span').map(node => node.text())).toEqual(['位置', '色值', '不透明度']);
     expect(wrapper.find('.c7n-pro-color-picker-preset-opacity > span').text()).toBe('透明度');
     expect(wrapper.find('.c7n-pro-color-picker-gradient-direction > span').text()).toBe('渐变方向');
     expect(wrapper.find('.c7n-pro-color-picker-direction-option > span').last().text()).toBe('径向');
@@ -213,6 +213,8 @@ describe('ColorPicker gradient editing', () => {
     expect(wrapper.find('input[aria-label="Color stop 2 color"]').prop('value')).toBe('#');
     wrapper.find('input[aria-label="Color stop 2 color"]').simulate('change', { target: { value: '#123456' } });
     wrapper.find('input[aria-label="Color stop 2 position"]').simulate('change', { target: { value: '72.5' } });
+    expect(picker.sortedStops[1].position).toBe(100);
+    wrapper.find('input[aria-label="Color stop 2 position"]').simulate('blur');
     expect(picker.currentStopColor).toBe('#123456');
     wrapper.find('input[aria-label="Opacity"]').simulate('change', { target: { value: '0.375' } });
     expect(picker.stops.map(stop => parseColor(stop.color).a)).toEqual([0.375, 0.375]);
@@ -263,7 +265,7 @@ describe('ColorPicker gradient editing', () => {
     const panel = wrapper.find('.c7n-pro-color-picker-custom-panel').getDOMNode();
     expect(panel.firstElementChild.className).toBe('c7n-pro-color-picker-popup-view-picker-name');
     expect(wrapper.find('.c7n-pro-color-picker-stop-list-header .icon-add')).toHaveLength(1);
-    expect(wrapper.find('.c7n-pro-color-picker-stop-list-header span').text()).toBe('色标');
+    expect(wrapper.find('.c7n-pro-color-picker-stop-list-header span').map(node => node.text())).toEqual(['位置', '色值', '不透明度']);
     expect(wrapper.find('.c7n-pro-color-picker-stop-track-color').prop('style').background).toBe('linear-gradient(90deg, #ff0000 0%, #ffb8b8 100%)');
     expect(wrapper.find('.c7n-pro-color-picker-stop-row').at(0).find('input').map(input => input.prop('aria-label'))).toEqual([
       'Color stop 1 position', 'Color stop 1 color', 'Color stop 1 alpha',
@@ -435,6 +437,44 @@ describe('ColorPicker gradient editing', () => {
     picker.handleFooterInput({ target: { name: 'r', value: '-20' } });
     expect(parseColor(picker.currentStopColor).r).toBe(0);
     expect(parseGradient(picker.getValue())).toBeDefined();
+  });
+
+  it('preserves pixel stops through loading, editing and mode changes', () => {
+    const value = 'repeating-linear-gradient(to top left, lightpink, lightpink 5px, white 5px, white 10px)';
+    const picker = open({ defaultValue: value });
+    expect(picker.gradientStopUnit).toBe('px');
+    expect(picker.gradientValue).toBe('repeating-linear-gradient(315deg, #ffb6c1 0px, #ffb6c1 5px, #ffffff 5px, #ffffff 10px)');
+    expect(wrapper.find('.c7n-pro-color-picker-stop-position > span').map(node => node.text())).toEqual(['px', 'px', 'px', 'px']);
+    expect(wrapper.find('input[aria-label="Color stop 4 position"]').prop('max')).toBeUndefined();
+    expect(wrapper.find('.c7n-pro-color-picker-stop-track button').map(node => node.prop('style').left)).toEqual(['0%', '50%', '50%', '100%']);
+    expect(wrapper.find('.c7n-pro-color-picker-stop-track-color').prop('style').background).toBe('linear-gradient(90deg, #ffb6c1 0%, #ffb6c1 50%, #ffffff 50%, #ffffff 100%)');
+    picker.stopTrack.getBoundingClientRect = () => ({ left: 10, width: 200 });
+    expect(picker.getStopPosition({ clientX: 110 })).toBe(5);
+    picker.updateStopPosition(250, picker.sortedStops[3].id);
+    expect(parseGradient(picker.getValue()).stops[3].position).toBe(250);
+    expect(picker.getStopPosition({ clientX: 110 })).toBe(125);
+    picker.addStop(500);
+    expect(picker.sortedStops[4].position).toBe(250);
+    picker.handleModeChange('single');
+    picker.handleModeChange('gradient');
+    expect(parseGradient(picker.getValue()).stopUnit).toBe('px');
+    picker.handleDirectionChange({ target: { value: 'radial' } });
+    expect(parseGradient(picker.getValue())).toMatchObject({ type: 'radial', stopUnit: 'px' });
+    wrapper.update();
+    wrapper.find('.c7n-pro-color-picker-direction-options button').forEach(button => {
+      expect(button.prop('style').background).toContain('250px');
+    });
+    picker.loadGradient(parseGradient('linear-gradient(#000 0px, #fff 0px)'));
+    expect(picker.stopPositionRange).toBe(1);
+    picker.stopTrack.getBoundingClientRect = () => ({ left: 10, width: 200 });
+    expect(picker.getStopPosition({ clientX: 110 })).toBe(0.5);
+    picker.handleNoFill();
+    expect(picker.gradientStopUnit).toBeUndefined();
+    picker.loadGradient(parseGradient(value));
+    picker.loadGradient(parseGradient('linear-gradient(#000, #fff)'));
+    expect(picker.gradientStopUnit).toBeUndefined();
+    picker.updateStopPosition(250, picker.sortedStops[1].id);
+    expect(picker.sortedStops[1].position).toBe(100);
   });
 
   it('supports radial and linear directions', () => {

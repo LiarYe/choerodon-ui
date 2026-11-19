@@ -15,6 +15,12 @@ timeline: true
 
 ---
 
+- 🐞 `<pro>Board`: 修复 customizedLoad 返回 Table 兜底配置时切换视图报错的问题。
+
+## 1.6.9
+
+`2026-11-12`
+
 - 🌟 `configure`: 新增 selectBeforeCreateComboOption, uploadBatchMaxFileCount, attachment.previewTarget, lovModalAutoWidth, duplicateKey, uploadAlwaysShowActions 属性。
 - 🌟 `<pro>Table`: 查询栏 onReset 事件新增 type 参数用于区分触发的场景。
 - 🌟 `<pro>Button`: 新增 iconPlacement 属性。
@@ -34,6 +40,11 @@ timeline: true
 - 🌟 `<pro>Cascader`: 新增 childrenPaging 属性。
 - 🌟 `<pro>PerformanceTable`: 新增 headWordWrap 属性，并优化 wordWrap 的效果。
 - 🌟 `<pro>ColorPicker`: 新增 gradientMode 属性，支持单色、线性渐变、径向渐变及单色与渐变模式切换，支持编辑渐变色标和 CSS 渐变值。
+- 🌟 `<pro>ColorPicker`: 新增 showNoFill 属性。
+- 🌟 `<pro>Attachment`: 新增内置预览按钮。
+- 🌟 `<pro>Attachment`: 新增 onCustomPreview 属性。
+- 🌟 `<pro>Select`: 新增 popupMainField, popupShowAvatar 属性。
+- 🌟 `<pro>TextField`: 新增 tagSeparatorRenderer 属性。
 - 💄 `<pro>FormField`: 优化 newLine 类型 help 样式，溢出 Tooltip 显示。
 - 💄 `Tabs`: 当前 tab 改变时，同时显示前一个或后一个 tab。
 - 💄 `<pro>Attachment`: 优化文件名显示不全时通过 tooltip 展示完整文件名。
@@ -85,6 +96,9 @@ timeline: true
 - 💄 `<pro>Table`: fuzzyQueryOnly 为 true 时, 根据 refreshBtn 配置显示刷新按钮。
 - 💄 `<pro>Table`: 优化粘贴逻辑，单个单元格粘贴时可追加值。
 - 💄 `<pro>Table.Column`: header 钩子函数新增 renderPlacement 参数，可根据渲染位置返回元素。
+- 💄 `configure`: fieldMaxTagCount 支持响应式配置。
+- 💄 `<pro>FormField`: maxTagCount 支持响应式配置。
+- 💄 `<pro>Lov`: 优化下拉模式展示效果。
 - 🐞 `<pro>Attachment`: 修复首次上传文件在 onAttachmentsChange 中通过字段属性 attachmentCount 获取不到附件数量的问题。
 - 🐞 `<pro>Attachment`: 修复配置组件属性 getPreviewUrl 可能会导致附件列表中的缩略图异常刷新的问题。
 - 🐞 `<pro>Lov`: 修复再次打开弹框时已勾选数据顺序与初次勾选顺序不一致的问题。
@@ -137,6 +151,9 @@ timeline: true
 - 🐞 `<pro>TextArea`: 修复配置 tooltip 为 overflow 时，内容换行且完整显示仍会展示 Tooltip 的问题。
 - 🐞 `<pro>TextField`: 修复长度信息的宽度计算不准确的问题。
 - 🐞 `<pro>Lov`: 修复使用中文输入法输入后按回车，可能持续处于 loading 状态的问题。
+- 🐞 `<pro>Form`: 修复 Form 动态校验失败时未按表单字段顺序聚焦首个错误输入框的问题。
+- 🐞 `Trigger`: 修复 Trigger 弹层内元素失焦时异常回焦，导致点击外部区域无法收起弹层的问题。
+- 🐞 `<pro>Output`: 修复 Output 入口在循环依赖场景下可能导出 undefined 的问题。
 
 ## 1.6.8
 

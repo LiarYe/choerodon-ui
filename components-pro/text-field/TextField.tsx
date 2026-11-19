@@ -21,6 +21,7 @@ import isNil from 'lodash/isNil';
 import noop from 'lodash/noop';
 import defaultTo from 'lodash/defaultTo';
 import debounce from 'lodash/debounce';
+import ResizeObserver from 'resize-observer-polyfill';
 import classNames from 'classnames';
 import { action, observable, runInAction, toJS, makeObservable, override as mobxOverride } from 'mobx';
 import isArrayLike from 'choerodon-ui/dataset/mobx-helper/isArrayLike';
@@ -73,7 +74,22 @@ export function isPlaceHolderSupport(): boolean {
   return true;
 }
 
+export interface TagSeparatorRendererProps {
+  /** 后一个标签在原始多值数组中的索引 */
+  index: number;
+  previousValue: any;
+  nextValue: any;
+  disabled: boolean;
+  readOnly: boolean;
+}
+
 export interface TextFieldProps<V = any> extends FormFieldProps<V> {
+  /**
+   * 渲染相邻可见标签之间的内容，省略占位项前不渲染。
+   * 间隔节点的鼠标和键盘事件不会冒泡到输入框，鼠标按下时保留输入框焦点。
+   * 业务交互应遵循 disabled 和 readOnly 状态。
+   */
+  tagSeparatorRenderer?: (props: TagSeparatorRendererProps) => ReactNode;
   /**
    * 占位词
    */
@@ -189,6 +205,19 @@ export class TextField<T extends TextFieldProps> extends FormField<T> {
   renderedValue: ReactNode;
 
   tagContainer: HTMLUListElement | null;
+
+  responsiveMeasurement: HTMLDivElement | null = null;
+
+  responsiveResizeObserver?: ResizeObserver;
+
+  responsiveObservedElements: Set<Element> = new Set();
+
+  responsiveTagCount: number | undefined = undefined;
+
+  get responsiveTags(): boolean {
+    const { maxTagCount = this.getContextConfig('fieldMaxTagCount') } = this.reactiveProps;
+    return !!this.multiple && maxTagCount === 'responsive';
+  }
 
   handleChangeWait: DebouncedFunc<(...value: any[]) => void>;
 
@@ -330,6 +359,8 @@ export class TextField<T extends TextFieldProps> extends FormField<T> {
     if (!Object.prototype.hasOwnProperty.call(this, 'showMaxLengthWarningFlag')) this.showMaxLengthWarningFlag = undefined;
     makeObservable(this, {
       text: observable,
+      responsiveTagCount: observable,
+      measureResponsiveTags: action.bound,
       suffixRef: observable,
       renderedText: observable,
       renderedStartText: observable,
@@ -451,15 +482,100 @@ export class TextField<T extends TextFieldProps> extends FormField<T> {
     }
   }
 
+  componentDidMount() {
+    super.componentDidMount();
+    this.observeResponsiveTags();
+    this.measureResponsiveTags();
+  }
+
+  componentDidUpdate(prevProps, prevState, snapshot) {
+    super.componentDidUpdate?.(prevProps, prevState, snapshot);
+    this.observeResponsiveTags();
+    this.measureResponsiveTags();
+  }
+
   componentWillUnmount() {
+    this.responsiveResizeObserver?.disconnect();
+    this.responsiveObservedElements.clear();
     super.componentWillUnmount();
     this.handleChangeWait.cancel();
     this.showLengthExceedWarningDeb.cancel();
   }
 
   @autobind
+  observeResponsiveTags() {
+    const elements: Set<Element> = new Set();
+    if (this.responsiveTags && this.tagContainer) {
+      elements.add(this.tagContainer);
+      if (this.responsiveMeasurement) {
+        Array.from(this.responsiveMeasurement.children).forEach(list => {
+          elements.add(list);
+          Array.from(list.children).forEach(element => elements.add(element));
+        });
+      }
+    }
+    if (elements.size && !this.responsiveResizeObserver) {
+      this.responsiveResizeObserver = new ResizeObserver(this.measureResponsiveTags);
+    }
+    this.responsiveObservedElements.forEach(element => {
+      if (!elements.has(element)) {
+        this.responsiveResizeObserver?.unobserve(element);
+      }
+    });
+    elements.forEach(element => {
+      if (!this.responsiveObservedElements.has(element)) {
+        this.responsiveResizeObserver!.observe(element);
+      }
+    });
+    this.responsiveObservedElements = elements;
+  }
+
+  measureResponsiveTags() {
+    const container = this.tagContainer;
+    const measurement = this.responsiveMeasurement;
+    if (!this.responsiveTags || !container || !measurement) {
+      return;
+    }
+    const tags = measurement.querySelectorAll(`.${this.prefixCls}-responsive-tag-measure > :not(.${this.prefixCls}-tag-separator)`) as NodeListOf<HTMLElement>;
+    const placeholders = measurement.querySelectorAll(`.${this.prefixCls}-responsive-placeholder-measure > *`) as NodeListOf<HTMLElement>;
+    const editor = container.lastElementChild as HTMLElement | null;
+    const style = window.getComputedStyle(container);
+    const measureWidth = (element?: HTMLElement) => {
+      if (!element) {
+        return 0;
+      }
+      const computed = window.getComputedStyle(element);
+      return element.getBoundingClientRect().width + parseFloat(computed.marginLeft) + parseFloat(computed.marginRight);
+    };
+    const width = container.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight) - (editor ? measureWidth(editor) : 0);
+    let used = 0;
+    let count = 0;
+    for (let i = 0; i < tags.length; i++) {
+      const separator = tags[i].previousElementSibling as HTMLElement | null;
+      if (separator && separator.classList.contains(`${this.prefixCls}-tag-separator`)) {
+        used += measureWidth(separator);
+      }
+      used += measureWidth(tags[i]);
+      if (used > width) {
+        break;
+      }
+      if (i === tags.length - 1 || used + measureWidth(placeholders[i + 1]) <= width) {
+        count = i + 1;
+      }
+    }
+    if (this.responsiveTagCount !== count) {
+      this.responsiveTagCount = count;
+    }
+  }
+
+  @autobind
   saveTagContainer(node) {
     this.tagContainer = node;
+  }
+
+  @autobind
+  saveResponsiveMeasurement(node) {
+    this.responsiveMeasurement = node;
   }
 
   @autobind
@@ -620,6 +736,7 @@ export class TextField<T extends TextFieldProps> extends FormField<T> {
       'forceShowRangeSeparator',
       'placeholderTooltip',
       'fieldFocusMode',
+      'tagSeparatorRenderer',
     ]);
   }
 
@@ -1229,6 +1346,63 @@ export class TextField<T extends TextFieldProps> extends FormField<T> {
   }
 
   @autobind
+  handleTagSeparatorMouseDown(e) {
+    e.preventDefault();
+    e.stopPropagation();
+  }
+
+  renderTagSeparators(tags: ReactNode[], overflow: boolean): ReactNode[] {
+    const { tagSeparatorRenderer } = this.reactiveProps;
+    if (!tagSeparatorRenderer) {
+      return [];
+    }
+    const values = this.getValues();
+    let previousIndex: number | undefined;
+    return tags.map((tag, index) => {
+      if ((index === tags.length - 1 && overflow) || tag === null || tag === undefined || typeof tag === 'boolean' || tag === '') {
+        return null;
+      }
+      const previous = previousIndex;
+      previousIndex = index;
+      if (previous === undefined) {
+        return null;
+      }
+      const nextValue = values[index];
+      const disabled = this.disabled || this.isMultipleBlockDisabled(values[previous]) || this.isMultipleBlockDisabled(nextValue);
+      const content = tagSeparatorRenderer({
+        index,
+        previousValue: values[previous],
+        nextValue,
+        disabled,
+        readOnly: this.readOnly,
+      });
+      if (content === null || content === undefined || typeof content === 'boolean' || content === '') {
+        return null;
+      }
+      return (
+        <li
+          key={`separator-${isValidElement(tag) ? tag.key : this.getValueKey(nextValue)}`}
+          className={`${this.prefixCls}-tag-separator`}
+          data-disabled={disabled || this.readOnly || undefined}
+          onMouseDown={this.handleTagSeparatorMouseDown}
+          onMouseUp={stopPropagation}
+          onClick={stopPropagation}
+          onDoubleClick={stopPropagation}
+          onContextMenu={stopPropagation}
+          onKeyDown={stopPropagation}
+          onKeyUp={stopPropagation}
+          onMouseEnter={stopPropagation}
+          onMouseLeave={stopPropagation}
+          onClickCapture={disabled || this.readOnly ? this.handleTagSeparatorMouseDown : undefined}
+          onKeyDownCapture={disabled || this.readOnly ? this.handleTagSeparatorMouseDown : undefined}
+        >
+          {content}
+        </li>
+      );
+    });
+  }
+
+  @autobind
   getMultipleWrap(wrap: (node: ReactNode) => ReactNode): ReactNode {
     const {
       prefixCls,
@@ -1250,7 +1424,17 @@ export class TextField<T extends TextFieldProps> extends FormField<T> {
     delete otherProps.onMouseEnter;
     delete otherProps.onMouseLeave;
     const { record } = this;
-    const { tags: multipleTags } = this.renderMultipleValues();
+    const responsive = this.responsiveTags && !showSelectLoading;
+    const valuesLength = responsive ? this.getValues().length : 0;
+    const fullTags = responsive ? this.renderMultipleValues(false, valuesLength, {}).tags as ReactNode[] : [];
+    const placeholders = responsive ? fullTags.map((_, index) => {
+      const { tags: limitedTags } = this.renderMultipleValues(false, index, { placeholderOnly: true });
+      const placeholder = (limitedTags as ReactNode[])[0];
+      return isValidElement(placeholder) ? cloneElement(placeholder, { key: String(index) }) : placeholder;
+    }) : [];
+    const fullSeparators = responsive ? this.renderTagSeparators(fullTags, false) : [];
+    const { tags: multipleTags, isOverflowMaxTagCount } = this.renderMultipleValues(false, responsive ? this.responsiveTagCount : undefined);
+    const separators = this.renderTagSeparators(multipleTags as ReactNode[], isOverflowMaxTagCount);
     const eventsProps = !this.disabled ? {
       onMouseDown,
       onMouseUp,
@@ -1258,15 +1442,18 @@ export class TextField<T extends TextFieldProps> extends FormField<T> {
       onDoubleClick,
       onContextMenu,
     } : undefined;
-    const renderTags = showSelectLoading ? null : multipleTags;
+    const renderTags = showSelectLoading ? null : separators.length
+      ? (multipleTags as ReactNode[]).reduce<ReactNode[]>((nodes, tag, index) => nodes.concat(separators[index], tag), [])
+      : multipleTags;
     const tags = (
       <Animate
         component="ul"
         componentProps={{
           ref: this.saveTagContainer,
           onScroll: stopPropagation,
+          className: responsive ? `${prefixCls}-responsive-tags` : undefined,
         }}
-        transitionName={!record || record === this.lastAnimationRecord ? 'zoom' : ''}
+        transitionName={!responsive && (!record || record === this.lastAnimationRecord) ? 'zoom' : ''}
         exclusive
         onEnd={this.handleTagAnimateEnd}
         onEnter={this.handleTagAnimateEnter}
@@ -1296,6 +1483,16 @@ export class TextField<T extends TextFieldProps> extends FormField<T> {
         {...eventsProps}
       >
         {tags}
+        {responsive && (
+          <div ref={this.saveResponsiveMeasurement} className={`${prefixCls}-responsive-measure`} aria-hidden="true">
+            <ul className={`${prefixCls}-responsive-tag-measure`}>
+              {fullTags.reduce<ReactNode[]>((nodes, tag, index) => nodes.concat(fullSeparators[index], tag || (
+                <li key={String(index)} style={{ width: 0, margin: 0, padding: 0, border: 0 }} />
+              )), [])}
+            </ul>
+            <ul className={`${prefixCls}-responsive-placeholder-measure`}>{placeholders}</ul>
+          </div>
+        )}
       </div>,
     );
   }

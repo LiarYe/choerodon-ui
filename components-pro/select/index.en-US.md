@@ -53,6 +53,8 @@ title: Select
 | addNewOptionPrompt | 自定义新增选项功能: 传入 path(根据addNewOptionPromptRender渲染) 或者 完全自定义渲染; | [AddNewOptionPromptResultProps](#AddNewOptionPromptResultProps) \| ((props: [AddNewOptionPromptRenderProps](#AddNewOptionPromptRenderProps)) => (ReactNode \| AddNewOptionPromptResultProps)) |  |
 | autoScrollToSelected | 自动滚动到选中位置 | boolean | true |
 | duplicateKey | Configuration object for duplicate `valueField` values; it can also be configured by component name through the global `duplicateKey` hook. `disable` controls whether to disable duplicates, `showWarning` determines whether to display a warning for duplicates | { disable?: boolean; showWarning?: boolean } | [globalConfig.duplicateKey](/components/configure#API) |
+| popupMainField | Main field of dropdown options. Defaults to `textField`. In Select, its first character is used for the avatar without changing the option text; in Lov popup lists and tree nodes, it also determines the primary text displayed | string | textField |
+| popupShowAvatar | A boolean controls whether to display an avatar using the first character of the main field in dropdown options; `'colorful'` enables multicolored avatars. Avatars are not displayed in Lov tree dropdowns | boolean \| 'colorful' | false |
 
 更多属性请参考 [TriggerField](/components-pro/trigger-field/#TriggerField)。
 
