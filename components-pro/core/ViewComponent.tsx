@@ -266,8 +266,17 @@ export default class ViewComponent<P extends ViewComponentProps, C extends Confi
 
   isFocused: boolean;
 
+  /**
+   * 由 getObservableProps 选取或计算的字段，MobX 按顶层字段跟踪变化。
+   * 不同于只读的 this.props，这里可以保留组件自己的值，例如非受控表单字段的当前值。
+   */
   observableProps: any;
 
+  /**
+   * 指向 React 传入的原始 props，供 computed、reaction 等跟踪 props 更新。
+   * observable.ref 只跟踪整份引用的替换，不会将嵌套值转为可观察对象。
+   * 仅在本组件的 render 中读取或透传原始属性时，直接使用 this.props 即可。
+   */
   reactiveProps: Readonly<P> & Readonly<{ children?: ReactNode }>;
 
   reactiveContext: C;
