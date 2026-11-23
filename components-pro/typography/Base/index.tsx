@@ -2,10 +2,10 @@ import React, { forwardRef, ForwardRefExoticComponent, PropsWithoutRef, ReactNod
 import omit from 'lodash/omit';
 import classNames from 'classnames';
 import copy from 'copy-to-clipboard';
-import { composeRef } from 'rc-util/lib/ref';
 import Icon from 'choerodon-ui/lib/icon';
 import ReactResizeObserver from 'choerodon-ui/lib/_util/resizeObserver';
 import ConfigContext from 'choerodon-ui/lib/config-provider/ConfigContext';
+import useMergedRef from '../hooks/useMergedRef';
 import Tooltip from '../../tooltip';
 import TransButton from '../../_util/TransButton';
 import EllipsisTooltip from './EllipsisTooltip';
@@ -110,7 +110,8 @@ const Base: IBase = forwardRef<HTMLDivElement, BaseBlockProps>((props, ref) => {
   } = props;
   const { getProPrefixCls } = useContext(ConfigContext);
 
-  const typographyRef = useRef<HTMLElement>(null);
+  const typographyRef = useRef<HTMLDivElement>(null);
+  const mergedRef = useMergedRef(typographyRef, ref);
 
   // ============================ MISC ============================
   const prefixCls = getProPrefixCls('typography', customizePrefixCls);
@@ -364,7 +365,7 @@ const Base: IBase = forwardRef<HTMLDivElement, BaseBlockProps>((props, ref) => {
             WebkitLineClamp: cssLineClamp ? rows : undefined,
           }}
           component={component}
-          ref={composeRef(typographyRef, ref)}
+          ref={mergedRef}
           aria-label={topAriaLabel}
           title={title}
           {...textProps}

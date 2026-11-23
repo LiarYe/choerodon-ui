@@ -2,6 +2,11 @@
 
 **根项目在 C0 切到 React 19，不等 D1。** `master` 维护 16；`react-19-feature` 不做双版本 shim，不发布 React 18 过渡版。顺序：A 固定基线 → B 在 16 根工程逐包升级 → P 准备严格安装所必需的替换 → C0 一次切根 → C 在根 19 上逐组件验收 → D 验发布物。正式源码始终改原目录，不复制到测试工程。
 
+## 背景与目的
+
+本项目为 React 组件库，改造前使用的是 React 16.x，最终要升级 React 19。
+此文是升级的计划，需要逐步完成。
+
 ## 执行规则与本次证据
 
 - 每次领取一个编号；表中明确分批的项，每个子项单独执行。交付记录：**改了哪些文件 / 实际命令 / 结果 / 未覆盖项**。前置未过则停在该项；不把跳过、mock 包装器或 `npm install` 成功记作交互通过。
@@ -31,7 +36,8 @@
 
 | 步骤 | 改动（当前锁版 → 目标） | 本项验收 |
 |---|---|---|
-| B1 直接依赖 | 分小项：Avatar/Typography 的 `rc-util` 4.18.1 → 5.44.4；Form 显式声明 `hoist-non-react-statics@3.3.2`；Calendar 声明 `prop-types@15.8.1`；PerformanceTable 若保留 polyfill 则声明 `react-lifecycles-compat@3.0.4`。 | 每项验证实际调用方的导入和行为；`npm ls rc-util` 分辨嵌套版本。不强行覆盖其他包的 `react-is`。 |
+| B1a 移除源码对 `rc-util` 的直接导入 | Avatar.Group 复用仓内 `Children/toArray`；Typography 和 Base 共用 `useMergedRef`，保留 `setContentRef` 和内部测量 ref。不新增或升级 `rc-util`，不改其他包的传递依赖。 | Avatar 验证空项占位、Fragment 计数和折叠结果；Typography 在 React 16/19 下验证 ref 挂载和解绑、19 的 callback cleanup，以及省略测量。以源码无直接导入为准，不要求 `npm ls rc-util` 为空。 |
+| B1b 其他直接依赖 | Form 显式声明 `hoist-non-react-statics@3.3.2`；Calendar 声明 `prop-types@15.8.1`；PerformanceTable 若保留 polyfill 则声明 `react-lifecycles-compat@3.0.4`。 | 每项验证实际调用方的导入和行为。不强行覆盖其他包的 `react-is`。 |
 | B2 公共 DOM ref | 按序各一项：基础 Trigger → Pro TriggerField/ViewComponent → vendored MenuItem/DOMWrap。显式传递真实节点并组合已有 ref，不随意新增 wrapper。 | 依次验首次挂载/外部点击；Lov/Select 无 wrapper 的聚焦；菜单滚入与容器测量。真实尺寸在浏览器验。 |
 | B3 Menu store | `mini-store` 2.0.0 → 3.0.6。启用 connect 的 `forwardRef`，替换 `getWrappedInstance()` 的实例调用。 | 嵌套菜单选中、键盘上下、`scrollToKey`；依赖 B2 的节点路径。 |
 | B4 Tree 动画 | `rc-motion` 2.4.1 → 2.9.5，真实 DOM 接 ref。 | 展开、快速反向收起，最终状态及结束事件正确。 |

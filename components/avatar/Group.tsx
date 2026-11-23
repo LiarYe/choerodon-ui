@@ -1,6 +1,6 @@
 ﻿import * as React from 'react';
 import classNames from 'classnames';
-import toArray from 'rc-util/lib/Children/toArray';
+import toArray from '../rc-components/util/Children/toArray';
 import Popover from '../popover';
 import { cloneElement } from '../_util/reactNode';
 import ConfigContext, { ConfigContextValue } from '../config-provider/ConfigContext';
