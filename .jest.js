@@ -9,7 +9,7 @@ module.exports = {
   testURL: 'http://localhost',
   setupFiles: ['./tests/setup.js'],
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'md'],
-  modulePathIgnorePatterns: ['/_site/'],
+  modulePathIgnorePatterns: ['/_site/', '<rootDir>/tests-react19/'],
   moduleNameMapper: {
     '\\.(css|scss|less)$': 'identity-obj-proxy',
     '^choerodon-ui/dataset$': '<rootDir>/components-dataset/index.ts',

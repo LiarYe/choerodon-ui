@@ -1,0 +1,28 @@
+{
+  "name": "choerodon-ui-react19-tests",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "typecheck": "tsc --project tsconfig.json",
+    "lint": "eslint --max-warnings 0 --ext .ts,.tsx cases preview",
+    "preview": "node preview.cjs",
+    "preview:build": "node preview.cjs --build",
+    "test": "jest --config jest.config.cjs --runInBand"
+  },
+  "devDependencies": {
+    "@swc/core": "1.11.24",
+    "@swc/jest": "0.2.39",
+    "@testing-library/dom": "10.4.2",
+    "@testing-library/react": "16.3.3",
+    "@types/jest": "29.5.14",
+    "@types/node": "20.19.43",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "jest": "29.7.0",
+    "jest-environment-jsdom": "29.7.0",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
+    "typescript": "5.9.3",
+    "webpack-dev-middleware": "^7.4.6"
+  }
+}

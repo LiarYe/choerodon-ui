@@ -1,0 +1,24 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "allowImportingTsExtensions": true,
+    "jsx": "react-jsx",
+    "types": ["node", "jest", "react", "react-dom"],
+    "typeRoots": ["./node_modules/@types"],
+    "paths": {
+      "react": ["tests-react19/node_modules/@types/react"],
+      "react/*": ["tests-react19/node_modules/@types/react/*"],
+      "react-dom": ["tests-react19/node_modules/@types/react-dom"],
+      "react-dom/*": ["tests-react19/node_modules/@types/react-dom/*"],
+      "choerodon-ui/lib/*": ["components/*"],
+      "choerodon-ui/pro/lib/*": ["components-pro/*"],
+      "choerodon-ui/dataset/*": ["components-dataset/*"],
+      "choerodon-ui/shared/*": ["components-shared/*"],
+      "choerodon-ui/dataset": ["components-dataset/index"],
+      "choerodon-ui/shared": ["components-shared/index"]
+    }
+  },
+  "include": ["cases/**/*", "preview/**/*", "../typings/index.d.ts"],
+  "exclude": ["node_modules", "dist"]
+}
