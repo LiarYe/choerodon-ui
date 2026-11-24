@@ -183,22 +183,22 @@ const RefNodeList: React.RefForwardingComponent<NodeListRef, NodeListProps> = (p
   // ============================== Motion ==============================
   const [prevExpandedKeys, setPrevExpandedKeys] = React.useState(expandedKeys);
   const [prevData, setPrevData] = React.useState(data);
-  const [transitionData, setTransitionData] = React.useState(data);
+  const [transitionData, setTransitionData] = React.useState<FlattenNode[] | null>(null);
   const [transitionRange, setTransitionRange] = React.useState<FlattenNode[]>([]);
   const [motionType, setMotionType] = React.useState<'show' | 'hide' | null>(null);
 
-  const onMotionEnd = () => {
-    setPrevData(data);
-    setTransitionData(data);
+  const onMotionEnd = React.useCallback(() => {
+    setTransitionData(null);
     setTransitionRange([]);
     setMotionType(null);
 
     onListChangeEnd();
-  }
+  }, [onListChangeEnd]);
 
   // Do animation if expanded keys changed
   React.useEffect(() => {
     setPrevExpandedKeys(expandedKeys);
+    setPrevData(data);
 
     const diffExpanded = findExpandedKeys(prevExpandedKeys, expandedKeys);
 
@@ -238,8 +238,7 @@ const RefNodeList: React.RefForwardingComponent<NodeListRef, NodeListProps> = (p
       }
     } else if (prevData !== data) {
       // If whole data changed, we just refresh the list
-      setPrevData(data);
-      setTransitionData(data);
+      setTransitionData(null);
     }
   }, [expandedKeys, data]);
 
@@ -250,7 +249,7 @@ const RefNodeList: React.RefForwardingComponent<NodeListRef, NodeListProps> = (p
     }
   }, [dragging]);
 
-  const mergedData = motion ? transitionData : data;
+  const mergedData = motion ? transitionData || prevData : data;
 
   const treeNodeRequiredProps: TreeNodeRequiredProps = React.useMemo(() => ({
     expandedKeys,
@@ -312,7 +311,7 @@ const RefNodeList: React.RefForwardingComponent<NodeListRef, NodeListProps> = (p
         }}
       />
     );
-  }, [treeNodeRequiredProps, activeItem]);
+  }, [treeNodeRequiredProps, activeItem, selectable, motion, transitionRange, motionType, onListChangeStart, onMotionEnd, onActiveChange]);
 
   return (
     <>

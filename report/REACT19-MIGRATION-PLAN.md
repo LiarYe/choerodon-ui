@@ -40,7 +40,7 @@
 | B1b 其他直接依赖 | Form 显式声明 `hoist-non-react-statics@3.3.2`；Calendar 声明 `prop-types@15.8.1`；PerformanceTable 若保留 polyfill 则声明 `react-lifecycles-compat@3.0.4`。 | 每项验证实际调用方的导入和行为。不强行覆盖其他包的 `react-is`。（暂不执行，后续其他包升级后验证） |
 | B2 公共 DOM ref | 按序各一项：基础 Trigger → Pro TriggerField/ViewComponent → vendored MenuItem/DOMWrap。显式传递真实节点并组合已有 ref，不随意新增 wrapper。 | 依次验首次挂载/外部点击；Lov/Select 无 wrapper 的聚焦；菜单滚入与容器测量。真实尺寸在浏览器验。 |
 | B3 Menu store（已完成） | 根 `mini-store` 2.0.0 → 3.0.6。仅 `SubPopupMenu` 的 `connect` 开启 `forwardRef`；根 Menu 的四个实例方法直接委派，不改公开属性。 | [同一交互用例](../tests-react19/cases/components/menu/connectedMenu.test.jsx) 在 16.14.0 / 19.3.1 验证嵌套选中、上下键、实例方法及滚动目标。19 的[真实菜单预览](../tests-react19/preview/components/menu/index.tsx) 实测 `scrollTop` 为 0 → 522 → 0 px；横向收窄后显示“更多”，展开恢复五项。 |
-| B4 Tree 动画 | `rc-motion` 2.4.1 → 2.9.5，真实 DOM 接 ref。 | 展开、快速反向收起，最终状态及结束事件正确。 |
+| B4 Tree 动画（已完成） | 根 `rc-motion` 2.4.1 → 2.9.5；沿用动画 `div` 的 ref。NodeList 按当前方向和上次展开数据渲染动画行，不改 Tree 属性。 | [共享用例](../tests-react19/cases/components/tree/motion.test.jsx) 在 React 16.14.0 / 19.3.1 均通过：正常展开、受控展开中反向收起；子节点冒泡不提前结束，容器 `transitionend` 只结算一次，最终节点正确。jsdom 验事件，不验视觉和布局；虚拟列表留 B5。 |
 | B5 虚拟列表 | `rc-virtual-list` 3.2.6 → 3.19.2；核对该调用链实际锁到的 `rc-resize-observer`（候选 1.4.3）。 | 改变容器尺寸，Tree/Menu 行高非零、可见行位置改变；仅未抛异常不算通过。 |
 | B6 Carousel | `react-slick` 0.25.2 → 0.31.0。 | 浏览器验首屏宽度、切页和断点。 |
 | B7 Board 测量 | `react-virtualized` 9.18.5 → 9.22.6；保留 List/AutoSizer，清理 KanbanColumn 对列表实例的 `findDOMNode`。 | 空列/非空列和滚动位置在 16 正确；完整 19 拖拽在 C7 复验。 |

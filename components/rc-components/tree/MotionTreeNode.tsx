@@ -45,21 +45,23 @@ const MotionTreeNode: React.RefForwardingComponent<HTMLDivElement, MotionTreeNod
   };
 
   useEffect(() => {
-    if (motionNodes && motionType === 'hide' && visible) {
-      setVisible(false);
-    }
-  }, [motionNodes]);
-
-  useEffect(() => {
-    // Trigger motion only when patched
     if (motionNodes) {
-      onOriginMotionStart();
+      setVisible(motionType !== 'hide');
     }
+  }, [motionNodes, motionType]);
+
+  const mountCount = React.useRef(0);
+  useEffect(() => {
+    if (!motionNodes) return undefined;
+    mountCount.current += 1;
+    const mount = mountCount.current;
+    if (mount === 1) onOriginMotionStart();
 
     return () => {
-      if (motionNodes) {
-        onMotionEnd();
-      }
+      // StrictMode reattaches the same effect before the microtask runs.
+      if (!motionedRef.current) Promise.resolve().then(() => {
+        if (mount === mountCount.current) onMotionEnd();
+      });
     };
   }, []);
 
@@ -71,6 +73,12 @@ const MotionTreeNode: React.RefForwardingComponent<HTMLDivElement, MotionTreeNod
         visible={visible}
         {...motion}
         motionAppear={motionType === 'show'}
+        onVisibleChanged={nextVisible => {
+          motion?.onVisibleChanged?.(nextVisible);
+          if (nextVisible === (motionType === 'show')) {
+            onMotionEnd();
+          }
+        }}
         onAppearEnd={onMotionEnd}
         onLeaveEnd={onMotionEnd}
       >
