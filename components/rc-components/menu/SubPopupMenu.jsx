@@ -68,8 +68,6 @@ export function saveRef(c) {
   }
 }
 
-export function getWrappedInstance() { return SubPopupMenu }
-
 export class SubPopupMenu extends Component {
   static defaultProps = {
     prefixCls: 'rc-menu',
@@ -361,6 +359,4 @@ export class SubPopupMenu extends Component {
   }
 }
 
-const connected = connect()(SubPopupMenu);
-
-export default connected;
+export default connect(undefined, { forwardRef: true })(SubPopupMenu);

@@ -91,6 +91,7 @@ export const menuAllProps = [
   'index',
   'isSelected',
   'store',
+  'miniStoreForwardedRef',
   'activeKey',
   'builtinPlacements',
   'overflowedIndicator',

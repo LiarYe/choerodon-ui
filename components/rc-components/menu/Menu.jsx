@@ -98,7 +98,7 @@ export default class Menu extends Component {
   };
 
   step(direction) {
-    return this.innerMenu.getWrappedInstance().step(direction);
+    return this.innerMenu.step(direction);
   }
 
   onClick = e => {
@@ -106,15 +106,15 @@ export default class Menu extends Component {
   };
 
   onKeyDown = (e, callback) => {
-    return this.innerMenu.getWrappedInstance().onKeyDown(e, callback);
+    return this.innerMenu.onKeyDown(e, callback);
   };
 
   getFlatInstanceArray() {
-    return this.innerMenu.getWrappedInstance().getFlatInstanceArray();
+    return this.innerMenu.getFlatInstanceArray();
   }
 
   scrollToKey(key) {
-    return this.innerMenu.getWrappedInstance().scrollToKey(key);
+    return this.innerMenu.scrollToKey(key);
   }
 
   onOpenChange = event => {

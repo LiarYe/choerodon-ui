@@ -39,7 +39,7 @@
 | B1a 移除源码对 `rc-util` 的直接导入 | Avatar.Group 复用仓内 `Children/toArray`；Typography 和 Base 共用 `useMergedRef`，保留 `setContentRef` 和内部测量 ref。不新增或升级 `rc-util`，不改其他包的传递依赖。 | Avatar 验证空项占位、Fragment 计数和折叠结果；Typography 在 React 16/19 下验证 ref 挂载和解绑、19 的 callback cleanup，以及省略测量。以源码无直接导入为准，不要求 `npm ls rc-util` 为空。 |
 | B1b 其他直接依赖 | Form 显式声明 `hoist-non-react-statics@3.3.2`；Calendar 声明 `prop-types@15.8.1`；PerformanceTable 若保留 polyfill 则声明 `react-lifecycles-compat@3.0.4`。 | 每项验证实际调用方的导入和行为。不强行覆盖其他包的 `react-is`。（暂不执行，后续其他包升级后验证） |
 | B2 公共 DOM ref | 按序各一项：基础 Trigger → Pro TriggerField/ViewComponent → vendored MenuItem/DOMWrap。显式传递真实节点并组合已有 ref，不随意新增 wrapper。 | 依次验首次挂载/外部点击；Lov/Select 无 wrapper 的聚焦；菜单滚入与容器测量。真实尺寸在浏览器验。 |
-| B3 Menu store | `mini-store` 2.0.0 → 3.0.6。启用 connect 的 `forwardRef`，替换 `getWrappedInstance()` 的实例调用。 | 嵌套菜单选中、键盘上下、`scrollToKey`；依赖 B2 的节点路径。 |
+| B3 Menu store（已完成） | 根 `mini-store` 2.0.0 → 3.0.6。仅 `SubPopupMenu` 的 `connect` 开启 `forwardRef`；根 Menu 的四个实例方法直接委派，不改公开属性。 | [同一交互用例](../tests-react19/cases/components/menu/connectedMenu.test.jsx) 在 16.14.0 / 19.3.1 验证嵌套选中、上下键、实例方法及滚动目标。19 的[真实菜单预览](../tests-react19/preview/components/menu/index.tsx) 实测 `scrollTop` 为 0 → 522 → 0 px；横向收窄后显示“更多”，展开恢复五项。 |
 | B4 Tree 动画 | `rc-motion` 2.4.1 → 2.9.5，真实 DOM 接 ref。 | 展开、快速反向收起，最终状态及结束事件正确。 |
 | B5 虚拟列表 | `rc-virtual-list` 3.2.6 → 3.19.2；核对该调用链实际锁到的 `rc-resize-observer`（候选 1.4.3）。 | 改变容器尺寸，Tree/Menu 行高非零、可见行位置改变；仅未抛异常不算通过。 |
 | B6 Carousel | `react-slick` 0.25.2 → 0.31.0。 | 浏览器验首屏宽度、切页和断点。 |

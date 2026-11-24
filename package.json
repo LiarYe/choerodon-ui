@@ -81,7 +81,7 @@
     "jshint": "^2.13.4",
     "jsonlint": "^1.6.3",
     "jsonlint-mod": "^1.7.5",
-    "mini-store": "^2.0.0",
+    "mini-store": "3.0.6",
     "mobx-react-lite": "4.1.1",
     "moment": "^2.24.0",
     "mutationobserver-shim": "^0.3.3",
