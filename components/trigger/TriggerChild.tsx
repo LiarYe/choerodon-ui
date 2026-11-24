@@ -1,4 +1,52 @@
-import { Children, cloneElement, PureComponent, ReactElement } from 'react';
+import React, { Children, cloneElement, PureComponent, ReactElement, ReactNode, Ref } from 'react';
+import * as ReactDOM from 'react-dom';
+import useMergedRef from '../_util/useMergedRef';
+
+function elementRef(child: ReactElement) {
+  // React 16 stores ref on the element; React 19 stores it in props.
+  const descriptor = Object.getOwnPropertyDescriptor(child.props, 'ref');
+  return descriptor && 'value' in descriptor ? descriptor.value : Object.getOwnPropertyDescriptor(child, 'ref')?.value;
+}
+
+type Host = Element | Text;
+export type RegisterHost = (read: () => Host | null, mounted: boolean) => void;
+
+// Look up opaque children lazily: they can replace their DOM without updating Trigger.
+class LegacyHost extends PureComponent<{ children?: ReactNode; register: RegisterHost }> {
+  read = () => {
+    const { findDOMNode } = ReactDOM as { findDOMNode?: (instance: LegacyHost) => Host | null };
+    return findDOMNode ? findDOMNode(this) : null;
+  };
+
+  componentDidMount() {
+    const { register } = this.props;
+    register(this.read, true);
+  }
+
+  componentWillUnmount() {
+    const { register } = this.props;
+    register(this.read, false);
+  }
+
+  render() {
+    const { children } = this.props;
+    return children;
+  }
+}
+
+export function HostChild({ child, register }: { child: ReactNode; register: RegisterHost }) {
+  const node = React.useRef<Element | null>(null);
+  const read = React.useCallback(() => node.current, []);
+  const save = React.useCallback((value: Element | null) => {
+    node.current = value;
+    register(read, !!value);
+  }, [register, read]);
+  const native = React.isValidElement<{ ref?: Ref<Element> }>(child) && typeof child.type === 'string';
+  const original = native ? elementRef(child) : null;
+  const ref = useMergedRef(save, original);
+  if (native && typeof original !== 'string') return cloneElement(child, { ref });
+  return <LegacyHost register={register}>{child}</LegacyHost>;
+}
 
 export type hook = (eventName: string, child: ReactElement<any>, e) => void;
 
@@ -14,6 +62,8 @@ export interface TriggerChildProps {
     value: boolean | undefined;
   };
   popupHidden?: boolean;
+  children?: ReactElement<any>;
+  register?: RegisterHost;
 }
 
 export default class TriggerChild extends PureComponent<TriggerChildProps> {
@@ -35,7 +85,7 @@ export default class TriggerChild extends PureComponent<TriggerChildProps> {
 
   handleKeyDown;
 
-  constructor(props, context) {
+  constructor(props: TriggerChildProps, context?: any) {
     super(props, context);
     const createChains = eventName => e => {
       const { [`on${eventName}`]: handle, children } = this.props as { [key: string]: any };
@@ -62,8 +112,8 @@ export default class TriggerChild extends PureComponent<TriggerChildProps> {
   }
 
   render() {
-    const { children } = this.props;
-    return cloneElement(Children.only(children as ReactElement), {
+    const { children, register } = this.props;
+    const child = cloneElement(Children.only(children as ReactElement<any>), {
       onContextMenu: this.handleContextMenu,
       onClick: this.handleClick,
       onMouseDown: this.handleMouseDown,
@@ -73,5 +123,6 @@ export default class TriggerChild extends PureComponent<TriggerChildProps> {
       onBlur: this.handleBlur,
       onKeyDown: this.handleKeyDown,
     });
+    return register ? <HostChild child={child} register={register} /> : child;
   }
 }

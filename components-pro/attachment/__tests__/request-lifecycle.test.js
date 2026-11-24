@@ -18,6 +18,26 @@ function deferred() {
 const files = name => [{ uid: name, name: `${name}.txt` }];
 const flush = async () => { await act(async () => { await Promise.resolve(); }); };
 
+it('styles the editable attachment list root, not the file input, on focus', () => {
+  const wrapper = mount(<Attachment viewMode="list" sortable={false} />);
+  try {
+    const root = wrapper.getDOMNode();
+    const input = wrapper.find('input[type="file"]');
+    const button = input.closest('button');
+    const focused = `${wrapper.instance().prefixCls}-focused`;
+    const focus = jest.spyOn(input.getDOMNode(), 'focus');
+    wrapper.instance().focus();
+    expect(focus).toHaveBeenCalled();
+    button.simulate('focus');
+    expect(root.classList.contains(focused)).toBe(true);
+    expect(input.getDOMNode().classList.contains(focused)).toBe(false);
+    button.simulate('blur');
+    expect(root.classList.contains(focused)).toBe(false);
+  } finally {
+    wrapper.unmount();
+  }
+});
+
 describe('Attachment request ownership', () => {
   let wrapper;
   let requests;

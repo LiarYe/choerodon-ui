@@ -25,6 +25,41 @@ describe('Lov-pro', () => {
     ],
   });
 
+  it('keeps the button instance for focus and resolves its host for DOM operations', () => {
+    const ref = React.createRef();
+    const container = document.createElement('div');
+    document.body.appendChild(container);
+    const wrapper = mount(<Lov ref={ref} dataSet={ds} name="code" mode="button" />, { attachTo: container });
+    try {
+      const button = container.querySelector('button');
+      expect(ref.current.domNode).toBe(button);
+      expect(ref.current.element).not.toBe(button);
+      ref.current.focus();
+      expect(document.activeElement).toBe(button);
+      expect(button.classList.contains(`${ref.current.prefixCls}-focused`)).toBe(true);
+      ref.current.blur();
+      expect(button.classList.contains(`${ref.current.prefixCls}-focused`)).toBe(false);
+    } finally {
+      wrapper.unmount();
+      container.remove();
+    }
+  });
+
+  it('resolves the current group without overriding the popup alignment target', () => {
+    const ref = React.createRef();
+    const target = document.createElement('div');
+    const wrapper = mount(<Lov ref={ref} addonAfter="after" getPopupAlignTarget={() => target} />);
+    try {
+      expect(ref.current.domNode).toBe(wrapper.getDOMNode());
+      expect(ref.current.domNode).not.toBe(ref.current.wrapper);
+      expect(ref.current.trigger.props.getRootDomNode()).toBe(target);
+      wrapper.setProps({ addonAfter: undefined });
+      expect(ref.current.domNode).toBe(ref.current.wrapper);
+    } finally {
+      wrapper.unmount();
+    }
+  });
+
   it('render mode button', () => {
     const wrapper = mount(<Lov dataSet={ds} name="code" mode="button" />);
     expect(wrapper.find('button').length).toBe(2);

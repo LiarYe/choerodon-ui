@@ -1310,6 +1310,11 @@ export default class Lov extends Select<LovProps> {
     ]);
   }
 
+  getHostNode(): HTMLElement | null {
+    if (this.element instanceof Button) return this.element.getHostNode();
+    return super.getHostNode();
+  }
+
   getButtonProps() {
     const { className, type } = this.reactiveProps;
     const { options } = this;

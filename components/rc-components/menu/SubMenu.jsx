@@ -1,5 +1,4 @@
 import React, { Component, createElement } from 'react';
-import { findDOMNode } from 'react-dom';
 import noop from 'lodash/noop';
 import classNames from 'classnames';
 import { connect } from 'mini-store';
@@ -307,8 +306,8 @@ export class SubMenu extends Component {
     if (!this.subMenuTitle || !this.menuInstance) {
       return;
     }
-    const popupMenu = findDOMNode(this.menuInstance);
-    if (popupMenu.offsetWidth >= this.subMenuTitle.offsetWidth) {
+    const popupMenu = this.menuInstance.getLayoutRoot();
+    if (!popupMenu || popupMenu.offsetWidth >= this.subMenuTitle.offsetWidth) {
       return;
     }
 

@@ -275,7 +275,7 @@ export default class TransferList extends Select<TransferListProps> {
     const { header, footer, reactiveProps: { style, children } } = this;
     const isCustom = typeof children === 'function';
     return (
-      <div {...this.getOtherProps()} style={style}>
+      <div {...this.getOtherProps()} ref={this.wrapperReference} style={style}>
         {!isCustom && header}
         {this.renderBody()}
         {!isCustom && footer}

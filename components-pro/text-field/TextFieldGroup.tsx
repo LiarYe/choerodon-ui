@@ -1,5 +1,6 @@
-import React, { FocusEventHandler, FunctionComponent, ReactNode, useEffect, useRef } from 'react';
+import React, { FocusEventHandler, ReactNode, useEffect, useRef } from 'react';
 import classNames from 'classnames';
+import useMergedRef from 'choerodon-ui/lib/_util/useMergedRef';
 
 export interface TextFieldGroupProps {
   prefixCls?: string;
@@ -8,8 +9,9 @@ export interface TextFieldGroupProps {
   className?: string;
 }
 
-const TextFieldGroup: FunctionComponent<TextFieldGroupProps> = ({ prefixCls, onBlur, children, className, ...otherProps }) => {
+const TextFieldGroup = React.forwardRef<HTMLDivElement, TextFieldGroupProps>(({ prefixCls, onBlur, children, className, ...otherProps }, forwardedRef) => {
   const ref = useRef<HTMLDivElement | null>(null);
+  const mergedRef = useMergedRef(ref, forwardedRef);
   const selfPrefixCls = `${prefixCls}-group-wrapper`;
   useEffect(() => {
     const { current } = ref;
@@ -28,11 +30,11 @@ const TextFieldGroup: FunctionComponent<TextFieldGroupProps> = ({ prefixCls, onB
     }
   }, [onBlur, ref]);
   return (
-    <div ref={ref} {...otherProps} className={classNames(selfPrefixCls, className)}>
+    <div ref={mergedRef} {...otherProps} className={classNames(selfPrefixCls, className)}>
       {children}
     </div>
   );
-};
+});
 
 TextFieldGroup.displayName = 'TextFieldGroup';
 

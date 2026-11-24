@@ -3,7 +3,10 @@ import { createRoot } from 'react-dom/client';
 import AvatarDemo from './components/avatar';
 import IconDemo from './components/icon';
 
+import MenuDemo from './components/menu';
+
 const pages = [
+  { hash: '#/components/menu', title: 'Menu 容器', Demo: MenuDemo },
   { hash: '#/components/avatar', title: 'Avatar 头像', Demo: AvatarDemo },
   { hash: '#/components/icon', title: 'Icon 图标', Demo: IconDemo },
 ];

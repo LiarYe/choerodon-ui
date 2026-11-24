@@ -1,5 +1,4 @@
 import React from 'react';
-import { findDOMNode } from 'react-dom';
 import scrollIntoView from 'dom-scroll-into-view';
 import classNames from 'classnames';
 import { connect } from 'mini-store';
@@ -9,6 +8,7 @@ import { hide, show } from 'choerodon-ui/pro/lib/tooltip/singleton';
 import isOverflow from 'choerodon-ui/pro/lib/overflow-tip/util';
 import isMobile from 'choerodon-ui/pro/lib/_util/isMobile';
 import KeyCode from '../../_util/KeyCode';
+import { mergeRefs } from '../../_util/useMergedRef';
 import Checkbox from '../../checkbox/Checkbox';
 import Ripple from '../../ripple';
 import { menuAllProps } from './util';
@@ -26,6 +26,17 @@ export class MenuItem extends React.Component {
     manualRef: noop,
   };
 
+  itemRef = React.createRef();
+
+  getItemRef(ref) {
+    if (typeof ref === 'string') return ref;
+    if (ref !== this.attributeRef) {
+      this.attributeRef = ref;
+      this.mergedItemRef = mergeRefs(this.itemRef, ref);
+    }
+    return this.mergedItemRef || this.itemRef;
+  }
+
   componentWillUnmount() {
     const props = this.props;
     if (props.onDestroy) {
@@ -39,10 +50,12 @@ export class MenuItem extends React.Component {
   }
 
   componentDidUpdate() {
-    if (this.props.active) {
-      scrollIntoView(findDOMNode(this), findDOMNode(this.props.parentMenu), {
-        onlyScrollIfNeeded: true,
-      });
+    const { active, attribute, getScrollContainer } = this.props;
+    const container = active && getScrollContainer && getScrollContainer();
+    if (container) {
+      const { refs, itemRef } = this;
+      const item = attribute && typeof attribute.ref === 'string' ? refs[attribute.ref] : itemRef.current;
+      if (item) scrollIntoView(item, container, { onlyScrollIfNeeded: true });
     }
     this.callRef();
   }
@@ -198,6 +211,7 @@ export class MenuItem extends React.Component {
         <li
           {...omit(props, ['tooltipPlacement', 'tooltipTheme'])}
           {...attrs}
+          ref={this.getItemRef(attrs.ref)}
           data-menu-key={eventKey}
           {...mouseEvent}
           style={style}

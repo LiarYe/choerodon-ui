@@ -1021,6 +1021,8 @@ export class TextField<T extends TextFieldProps> extends FormField<T> {
     return element;
   }
 
+  protected groupRef = React.createRef<HTMLDivElement>();
+
   renderGroup(): ReactNode {
     const {
       showHelp,
@@ -1039,7 +1041,7 @@ export class TextField<T extends TextFieldProps> extends FormField<T> {
     });
 
     return (
-      <TextFieldGroup key="wrapper" prefixCls={prefixCls} onBlur={_inTable && (addonBefore || addonAfter) ? onBlur : undefined}>
+      <TextFieldGroup ref={this.groupRef} key="wrapper" prefixCls={prefixCls} onBlur={_inTable && (addonBefore || addonAfter) ? onBlur : undefined}>
         <div className={classString}>
           {
             this.wrapGroupItem(addonBefore, GroupItemCategory.before, {

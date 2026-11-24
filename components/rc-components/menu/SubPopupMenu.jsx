@@ -120,6 +120,10 @@ export class SubPopupMenu extends Component {
     this.domWrap = node;
   };
 
+  getScrollContainer = () => this.domWrap && this.domWrap.getScrollContainer();
+
+  getLayoutRoot = () => this.domWrap && this.domWrap.getLayoutRoot();
+
   scrollToKey = key => {
     if (this.domWrap && this.domWrap.scrollToKey) {
       this.domWrap.scrollToKey(key);
@@ -243,6 +247,7 @@ export class SubPopupMenu extends Component {
       rootPrefixCls: props.prefixCls,
       index: i,
       parentMenu: props.parentMenu,
+      getScrollContainer: this.getScrollContainer,
       // customized ref function, need to be invoked manually in child's componentDidMount
       manualRef: childProps.disabled ? undefined : createChainedFunction(child.ref, saveRef.bind(this)),
       eventKey: key,

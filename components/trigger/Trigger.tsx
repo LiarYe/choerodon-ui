@@ -1,5 +1,4 @@
 import React, { Children, Component, CSSProperties, isValidElement, Key, MouseEventHandler, ReactElement, ReactNode } from 'react';
-import { findDOMNode } from 'react-dom';
 import classNames from 'classnames';
 import raf from 'raf';
 import { action as mobxAction, observable, runInAction, makeObservable } from 'mobx';
@@ -8,7 +7,6 @@ import debounce from 'lodash/debounce';
 import noop from 'lodash/noop';
 import isEqual from 'lodash/isEqual';
 import isNil from 'lodash/isNil';
-import isFragment from 'choerodon-ui/pro/lib/_util/isFragment';
 import autobind from 'choerodon-ui/pro/lib/_util/autobind';
 import { ElementProps } from 'choerodon-ui/pro/lib/core/ViewComponent';
 import focusable, { findFocusableParent } from 'choerodon-ui/pro/lib/_util/focusable';
@@ -19,7 +17,7 @@ import TaskRunner from '../_util/TaskRunner';
 import Popup from './Popup';
 import EventManager from '../_util/EventManager';
 import { Action, HideAction, ShowAction } from './enum';
-import TriggerChild from './TriggerChild';
+import TriggerChild, { HostChild, RegisterHost } from './TriggerChild';
 import { Config, ConfigKeys, DefaultConfig } from '../configure';
 
 function isHTMLInputElement(target: HTMLElement): target is HTMLInputElement {
@@ -134,7 +132,16 @@ export default class Trigger extends Component<TriggerProps> {
     defaultPopupHidden: true,
   };
 
-  domNode: Element | Text | null;
+  hosts = new Set<() => Element | Text | null>();
+
+  registerHost: RegisterHost = (read, mounted) => {
+    if (mounted) this.hosts.add(read);
+    else this.hosts.delete(read);
+  };
+
+  get domNode() {
+    return this.getRootDomNode();
+  }
 
   popup: Popup | null;
 
@@ -227,14 +234,12 @@ export default class Trigger extends Component<TriggerProps> {
   @autobind
   renderTriggerChild(child: ReactNode): ReactNode {
     if (child) {
-      if (isFragment(child)) {
+      if (isValidElement<{ children?: ReactNode }>(child) && (child.type === React.Fragment || child.type === 'fragment')) {
         const { props: { children } } = child;
         return Children.map<ReactNode, ReactNode>(children, (fragmentChild) => this.renderTriggerChild(fragmentChild));
       }
       if (isValidElement(child)) {
-        const newChildProps: any = {
-          key: child.key,
-        };
+        const newChildProps: any = {};
         if (this.isContextMenuToShow()) {
           newChildProps.onContextMenu = this.handleEvent;
         }
@@ -262,7 +267,7 @@ export default class Trigger extends Component<TriggerProps> {
         }
         newChildProps.onKeyDown = this.handleEvent;
         newChildProps.popupHidden = this.popupHidden;
-        return <TriggerChild {...newChildProps}>{child}</TriggerChild>;
+        return <TriggerChild key={child.key} {...newChildProps}>{child}</TriggerChild>;
       }
     }
     return child;
@@ -272,7 +277,22 @@ export default class Trigger extends Component<TriggerProps> {
     const { children, childrenProps } = this.props;
     const popup = this.getPopup();
     const newChildren = isChildrenFunction(children) ? children(this.renderTriggerChild, childrenProps) : Children.map<ReactNode, ReactNode>(children, child => this.renderTriggerChild(child));
-    return [newChildren, popup];
+    return [this.collectHosts(newChildren), popup];
+  }
+
+  // Inspect the final render-prop output, not just the (possibly nested) caller result.
+  collectHosts(children: ReactNode): ReactNode {
+    // A top-level unkeyed fragment shares its children's key space with an array.
+    const roots = isValidElement<{ children?: ReactNode }>(children) && children.type === React.Fragment && children.key == null
+      ? children.props.children : children;
+    return Children.map(roots, child => {
+      if (child == null || typeof child === 'boolean') return null;
+      if (isValidElement<{ children?: ReactNode; register?: RegisterHost }>(child)) {
+        if (child.type === React.Fragment) return this.collectHosts(child.props.children);
+        if (child.type === TriggerChild) return React.cloneElement(child, { register: this.registerHost });
+      }
+      return <HostChild child={child} register={this.registerHost} />;
+    });
   }
 
   componentWillReceiveProps(nextProps) {
@@ -288,7 +308,6 @@ export default class Trigger extends Component<TriggerProps> {
 
   componentDidMount() {
     this.mounted = true;
-    this.domNode = findDOMNode(this);
     if (!isChrome() && (isSafari() || isWeChat())) {
       this.mouseDownEvent = new EventManager(document).addEventListener('mousedown', (e) => {
         if (!this.popupHidden) {
@@ -305,11 +324,16 @@ export default class Trigger extends Component<TriggerProps> {
       });
     }
 
+    this.syncDocumentEvents();
     this.watchingChild();
   }
 
   componentDidUpdate() {
-    this.domNode = findDOMNode(this);
+    this.syncDocumentEvents();
+    this.watchingChild();
+  }
+
+  syncDocumentEvents() {
     const { popupHidden } = this;
     if (this.documentEvent) {
       this.documentEvent.clear();
@@ -321,11 +345,10 @@ export default class Trigger extends Component<TriggerProps> {
         documentEvent.addEventListener('mousedown', this.handleDocumentMouseDown);
       }
     }
-
-    this.watchingChild();
   }
 
   componentWillUnmount() {
+    this.handleDocumentMouseDown.cancel();
     this.cancelPopupTask();
     if (this.documentEvent) {
       this.documentEvent.clear();
@@ -477,8 +500,7 @@ export default class Trigger extends Component<TriggerProps> {
       if (ownerDocument) {
         const { activeElement } = ownerDocument;
         if (activeElement && activeElement !== ownerDocument.body) {
-          const el = findDOMNode(this);
-          if (el && el.contains(activeElement)) {
+          if (this.containsTrigger(activeElement)) {
             e.preventDefault();
           }
         }
@@ -530,7 +552,7 @@ export default class Trigger extends Component<TriggerProps> {
   handleDocumentMouseDown = debounce((e) => {
     if (this.popup) {
       const { target } = e;
-      if (target.isConnected && !contains(findDOMNode(this), target) && !contains(findDOMNode(this.popup), target)) {
+      if (target.isConnected && !this.containsTrigger(target) && !contains(this.popup.element, target)) {
         this.setPopupHidden(true);
       }
     }
@@ -538,7 +560,7 @@ export default class Trigger extends Component<TriggerProps> {
 
   @autobind
   handleDocumentScroll({ target }) {
-    if (this.popup && target !== document && !contains(findDOMNode(this.popup), target)) {
+    if (this.popup && target !== document && !contains(this.popup.element, target)) {
       if (this.animateFrameId) {
         raf.cancel(this.animateFrameId);
       }
@@ -671,12 +693,21 @@ export default class Trigger extends Component<TriggerProps> {
     }
   }
 
+  containsTrigger(target: Node) {
+    return Array.from(this.hosts).some(read => contains(read(), target));
+  }
+
   @autobind
-  getRootDomNode() {
-    if (this.domNode) {
-      return this.domNode;
-    }
-    return findDOMNode(this);
+  getRootDomNode(): Element | Text | null {
+    // Keyed nodes can move without their refs being reattached.
+    let first: Element | Text | null = null;
+    this.hosts.forEach(read => {
+      const node = read();
+      // compareDocumentPosition returns a bitmask.
+      // eslint-disable-next-line no-bitwise
+      if (node && (!first || (node.compareDocumentPosition(first) & Node.DOCUMENT_POSITION_FOLLOWING))) first = node;
+    });
+    return first;
   }
 
   @autobind

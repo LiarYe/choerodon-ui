@@ -1,8 +1,7 @@
-import React, { CSSProperties, Key } from 'react';
+import React from 'react';
 import { createPortal } from 'react-dom';
 import { observer } from 'mobx-react';
 import omit from 'lodash/omit';
-import shallowEqual from 'shallowequal';
 import noop from 'lodash/noop';
 import isElement from 'lodash/isElement';
 import { PopupManager } from 'choerodon-ui/shared';
@@ -23,10 +22,10 @@ export interface PopupProps extends ViewComponentProps {
   getRootDomNode?: () => Element | Text | null;
   getPopupContainer?: (triggerNode: Element) => HTMLElement | undefined | null;
   transitionName?: string;
-  onAnimateAppear?: (key: Key | null) => void;
-  onAnimateEnter?: (key: Key | null) => void;
-  onAnimateLeave?: (key: Key | null) => void;
-  onAnimateEnd?: (key: Key | null, exists: boolean) => void;
+  onAnimateAppear?: (key: React.Key | null) => void;
+  onAnimateEnter?: (key: React.Key | null) => void;
+  onAnimateLeave?: (key: React.Key | null) => void;
+  onAnimateEnd?: (key: React.Key | null, exists: boolean) => void;
   getStyleFromAlign?: (target: HTMLElement, align: object) => object | undefined;
   getClassNameFromAlign?: (align: object) => string | undefined;
   getFocusableElements?: (elements: HTMLElement[]) => void;
@@ -52,8 +51,6 @@ export default class Popup extends ViewComponent<PopupProps> {
   popupContainer?: HTMLDivElement;
 
   currentAlignClassName?: string;
-
-  currentAlignStyle?: CSSProperties;
 
   align: Align | null;
 
@@ -222,12 +219,11 @@ export default class Popup extends ViewComponent<PopupProps> {
       source.className = this.getMergedClassNames(currentAlignClassName);
     }
     const currentAlignStyle = getStyleFromAlign(target, align);
-    if (differentTarget || !shallowEqual(this.currentAlignStyle, currentAlignStyle)) {
-      this.currentAlignStyle = currentAlignStyle;
+    if (currentAlignStyle) {
       Object.assign(source.style, currentAlignStyle);
     }
     onAlign(source, align, target, translate);
-    this.target = source;
+    this.target = target;
     // 过程: 先执行 forceAlign 定位, 再执行 onAlign 改变 className;
     // 场景: forceAlign 中定位可能从向上变为向下, 然后 onAlign 中 className 才从 top 变为 bottom;
     // 开发自定义样式 向上\向下高度不同, 导致定位不准, 需重新定位;

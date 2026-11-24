@@ -72,6 +72,7 @@ export const menuAllProps = [
   'prefixCls',
   'inlineIndent',
   'parentMenu',
+  'getScrollContainer',
   'title',
   'rootPrefixCls',
   'eventKey',

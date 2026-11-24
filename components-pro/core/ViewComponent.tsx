@@ -10,7 +10,6 @@
   MouseEventHandler,
   ReactNode,
 } from 'react';
-import { findDOMNode } from 'react-dom';
 import classNames from 'classnames';
 import { action, observable, runInAction, makeObservable } from 'mobx';
 import omit from 'lodash/omit';
@@ -488,6 +487,11 @@ export default class ViewComponent<P extends ViewComponentProps, C extends Confi
     return true;
   }
 
+  getHostNode(): HTMLElement | null {
+    if (isElement(this.wrapper)) return this.wrapper;
+    return isElement(this.element) ? this.element : null;
+  }
+
   handleFocus(e) {
     this.isFocused = true;
     this.isFocus = true;
@@ -496,7 +500,7 @@ export default class ViewComponent<P extends ViewComponentProps, C extends Confi
       prefixCls,
     } = this;
     if (this.useFocusedClassName()) {
-      const element = this.wrapper || findDOMNode(this);
+      const element = this.getHostNode();
       if (element) {
         classes(element).add(`${prefixCls}-focused`);
       }
@@ -519,7 +523,7 @@ export default class ViewComponent<P extends ViewComponentProps, C extends Confi
         this.isFocused = false;
         this.isFocus = false;
         if (this.useFocusedClassName()) {
-          const element = this.wrapper || findDOMNode(this);
+          const element = this.getHostNode();
           if (element) {
             classes(element).remove(`${prefixCls}-focused`);
           }
@@ -558,8 +562,9 @@ export default class ViewComponent<P extends ViewComponentProps, C extends Confi
       defer(() => {
         this.blur();
         if (this.useFocusedClassName()) {
-          if (this.element && isElement(this.element)) {
-            classes(this.element).remove(`${this.prefixCls}-focused`);
+          const element = this.getHostNode();
+          if (element) {
+            classes(element).remove(`${this.prefixCls}-focused`);
           }
         }
       });

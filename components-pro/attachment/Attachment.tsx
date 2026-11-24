@@ -1648,7 +1648,7 @@ export default class Attachment extends FormField<AttachmentProps> {
       }
     }
     return (
-      <div className={classes.join(' ')}>
+      <div className={classes.join(' ')} ref={viewMode !== 'popup' && !this.readOnly ? this.wrapperReference : undefined}>
         {viewMode !== 'popup' && this.renderDragUploadArea()}
         {this.renderHeader(!isCard && uploadBtn)}
         {!__inGroup && viewMode !== 'popup' && this.renderHelp()}

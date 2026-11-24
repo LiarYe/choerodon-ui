@@ -44,6 +44,25 @@ describe('Transfer', () => {
     expect(wrapper.find('TransferOperation').length).toBe(1);
   });
 
+  it('styles the list root while delegating focus to the search input', () => {
+    const wrapper = mount(<Transfer dataSet={ds} name="first-name" searchable />);
+    try {
+      const list = wrapper.find('Select').first();
+      const root = list.getDOMNode();
+      const input = list.find('input[type="text"]').first();
+      const focused = `${list.instance().prefixCls}-focused`;
+      const focus = jest.spyOn(input.getDOMNode(), 'focus');
+      list.instance().focus();
+      expect(focus).toHaveBeenCalled();
+      input.simulate('focus');
+      expect(root.classList.contains(focused)).toBe(true);
+      input.simulate('blur');
+      expect(root.classList.contains(focused)).toBe(false);
+    } finally {
+      wrapper.unmount();
+    }
+  });
+
   it('basic test render 6 input item ', () => {
     const wrapper = mount(<TransferTest />);
     expect(wrapper.find('input').length).toBe(6);

@@ -5,7 +5,7 @@ import copy from 'copy-to-clipboard';
 import Icon from 'choerodon-ui/lib/icon';
 import ReactResizeObserver from 'choerodon-ui/lib/_util/resizeObserver';
 import ConfigContext from 'choerodon-ui/lib/config-provider/ConfigContext';
-import useMergedRef from '../hooks/useMergedRef';
+import useMergedRef from 'choerodon-ui/lib/_util/useMergedRef';
 import Tooltip from '../../tooltip';
 import TransButton from '../../_util/TransButton';
 import EllipsisTooltip from './EllipsisTooltip';
@@ -111,7 +111,7 @@ const Base: IBase = forwardRef<HTMLDivElement, BaseBlockProps>((props, ref) => {
   const { getProPrefixCls } = useContext(ConfigContext);
 
   const typographyRef = useRef<HTMLDivElement>(null);
-  const mergedRef = useMergedRef(typographyRef, ref);
+  const mergedRef = useMergedRef(typographyRef, ref, true);
 
   // ============================ MISC ============================
   const prefixCls = getProPrefixCls('typography', customizePrefixCls);

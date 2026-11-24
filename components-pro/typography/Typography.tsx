@@ -2,7 +2,7 @@ import React, { ForwardRefExoticComponent, PropsWithoutRef, RefAttributes } from
 import classNames from 'classnames';
 import warning from 'choerodon-ui/lib/_util/warning';
 import ConfigContext from 'choerodon-ui/lib/config-provider/ConfigContext';
-import useMergedRef from './hooks/useMergedRef';
+import useMergedRef from 'choerodon-ui/lib/_util/useMergedRef';
 
 export interface TypographyProps {
   id?: string;
@@ -32,7 +32,7 @@ const Typography: ITypographyProps = React.forwardRef<HTMLElement, TypographyPro
   } = props;
   const { getProPrefixCls } = React.useContext(ConfigContext);
 
-  const mergedRef = useMergedRef(ref, setContentRef);
+  const mergedRef = useMergedRef(ref, setContentRef, true);
   if (setContentRef) {
     warning(false, `[c7n: Typography] setContentRef is deprecated. Please use ref instead.`);
   }

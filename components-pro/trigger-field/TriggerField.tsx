@@ -1,5 +1,5 @@
 import React, { CSSProperties, ReactNode } from 'react';
-import { findDOMNode } from 'react-dom';
+import * as ReactDOM from 'react-dom';
 import noop from 'lodash/noop';
 import { action, observable, runInAction, makeObservable } from 'mobx';
 import Trigger from 'choerodon-ui/lib/trigger/Trigger';
@@ -93,7 +93,15 @@ export default abstract class TriggerField<T extends TriggerFieldProps = Trigger
 
   trigger: Trigger | null;
 
-  domNode: Element | Text | null;
+  get domNode(): Element | Text | null {
+    // A highlight renderer may replace the field entirely. Only legacy React
+    // can resolve the outer host of an opaque renderer.
+    if (this.highlight) {
+      const { findDOMNode } = ReactDOM as { findDOMNode?: (instance: React.Component) => Element | Text | null };
+      if (findDOMNode) return findDOMNode(this);
+    }
+    return this.groupRef.current || this.getHostNode();
+  }
 
   statePopup: boolean;
 
@@ -113,13 +121,7 @@ export default abstract class TriggerField<T extends TriggerFieldProps = Trigger
     });
   }
 
-  componentDidMount(): void {
-    this.domNode = findDOMNode(this);
-    super.componentDidMount();
-  }
-
   componentDidUpdate(prevProps?, prevState?, snapshot?) {
-    this.domNode = findDOMNode(this);
     super.componentDidUpdate(prevProps, prevState, snapshot);
   }
 
@@ -157,10 +159,7 @@ export default abstract class TriggerField<T extends TriggerFieldProps = Trigger
 
   @autobind
   getRootDomNode() {
-    if (this.domNode) {
-      return this.domNode;
-    }
-    return findDOMNode(this);
+    return this.domNode;
   }
 
   getOmitPropsKeys(): string[] {

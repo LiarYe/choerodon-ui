@@ -1,8 +1,8 @@
 import React, { cloneElement, Component } from 'react';
-import ReactDOM from 'react-dom';
 import ResizeObserver from 'resize-observer-polyfill';
 import scrollIntoView from 'dom-scroll-into-view';
 import List from 'rc-virtual-list';
+import useMergedRef from '../../_util/useMergedRef';
 import SubMenu from './SubMenu';
 import { getWidth, menuAllProps, setStyle } from './util';
 
@@ -19,6 +19,13 @@ if (canUseDOM) {
   require('mutationobserver-shim');
 }
 
+function createVirtualHolder(getTag, holderRef) {
+  return React.forwardRef(function VirtualHolder(props, ref) {
+    const Tag = getTag();
+    return <Tag {...props} ref={useMergedRef(holderRef, ref)} />;
+  });
+}
+
 export default class DOMWrap extends Component {
   static defaultProps = {
     tag: 'div',
@@ -28,6 +35,27 @@ export default class DOMWrap extends Component {
   state = {
     lastVisibleIndex: undefined,
     measuredItemHeight: undefined,
+  };
+
+  holderRef = React.createRef();
+
+  VirtualHolder = createVirtualHolder(() => {
+    const { tag } = this.props;
+    return tag;
+  }, this.holderRef);
+
+  getScrollContainer = () => this.holderRef.current;
+
+  getLayoutRoot = () => {
+    const holder = this.getScrollContainer();
+    const { virtual } = this.props;
+    return holder && virtual ? holder.parentElement : holder;
+  };
+
+  getItemsRoot = () => {
+    const holder = this.getScrollContainer();
+    const { virtual } = this.props;
+    return holder && virtual ? holder.querySelector('.rc-virtual-list-holder-inner') : holder;
   };
 
   setVirtualListRef = node => {
@@ -43,8 +71,10 @@ export default class DOMWrap extends Component {
 
   scrollToKey = key => {
     const { children, virtual } = this.props;
-    const menu = ReactDOM.findDOMNode(this);
+    if (this.scrollFrame != null) cancelAnimationFrame(this.scrollFrame);
     const scrollItemIntoView = () => {
+      this.scrollFrame = null;
+      const menu = this.getScrollContainer();
       const item = menu && [].slice.call(menu.querySelectorAll('[data-menu-key]'))
         .find(node => node.getAttribute('data-menu-key') === key);
       if (item && menu) {
@@ -74,14 +104,14 @@ export default class DOMWrap extends Component {
     const index = menuChildren.findIndex(containsKey);
     if (index !== -1) {
       this.scrollTo({ index, align: 'auto' });
-      requestAnimationFrame(scrollItemIntoView);
+      this.scrollFrame = requestAnimationFrame(scrollItemIntoView);
     }
   };
 
   componentDidMount() {
     this.setChildrenWidthAndResize();
     if (this.props.level === 1 && this.props.mode === 'horizontal') {
-      const menuUl = ReactDOM.findDOMNode(this);
+      const menuUl = this.getItemsRoot();
       if (!menuUl) {
         return;
       }
@@ -91,7 +121,7 @@ export default class DOMWrap extends Component {
 
       [].slice
         .call(menuUl.children)
-        .concat(menuUl)
+        .concat(this.getLayoutRoot())
         .forEach(el => {
           this.resizeObserver.observe(el);
         });
@@ -101,7 +131,7 @@ export default class DOMWrap extends Component {
           this.resizeObserver.disconnect();
           [].slice
             .call(menuUl.children)
-            .concat(menuUl)
+            .concat(this.getLayoutRoot())
             .forEach(el => {
               this.resizeObserver.observe(el);
             });
@@ -130,14 +160,20 @@ export default class DOMWrap extends Component {
       this.resizeObserver.disconnect();
     }
     if (this.mutationObserver) {
-      this.resizeObserver.disconnect();
+      this.mutationObserver.disconnect();
     }
+    if (this.scrollFrame != null) cancelAnimationFrame(this.scrollFrame);
+    if (this.measureFrame != null) cancelAnimationFrame(this.measureFrame);
+    this.measureFrame = null;
+    this.scrollFrame = null;
   }
 
   // 动态测量菜单项实际高度
   measureItemHeight = () => {
-    requestAnimationFrame(() => {
-      const menuUl = ReactDOM.findDOMNode(this);
+    if (this.measureFrame != null) return;
+    this.measureFrame = requestAnimationFrame(() => {
+      this.measureFrame = null;
+      const menuUl = this.getItemsRoot();
       if (!menuUl) return;
       const { prefixCls } = this.props;
       const firstItem = menuUl.querySelector(`li.${prefixCls}-item`);
@@ -153,7 +189,7 @@ export default class DOMWrap extends Component {
   // get all valid menuItem nodes
   getMenuItemNodes = () => {
     const { prefixCls } = this.props;
-    const ul = ReactDOM.findDOMNode(this);
+    const ul = this.getItemsRoot();
     if (!ul) {
       return [];
     }
@@ -204,6 +240,7 @@ export default class DOMWrap extends Component {
       <SubMenu
         title={overflowedIndicator}
         className={`${prefixCls}-overflowed-submenu`}
+        data-overflow-placeholder={renderPlaceholder || undefined}
         popupClassName={popupClassName}
         {...props}
         key={key}
@@ -221,7 +258,7 @@ export default class DOMWrap extends Component {
     if (this.props.mode !== 'horizontal') {
       return;
     }
-    const ul = ReactDOM.findDOMNode(this);
+    const ul = this.getItemsRoot();
 
     if (!ul) {
       return;
@@ -233,7 +270,11 @@ export default class DOMWrap extends Component {
       return;
     }
 
-    const lastOverflowedIndicatorPlaceholder = ul.children[ulChildrenNodes.length - 1];
+    const lastOverflowedIndicatorPlaceholder = ulChildrenNodes[ulChildrenNodes.length - 1];
+    // A partial virtual window may end before the measurement placeholder.
+    if (!lastOverflowedIndicatorPlaceholder.hasAttribute('data-overflow-placeholder')) {
+      return;
+    }
 
     // need last overflowed indicator for calculating length;
     setStyle(lastOverflowedIndicatorPlaceholder, 'display', 'inline-block');
@@ -256,7 +297,7 @@ export default class DOMWrap extends Component {
     overflowedItems.forEach(c => {
       setStyle(c, 'display', 'none');
     });
-    this.overflowedIndicatorWidth = getWidth(ul.children[ul.children.length - 1]);
+    this.overflowedIndicatorWidth = getWidth(lastOverflowedIndicatorPlaceholder);
     this.originalTotalWidth = this.menuItemSizes.reduce((acc, cur) => acc + cur, 0);
     this.handleResize();
     // prevent the overflowed indicator from taking space;
@@ -280,11 +321,11 @@ export default class DOMWrap extends Component {
       return;
     }
 
-    const ul = ReactDOM.findDOMNode(this);
+    const ul = this.getItemsRoot();
     if (!ul) {
       return;
     }
-    const width = getWidth(ul);
+    const width = getWidth(this.getLayoutRoot());
 
     this.overflowedItems = [];
     let currentSumWidth = 0;
@@ -382,8 +423,8 @@ export default class DOMWrap extends Component {
       return (
         <List
           ref={this.setVirtualListRef}
-          component={Tag}
-          data={this.renderChildren(this.props.children)}
+          component={this.VirtualHolder}
+          data={this.renderChildren(children)}
           height={234}
           itemHeight={itemHeight}
           fullHeight={false}
@@ -395,6 +436,6 @@ export default class DOMWrap extends Component {
       );
     }
 
-    return <Tag {...rest}>{this.renderChildren(this.props.children)}</Tag>;
+    return <Tag {...rest} ref={this.holderRef}>{this.renderChildren(children)}</Tag>;
   }
 }

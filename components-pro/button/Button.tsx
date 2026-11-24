@@ -466,6 +466,7 @@ export default class Button extends DataSetComponent<ButtonProps> {
     );
     return tooltipWrapper ? (
       <span
+        ref={this.wrapperReference}
         className={classNames(props.className, `${this.prefixCls}-disabled-wrapper`)}
         style={props.style}
         onMouseEnter={onMouseEnter}

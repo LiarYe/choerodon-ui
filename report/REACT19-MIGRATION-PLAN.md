@@ -37,7 +37,7 @@
 | 步骤 | 改动（当前锁版 → 目标） | 本项验收 |
 |---|---|---|
 | B1a 移除源码对 `rc-util` 的直接导入 | Avatar.Group 复用仓内 `Children/toArray`；Typography 和 Base 共用 `useMergedRef`，保留 `setContentRef` 和内部测量 ref。不新增或升级 `rc-util`，不改其他包的传递依赖。 | Avatar 验证空项占位、Fragment 计数和折叠结果；Typography 在 React 16/19 下验证 ref 挂载和解绑、19 的 callback cleanup，以及省略测量。以源码无直接导入为准，不要求 `npm ls rc-util` 为空。 |
-| B1b 其他直接依赖 | Form 显式声明 `hoist-non-react-statics@3.3.2`；Calendar 声明 `prop-types@15.8.1`；PerformanceTable 若保留 polyfill 则声明 `react-lifecycles-compat@3.0.4`。 | 每项验证实际调用方的导入和行为。不强行覆盖其他包的 `react-is`。 |
+| B1b 其他直接依赖 | Form 显式声明 `hoist-non-react-statics@3.3.2`；Calendar 声明 `prop-types@15.8.1`；PerformanceTable 若保留 polyfill 则声明 `react-lifecycles-compat@3.0.4`。 | 每项验证实际调用方的导入和行为。不强行覆盖其他包的 `react-is`。（暂不执行，后续其他包升级后验证） |
 | B2 公共 DOM ref | 按序各一项：基础 Trigger → Pro TriggerField/ViewComponent → vendored MenuItem/DOMWrap。显式传递真实节点并组合已有 ref，不随意新增 wrapper。 | 依次验首次挂载/外部点击；Lov/Select 无 wrapper 的聚焦；菜单滚入与容器测量。真实尺寸在浏览器验。 |
 | B3 Menu store | `mini-store` 2.0.0 → 3.0.6。启用 connect 的 `forwardRef`，替换 `getWrappedInstance()` 的实例调用。 | 嵌套菜单选中、键盘上下、`scrollToKey`；依赖 B2 的节点路径。 |
 | B4 Tree 动画 | `rc-motion` 2.4.1 → 2.9.5，真实 DOM 接 ref。 | 展开、快速反向收起，最终状态及结束事件正确。 |
@@ -74,6 +74,8 @@ P 阶段使用测试工程的候选包时，**从正式源码导入它**，在 J
 
 | 步骤 | 只改什么 | 单独验收 |
 |---|---|---|
+| C0d 共享尺寸监听（关闭 B2 弹层阻塞） | C0c 后将 [ReactResizeObserver](../components/_util/resizeObserver.tsx) 的 `findDOMNode(this)` 改为观察显式传入的真实 DOM 节点，不新增 wrapper。React 16 的 B2 定向用例已通过；React 19 在 `PopupInner` 挂载时抛错，尚未执行外点断言。 | 验证 `immediately` 首次测量、尺寸变化回调、禁用及卸载时断开监听。重跑 [Trigger 首次可见用例](../tests-react19/cases/components/trigger/host.test.tsx)：弹层成功挂载，点击触发器或弹层不关闭，点击外部才关闭。 |
+| C0e Trigger 宿主 ref 收尾（C0d 后） | 核对 Tooltip 等真实调用方：能透传 DOM 的子项组合原 ref；返回组件实例的子项显式提供宿主，不改变公开 ref 或新增 wrapper。仅在宿主契约验证后删除 B2 的 `LegacyHost`、旧 `element.ref` 读取和自定义 highlight 的 `findDOMNode` 回退；停止支持旧 React 后直接读 `props.ref`，删除 `mergeRefs` 的版本判断、Typography 专用的旧版 cleanup 参数和 MenuItem 的字符串 ref 分支，保留回调 cleanup 与对象 ref 清空行为。 | 用 Typography 复制按钮（TransButton）、Pro Button 和自定义 highlight 验证首次定位、内外点击、原 ref 值与替换/卸载 cleanup；外部组件不暴露宿主的限制须明确，不以回退到空节点作为通过。 |
 | C1 基础静态 Modal | [confirm](../components/modal/confirm.tsx) 按容器保存 root，关闭动画后卸载。公开句柄只有 destroy，不新增 update。 | 打开→取消；同轮打开即 destroy；再打开。验回调次数、动画后节点清理。 |
 | C2 Notification / Message | 实例通过 ref 异步交付；处理待定 Promise，旧 ref 不得回写已销毁缓存。 | 同键 open→destroy→open，中间不等待首次提交；只留下新实例。Message 连发、立即关闭单验。 |
 | C3a Pro Modal | 无 Provider 冷启动共享待创建的 root；保留 Provider portal。 | 同轮两次 open、立即 update/close，只建一个 root；已有 Provider 不建额外容器。 |
@@ -91,6 +93,7 @@ P 阶段使用测试工程的候选包时，**从正式源码导入它**，在 J
 | D2 发布产物 | 依次 `npm run compile`、`npm run dist`；跑 `node tools/tests/webpack5.test.js` 和 `node tools/tests/dist-contract.test.js`。先改后者的 React 16 UMD/旧 render 宿主，用本轮产物测 ESM/CJS、SSR 及真实浏览器挂载；React 19 不发布 UMD，不等于本库要删 UMD。 |
 | D3 站点 | 先让 `npm run site` 的 SSR 组件页含正文；再修 BiSheng 生成的客户端入口（旧 render）、Router/Intl 与 Layout Context，锁定可复现的模板/工具改动，不手改 node_modules。浏览器接管后无 hydration 错误、demo 可点、页面仅一份根 React。 |
 | D4 外部消费者 | `npm pack` 后在仓库外严格安装 tarball，验证基础/Pro/DataSet/Shared、字体 CSS、公开类型、真实 MobX observer。无 alias、无手补依赖。若声明 `^19.0.0`，须另加配对的 React/DOM 19.0.0 消费者通过；否则不扩范围。 |
+| D4a JSX 转换终验 | 复用 C5 的 TSX、vendored JSX 样例，核对 D4 实际安装包的 ESM/CJS 对应代码均使用 `react/jsx-runtime`；`tsc --noEmit` 通过不算产物证据。若仍是经典转换，回到 C5 修正实际生成 JS 的环节（TS 用 `react-jsx`，Babel 用 `runtime: "automatic"`）。配置对齐后仅清理确实未使用的 React 导入，复跑 TS、ESLint 和受影响的发布验收。 |
 | D5 发布决策 | 对照 A3 关闭剩余行为回归；列出未测/失败和消费者迁移点（拖拽 Context、富文本、类型）。所有发布门槛通过再声明兼容，master 不接收新锁。 |
 
 ## 版本依据与复核入口
