@@ -4,12 +4,12 @@
 
 import * as React from 'react';
 import omit from 'lodash/omit';
-import VirtualList, { ListRef } from 'rc-virtual-list';
+import VirtualList from 'rc-virtual-list';
 import { DataEntity, DataNode, FlattenNode, Key, ScrollTo } from './interface';
 import MotionTreeNode, { MotionTreeNodeProps } from './MotionTreeNode';
 import { findExpandedKeys, getExpandRange } from './utils/diffUtil';
 import { getKey, getTreeNodeProps, TreeNodeRequiredProps } from './utils/treeUtil';
-import List from './List';
+import List, { ListRef } from './List';
 
 const HIDDEN_STYLE = {
   width: 0,
@@ -128,7 +128,7 @@ function getAccessibilityPath(item: FlattenNode): string {
   return path;
 }
 
-const RefNodeList: React.RefForwardingComponent<NodeListRef, NodeListProps> = (props, ref) => {
+const RefNodeList: React.ForwardRefRenderFunction<NodeListRef, NodeListProps> = (props, ref) => {
   const {
     prefixCls,
     data,
@@ -168,7 +168,10 @@ const RefNodeList: React.RefForwardingComponent<NodeListRef, NodeListProps> = (p
   } = props;
 
   // =============================== Ref ================================
-  const listRef = React.useRef<ListRef>(null);
+  const listRef = React.useRef<ListRef | null>(null);
+  const setListRef = React.useCallback((list: ListRef | null) => {
+    listRef.current = list;
+  }, []);
   const indentMeasurerRef = React.useRef<HTMLDivElement>(null);
   React.useImperativeHandle(ref, () => ({
     scrollTo: scroll => {
@@ -351,7 +354,7 @@ const RefNodeList: React.RefForwardingComponent<NodeListRef, NodeListProps> = (p
       </div>
       {
         virtual === false ? (
-          <List ref={listRef} data={mergedData || []} prefixCls={`${prefixCls}-list`} height={height} itemKey={itemKey}>
+          <List ref={setListRef} data={mergedData || []} prefixCls={`${prefixCls}-list`} height={height} itemKey={itemKey}>
             {renderFunction}
           </List>
         ) : (
@@ -364,7 +367,7 @@ const RefNodeList: React.RefForwardingComponent<NodeListRef, NodeListProps> = (p
             virtual={virtual}
             itemHeight={itemHeight}
             prefixCls={`${prefixCls}-list`}
-            ref={listRef}
+            ref={setListRef}
           >
             {renderFunction}
           </VirtualList>

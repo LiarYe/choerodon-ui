@@ -30,9 +30,11 @@ export class MenuItem extends React.Component {
 
   getItemRef(ref) {
     if (typeof ref === 'string') return ref;
-    if (ref !== this.attributeRef) {
+    const { virtualRowRef } = this.props;
+    if (ref !== this.attributeRef || virtualRowRef !== this.virtualRowRef) {
       this.attributeRef = ref;
-      this.mergedItemRef = mergeRefs(this.itemRef, ref);
+      this.virtualRowRef = virtualRowRef;
+      this.mergedItemRef = mergeRefs(mergeRefs(this.itemRef, ref), virtualRowRef);
     }
     return this.mergedItemRef || this.itemRef;
   }

@@ -32,6 +32,33 @@ it('merges attribute.ref with the li ref across updates, replacements and unmoun
   expect(plain.mock.calls).toEqual([[li], [null]]);
 });
 
+it('keeps keyed virtual rows and their refs attached when the order changes', () => {
+  const instance = React.createRef<MenuItem>();
+  const row = React.createRef<HTMLLIElement>();
+  const wrap = React.createRef<DOMWrap>();
+  const tree = (keys: string[]) => (
+    <DOMWrap ref={wrap} tag="ol" virtual>
+      {keys.map(key => (
+        <MenuItem key={key} eventKey={key} ref={key === 'a' ? instance : undefined}
+          attribute={{ ref: key === 'a' ? row : undefined }} rippleDisabled>{key}</MenuItem>
+      ))}
+    </DOMWrap>
+  );
+  const { container, rerender, unmount } = render(tree(['a', 'b']));
+  const li = row.current;
+  const menuItem = instance.current;
+  expect(li).toBe(container.querySelector('.rc-virtual-list-holder-inner > li'));
+  expect(menuItem!.itemRef.current).toBe(li);
+  rerender(tree(['b', 'a']));
+  expect(wrap.current!.getScrollContainer()).toBe(container.querySelector('ol'));
+  expect(container.querySelector('li:last-child')).toBe(li);
+  expect(instance.current).toBe(menuItem);
+  expect(row.current).toBe(li);
+  unmount();
+  expect(instance.current).toBeNull();
+  expect(row.current).toBeNull();
+});
+
 it('uses the existing tag and li without replacing the manual instance ref', () => {
   const wrap = React.createRef<DOMWrap>();
   const instance = jest.fn();

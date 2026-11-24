@@ -6,7 +6,8 @@ const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const less = require('../tools/lessImplementation');
 
 const root = path.resolve(__dirname, '..');
-const local = name => path.join(__dirname, 'node_modules', name);
+const legacy = process.argv.includes('--react16');
+const local = name => path.dirname(require.resolve(`${name}/package.json`, { paths: [legacy ? root : __dirname] }));
 const source = name => path.join(root, name);
 const compiler = webpack({
   context: __dirname,
@@ -17,6 +18,7 @@ const compiler = webpack({
   resolve: {
     extensions: ['.tsx', '.ts', '.jsx', '.js', '.json'],
     alias: {
+      ...(legacy && { 'react-dom/client$': path.join(__dirname, 'preview/client16.js') }),
       react: local('react'),
       'react-dom': local('react-dom'),
       'choerodon-ui$': source('components'),
@@ -74,5 +76,5 @@ if (process.argv.includes('--build')) {
   const serve = middleware(compiler);
   http.createServer((req, res) => serve(req, res, () => {
     res.writeHead(404).end();
-  })).listen(port, 'localhost', () => console.log(`React 19 preview: http://localhost:${port}/`));
+  })).listen(port, 'localhost', () => console.log(`React ${legacy ? 16 : 19} preview: http://localhost:${port}/`));
 }

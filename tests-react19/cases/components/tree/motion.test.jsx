@@ -132,6 +132,83 @@ it('keeps the replacement list when an active expansion is discarded', async () 
   expect(titles()).toEqual(['Replacement']);
 });
 
+it('measures ordinary and motion DOM rows in the virtual list', async () => {
+  const { render, container, active, motion, end } = setup();
+  const measured = jest.spyOn(HTMLElement.prototype, 'offsetParent', 'get');
+  try {
+    const options = { virtual: true, height: 48, itemHeight: 24 };
+    await act(async () => { render(collapsed, options); });
+    const parent = container.querySelector('.rc-tree-title').closest('.rc-tree-treenode');
+    expect(measured.mock.instances).toContain(parent);
+    render(expanded, options);
+    const node = await active(motion.onAppearActive);
+    expect(measured.mock.instances).toContain(node);
+    end(node);
+  } finally {
+    measured.mockRestore();
+  }
+});
+
+it('scrolls to a distant key and back through the virtual list ref', async () => {
+  const { render, container, titles } = setup();
+  const ref = React.createRef();
+  const rows = Array.from({ length: 80 }, (_, i) => ({ key: `k-${i}`, title: `Row ${i}` }));
+  const parent = jest.spyOn(HTMLElement.prototype, 'offsetParent', 'get').mockReturnValue(document.body);
+  const height = jest.spyOn(HTMLElement.prototype, 'offsetHeight', 'get').mockReturnValue(24);
+  try {
+    await act(async () => { render(listFor([], rows), { ref, virtual: true, height: 48, itemHeight: 24 }); });
+    const holder = container.querySelector('.rc-tree-list-holder');
+    Object.defineProperty(holder, 'clientHeight', { value: 48 });
+    expect(titles()).not.toContain('Row 60');
+    await act(async () => { ref.current.scrollTo({ key: 'k-60', align: 'top' }); });
+    expect(holder.scrollTop).toBe(60 * 24);
+    expect(titles()).toContain('Row 60');
+    await act(async () => { ref.current.scrollTo({ key: 'k-0', align: 'top' }); });
+    expect(holder.scrollTop).toBe(0);
+    expect(titles()).not.toContain('Row 60');
+  } finally {
+    height.mockRestore();
+    parent.mockRestore();
+  }
+});
+
+it('keeps all non-virtual rows and resolves key targets in the local holder', () => {
+  const { render, container, titles } = setup();
+  const ref = React.createRef();
+  render(expanded, { ref, height: 24 });
+  expect(titles()).toEqual(['Parent', 'Child']);
+  const holder = container.querySelector('.rc-tree-list-holder-inner');
+  jest.spyOn(holder.children[1], 'getBoundingClientRect').mockReturnValue({ top: 48, bottom: 72 });
+  ref.current.scrollTo({ key: 'c', align: 'top', offset: 4 });
+  expect(holder.scrollTop).toBe(44);
+  ref.current.scrollTo({ key: 'absent' });
+  expect(holder.scrollTop).toBe(44);
+  ref.current.scrollTo(0);
+  expect(holder.scrollTop).toBe(0);
+});
+
+it.each([
+  ['top', 114, 52],
+  ['bottom', 124, 40],
+  ['auto', 98, 20],
+  ['auto', 110, 32],
+  ['auto', 124, 40],
+])('aligns a half-scale non-virtual row (%s at %i) in layout pixels', (align, top, expected) => {
+  const { render, container } = setup();
+  const ref = React.createRef();
+  render(expanded, { ref, height: 48 });
+  const holder = container.querySelector('.rc-tree-list-holder-inner');
+  // A 48px padding box with 4px borders is 28 visual pixels at half scale.
+  Object.defineProperties(holder, {
+    clientTop: { value: 4 }, clientHeight: { value: 48 }, offsetHeight: { value: 56 },
+  });
+  jest.spyOn(holder, 'getBoundingClientRect').mockReturnValue({ top: 100, height: 28 });
+  jest.spyOn(holder.children[1], 'getBoundingClientRect').mockReturnValue({ top, bottom: top + 4 });
+  holder.scrollTop = 32;
+  ref.current.scrollTo({ key: 'c', align, offset: 4 });
+  expect(holder.scrollTop).toBe(expected);
+});
+
 it('updates the focus announcement without rendering non-virtual rows again', () => {
   const { render, container } = setup();
   const title = jest.fn(node => node.key);

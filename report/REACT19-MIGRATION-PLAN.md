@@ -41,12 +41,21 @@
 | B2 公共 DOM ref | 按序各一项：基础 Trigger → Pro TriggerField/ViewComponent → vendored MenuItem/DOMWrap。显式传递真实节点并组合已有 ref，不随意新增 wrapper。 | 依次验首次挂载/外部点击；Lov/Select 无 wrapper 的聚焦；菜单滚入与容器测量。真实尺寸在浏览器验。 |
 | B3 Menu store（已完成） | 根 `mini-store` 2.0.0 → 3.0.6。仅 `SubPopupMenu` 的 `connect` 开启 `forwardRef`；根 Menu 的四个实例方法直接委派，不改公开属性。 | [同一交互用例](../tests-react19/cases/components/menu/connectedMenu.test.jsx) 在 16.14.0 / 19.3.1 验证嵌套选中、上下键、实例方法及滚动目标。19 的[真实菜单预览](../tests-react19/preview/components/menu/index.tsx) 实测 `scrollTop` 为 0 → 522 → 0 px；横向收窄后显示“更多”，展开恢复五项。 |
 | B4 Tree 动画（已完成） | 根 `rc-motion` 2.4.1 → 2.9.5；沿用动画 `div` 的 ref。NodeList 按当前方向和上次展开数据渲染动画行，不改 Tree 属性。 | [共享用例](../tests-react19/cases/components/tree/motion.test.jsx) 在 React 16.14.0 / 19.3.1 均通过：正常展开、受控展开中反向收起；子节点冒泡不提前结束，容器 `transitionend` 只结算一次，最终节点正确。jsdom 验事件，不验视觉和布局；虚拟列表留 B5。 |
-| B5 虚拟列表 | `rc-virtual-list` 3.2.6 → 3.19.2；核对该调用链实际锁到的 `rc-resize-observer`（候选 1.4.3）。 | 改变容器尺寸，Tree/Menu 行高非零、可见行位置改变；仅未抛异常不算通过。 |
+| B5 虚拟列表（已完成） | 根 `rc-virtual-list` 3.2.6 → 3.19.2，传递 `rc-resize-observer` 1.0.0 → 1.4.3，无 overrides。Tree 保留虚拟和非虚拟滚动接口；Menu 用稳定 key 和原有 li 测量，不改变公开 ref 或增加 DOM 包装。 | [真实浏览器验收](../tests-react19/preview-b5.cjs)：16.14.0 / 19.3.1 的视口由 120 增至 240 px，Tree 挂载行 6 → 10（子行 28 px），Menu 5 → 8（40 px）；两者第 200 项整行可见，返回首行后 scrollTop 均为 0。禁用波纹时两版均可选中菜单 200；19 默认波纹问题留 B10。 |
 | B6 Carousel | `react-slick` 0.25.2 → 0.31.0。 | 浏览器验首屏宽度、切页和断点。 |
 | B7 Board 测量 | `react-virtualized` 9.18.5 → 9.22.6；保留 List/AutoSizer，清理 KanbanColumn 对列表实例的 `findDOMNode`。 | 空列/非空列和滚动位置在 16 正确；完整 19 拖拽在 C7 复验。 |
 | B8 二维码 | `qrcode.react` 1.0.1 → 4.2.0；用具名 Canvas/SVG 导出，移除失效旧声明，保留 `renderAs`。 | 默认 canvas、显式 svg；旧公开 props 的 TS 样例通过。 |
 | B9 CodeArea | `react-codemirror2` 5.1.0 → 9.0.1；保留 `codemirror@5.58.2`，`IInstance` 改为 CodeMirror Editor；移除无 wrapper 时的旧节点回退。 | 16 下真实编辑器输入、受控回写、快捷键、卸载及公开类型；19 整体在 C3b 后复跑。 |
 | B10 剩余本地旧写法 | 按目录单做：TimePicker 字符串 ref；Result 函数组件默认值；RC Trigger/TableRow/Form；Align/Animate、上传与列宽拖柄。类组件 `defaultProps` 和 `declare context` 不需机械改写。 | 每批至少触发一次旧路径：focus、默认值、行节点、滚到错误项、动画结束或实际列宽变化，分别记录。 |
+
+### B5 复核记录
+
+- React 16.14.0 虚拟 MenuItem 的限制：在 jsdom 挂载 `DOMWrap virtual`，记录传给 `MenuItem` 的 `virtualRowRef` 调用。`attribute.ref="legacy"` 时，`MenuItem.refs.legacy` 是实际 `li`，但测量回调未被调用；同一行换成对象 ref 后，对象与测量回调都收到原 `li`，卸载时回调收到 `null`。`getItemRef` 原样返回字符串以保留 React 16 的 owner ref 语义，不能直接用只支持回调/对象的 `mergeRefs` 合并。需要逐行测量时请改用回调或对象 ref；此验证不涉及实际布局或滚动表现。
+
+- 根执行 `npm install rc-virtual-list@3.19.2 --save-exact --strict-peer-deps --ignore-scripts`，再 `npm update rc-resize-observer --strict-peer-deps --ignore-scripts`；`npm ls rc-virtual-list rc-resize-observer --all` 与锁一致。根 React 未变。
+- `npm run tsc -- --noEmit` 通过。`npm --prefix tests-react19 test -- cases/components/menu cases/components/tree` 通过 15/15；同一套可跨版本的 Tree / connectedMenu 用例切根 React 16 后通过 12/12。变更测试 ESLint 通过，强制检查默认忽略的 Menu 源码未新增诊断。独立 19 全库类型仍未收敛，留 C6。
+- `npm --prefix tests-react19 run preview:build` 通过。浏览器复验：两个终端分别运行 `node tests-react19/preview.cjs`（默认 4191）和 `$env:PREVIEW_PORT='4192'; node tests-react19/preview.cjs --react16`。本机需有 Edge；将 `playwright-core@1.55.0` 安装在临时目录并把该目录的 `node_modules` 加入 `NODE_PATH`，执行 `node tests-react19/preview-b5.cjs http://localhost:4191 http://localhost:4192`。不向根库引入浏览器驱动。
+- 根 Menu 既有交互测试通过。旧 Menu/Tree demo 在基线 `26c7d0677` 与升级后均为同名 15/16 个快照失败；仅 Tree `virtual-scroll` 的实际 DOM 因新版内层样式和滚动条标记改变，未批量重录历史差异。React 19 开启默认菜单波纹点击时，`AnimateChild.transition` 调用已移除的 `findDOMNode`；B10 修复后须在本场景打开波纹复验。
 
 ## P｜在 C0 之前解除 peer 冲突，不让根切换变成一次业务重写
 
@@ -75,7 +84,7 @@ P 阶段使用测试工程的候选包时，**从正式源码导入它**，在 J
 | 步骤 | 只改什么 | 单独验收 |
 |---|---|---|
 | C0d 共享尺寸监听（关闭 B2 弹层阻塞） | C0c 后将 [ReactResizeObserver](../components/_util/resizeObserver.tsx) 的 `findDOMNode(this)` 改为观察显式传入的真实 DOM 节点，不新增 wrapper。React 16 的 B2 定向用例已通过；React 19 在 `PopupInner` 挂载时抛错，尚未执行外点断言。 | 验证 `immediately` 首次测量、尺寸变化回调、禁用及卸载时断开监听。重跑 [Trigger 首次可见用例](../tests-react19/cases/components/trigger/host.test.tsx)：弹层成功挂载，点击触发器或弹层不关闭，点击外部才关闭。 |
-| C0e Trigger 宿主 ref 收尾（C0d 后） | 核对 Tooltip 等真实调用方：能透传 DOM 的子项组合原 ref；返回组件实例的子项显式提供宿主，不改变公开 ref 或新增 wrapper。仅在宿主契约验证后删除 B2 的 `LegacyHost`、旧 `element.ref` 读取和自定义 highlight 的 `findDOMNode` 回退；停止支持旧 React 后直接读 `props.ref`，删除 `mergeRefs` 的版本判断、Typography 专用的旧版 cleanup 参数和 MenuItem 的字符串 ref 分支，保留回调 cleanup 与对象 ref 清空行为。 | 用 Typography 复制按钮（TransButton）、Pro Button 和自定义 highlight 验证首次定位、内外点击、原 ref 值与替换/卸载 cleanup；外部组件不暴露宿主的限制须明确，不以回退到空节点作为通过。 |
+| C0e Trigger 宿主 ref 收尾（C0d 后） | 核对 Tooltip 等真实调用方：能透传 DOM 的子项组合原 ref；返回组件实例的子项显式提供宿主，不改变公开 ref 或新增 wrapper。仅在宿主契约验证后删除 B2 的 `LegacyHost`、旧 `element.ref` 读取和自定义 highlight 的 `findDOMNode` 回退；停止支持旧 React 后直接读 `props.ref`，删除 `mergeRefs` 的版本判断、Typography 专用的旧版 cleanup 参数和 MenuItem 的字符串 ref 分支，保留回调 cleanup 与对象 ref 清空行为。 | 用 Typography 复制按钮（TransButton）、Pro Button 和自定义 highlight 验证首次定位、内外点击、原 ref 值与替换/卸载 cleanup；外部组件不暴露宿主的限制须明确，不以回退到空节点作为通过。切根后同步清理 `SubPopupMenu` 对 `child.ref` 的读取：以直接传给 `Menu.Item` 的 callback/object ref 验证实例值、替换和卸载，不触发 React 19 的 `element.ref` 告警；与 `attribute.ref` 指向行 DOM 的契约分别验证：针对 B5 的字符串 ref 限制，切根后用回调/对象 `attribute.ref` 验证虚拟行测量同时收到同一 `li`，不再兼容字符串。 |
 | C1 基础静态 Modal | [confirm](../components/modal/confirm.tsx) 按容器保存 root，关闭动画后卸载。公开句柄只有 destroy，不新增 update。 | 打开→取消；同轮打开即 destroy；再打开。验回调次数、动画后节点清理。 |
 | C2 Notification / Message | 实例通过 ref 异步交付；处理待定 Promise，旧 ref 不得回写已销毁缓存。 | 同键 open→destroy→open，中间不等待首次提交；只留下新实例。Message 连发、立即关闭单验。 |
 | C3a Pro Modal | 无 Provider 冷启动共享待创建的 root；保留 Provider portal。 | 同轮两次 open、立即 update/close，只建一个 root；已有 Provider 不建额外容器。 |

@@ -86,6 +86,7 @@ export const menuAllProps = [
   'isOpen',
   'renderMenuItem',
   'manualRef',
+  'virtualRowRef',
   'subMenuKey',
   'disabled',
   'index',

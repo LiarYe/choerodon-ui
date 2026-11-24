@@ -26,6 +26,14 @@ function createVirtualHolder(getTag, holderRef) {
   });
 }
 
+// List.Item replaces its child's ref. Keep the menu instance ref on the original
+// element and pass the measurement ref through mini-store as an ordinary prop.
+const VirtualRow = React.forwardRef(function VirtualRow({ item }, ref) {
+  return cloneElement(item, { virtualRowRef: ref });
+});
+
+const getVirtualKey = item => item.key == null ? item.props.eventKey : item.key;
+
 export default class DOMWrap extends Component {
   static defaultProps = {
     tag: 'div',
@@ -211,7 +219,8 @@ export default class DOMWrap extends Component {
     const { children: throwAway, title, eventKey, ...rest } = copy.props;
 
     let style = { ...propStyle };
-    let key = `${keyPrefix}-overflowed-indicator`;
+    // Children.map prefixes business keys with '.'; keep both internal row types separate.
+    const key = `${renderPlaceholder ? 'overflow-placeholder' : 'overflow-indicator'}:${keyPrefix}`;
 
     if (overflowedItems.length === 0 && renderPlaceholder !== true) {
       style = {
@@ -225,7 +234,6 @@ export default class DOMWrap extends Component {
         // prevent from taking normal dom space
         position: 'absolute',
       };
-      key = `${key}-placeholder`;
     }
 
     const popupClassName = theme ? `${prefixCls}-${theme}` : '';
@@ -347,55 +355,51 @@ export default class DOMWrap extends Component {
     this.setState({ lastVisibleIndex });
   };
 
-  renderChildren(children) {
-    // need to take care of overflowed items in horizontal mode
+  renderHorizontalChildren(children) {
     const { lastVisibleIndex } = this.state;
-    return (children || []).reduce((acc, childNode, index) => {
+    const { className, prefixCls } = this.props;
+    const hasOverflow = lastVisibleIndex !== undefined && className.indexOf(`${prefixCls}-root`) !== -1;
+    const items = [];
+    children.forEach((childNode, index) => {
       let item = childNode;
-      if (this.props.mode === 'horizontal') {
-        let overflowed = this.getOverflowedSubMenuItem(childNode.props.eventKey, []);
-        if (
-          lastVisibleIndex !== undefined &&
-          this.props.className.indexOf(`${this.props.prefixCls}-root`) !== -1
-        ) {
-          if (index > lastVisibleIndex) {
-            item = cloneElement(
-              childNode,
-              // 这里修改 eventKey 是为了防止隐藏状态下还会触发 openkeys 事件
-              {
-                style: { display: 'none' },
-                eventKey: `${childNode.props.eventKey}-hidden`,
-                className: `${childNode.className} ${MENUITEM_OVERFLOWED_CLASSNAME}`,
-              },
-            );
-          }
-          if (index === lastVisibleIndex + 1) {
-            this.overflowedItems = children.slice(lastVisibleIndex + 1).map(c => {
-              return cloneElement(
-                c,
-                // children[index].key will become '.$key' in clone by default,
-                // we have to overwrite with the correct key explicitly
-                { key: c.props.eventKey, mode: 'vertical-left' },
-              );
-            });
-
-            overflowed = this.getOverflowedSubMenuItem(
-              childNode.props.eventKey,
-              this.overflowedItems,
-            );
-          }
+      let overflowed = this.getOverflowedSubMenuItem(childNode.props.eventKey, []);
+      if (hasOverflow) {
+        if (index > lastVisibleIndex) {
+          item = cloneElement(
+            childNode,
+            // 这里修改 eventKey 是为了防止隐藏状态下还会触发 openkeys 事件
+            {
+              style: { display: 'none' },
+              eventKey: `${childNode.props.eventKey}-hidden`,
+              className: `${childNode.className} ${MENUITEM_OVERFLOWED_CLASSNAME}`,
+            },
+          );
         }
-
-        const ret = [...acc, overflowed, item];
-
-        if (index === children.length - 1) {
-          // need a placeholder for calculating overflowed indicator width
-          ret.push(this.getOverflowedSubMenuItem(childNode.props.eventKey, [], true));
+        if (index === lastVisibleIndex + 1) {
+          this.overflowedItems = children.slice(index).map(c => {
+            return cloneElement(
+              c,
+              // children[index].key will become '.$key' in clone by default,
+              // we have to overwrite with the correct key explicitly
+              { key: c.props.eventKey, mode: 'vertical-left' },
+            );
+          });
+          overflowed = this.getOverflowedSubMenuItem(childNode.props.eventKey, this.overflowedItems);
         }
-        return ret;
       }
-      return [...acc, item];
-    }, []);
+      items.push(overflowed, item);
+      if (index === children.length - 1) {
+        // need a placeholder for calculating overflowed indicator width
+        items.push(this.getOverflowedSubMenuItem(childNode.props.eventKey, [], true));
+      }
+    });
+    return items;
+  }
+
+  renderChildren(children) {
+    const { mode, virtual } = this.props;
+    const items = mode === 'horizontal' ? this.renderHorizontalChildren(children || []) : children;
+    return virtual ? (items || []).filter(React.isValidElement) : items;
   }
 
   render() {
@@ -425,13 +429,14 @@ export default class DOMWrap extends Component {
           ref={this.setVirtualListRef}
           component={this.VirtualHolder}
           data={this.renderChildren(children)}
+          itemKey={getVirtualKey}
           height={234}
           itemHeight={itemHeight}
           fullHeight={false}
           virtual
           {...rest}
         >
-          {(item) => item}
+          {item => <VirtualRow item={item} />}
         </List>
       );
     }

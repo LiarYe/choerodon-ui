@@ -5,7 +5,10 @@ import IconDemo from './components/icon';
 
 import MenuDemo from './components/menu';
 
+import B5Demo from './b5';
+
 const pages = [
+  { hash: '#/b5', title: 'B5 Tree / Menu 虚拟布局', Demo: B5Demo },
   { hash: '#/components/menu', title: 'Menu 容器', Demo: MenuDemo },
   { hash: '#/components/avatar', title: 'Avatar 头像', Demo: AvatarDemo },
   { hash: '#/components/icon', title: 'Icon 图标', Demo: IconDemo },

@@ -2,10 +2,8 @@ import React, {
   cloneElement,
   CSSProperties,
   forwardRef,
-  ForwardRefExoticComponent,
   Key,
   memo,
-  MutableRefObject,
   PropsWithoutRef,
   ReactElement,
   RefAttributes,
@@ -14,9 +12,7 @@ import React, {
   useMemo,
   useRef,
 } from 'react';
-import { ListRef } from 'rc-virtual-list';
-import isNil from 'lodash/isNil';
-import { FlattenNode } from './interface';
+import { FlattenNode, ScrollTo } from './interface';
 import { MotionTreeNodeProps } from './MotionTreeNode';
 
 export interface ListProps {
@@ -25,10 +21,11 @@ export interface ListProps {
   children: (item: FlattenNode) => ReactElement<MotionTreeNodeProps>;
   height?: number;
   itemKey: (item: FlattenNode) => Key;
-  ref?: MutableRefObject<ListRef> | null;
 }
 
-const List: ForwardRefExoticComponent<PropsWithoutRef<ListProps> & RefAttributes<ListRef>> = forwardRef<ListRef, ListProps>(({
+export type ListRef = { scrollTo: ScrollTo };
+
+const List: React.ForwardRefExoticComponent<PropsWithoutRef<ListProps> & RefAttributes<ListRef>> = forwardRef<ListRef, ListProps>(({
   data,
   prefixCls,
   children,
@@ -47,24 +44,33 @@ const List: ForwardRefExoticComponent<PropsWithoutRef<ListProps> & RefAttributes
     }
     return style;
   }, [height]);
-  const getKey = useCallback(function (item) {
-    if (typeof itemKey === 'function') {
-      return itemKey(item);
-    }
-
-    return isNil(itemKey) ? undefined : item[itemKey];
-  }, [itemKey]);
-  const renderChild = useCallback(child => cloneElement<MotionTreeNodeProps>(children(child), { key: getKey(child) }), [children, getKey]);
-  const scrollTo = useCallback((scroll) => {
-    const { current } = containerRef;
-    if (current) {
-      if (current.scrollTo) {
-        current.scrollTo(0, scroll);
-      } else {
-        current.scrollTop = scroll;
+  const renderChild = useCallback(child => cloneElement<MotionTreeNodeProps>(children(child), { key: itemKey(child) }), [children, itemKey]);
+  const scrollTo = useCallback<ScrollTo>(scroll => {
+    const holder = containerRef.current;
+    if (!holder || scroll == null) return;
+    if (typeof scroll === 'number') {
+      holder.scrollTop = scroll;
+    } else if ('index' in scroll || 'key' in scroll) {
+      const index = 'index' in scroll ? scroll.index : data.findIndex(item => itemKey(item) === scroll.key);
+      const row = holder.children[index];
+      if (!row) return;
+      const { align = 'auto', offset = 0 } = scroll;
+      const bounds = row.getBoundingClientRect();
+      const holderBounds = holder.getBoundingClientRect();
+      // Convert visual distances to the layout pixels used by scrollTop.
+      const scaleY = holderBounds.height && holder.offsetHeight ? holderBounds.height / holder.offsetHeight : 1;
+      const top = (bounds.top - holderBounds.top) / scaleY - holder.clientTop;
+      const bottom = (bounds.bottom - holderBounds.top) / scaleY - holder.clientTop - holder.clientHeight;
+      if (align === 'top' || (align === 'auto' && top < 0)) {
+        holder.scrollTop += top - offset;
+      } else if (align === 'bottom' || (align === 'auto' && bottom > 0)) {
+        holder.scrollTop += bottom + offset;
       }
+    } else {
+      if (scroll.top !== undefined) holder.scrollTop = scroll.top;
+      if (scroll.left !== undefined) holder.scrollLeft = scroll.left;
     }
-  }, [containerRef]);
+  }, [data, itemKey]);
 
   useImperativeHandle(ref, () => ({
     scrollTo,

@@ -505,6 +505,7 @@ export class SubMenu extends Component {
       forceSubMenuRender,
       subMenuCloseDelay,
       builtinPlacements,
+      virtualRowRef,
     } = props;
     menuAllProps.forEach(key => delete props[key]);
     // Set onClick to null, to ignore propagated onClick event
@@ -514,6 +515,7 @@ export class SubMenu extends Component {
       <li
         {...props}
         {...mouseEvents}
+        ref={virtualRowRef}
         className={className}
         role="menuitem"
       >

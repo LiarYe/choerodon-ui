@@ -1,7 +1,8 @@
 import React from 'react';
+import type { ListRef } from 'rc-virtual-list';
 import { TreeNodeProps } from './TreeNode';
 
-export { ScrollTo } from 'rc-virtual-list/lib/List';
+export type ScrollTo = ListRef['scrollTo'];
 
 export interface DataNode {
   checkable?: boolean;

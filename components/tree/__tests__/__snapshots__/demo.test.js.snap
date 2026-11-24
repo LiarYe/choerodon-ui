@@ -1892,7 +1892,7 @@ exports[`renders ./components/tree/demo/virtual-scroll.md correctly 1`] = `
     >
       <div
         class="c7n-tree-list-holder-inner"
-        style="display:flex;flex-direction:column;transform:translateY(0px);position:absolute;left:0;right:0;top:0"
+        style="display:flex;flex-direction:column;transform:translateY(0px);margin-left:0;position:absolute;left:0;right:0;top:0"
       >
         <div
           class="c7n-tree-treenode c7n-tree-treenode-switcher-open c7n-tree-treenode-checkable"

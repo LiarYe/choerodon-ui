@@ -1,8 +1,8 @@
 import React from 'react';
 
 const Divider = function Divider(props) {
-  const { className = '', rootPrefixCls } = props;
-  return <li className={`${className} ${rootPrefixCls}-item-divider`} />;
+  const { className = '', rootPrefixCls, virtualRowRef } = props;
+  return <li ref={virtualRowRef} className={`${className} ${rootPrefixCls}-item-divider`} />;
 };
 
 Divider.displayName = 'Divider';
