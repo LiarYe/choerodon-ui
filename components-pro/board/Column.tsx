@@ -1,5 +1,4 @@
 import React, { FunctionComponent, CSSProperties } from 'react';
-import { findDOMNode } from 'react-dom';
 import { List } from 'react-virtualized';
 import { observer } from 'mobx-react-lite';
 import {
@@ -154,17 +153,7 @@ const Column: FunctionComponent<ColumnProps> = function Column(props) {
               rowCount={itemCount}
               rowHeight={122}
               width={332}
-              ref={(ref) => {
-                // react-virtualized has no way to get the list's ref that I can so
-                // So we use the `ReactDOM.findDOMNode(ref)` escape hatch to get the ref
-                if (ref) {
-                  // eslint-disable-next-line react/no-find-dom-node
-                  const whatHasMyLifeComeTo = findDOMNode(ref);
-                  if (whatHasMyLifeComeTo instanceof HTMLElement) {
-                    droppableProvided.innerRef(whatHasMyLifeComeTo);
-                  }
-                }
-              }}
+              elementRef={droppableProvided.innerRef}
               style={getDraggingStyle(snapshot.isDraggingOver, Boolean(snapshot.draggingFromThisWith))}
               // style={{
               //   backgroundColor: getBackgroundColor(

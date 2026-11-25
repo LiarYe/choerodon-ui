@@ -13,7 +13,7 @@ const compiler = webpack({
   context: __dirname,
   mode: 'development',
   // Direct component imports need the library's UI defaults before the first render.
-  entry: ['./preview/index.html', source('components/configure/index.tsx'), './preview/main.tsx'],
+  entry: ['./preview/index.html', source('components/configure/index.tsx'), legacy && process.argv.includes('--b7') ? './preview/b7.jsx' : './preview/main.tsx'],
   output: { path: path.join(__dirname, 'dist'), publicPath: '/', filename: 'preview.js' },
   resolve: {
     extensions: ['.tsx', '.ts', '.jsx', '.js', '.json'],

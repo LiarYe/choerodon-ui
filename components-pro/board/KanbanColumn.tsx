@@ -1,5 +1,4 @@
 import React, { FunctionComponent, useContext, CSSProperties, useMemo, useEffect, useCallback } from 'react';
-import { findDOMNode } from 'react-dom';
 import { List, AutoSizer } from 'react-virtualized';
 import { observer } from 'mobx-react-lite';
 import {
@@ -254,21 +253,8 @@ const KanbanColumn: FunctionComponent<KanbanColumnProps> = function KanbanColumn
                   rowCount={itemCount}
                   rowHeight={({ index }) => (itemCount - 1) === index ? defaultRowHeight + 36 : defaultRowHeight}
                   width={width}
-                  ref={(ref) => {
-                    // react-virtualized has no way to get the list's ref that I can so
-                    // So we use the `ReactDOM.findDOMNode(ref)` escape hatch to get the ref
-                    // listRef = ref;
-                    if (ref) {
-                      ref.recomputeRowHeights();
-
-                      // columnDS.setState('__REF__', ref);
-                      // eslint-disable-next-line react/no-find-dom-node
-                      const nodeRef = findDOMNode(ref);
-                      if (nodeRef instanceof HTMLElement) {
-                        droppableProvided.innerRef(nodeRef);
-                      }
-                    }
-                  }}
+                  elementRef={droppableProvided.innerRef}
+                  ref={(list) => { list?.recomputeRowHeights(); }}
                   style={getDraggingStyle(snapshot.isDraggingOver, Boolean(snapshot.draggingFromThisWith))}
                   // style={{
                   //   backgroundColor: getBackgroundColor(

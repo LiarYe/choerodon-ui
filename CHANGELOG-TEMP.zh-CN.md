@@ -1,5 +1,11 @@
 ## 2026-11-25
 
+- 将 Board 的 `react-virtualized` 从 9.18.5 升级至 9.22.6。`Column` 和 `KanbanColumn` 通过 `elementRef` 将滚动节点传给拖拽组件，不再使用 `findDOMNode`；保留原有公开属性、列尺寸和动态行高刷新行为。
+- 新增 Board 浏览器回归用例，在 React 16.14.0 下验证空列与非空列的尺寸、100 条记录的首尾滚动，以及键盘跨列投放到空列。
+- 为 `mini-store`、`rc-motion`、`rc-virtual-list` 恢复 `^` 版本范围，为 `react-slick`、`@types/react-slick` 恢复 `~`；`react-virtualized` 沿用 `~`。重新安装后，各包仍使用已验证的锁定版本。
+
+## 2026-11-25
+
 - 将 Carousel 的 `react-slick` 从 0.25.2 升级至 0.31.0，`@types/react-slick` 升级至 0.23.12，并重新生成文档站锁文件；根项目仍使用 React 16.14.0。
 - 修复 Carousel 窄屏首次挂载未应用断点、从不同方向进入同一断点时显示张数不一致的问题；使用自定义圆点类名时保留默认样式，嵌套轮播的悬停切页互不干扰。
 - 保留顶层和断点配置中的 `onSwipe`、`onLazyLoad` 回调；修复 `asNavFor` 联动目标进入 `'unslick'` 后源轮播切页报错的问题，目标恢复后可继续同步切页。
