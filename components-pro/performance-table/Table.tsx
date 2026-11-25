@@ -35,7 +35,7 @@ import {
 import isPromise from 'is-promise';
 
 import ConfigContext, { ConfigContextValue } from 'choerodon-ui/lib/config-provider/ConfigContext';
-import { toPx } from 'choerodon-ui/lib/_util/UnitConvertor';
+import { pxToRem, toPx } from 'choerodon-ui/lib/_util/UnitConvertor';
 import LocaleReceiver from 'choerodon-ui/lib/locale-provider/LocaleReceiver';
 import { PerformanceTable as PerformanceTableLocal } from 'choerodon-ui/lib/locale-provider';
 import { getRuntimeLocale } from 'choerodon-ui/lib/locale-provider/utils';
@@ -3202,6 +3202,8 @@ export default class PerformanceTable extends React.Component<TableProps, TableS
       rowHeight,
       rowDraggable,
       components,
+      disabledScroll,
+      showScrollArrow,
     } = this.props;
 
     const headerHeight = this.getTableHeaderHeight();
@@ -3482,6 +3484,10 @@ export default class PerformanceTable extends React.Component<TableProps, TableS
     const bottomRowStyles = { height: bottomHideHeight };
 
     const { footerCells } = this.getCellDescriptor();
+    const hasHorizontalScrollbar = !disabledScroll && contentWidth > width;
+    const footerBottom = hasHorizontalScrollbar
+      ? (showScrollArrow ? pxToRem(SCROLLBAR_LARGE_WIDTH) : SCROLLBAR_WIDTH)
+      : 0;
 
     const getFooterProps = ()=>({
       width: rowWidth,
@@ -3490,7 +3496,7 @@ export default class PerformanceTable extends React.Component<TableProps, TableS
       isFooterRow: true,
       bottom: 0,
       style: {
-        bottom: contentWidth > width ? 10 : 0,
+        bottom: footerBottom,
         width: rowWidth,
       }
     })

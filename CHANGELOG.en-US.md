@@ -15,11 +15,12 @@ timeline: true
 
 ---
 
-- 🐞 `<pro>Board`: Fixed an error when switching views if customizedLoad returns the Table fallback configuration.
+- 🐞 `<pro>Select`: Fixed an issue where a non-editable single-select Select with a selected value still displayed a text caret when focused.
+- 🐞 `<pro>PerformanceTable`: Fixed an issue where the horizontal scrollbar covered the `PerformanceTable` footer when `showScrollArrow` was enabled.
 
 ## 1.6.9
 
-`2026-11-12`
+`2026-11-24`
 
 - 🌟 `configure`: Added `selectBeforeCreateComboOption`, `uploadBatchMaxFileCount`, `attachment.previewTarget`, `lovModalAutoWidth`, `duplicateKey`, `uploadAlwaysShowActions` properties.
 - 🌟 `<pro>Table`: A `type` parameter has been added to the `onReset` event of the search bar to distinguish the triggering scenarios.
@@ -154,6 +155,8 @@ timeline: true
 - 🐞 `<pro>Form`: Fixed the issue where the first error input box was not focused when the Form component validated dynamically.
 - 🐞 `Trigger`: Fixed the issue where the Trigger component would focus on the element that triggered it after the popup was closed.
 - 🐞 `<pro>Output`: Fixed an issue where the Output entry could export `undefined` due to circular dependencies.
+- 🐞 `<pro>Board`: Fixed an error when switching views if customizedLoad returns the Table fallback configuration.
+- 🐞 `<pro>Lov`: Fixed a Lov rendering crash that could leave the page blank when merging `tableProps` mutated the original MobX observable configuration.
 
 ## 1.6.8
 
