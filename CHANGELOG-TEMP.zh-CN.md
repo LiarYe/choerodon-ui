@@ -1,5 +1,11 @@
 ## 2026-11-25
 
+- 将 CodeArea 的 `react-codemirror2` 从 5.1.0 升级至 9.0.1，保留 `codemirror@5.58.2`。将 `@types/codemirror` 从 0.0.72 升级至 5.60.15，并移至 `dependencies`，确保使用方能解析公开声明。
+- 保留 `editorDidMount(editor, value, cb)` 的三个参数；显式引用旧 `IInstance` 的调用方需改用 `codemirror` 导出的 `Editor` 类型。
+- 移除 CodeArea 失焦处理中的 `findDOMNode` 回退，修复卸载后延迟失焦仍触发 `onChange` 的问题。补充公开类型检查和真实编辑器回归用例，在 React 16.14.0 和 19.3.1 下验证输入、受控回写、快捷键与卸载行为。
+
+## 2026-11-25
+
 - 将二维码依赖 `qrcode.react` 从 1.0.1 升级至 4.2.0，沿用 `^` 版本范围，移除旧类型包 `@types/qrcode.react`。默认仍渲染 Canvas，`renderAs="svg"` 仍渲染 SVG；保留原有纠错级别和嵌图默认尺寸。
 - 类型兼容提示：开启 `exactOptionalPropertyTypes` 时，仍可省略 `size` 等可选属性，但显式传入 `undefined`（如 `size={undefined}`）不再通过类型检查。
 

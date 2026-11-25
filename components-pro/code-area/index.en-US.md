@@ -22,7 +22,7 @@ subtitle: 代码域
 | formatHotKey | 格式化快捷键 | string | `Alt+F` |
 | unFormatHotKey | 清除格式化快捷键 | string | `Alt+R` |
 | formatter | `CodeAreaFormatter`类的实例，用于格式化 | CodeAreaFormatter | `new JSONFormatter()` |
-| editorDidMount | 在实例挂载前回调函数 | (editor: IInstance, value: string, cb: () => void) => void; |  |
+| editorDidMount | Called after the editor mounts (`Editor` is imported from `codemirror`). | `(editor: Editor, value: string, cb: () => void) => void` |  |
 | themeSwitch | 默认主题切换设置( options 中设置 theme 或者不设置 themeSwitch，则不显示主题切换按钮)。不设置，默认 idea 主题，可选值 `idea` \| `material` | string |  |
 | title | 标题 | ReactNode |  |
 | placeholder | 占位词 | string |  |

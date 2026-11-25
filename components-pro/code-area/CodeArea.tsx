@@ -1,10 +1,10 @@
 import React, { ComponentClass, ReactNode } from 'react';
-import { findDOMNode } from 'react-dom';
+import type { Editor } from 'codemirror';
 import classes from 'component-classes';
 import classNames from 'classnames';
 import { action, autorun, IReactionDisposer, observable, runInAction, makeObservable } from 'mobx';
 import { observer } from 'mobx-react';
-import { IControlledCodeMirror as CodeMirrorProps, IInstance } from 'react-codemirror2';
+import type { IControlledCodeMirror as CodeMirrorProps } from 'react-codemirror2';
 import ResizeObserver from 'resize-observer-polyfill';
 import shallowEqual from 'shallowequal';
 import { DebouncedFunc, DebounceSettings } from 'lodash';
@@ -45,7 +45,7 @@ export interface CodeAreaProps extends FormFieldProps {
   formatHotKey?: string;
   unFormatHotKey?: string;
   formatter?: CodeAreaFormatter;
-  editorDidMount?: (editor: IInstance, value: string, cb: () => void) => void;
+  editorDidMount?: (editor: Editor, value: string, cb: () => void) => void;
   themeSwitch?: ThemeSwitch,
   /**
    * 占位词
@@ -100,7 +100,7 @@ export default class CodeArea extends FormField<CodeAreaProps> {
 
   theme?: string;
 
-  editor?: IInstance;
+  editor?: Editor;
 
   resizeObserver?: ResizeObserver;
 
@@ -112,7 +112,7 @@ export default class CodeArea extends FormField<CodeAreaProps> {
 
   secondTimeoutId?: number;
 
-  handleChangeWait: DebouncedFunc<(codeMirrorInstance: IInstance, event?: Event, focus?: boolean) => void>;
+  handleChangeWait: DebouncedFunc<(codeMirrorInstance: Editor, event?: Event, focus?: boolean) => void>;
 
   constructor(props, content) {
     super(props, content);
@@ -162,6 +162,7 @@ export default class CodeArea extends FormField<CodeAreaProps> {
       this.disposer();
       this.disposer = undefined;
     }
+    this.editor = undefined;
     this.disconnect();
     this.editorRefreshDebounce.cancel();
     this.handleChangeWait.cancel();
@@ -237,7 +238,7 @@ export default class CodeArea extends FormField<CodeAreaProps> {
   }, 600);
 
   @autobind
-  handleBeforeChange(editor: IInstance, _data, value) {
+  handleBeforeChange(editor: Editor, _data, value) {
     this.setText(value);
     this.editorRefreshDebounce();
     if (this.reactiveProps.valueChangeAction === ValueChangeAction.input) {
@@ -442,7 +443,7 @@ export default class CodeArea extends FormField<CodeAreaProps> {
     return formatter && isString(text) ? formatter.getFormatted(text, prettierOptions) : text;
   }
 
-  getHandleChange(props: CodeAreaProps): DebouncedFunc<(codeMirrorInstance: IInstance, event?: Event, focus?: boolean) => void> {
+  getHandleChange(props: CodeAreaProps): DebouncedFunc<(codeMirrorInstance: Editor, event?: Event, focus?: boolean) => void> {
     const { wait, waitType } = props;
     if (wait && waitType) {
       const options: DebounceSettings = { leading: true, trailing: true };
@@ -462,7 +463,9 @@ export default class CodeArea extends FormField<CodeAreaProps> {
    *
    * @memberof CodeArea
    */
-  handleCodeMirrorBlur = action((codeMirrorInstance: IInstance, _event?: Event, focus?: boolean) => {
+  handleCodeMirrorBlur = action((codeMirrorInstance: Editor, _event?: Event, focus?: boolean) => {
+    // CodeMirror can deliver a delayed blur after its editor has unmounted.
+    if (codeMirrorInstance !== this.editor) return;
     const { formatter, prettierOptions, onBlur } = this.props;
     if (_event && onBlur && typeof onBlur === 'function') {
       onBlur(_event as any);
@@ -478,9 +481,8 @@ export default class CodeArea extends FormField<CodeAreaProps> {
     if (!focus) {
       this.isFocused = false;
       this.isFocus = false;
-      const element = this.wrapper || findDOMNode(this);
-      if (element) {
-        classes(element).remove(`${this.prefixCls}-focused`);
+      if (this.wrapper) {
+        classes(this.wrapper).remove(`${this.prefixCls}-focused`);
       }
       this.handleChangeWait.cancel();
     }
@@ -496,7 +498,7 @@ export default class CodeArea extends FormField<CodeAreaProps> {
    *
    * @memberof CodeArea
    */
-  handleCodeMirrorDidMount = (editor: IInstance, value: string, cb: () => void) => {
+  handleCodeMirrorDidMount = (editor: Editor, value: string, cb: () => void) => {
     this.editor = editor;
     const { formatter, style, formatHotKey, unFormatHotKey, editorDidMount, prettierOptions } = this.props;
     const { width, height = 100 } = style || {};

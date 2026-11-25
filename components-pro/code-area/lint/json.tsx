@@ -1,5 +1,5 @@
 /* eslint-disable global-require */
-import { Annotation } from 'codemirror';
+import type { Annotation } from 'codemirror/addon/lint/lint';
 import jsonlintMod from 'jsonlint-mod';
 
 if (typeof window !== 'undefined') {

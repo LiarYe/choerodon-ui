@@ -1,0 +1,9 @@
+{
+  "extends": "../../../../tsconfig.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "typeRoots": ["../../../../node_modules/@types"]
+  },
+  "files": ["public-props.types.ts", "../../../../typings/index.d.ts"],
+  "include": []
+}

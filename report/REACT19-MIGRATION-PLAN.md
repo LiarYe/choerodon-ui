@@ -45,7 +45,7 @@
 | B6 Carousel（已完成） | 根 `react-slick` 0.25.2 → 0.31.0；[Carousel](../components/carousel/index.tsx) 在挂载时选择最小匹配断点，避免上游查询在最大断点重叠；沿用 Slick 的渲染与实例方法。 | [Edge 同场景验收](../tests-react19/preview-b6.cjs)：React 16.14.0 / 19.3.1 下，390px 首帧为 1 × 358px，1280px 为 2 × 304px；从 767px 或 769px 进入 768px 均为 1 × 608px。箭头、圆点悬停及 `prev/next/goTo` 的回调顺序、最终索引一致。 |
 | B7 Board 测量（已完成） | 根 `react-virtualized` 保留 `~`，锁定 9.22.6。Column、KanbanColumn 均通过 List 的 `elementRef` 将真实滚动节点交给 DnD；前者保持固定尺寸，后者保留 AutoSizer 和原行高刷新时机，不改公开属性。 | [Edge 验收脚本](../tests-react19/preview-b7.cjs)：React 16.14.0 下，空列和 100 条记录的列均从 400×240 缩至 320×240；非空列滚动 0 → 7596 → 0 px，首尾卡片正确，键盘投放回调目标为固定 332×500 的 Column 空列。完整 React 19 键盘及指针拖拽留 C7。 |
 | B8 二维码（已完成） | 根 `qrcode.react` 保留 `^`，锁定 4.2.0，移除 `@types/qrcode.react`。使用具名 Canvas/SVG 导出；保留 `renderAs`、原纠错级别和嵌图可选尺寸。 | [共享用例](../tests-react19/cases/components/bar-code/qr.test.tsx) 在 React 16.14.0 / 19.3.1 各通过 4/4：默认 canvas 绘制、显式 SVG 属性与边距、仅传 src 的嵌图和 BAR 分流。根 `npm run tsc -- --noEmit`、旧属性 TS 样例、变更文件 ESLint 通过；jsdom 不验证真实扫码。 |
-| B9 CodeArea | `react-codemirror2` 5.1.0 → 9.0.1；保留 `codemirror@5.58.2`，`IInstance` 改为 CodeMirror Editor；移除无 wrapper 时的旧节点回退。 | 16 下真实编辑器输入、受控回写、快捷键、卸载及公开类型；19 整体在 C3b 后复跑。 |
+| B9 CodeArea（已完成） | 根 `react-codemirror2` 5.1.0 → 9.0.1，保留 `codemirror@5.58.2`。`@types/codemirror` 0.0.72 → 5.60.15，随公开 `Editor` 类型发布；`editorDidMount(editor, value, cb)` 不变。失焦只使用已有 wrapper，不回退到 `findDOMNode`。 | [真实编辑器交互](../tests-react19/cases/components-pro/code-area/editor.test.jsx)；[公开属性类型样例](../tests-react19/cases/components-pro/code-area/public-props.types.ts)。React 19 整体在 C3b 后复跑。 |
 | B10 剩余本地旧写法 | 按目录单做：TimePicker 字符串 ref；Result 函数组件默认值；RC Trigger/TableRow/Form；Align/Animate、上传与列宽拖柄。类组件 `defaultProps` 和 `declare context` 不需机械改写。 | 每批至少触发一次旧路径：focus、默认值、行节点、滚到错误项、动画结束或实际列宽变化，分别记录。 |
 
 ### B5 复核记录
@@ -56,6 +56,14 @@
 - `npm run tsc -- --noEmit` 通过。`npm --prefix tests-react19 test -- cases/components/menu cases/components/tree` 通过 15/15；同一套可跨版本的 Tree / connectedMenu 用例切根 React 16 后通过 12/12。变更测试 ESLint 通过，强制检查默认忽略的 Menu 源码未新增诊断。独立 19 全库类型仍未收敛，留 C6。
 - `npm --prefix tests-react19 run preview:build` 通过。浏览器复验：两个终端分别运行 `node tests-react19/preview.cjs`（默认 4191）和 `$env:PREVIEW_PORT='4192'; node tests-react19/preview.cjs --react16`。本机需有 Edge；将 `playwright-core@1.55.0` 安装在临时目录并把该目录的 `node_modules` 加入 `NODE_PATH`，执行 `node tests-react19/preview-b5.cjs http://localhost:4191 http://localhost:4192`。不向根库引入浏览器驱动。
 - 根 Menu 既有交互测试通过。旧 Menu/Tree demo 在基线 `26c7d0677` 与升级后均为同名 15/16 个快照失败；仅 Tree `virtual-scroll` 的实际 DOM 因新版内层样式和滚动条标记改变，未批量重录历史差异。React 19 开启默认菜单波纹点击时，`AnimateChild.transition` 调用已移除的 `findDOMNode`；B10 修复后须在本场景打开波纹复验。
+
+### B9 复核记录
+
+- 根执行 `npm install --save-prod --save-exact --strict-peer-deps --ignore-scripts react-codemirror2@9.0.1 @types/codemirror@5.60.15`。`npm ls react-codemirror2 codemirror @types/codemirror --all` 确认包装器复用根编辑器。三个 lint helper 只改 `Annotation` 类型导入；中英文属性表同步更新。
+- `npm --prefix tests-react19 test -- cases/components-pro/code-area/editor.test.jsx`：独立 React 19.3.1 通过 5/5；同一 Jest 配置把 React/DOM 映射到根 `node_modules` 后，16.14.0 也通过 5/5。测试挂载真实包装器和编辑器，覆盖挂载回调、输入与受控回写、默认失焦提交、Tab 和格式化快捷键、卸载。回归用例发现两版均可能在卸载后收到延迟 blur；现只处理当前编辑器的事件。jsdom 不验证真实布局、滚动或 IME；Tooltip 组合留 C3b。
+- `npm run tsc -- --noEmit`、`node node_modules/typescript/bin/tsc -p tests-react19/cases/components-pro/code-area/tsconfig.json`、变更源码及用例的 `eslint --no-ignore` 均通过。
+
+- React 16 下用 `.jest.mobx-source.js` 跑 CodeArea 原有 `index`、`lifecycle`、`demo` 三组：生命周期 3/3 通过；仓库快照有 10 项内容不符、1 项缺失。独立副本以 `e8046cadd` + 包装器 5.1.0 的实际渲染输出为基准，再用 9.0.1 执行同组 `--ci` 测试，14/14 通过、11/11 快照一致。未重录仓库快照。
 
 ## P｜在 C0 之前解除 peer 冲突，不让根切换变成一次业务重写
 

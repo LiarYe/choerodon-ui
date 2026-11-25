@@ -1,5 +1,5 @@
 /* eslint-disable global-require */
-import { Annotation } from 'codemirror';
+import type { Annotation } from 'codemirror/addon/lint/lint';
 import { JSHINT } from 'jshint';
 
 if (typeof window !== 'undefined') {
