@@ -1,5 +1,10 @@
 ## 2026-11-25
 
+- 将二维码依赖 `qrcode.react` 从 1.0.1 升级至 4.2.0，沿用 `^` 版本范围，移除旧类型包 `@types/qrcode.react`。默认仍渲染 Canvas，`renderAs="svg"` 仍渲染 SVG；保留原有纠错级别和嵌图默认尺寸。
+- 类型兼容提示：开启 `exactOptionalPropertyTypes` 时，仍可省略 `size` 等可选属性，但显式传入 `undefined`（如 `size={undefined}`）不再通过类型检查。
+
+## 2026-11-25
+
 - 将 Board 的 `react-virtualized` 从 9.18.5 升级至 9.22.6。`Column` 和 `KanbanColumn` 通过 `elementRef` 将滚动节点传给拖拽组件，不再使用 `findDOMNode`；保留原有公开属性、列尺寸和动态行高刷新行为。
 - 新增 Board 浏览器回归用例，在 React 16.14.0 下验证空列与非空列的尺寸、100 条记录的首尾滚动，以及键盘跨列投放到空列。
 - 为 `mini-store`、`rc-motion`、`rc-virtual-list` 恢复 `^` 版本范围，为 `react-slick`、`@types/react-slick` 恢复 `~`；`react-virtualized` 沿用 `~`。重新安装后，各包仍使用已验证的锁定版本。

@@ -1,5 +1,4 @@
 import React, { FunctionComponent } from 'react';
-import { BaseQRCodeProps } from 'qrcode.react';
 import { BaseOptions as JsBarCodeBaseOption } from 'jsbarcode';
 import QRCode from './QRCode';
 import BarCode from './BarCode';
@@ -9,7 +8,18 @@ export {
   CodeType,
 };
 
-export interface QRBarCodeProps extends BaseQRCodeProps {
+export interface QRBarCodeProps {
+  size?: number;
+  includeMargin?: boolean;
+  level?: 'L' | 'M' | 'Q' | 'H';
+  imageSettings?: {
+    src: string;
+    x?: number;
+    y?: number;
+    width?: number;
+    height?: number;
+    excavate?: boolean;
+  };
   type?: string;
   prefixCls?: string;
   className?: string;
