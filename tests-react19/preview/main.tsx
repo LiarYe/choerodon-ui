@@ -7,7 +7,10 @@ import MenuDemo from './components/menu';
 
 import B5Demo from './b5';
 
+import B6Demo from './b6';
+
 const pages = [
+  { hash: '#/b6', title: 'B6 Carousel 轮播', Demo: B6Demo },
   { hash: '#/b5', title: 'B5 Tree / Menu 虚拟布局', Demo: B5Demo },
   { hash: '#/components/menu', title: 'Menu 容器', Demo: MenuDemo },
   { hash: '#/components/avatar', title: 'Avatar 头像', Demo: AvatarDemo },

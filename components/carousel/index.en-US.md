@@ -29,19 +29,46 @@ A carousel component. Scales with its container.
 | nextArrow | Customize the next arrow | HTMLElement | |
 | theme | Arrow and Indicator Theme | dark \| light| light |
 | arrows | Whether to show arrows | boolean | false |
-| dotsActionType | Indicator Trigger Mode | [['click', 'hover']] | ['ckick'] |
-| slidesToShow | How many sheets are displayed in a screen (can be decimal) | number ｜1 ｜
+| dotsActionType | Dot triggers. Include `'hover'` to also switch slides on hover | `('click' \| 'hover')[]` | `['click']` |
+| slidesToShow | Number of slides shown at once (can be fractional) | number | 1 |
 | verticalSwiping | Vertical Drag | boolean | false |
 | pauseOnDotsHover | Mouse over indicator to stop playback | boolean | true |
 | pauseOnArrowsHover | Mouse over arrows to stop playback | boolean | true |
+| children | Content of the slides | `React.ReactNode` | - |
+| responsive | Override settings by viewport width; see the matching rule below | `{ breakpoint: number; settings: CarouselResponsiveSettings \| 'unslick' }[] \| null` | - |
+| asNavFor | Pass the mounted peer instance (e.g. `peerRef.current`), not the ref object. Pass `null` to disable synchronization. A peer in `'unslick'` mode is skipped automatically; missed changes are not replayed. Once active again, it follows the next change to a different index | `{ innerSlider: { slideHandler(index: number): void } } \| null` | - |
+| onSwipe | Receives the swipe direction | `(direction: string) => void` | - |
+| onLazyLoad | Receives the indices of the slides just loaded | `(slides: number[]) => void` | - |
+| lazyLoad | The top-level setting still accepts a boolean, or you can select on-demand or progressive loading | `boolean \| 'ondemand' \| 'progressive'` | - |
+
+### responsive and CarouselResponsiveSettings
+
+`breakpoint` is an inclusive maximum viewport width in pixels. If multiple breakpoints match, only the smallest matching breakpoint applies; settings from other breakpoints are not merged. When none match, or `responsive` is `null` or omitted, the top-level settings apply. A matching `'unslick'` renders the slides as plain content without a slider.
+
+`CarouselResponsiveSettings` starts from `CarouselProps` and excludes `children`, `responsive`, `effect`, `theme`, `prefixCls`, `style`, `slickGoTo`, `dotsActionType`, `pauseOnArrowsHover`, and `lazyLoad`. It redefines `lazyLoad` to accept only `'ondemand'` or `'progressive'`, not a boolean. The following additional fields are optional; arbitrary Slick settings are not supported by this type:
+
+| Field | Type |
+| --- | --- |
+| `appendDots` | `(dots: React.ReactNode) => React.ReactElement` |
+| `customPaging` | `(index: number) => React.ReactElement` |
+| `edgeFriction`, `rows`, `slidesPerRow` | `number` |
+| `onEdge`, `swipeEvent` | `(direction: string) => void` |
+| `onInit`, `onReInit` | `() => void` |
+| `pauseOnFocus`, `useTransform`, `waitForAnimate` | `boolean` |
 
 ## Methods
 
+Call these methods on the Carousel instance. In `'unslick'` mode there is no active slider, so these calls have no effect.
+
 | Name | Description |
 | ---- | ----------- |
-| goTo(slideNumber) | Change current slide to given slide number |
-| next() | Change current slide to next slide |
-| prev() | Change current slide to previous slide |
+| `goTo(slide: number, dontAnimate?: boolean)` | Switch to the zero-based slide index; pass `true` to skip animation |
+| `next()` | Switch to the next slide |
+| `prev()` | Switch to the previous slide |
+| `play()` | Start or resume autoplay |
+| `pause()` | Pause autoplay |
+
+**Migrating from older versions:** The old declarations exposed the undocumented `arrowsRef`, `dotsRef`, `bindDotsEvent`, `bindArrowEvent`, `handleDotsHover`, and `handleArrowMouseChange`. No in-repository consumers were found outside the component implementation. These members have been removed. If your code used them, use `dotsActionType`, `pauseOnArrowsHover`, or the instance methods above instead of binding events to internal controls.
 
 ## Q&A
 

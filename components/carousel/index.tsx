@@ -1,28 +1,21 @@
 ﻿import React, { Component, CSSProperties } from 'react';
-import debounce from 'lodash/debounce';
 import classNames from 'classnames';
 import { matchMediaPolifill } from '../_util/mediaQueryListPolyfill';
 import ConfigContext, { ConfigContextValue } from '../config-provider/ConfigContext';
 
-// matchMedia polyfill for
-// https://github.com/WickyNilliams/enquire.js/issues/82
-if (typeof window !== 'undefined') {
-  // const matchMediaPolyfill = (mediaQuery: string): MediaQueryList => {
-  //   return {
-  //     media: mediaQuery,
-  //     matches: false,
-  //     addListener() {
-  //     },
-  //     removeListener() {
-  //     },
-  //   };
-  // };
-  window.matchMedia = window.matchMedia || matchMediaPolifill;
-}
-// Use require over import (will be lifted up)
-// make sure matchMedia polyfill run before require('react-slick')
+type SlickState = { breakpoint: number | null };
+
+type SlickInstance = Component<CarouselProps, SlickState> & {
+  innerSlider: any;
+  slickGoTo(slide: number, dontAnimate?: boolean): void;
+  slickNext(): void;
+  slickPrev(): void;
+  slickPlay(): void;
+  slickPause(): void;
+};
+
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const SlickCarousel = require('react-slick').default;
+const SlickCarousel: new (props: CarouselProps) => SlickInstance = require('react-slick').default;
 
 export type CarouselEffect = 'scrollx' | 'fade';
 
@@ -32,8 +25,27 @@ export enum CarouselTheme {
   LIGHT = "light",
 }
 
+export interface CarouselResponsiveSettings extends Omit<CarouselProps,
+  'children' | 'responsive' | 'effect' | 'theme' | 'prefixCls' | 'style' | 'slickGoTo' | 'dotsActionType' | 'pauseOnArrowsHover' | 'lazyLoad'> {
+  appendDots?: (dots: React.ReactNode) => React.ReactElement;
+  customPaging?: (index: number) => React.ReactElement;
+  edgeFriction?: number;
+  lazyLoad?: 'ondemand' | 'progressive';
+  onEdge?: (direction: string) => void;
+  onInit?: () => void;
+  onReInit?: () => void;
+  pauseOnFocus?: boolean;
+  rows?: number;
+  slidesPerRow?: number;
+  swipeEvent?: (direction: string) => void;
+  useTransform?: boolean;
+  waitForAnimate?: boolean;
+}
+
 // Carousel
 export interface CarouselProps {
+  children?: React.ReactNode;
+  responsive?: { breakpoint: number; settings: CarouselResponsiveSettings | 'unslick' }[] | null;
   effect?: CarouselEffect;
   dots?: boolean;
   theme?: CarouselTheme;
@@ -61,7 +73,10 @@ export interface CarouselProps {
   focusOnSelect?: boolean;
   infinite?: boolean;
   initialSlide?: number;
-  lazyLoad?: boolean;
+  lazyLoad?: boolean | 'ondemand' | 'progressive';
+  onLazyLoad?: (slides: number[]) => void;
+  onSwipe?: (direction: string) => void;
+  asNavFor?: { innerSlider: { slideHandler(index: number): void } } | null;
   rtl?: boolean;
   slide?: string;
   slidesToShow?: number;
@@ -74,10 +89,78 @@ export interface CarouselProps {
   variableWidth?: boolean;
   useCSS?: boolean;
   slickGoTo?: number;
-  dotsActionType?: ["click", "hover"];
+  dotsActionType?: ('click' | 'hover')[];
   verticalSwiping?: boolean;
   pauseOnDotsHover?: boolean;
   pauseOnArrowsHover?: boolean;
+}
+
+// Keep Slick's rendering and instance methods while replacing its overlapping breakpoint queries.
+class ResponsiveSlick extends SlickCarousel {
+  private breakpointQueries: { breakpoint: number; query: Partial<MediaQueryList> }[] = [];
+
+  static getDerivedStateFromProps({ responsive }: CarouselProps, { breakpoint }: SlickState) {
+    // Slick's render assumes its active breakpoint exists in the current props.
+    if (breakpoint !== null && !responsive?.some(item => item.breakpoint === breakpoint)) {
+      return { breakpoint: null };
+    }
+    return null;
+  }
+
+  componentDidMount() {
+    this.bindBreakpointQueries();
+  }
+
+  componentDidUpdate(prevProps: CarouselProps) {
+    if (prevProps.responsive !== this.props.responsive) {
+      this.unbindBreakpointQueries();
+      this.bindBreakpointQueries();
+    }
+  }
+
+  componentWillUnmount() {
+    this.unbindBreakpointQueries();
+  }
+
+  render() {
+    const slider = super.render();
+    // Slick returns a div for "unslick"; only InnerSlider consumes the filtered callbacks.
+    if (!React.isValidElement<CarouselProps>(slider) || typeof slider.type === 'string') return slider;
+    const { breakpoint } = this.state;
+    const settings = breakpoint ? this.props.responsive?.find(item => item.breakpoint === breakpoint)?.settings : undefined;
+    const { onSwipe, onLazyLoad } = { onSwipe: this.props.onSwipe, onLazyLoad: this.props.onLazyLoad, ...(settings !== 'unslick' && settings) };
+    const { dotsClass, asNavFor } = slider.props;
+    const hasBaseClass = dotsClass?.split(/\s+/).includes('slick-dots');
+    if (hasBaseClass && !onSwipe && !onLazyLoad && !asNavFor) return slider;
+    return React.cloneElement(slider, {
+      // Slick owns index de-duplication; the target's inner ref can change independently.
+      asNavFor: asNavFor && { innerSlider: { slideHandler: index => asNavFor.innerSlider?.slideHandler?.(index) } },
+      dotsClass: hasBaseClass ? dotsClass : classNames('slick-dots', dotsClass),
+      onSwipe,
+      onLazyLoad,
+    });
+  }
+
+  private bindBreakpointQueries() {
+    const { responsive } = this.props;
+    const breakpoints = [...new Set((responsive ?? []).map(item => item.breakpoint))].sort((a, b) => a - b);
+    this.breakpointQueries = breakpoints.map(breakpoint => {
+      const media = `(max-width: ${breakpoint}px)`;
+      return { breakpoint, query: window.matchMedia?.(media) ?? matchMediaPolifill(media) };
+    });
+    this.breakpointQueries.forEach(({ query }) => query.addListener?.(this.updateBreakpoint));
+    this.updateBreakpoint();
+  }
+
+  private unbindBreakpointQueries() {
+    this.breakpointQueries.forEach(({ query }) => query.removeListener?.(this.updateBreakpoint));
+    this.breakpointQueries = [];
+  }
+
+  private updateBreakpoint = () => {
+    const breakpoint = this.breakpointQueries.find(({ query }) => query.matches)?.breakpoint ?? null;
+    if (this.state.breakpoint !== breakpoint) this.setState({ breakpoint });
+  };
 }
 
 export default class Carousel extends Component<CarouselProps> {
@@ -99,133 +182,68 @@ export default class Carousel extends Component<CarouselProps> {
 
   declare context: ConfigContextValue;
 
-  innerSlider: any;
+  get innerSlider() {
+    return this.slick?.innerSlider;
+  }
 
   wrapper: HTMLElement | null;
 
-  arrowsRef: NodeListOf<Element>;
-
-  dotsRef: NodeListOf<Element>;
-
-  private slick: any;
-
-  private onWindowResized = debounce(
-    () => {
-      const { autoplay } = this.props;
-      if (autoplay && this.slick && this.slick.innerSlider && this.slick.innerSlider.autoPlay) {
-        this.slick.innerSlider.autoPlay();
-      }
-    },
-    500,
-    {
-      leading: false,
-    },
-  );
+  private slick: SlickInstance | null = null;
 
   componentDidMount() {
-    const { autoplay } = this.props;
-    if (autoplay) {
-      window.addEventListener('resize', this.onWindowResized);
-    }
-
-    if (this.wrapper) {
-      this.arrowsRef = this.wrapper.querySelectorAll('.slick-slider .slick-arrow');
-      this.dotsRef = this.wrapper.querySelectorAll('.slick-slider .slick-dots li');
-    }
-
-    this.bindDotsEvent();
-    this.bindArrowEvent();
-    this.innerSlider = this.slick && this.slick.innerSlider;
+    this.wrapper?.addEventListener('mouseenter', this.handleControlHover, true);
+    this.wrapper?.addEventListener('mouseleave', this.handleControlHover, true);
   }
 
   componentWillUnmount() {
-    const { autoplay } = this.props;
-    if (autoplay) {
-      window.removeEventListener('resize', this.onWindowResized);
-      (this.onWindowResized as any).cancel();
-    }
-    if (this.dotsRef) {
-      this.dotsRef.forEach((dot, i) => {
-        dot.removeEventListener('mouseenter', () => this.handleDotsHover(i));
-      });
-    }
-    if (this.arrowsRef) {
-      this.arrowsRef.forEach((arrow) => {
-        arrow.removeEventListener('mouseenter', this.handleArrowMouseChange);
-        arrow.removeEventListener('mouseleave', this.handleArrowMouseChange);
-      });
-    }
+    this.wrapper?.removeEventListener('mouseenter', this.handleControlHover, true);
+    this.wrapper?.removeEventListener('mouseleave', this.handleControlHover, true);
   }
 
-  bindDotsEvent() {
-    if (this.wrapper) {
-      this.dotsRef.forEach((dot, i) => {
-        dot.addEventListener('mouseenter', () => this.handleDotsHover(i));
-      });
+  private handleControlHover = (event: MouseEvent) => {
+    const { target } = event;
+    if (!(target instanceof Element) || target.closest('.slick-slider') !== this.wrapper?.firstElementChild) return;
+    const { dotsActionType, pauseOnArrowsHover } = this.props;
+    if (target.matches('li') && event.type === 'mouseenter' && dotsActionType?.includes('hover')) {
+      const dots = target.closest('.slick-dots');
+      const slider = this.wrapper?.firstElementChild;
+      if (!dots || dots.closest('.slick-slider') !== slider) return;
+      const items = Array.from(dots.querySelectorAll('li')).filter(item =>
+        item.closest('.slick-dots') === dots && item.closest('.slick-slider') === slider);
+      this.goTo(items.indexOf(target as HTMLLIElement), true);
+    } else if (target.matches('.slick-arrow') && pauseOnArrowsHover && this.innerSlider?.props.autoplay) {
+      if (event.type === 'mouseenter') this.innerSlider.pause('hovered');
+      else if (this.innerSlider.state.autoplaying === 'hovered') this.innerSlider.autoPlay('leave');
     }
-  }
+  };
 
-  bindArrowEvent() {
-    const { autoplay } = this.props;
-    if (this.arrowsRef && autoplay) {
-      this.arrowsRef.forEach((arrow) => {
-        arrow.addEventListener('mouseenter', this.handleArrowMouseChange);
-        arrow.addEventListener('mouseleave', this.handleArrowMouseChange);
-      });
-    }
-  }
-
-  handleDotsHover(index) {
-    const { dotsActionType } = this.props;
-    if (dotsActionType && dotsActionType.includes('hover')) {
-      this.goTo(index, true);
-    }
-  }
-
-  handleArrowMouseChange = (event) => {
-    const { pauseOnArrowsHover } = this.props;
-    if (pauseOnArrowsHover) {
-      if (event.type === 'mouseleave') {
-        this.play();
-      } else if (event.type === 'mouseenter') {
-        this.pause();
-      }
-    }
-  }
-
-  saveSlick = (node: any) => {
+  saveSlick = (node: SlickInstance | null) => {
     this.slick = node;
   };
 
   play() {
-    this.slick.slickPlay();
+    if (this.slick?.innerSlider) this.slick.slickPlay();
   }
 
   pause() {
-    this.slick.slickPause();
+    if (this.slick?.innerSlider) this.slick.slickPause();
   }
 
   next() {
-    this.slick.slickNext();
+    if (this.slick?.innerSlider) this.slick.slickNext();
   }
 
   prev() {
-    this.slick.slickPrev();
+    if (this.slick?.innerSlider) this.slick.slickPrev();
   }
 
   goTo(slide: number, dontAnimate?: boolean) {
-    this.slick.slickGoTo(slide, dontAnimate);
+    if (this.slick?.innerSlider) this.slick.slickGoTo(slide, dontAnimate);
   }
 
   render() {
     const { getPrefixCls } = this.context;
-    const { dotsClass } = this.props;
-    const props: CarouselProps & { children?: any } = {
-      ...this.props,
-    };
-    if (dotsClass) {
-      props.dotsClass = ["slick-dots", dotsClass].join(' ');
-    }
+    const props: CarouselProps = { ...this.props };
 
     if (props.effect === 'fade') {
       props.fade = true;
@@ -240,7 +258,7 @@ export default class Carousel extends Component<CarouselProps> {
 
     return (
       <div className={className} ref={(wrapper) => { this.wrapper = wrapper }}>
-        <SlickCarousel ref={this.saveSlick} {...props} />
+        <ResponsiveSlick ref={this.saveSlick} {...props} />
       </div>
     );
   }
