@@ -1,8 +1,8 @@
-import { cloneElement, CSSProperties, isValidElement, PureComponent } from 'react';
-import { findDOMNode } from 'react-dom';
+import React, { cloneElement, CSSProperties, isValidElement, PureComponent } from 'react';
 import isEqual from 'lodash/isEqual';
 import omit from 'lodash/omit';
 import cssAnimate, { isCssAnimationSupported } from 'css-animation';
+import { HostChild, RegisterHost } from '../trigger/TriggerChild';
 import animUtil from './util';
 
 const transitionMap = {
@@ -12,6 +12,7 @@ const transitionMap = {
 };
 
 export interface AnimateChildProps {
+  getNode?: () => Element | Text | null;
   transitionName?: string | object;
   animation?: { [key: string]: (node: Element | Text, end: () => void) => void };
   style?: CSSProperties;
@@ -21,6 +22,12 @@ export default class AnimateChild extends PureComponent<AnimateChildProps, any> 
   static displayName = 'AnimateChild';
 
   stopper;
+
+  readHost?: () => Element | Text | null;
+
+  registerHost: RegisterHost = (read, mounted) => {
+    this.readHost = mounted ? read : undefined;
+  };
 
   style?: CSSProperties;
 
@@ -53,7 +60,8 @@ export default class AnimateChild extends PureComponent<AnimateChildProps, any> 
   }
 
   transition(animationType: string, finishCallback: (child: AnimateChild) => void) {
-    const node = findDOMNode(this);
+    const { getNode } = this.props;
+    const node = getNode ? getNode() : this.readHost?.();
     if (node) {
       const { props } = this;
       const { transitionName, animation = {} } = props;
@@ -86,6 +94,8 @@ export default class AnimateChild extends PureComponent<AnimateChildProps, any> 
       } else {
         this.stopper = animation[animationType](node, end);
       }
+    } else {
+      finishCallback(this);
     }
   }
 
@@ -106,7 +116,8 @@ export default class AnimateChild extends PureComponent<AnimateChildProps, any> 
   }
 
   render() {
-    const { children, ...otherProps } = this.props;
+    const { children, getNode, ...otherProps } = this.props;
+    let child = children;
     if (isValidElement(children)) {
       const props = omit(otherProps, [
         'animation',
@@ -116,8 +127,8 @@ export default class AnimateChild extends PureComponent<AnimateChildProps, any> 
         'transitionLeave',
       ]);
       const { style } = children.props as any;
-      return cloneElement(children, { ...props, style: this.getStyle({ ...props.style, ...style }) } as any);
+      child = cloneElement(children, { ...props, style: this.getStyle({ ...props.style, ...style }) } as any);
     }
-    return children;
+    return getNode ? child : <HostChild child={child} register={this.registerHost} />;
   }
 }

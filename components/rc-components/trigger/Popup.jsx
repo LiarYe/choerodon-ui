@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import ReactDOM from 'react-dom';
 import Align from '../../align';
 import Animate from '../../animate';
 import PopupInner from './PopupInner';
@@ -22,7 +21,6 @@ class Popup extends Component {
   }
 
   componentDidMount() {
-    this.rootNode = this.getPopupDomNode();
     this.setStretchSize();
   }
 
@@ -80,12 +78,17 @@ class Popup extends Component {
     }
   };
 
-  getPopupDomNode() {
-    return ReactDOM.findDOMNode(this.popupInstance);
-  }
+  saveRoot = node => { this.rootNode = node; };
+
+  getPopupDomNode = () => this.rootNode || null;
+
+  maskRef = React.createRef();
+
+  getMaskNode = () => this.maskRef.current;
 
   getTargetElement = () => {
-    return this.props.getRootDomNode();
+    const { props } = this;
+    return props.getRootDomNode();
   };
 
   // `target` on `rc-align` can accept as a function to get the bind element or a point.
@@ -118,7 +121,8 @@ class Popup extends Component {
   }
 
   getClassName(currentAlignClassName) {
-    return `${this.props.prefixCls} ${this.props.className} ${currentAlignClassName}`;
+    const { prefixCls, className } = this.props;
+    return `${prefixCls} ${className} ${currentAlignClassName}`;
   }
 
   renderPopupInner = (innerRef) => {
@@ -204,6 +208,7 @@ class Popup extends Component {
           component=""
           exclusive
           transitionAppear
+          getAnimationNode={this.getPopupDomNode}
           transitionName={this.getTransitionName()}
         >
           {visible ? (
@@ -211,6 +216,7 @@ class Popup extends Component {
               target={this.getAlignTarget()}
               key="popup"
               ref={this.saveAlignRef}
+              childrenRef={this.saveRoot}
               monitorWindowResize
               hidden={!visible}
               childrenProps={{ hidden: 'hidden' }}
@@ -228,6 +234,7 @@ class Popup extends Component {
         component=""
         exclusive
         transitionAppear
+        getAnimationNode={this.getPopupDomNode}
         transitionName={this.getTransitionName()}
         hiddenProp="hidden"
       >
@@ -235,6 +242,7 @@ class Popup extends Component {
           target={this.getAlignTarget()}
           key="popup"
           ref={this.saveAlignRef}
+          childrenRef={this.saveRoot}
           monitorWindowResize
           childrenProps={{ hidden: 'hidden' }}
           hidden={!visible}
@@ -263,6 +271,7 @@ class Popup extends Component {
       const maskTransition = this.getMaskTransitionName();
       maskElement = (
         <LazyRenderBox
+          innerRef={this.maskRef}
           style={this.getZIndexStyle()}
           key="mask"
           className={`${props.prefixCls}-mask`}
@@ -277,6 +286,7 @@ class Popup extends Component {
             hiddenProp="hidden"
             transitionAppear
             component=""
+            getAnimationNode={this.getMaskNode}
             transitionName={maskTransition}
           >
             {maskElement}

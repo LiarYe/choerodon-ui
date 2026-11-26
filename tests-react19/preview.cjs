@@ -9,11 +9,14 @@ const root = path.resolve(__dirname, '..');
 const legacy = process.argv.includes('--react16');
 const local = name => path.dirname(require.resolve(`${name}/package.json`, { paths: [legacy ? root : __dirname] }));
 const source = name => path.join(root, name);
+const defaultEntry = legacy && process.argv.includes('--b7') ? './preview/b7.jsx' : './preview/main.tsx';
+const entry = process.argv.includes('--b10-resize-upload') ? './preview/b10-resize-upload.jsx' : defaultEntry;
+const tableFormEntry = process.argv.includes('--b10-table-form') ? './preview/b10-table-form.jsx' : entry;
 const compiler = webpack({
   context: __dirname,
   mode: 'development',
   // Direct component imports need the library's UI defaults before the first render.
-  entry: ['./preview/index.html', source('components/configure/index.tsx'), legacy && process.argv.includes('--b7') ? './preview/b7.jsx' : './preview/main.tsx'],
+  entry: ['./preview/index.html', source('components/configure/index.tsx'), tableFormEntry],
   output: { path: path.join(__dirname, 'dist'), publicPath: '/', filename: 'preview.js' },
   resolve: {
     extensions: ['.tsx', '.ts', '.jsx', '.js', '.json'],
@@ -68,7 +71,7 @@ compiler.hooks.afterCompile.tap('React19Resolution', compilation => {
 
 if (process.argv.includes('--build')) {
   compiler.run((error, stats) => {
-    console.log(error || stats.toString('errors-warnings'));
+    process.stdout.write(`${error ? (error.stack || error) : stats.toString('errors-warnings')}\n`);
     compiler.close(() => { process.exitCode = error || stats.hasErrors() ? 1 : 0; });
   });
 } else {
@@ -76,5 +79,5 @@ if (process.argv.includes('--build')) {
   const serve = middleware(compiler);
   http.createServer((req, res) => serve(req, res, () => {
     res.writeHead(404).end();
-  })).listen(port, 'localhost', () => console.log(`React ${legacy ? 16 : 19} preview: http://localhost:${port}/`));
+  })).listen(port, 'localhost', () => process.stdout.write(`React ${legacy ? 16 : 19} preview: http://localhost:${port}/\n`));
 }

@@ -22,8 +22,7 @@ export default function B5Demo() {
       <button type="button" onClick={() => jump('200')}>远端</button>
       <button type="button" onClick={() => jump('root')}>返回首行</button>
       <Tree ref={tree} treeData={treeData} defaultExpandAll height={height} />
-      {/* B10: With default ripple, selecting item 200 on React 19 threw in AnimateChild.transition (findDOMNode). */}
-      <Menu ref={menu} virtual rippleDisabled height={height} prefixCls="c7n-menu" mode="inline" onSelect={({ key }) => setSelected(key)}>
+      <Menu ref={menu} virtual height={height} prefixCls="c7n-menu" mode="inline" onSelect={({ key }) => setSelected(key)}>
         {keys.map(key => <Item key={key}>菜单 {key}</Item>)}
       </Menu>
       <output>菜单选中：{selected}</output>

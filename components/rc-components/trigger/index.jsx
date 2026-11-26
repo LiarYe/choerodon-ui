@@ -1,9 +1,9 @@
 import React, { Children, cloneElement, Component, isValidElement } from 'react';
 import { observer } from 'mobx-react';
-import { createPortal, findDOMNode } from 'react-dom';
 import noop from 'lodash/noop';
 import debounce from 'lodash/debounce';
 import classNames from "classnames";
+import { HostChild } from '../../trigger/TriggerChild';
 import contains from '../util/Dom/contains';
 import addEventListener from '../../_util/addEventListener';
 import Popup from './Popup';
@@ -75,9 +75,8 @@ class Trigger extends Component {
   }
 
   componentDidMount() {
-    this.componentDidUpdate({}, {
-      popupVisible: this.state.popupVisible,
-    });
+    const { popupVisible } = this.state;
+    this.componentDidUpdate({}, { popupVisible });
   }
 
   componentWillReceiveProps({ popupVisible }) {
@@ -171,7 +170,8 @@ class Trigger extends Component {
 
   onMouseLeave = (e) => {
     this.fireEvents('onMouseLeave', e);
-    this.delaySetPopupVisible(false, this.props.mouseLeaveDelay);
+    const { mouseLeaveDelay } = this.props;
+    this.delaySetPopupVisible(false, mouseLeaveDelay);
   };
 
   onPopupMouseEnter = () => {
@@ -190,7 +190,8 @@ class Trigger extends Component {
     ) {
       return;
     }
-    this.delaySetPopupVisible(false, this.props.mouseLeaveDelay);
+    const { mouseLeaveDelay } = this.props;
+    this.delaySetPopupVisible(false, mouseLeaveDelay);
   };
 
   onFocus = (e) => {
@@ -199,7 +200,8 @@ class Trigger extends Component {
     this.clearDelayTimer();
     if (this.isFocusToShow()) {
       this.focusTime = Date.now();
-      this.delaySetPopupVisible(true, this.props.focusDelay);
+      const { focusDelay } = this.props;
+      this.delaySetPopupVisible(true, focusDelay);
     }
   };
 
@@ -218,7 +220,8 @@ class Trigger extends Component {
     if (!e.isDefaultPrevented()) {
       this.clearDelayTimer();
       if (this.isBlurToHide()) {
-        this.delaySetPopupVisible(false, this.props.blurDelay);
+        const { blurDelay } = this.props;
+        this.delaySetPopupVisible(false, blurDelay);
       }
     }
   };
@@ -265,20 +268,22 @@ class Trigger extends Component {
         event.preventDefault();
       }
     }
-    const nextVisible = !this.state.popupVisible;
+    const { popupVisible } = this.state;
+    const nextVisible = !popupVisible;
     if (this.isClickToHide() && !nextVisible || nextVisible && this.isClickToShow()) {
-      this.setPopupVisible(!this.state.popupVisible, event);
+      this.setPopupVisible(nextVisible, event);
     }
   }, 1, { leading: true, trailing: false });
 
   onDocumentClick = (event) => {
     const isCodeAreaClick = event && event.target && typeof event.target.closest === 'function' &&
       event.target.closest(`.${getConfigDefault('proPrefixCls')}-code-area-wrapper`);
-    if ((!isCodeAreaClick && event.isDefaultPrevented()) || (this.props.mask && !this.props.maskClosable)) {
+    const { mask, maskClosable } = this.props;
+    if ((!isCodeAreaClick && event.isDefaultPrevented()) || (mask && !maskClosable)) {
       return;
     }
     const target = event.target;
-    const root = findDOMNode(this);
+    const root = this.readHost?.() || this.getRootDomNode();
     const popupNode = this.getPopupDomNode();
     if (!contains(root, target) && !contains(popupNode, target)) {
       this.close();
@@ -293,13 +298,13 @@ class Trigger extends Component {
     return null;
   }
 
+  registerHost = (read, mounted) => {
+    this.readHost = mounted ? read : null;
+  };
+
   getRootDomNode = () => {
     const { getRootDomNode } = this.props;
-    if (getRootDomNode) {
-      return getRootDomNode();
-    } else {
-      return findDOMNode(this);
-    }
+    return getRootDomNode ? getRootDomNode() : this.readHost?.() || null;
   };
 
   getPopupClassFromAlign = (align) => {
@@ -382,7 +387,7 @@ class Trigger extends Component {
     popupContainer.style.top = '0';
     popupContainer.style.left = '0';
     popupContainer.style.width = '100%';
-    const mountNode = props.getPopupContainer ? props.getPopupContainer(findDOMNode(this)) : props.getDocument().body;
+    const mountNode = props.getPopupContainer ? props.getPopupContainer(this.readHost?.() || this.getRootDomNode()) : props.getDocument().body;
     mountNode.appendChild(popupContainer);
     return popupContainer;
   };
@@ -392,14 +397,17 @@ class Trigger extends Component {
 
     this.clearDelayTimer();
 
-    if (this.state.popupVisible !== popupVisible) {
-      if (this.props.beforePopupVisibleChange(popupVisible) !== false) {
+    const { popupVisible: currentVisible } = this.state;
+    if (currentVisible !== popupVisible) {
+      const { props } = this;
+      if (props.beforePopupVisibleChange(popupVisible) !== false) {
         if (!('popupVisible' in this.props)) {
           this.setState({
             popupVisible,
           });
         }
-        this.props.onPopupVisibleChange(popupVisible);
+        const { props: currentProps } = this;
+        currentProps.onPopupVisibleChange(popupVisible);
       }
     }
 
@@ -422,8 +430,10 @@ class Trigger extends Component {
   };
 
   handlePortalUpdate = () => {
-    if (this.prevPopupVisible !== this.state.popupVisible) {
-      this.props.afterPopupVisibleChange(this.state.popupVisible);
+    const { popupVisible } = this.state;
+    if (this.prevPopupVisible !== popupVisible) {
+      const { props } = this;
+      props.afterPopupVisibleChange(popupVisible);
     }
   };
 
@@ -476,8 +486,8 @@ class Trigger extends Component {
   }
 
   createTwoChains(event) {
-    const childPros = this.props.children.props;
-    const props = this.props;
+    const { props } = this;
+    const childPros = props.children.props;
     if (childPros[event] && props[event]) {
       return this[`fire${event}`];
     }
@@ -520,19 +530,21 @@ class Trigger extends Component {
   }
 
   forcePopupAlign() {
-    if (this.state.popupVisible && this._component && this._component.alignInstance) {
+    const { popupVisible } = this.state;
+    if (popupVisible && this._component && this._component.alignInstance) {
       this._component.alignInstance.forceAlign();
     }
   }
 
   fireEvents(type, e) {
-    const domEvent = e.hasOwnProperty('isDefaultPrevented') ? e : e.domEvent;
-    const childCallback = this.props.children.props[type];
+    const domEvent = Object.prototype.hasOwnProperty.call(e, 'isDefaultPrevented') ? e : e.domEvent;
+    const { children } = this.props;
+    const childCallback = children.props[type];
     if (childCallback) {
       childCallback(domEvent);
     }
     if (!domEvent.isDefaultPrevented()) {
-      const callback = this.props[type];
+      const { [type]: callback } = this.props;
       if (callback) {
         callback(domEvent);
       }
@@ -613,7 +625,7 @@ class Trigger extends Component {
     }
 
     return [
-      trigger,
+      <HostChild key="trigger" child={trigger} register={this.registerHost} />,
       portal,
     ];
   }

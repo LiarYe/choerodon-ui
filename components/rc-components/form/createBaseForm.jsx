@@ -3,6 +3,8 @@ import createReactClass from 'create-react-class';
 import AsyncValidator from 'async-validator';
 import get from 'lodash/get';
 import set from 'lodash/set';
+import { elementRef } from '../../trigger/TriggerChild';
+import { mergeRefs } from '../../_util/useMergedRef';
 import createFieldsStore from './createFieldsStore';
 import warning from '../../_util/warning';
 import {
@@ -35,7 +37,8 @@ function createBaseForm(option = {}, mixins = []) {
   } = option;
 
   return function decorate(WrappedComponent) {
-    const Form = createReactClass({
+    // createReactClass autobinds the form mixins and their public methods.
+    const Form = createReactClass({ // eslint-disable-line react/prefer-es6-class
       mixins,
 
       getInitialState() {
@@ -138,10 +141,11 @@ function createBaseForm(option = {}, mixins = []) {
 
       recoverClearedField(name) {
         if (this.clearedFieldMetaCache[name]) {
+          this.cachedBind[name] = this.cachedBind[name] || this.clearedFieldMetaCache[name].bindings;
+          this.fieldsStore.setFieldMeta(name, this.clearedFieldMetaCache[name].meta);
           this.fieldsStore.setFields({
             [name]: this.clearedFieldMetaCache[name].field,
           });
-          this.fieldsStore.setFieldMeta(name, this.clearedFieldMetaCache[name].meta);
           delete this.clearedFieldMetaCache[name];
         }
       },
@@ -169,9 +173,15 @@ function createBaseForm(option = {}, mixins = []) {
             );
           }
           fieldMeta.originalProps = originalProps;
-          fieldMeta.ref = fieldElem.ref;
+          const ref = elementRef(fieldElem);
+          if (typeof ref === 'string') throw new Error(`can not set ref string for ${name}`);
+          const cache = this.cachedBind[name];
+          if (!cache.decorated || cache.decorated.original !== ref || cache.decorated.field !== props.ref) {
+            cache.decorated = { original: ref, field: props.ref, merged: mergeRefs(props.ref, ref) };
+          }
           return cloneElement(fieldElem, {
             ...props,
+            ref: cache.decorated.merged,
             form: this,
             ...this.fieldsStore.getFieldValuePropValue(fieldMeta),
           });
@@ -219,6 +229,14 @@ function createBaseForm(option = {}, mixins = []) {
           ...this.fieldsStore.getFieldValuePropValue(fieldOption),
           ref: this.getCacheBind(name, `${name}__ref`, this.saveRef),
         };
+        if (fieldOption.ref) {
+          if (typeof fieldOption.ref === 'string') throw new Error(`can not set ref string for ${name}`);
+          const cache = this.cachedBind[name];
+          if (!cache.optionRef || cache.optionRef.original !== fieldOption.ref) {
+            cache.optionRef = { original: fieldOption.ref, merged: mergeRefs(inputProps.ref, fieldOption.ref) };
+          }
+          inputProps.ref = cache.optionRef.merged;
+        }
         if (fieldNameProp) {
           inputProps[fieldNameProp] = name;
         }
@@ -326,6 +344,7 @@ function createBaseForm(option = {}, mixins = []) {
         if (!component) {
           // after destroy, delete data
           this.clearedFieldMetaCache[name] = {
+            bindings: this.cachedBind[name],
             field: this.fieldsStore.getField(name),
             meta: this.fieldsStore.getFieldMeta(name),
           };
@@ -335,16 +354,6 @@ function createBaseForm(option = {}, mixins = []) {
           return;
         }
         this.recoverClearedField(name);
-        const fieldMeta = this.fieldsStore.getFieldMeta(name);
-        if (fieldMeta) {
-          const ref = fieldMeta.ref;
-          if (ref) {
-            if (typeof ref === 'string') {
-              throw new Error(`can not set ref string for ${name}`);
-            }
-            ref(component);
-          }
-        }
         this.instances[name] = component;
       },
 
@@ -486,7 +495,8 @@ function createBaseForm(option = {}, mixins = []) {
             'Actually, it\'s more convenient to handle submitting status by yourself.',
           );
         }
-        return this.state.submitting;
+        const { submitting } = this.state;
+        return submitting;
       },
 
       submit(callback) {
@@ -508,6 +518,12 @@ function createBaseForm(option = {}, mixins = []) {
         callback(fn);
       },
 
+      saveWrappedComponent(component) {
+        // Keep the legacy withRef access path without a React string ref.
+        // eslint-disable-next-line react/no-string-refs
+        this.refs = component ? { wrappedComponent: component } : {};
+      },
+
       render() {
         const { wrappedComponentRef, ...restProps } = this.props;
         const formProps = {
@@ -521,7 +537,7 @@ function createBaseForm(option = {}, mixins = []) {
               'See: https://github.com/react-component/form#note-use-wrappedcomponentref-instead-of-withref-after-rc-form140',
             );
           }
-          formProps.ref = 'wrappedComponent';
+          formProps.ref = this.saveWrappedComponent;
         } else if (wrappedComponentRef) {
           formProps.ref = wrappedComponentRef;
         }

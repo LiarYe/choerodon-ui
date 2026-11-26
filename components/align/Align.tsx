@@ -1,6 +1,6 @@
-import { cloneElement, Component, isValidElement, ReactNode } from 'react';
-import { findDOMNode } from 'react-dom';
+import React, { cloneElement, Component, isValidElement, ReactNode } from 'react';
 import noop from 'lodash/noop';
+import { HostChild, RegisterHost } from '../trigger/TriggerChild';
 import alignElement, { alignPoint } from './domAlign';
 import EventManager from '../_util/EventManager';
 import TaskRunner from '../_util/TaskRunner';
@@ -55,6 +55,12 @@ export default class Align extends Component<AlignProps, any> {
 
   source?: HTMLElement;
 
+  readHost?: () => Element | Text | null;
+
+  registerHost: RegisterHost = (read, mounted) => {
+    this.readHost = mounted ? read : undefined;
+  };
+
   sourceRect: ClientRect | DOMRect | null;
 
   saveSourceRef = (node) => {
@@ -79,7 +85,7 @@ export default class Align extends Component<AlignProps, any> {
     let reAlign = false;
 
     if (!hidden) {
-      const { source = findDOMNode(this) as HTMLElement } = this;
+      const source = this.source || this.readHost?.() as HTMLElement | undefined;
       const sourceRect = source ? source.getBoundingClientRect() : null;
       if (preHidden || preAlign !== align) {
         reAlign = true;
@@ -156,7 +162,7 @@ export default class Align extends Component<AlignProps, any> {
   forceAlign() {
     const { hidden, onAlign = noop, target, align } = this.props;
     if (!hidden && target) {
-      const { source = findDOMNode(this) as HTMLElement } = this;
+      const source = this.source || this.readHost?.() as HTMLElement | undefined;
       if (source && source.offsetParent) {
         let result;
         const element: HTMLElement | null = getElement(target) as HTMLElement | null;
@@ -168,6 +174,8 @@ export default class Align extends Component<AlignProps, any> {
           result = alignElement(source, element, align);
         } else if (point) {
           result = alignPoint(source, point, align);
+        } else {
+          return;
         }
         const translate = {
           x: 0,
@@ -192,7 +200,7 @@ export default class Align extends Component<AlignProps, any> {
   render() {
     const { props } = this;
     const { childrenProps, children } = props;
-    const node = isChildrenFunction(children) ? children(this.saveSourceRef) : children;
+    let node = isChildrenFunction(children) ? children(this.saveSourceRef) : children;
     if (childrenProps && isValidElement(node)) {
       const newProps = {};
       Object.keys(childrenProps).forEach(prop => {
@@ -200,8 +208,8 @@ export default class Align extends Component<AlignProps, any> {
           newProps[prop] = props[childrenProps[prop]];
         }
       });
-      return cloneElement(node, newProps);
+      node = cloneElement(node, newProps);
     }
-    return node;
+    return <HostChild child={node} register={this.registerHost} />;
   }
 }

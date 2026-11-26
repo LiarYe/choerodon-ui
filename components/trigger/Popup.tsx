@@ -66,6 +66,8 @@ export default class Popup extends ViewComponent<PopupProps> {
     height?: number;
   };
 
+  getAnimationNode = () => this.element || null;
+
   saveRef = align => (this.align = align);
 
   getOmitPropsKeys(): string[] {
@@ -146,6 +148,7 @@ export default class Popup extends ViewComponent<PopupProps> {
     const container = this.getContainer();
     return container && this.contentRendered ? createPortal(
       <Animate
+        getAnimationNode={this.getAnimationNode}
         component=""
         exclusive
         transitionAppear

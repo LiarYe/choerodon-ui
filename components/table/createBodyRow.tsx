@@ -1,6 +1,7 @@
 import React, { Component, ComponentClass, ReactNode, ReactHTML } from 'react';
 import classnames from 'classnames';
 import omit from 'lodash/omit';
+import acceptsHostRef from '../_util/acceptsHostRef';
 import { Store } from './createStore';
 
 interface BodyRowProps {
@@ -8,6 +9,7 @@ interface BodyRowProps {
   className?: string;
   rowKey: string;
   prefixCls: string;
+  rowNodeRef?: React.RefCallback<HTMLElement>;
   children?: ReactNode
 }
 
@@ -17,7 +19,8 @@ interface BodyRowState {
 
 export type BodyRowClass = ComponentClass;
 
-export default function createTableRow(Cmp: keyof ReactHTML = 'tr') {
+export default function createTableRow(Cmp: keyof ReactHTML | React.ComponentType<any> = 'tr') {
+  const acceptsNodeRef = acceptsHostRef(Cmp);
   class BodyRow extends Component<BodyRowProps, BodyRowState> {
     private store: Store;
 
@@ -60,18 +63,19 @@ export default function createTableRow(Cmp: keyof ReactHTML = 'tr') {
       const { props } = this;
       const { selected } = this.state;
       const { className, prefixCls, children } = props;
-      const omits: string[] = ['prefixCls', 'rowKey', 'store', 'children'];
+      const omits: string[] = ['prefixCls', 'rowKey', 'store', 'children', 'rowNodeRef'];
 
       if (Cmp === 'tr') {
         omits.push('record');
       }
       const otherProps: any = omit(props, omits);
+      const nodeProps = acceptsNodeRef ? { ref: props.rowNodeRef } : { rowNodeRef: props.rowNodeRef };
       const classString = classnames(className, {
         [`${prefixCls}-row-selected`]: selected,
       });
 
       return (
-        <Cmp {...otherProps} className={classString}>
+        <Cmp {...otherProps} {...nodeProps} className={classString}>
           {children}
         </Cmp>
       );

@@ -26,12 +26,12 @@ async function check(browser, url) {
   }
   async function snapshot(stage) {
     const values = await Promise.all([measure(tree), measure(menu)]);
-    console.log(stage, JSON.stringify(values));
+    process.stdout.write(`${stage} ${JSON.stringify(values)}\n`);
     for (const v of values) assert(v.rows > 0 && v.rows < 200 && v.rowHeight > 0);
     return values;
   }
   await menu.getByText('菜单 1', { exact: true }).waitFor();
-  console.log(await page.getByText(/React 运行版本/).innerText());
+  process.stdout.write(`${await page.getByText(/React 运行版本/).innerText()}\n`);
   const small = await snapshot('初始');
   await page.getByRole('button', { name: /切换高度/ }).click();
   const large = await snapshot('增高');
@@ -47,10 +47,15 @@ async function check(browser, url) {
   const back = await snapshot('返回');
   back.forEach((v, i) => assert(v.top === 0 && v.first === small[i].first));
   await page.getByRole('button', { name: '远端' }).click();
-  await last.click();
+  await last.hover();
+  await page.mouse.down();
+  const circle = last.locator('.c7n-ripple');
+  await circle.waitFor({ state: 'visible' });
+  await page.mouse.up();
+  await circle.waitFor({ state: 'hidden' });
   await menu.locator('.c7n-menu-item-selected[data-menu-key="200"]').waitFor();
   const selected = await page.locator('#b5 output').innerText();
-  console.log(selected);
+  process.stdout.write(`${selected}\n`);
   assert.equal(selected, '菜单选中：200');
   await page.close();
 }
@@ -58,8 +63,10 @@ async function check(browser, url) {
 (async () => {
   const browser = await chromium.launch({ channel: 'msedge' });
   try {
-    for (const url of process.argv.length > 2 ? process.argv.slice(2) : ['http://localhost:4191']) {
+    const urls = process.argv.length > 2 ? process.argv.slice(2) : ['http://localhost:4191'];
+    await urls.reduce(async (previous, url) => {
+      await previous;
       try { await check(browser, url); } catch (error) { console.error(url, error); process.exitCode = 1; }
-    }
+    }, Promise.resolve());
   } finally { await browser.close(); }
 })().catch(error => { console.error(error); process.exitCode = 1; });

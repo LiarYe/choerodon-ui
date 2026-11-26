@@ -23,9 +23,9 @@ function computedStyle(el, prop) {
       // DEV: Grabbed from jQuery
       // https://github.com/jquery/jquery/blob/1.9-stable/src/css.js#L191-L194
       // https://github.com/jquery/jquery/blob/1.9-stable/src/core.js#L593-L597
-      prop.replace(/-(\w)/gi, (word, letter) => {
-        return letter.toUpperCase();
-      })
+        prop.replace(/-(\w)/gi, (word, letter) => {
+          return letter.toUpperCase();
+        })
       ];
   }
   return undefined;
@@ -50,6 +50,13 @@ function getScrollableContainer(n) {
   return nodeName === 'body' ? node.ownerDocument : node;
 }
 
+function getFieldNode(instance) {
+  if (instance.nodeType === 1) return instance;
+  // Keep the original root for legacy composites, including wrapped inputs.
+  if (ReactDOM.findDOMNode && instance.isReactComponent) return ReactDOM.findDOMNode(instance);
+  return typeof instance.getRootDomNode === 'function' ? instance.getRootDomNode() : instance.input;
+}
+
 const mixin = {
   getForm() {
     return {
@@ -69,8 +76,8 @@ const mixin = {
         for (const name of validNames) {
           if (has(error, name)) {
             const instance = this.getFieldInstance(name);
-            if (instance) {
-              const node = ReactDOM.findDOMNode(instance);
+            const node = instance && getFieldNode(instance);
+            if (node && node.nodeType === 1) {
               const top = node.getBoundingClientRect().top;
               if (node.type !== 'hidden' && (firstTop === undefined || firstTop > top)) {
                 firstTop = top;

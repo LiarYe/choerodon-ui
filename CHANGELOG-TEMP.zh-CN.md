@@ -1,3 +1,10 @@
+## 2026-11-26
+
+- 将 TimePicker 面板输入框的字符串 ref 改为对象 ref，保留打开时的聚焦和全选行为。Result 改用参数默认值，省略 `status` 时仍显示 `info` 样式和图标。
+- 将 RC Trigger、Popup、Align、Animate 和表格行的定位、动画及测量改为优先使用真实 DOM ref，支持 `forwardRef` 和 `memo(forwardRef)`，保留原有实例 ref 和动画回调。修复 React 19 下默认菜单波纹触发旧 DOM API 的问题。
+- 保留 RC Form 校验失败时滚动到首个可见错误字段的行为，修复仅更换字段 ref 就可能影响其他字段值的问题。iframe 上传优先测量外层节点，PerformanceTable 列宽拖柄复用已有 DOM ref。
+- 补充 React 16/19 回归用例和浏览器验收脚本。根项目仍使用 React 16.14.0，基础 Trigger 首次打开与完整 PerformanceTable 拖宽留待切根后在 React 19 下验收。
+
 ## 2026-11-25
 
 - 将 CodeArea 的 `react-codemirror2` 从 5.1.0 升级至 9.0.1，保留 `codemirror@5.58.2`。将 `@types/codemirror` 从 0.0.72 升级至 5.60.15，并移至 `dependencies`，确保使用方能解析公开声明。

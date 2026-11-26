@@ -15,13 +15,19 @@ class Header extends Component {
     };
   }
 
+  inputRef = React.createRef();
+
   componentDidMount() {
-    if (this.props.focusOnOpen) {
+    const { focusOnOpen } = this.props;
+    if (focusOnOpen) {
       // Wait one frame for the panel to be positioned before focusing
       const requestAnimationFrame = (window.requestAnimationFrame || window.setTimeout);
       requestAnimationFrame(() => {
-        this.refs.input.focus();
-        this.refs.input.select();
+        const input = this.inputRef.current;
+        if (input) {
+          input.focus();
+          input.select();
+        }
       });
     }
   }
@@ -46,7 +52,7 @@ class Header extends Component {
     } = this.props;
 
     if (str) {
-      const originalValue = this.props.value;
+      const { value: originalValue } = this.props;
       const value = this.getProtoValue().clone();
       const parsed = moment(str, format, true);
       if (!parsed.isValid()) {
@@ -125,19 +131,21 @@ class Header extends Component {
 
   onClear = () => {
     this.setState({ str: '' });
-    this.props.onClear();
+    const { props } = this;
+    props.onClear();
   };
 
   getClearButton() {
-    const { prefixCls, allowEmpty, clearIcon } = this.props;
+    const { prefixCls, allowEmpty, clearIcon, clearText } = this.props;
     if (!allowEmpty) {
       return null;
     }
     return (
       <a
         role="button"
+        tabIndex={-1}
         className={`${prefixCls}-clear-btn`}
-        title={this.props.clearText}
+        title={clearText}
         onMouseDown={this.onClear}
       >
         {clearIcon || <i className={`${prefixCls}-clear-btn-icon`} />}
@@ -146,7 +154,8 @@ class Header extends Component {
   }
 
   getProtoValue() {
-    return this.props.value || this.props.defaultOpenValue;
+    const { value, defaultOpenValue } = this.props;
+    return value || defaultOpenValue;
   }
 
   getInput() {
@@ -156,7 +165,7 @@ class Header extends Component {
     return (
       <input
         className={`${prefixCls}-input  ${invalidClass}`}
-        ref="input"
+        ref={this.inputRef}
         onKeyDown={this.onKeyDown}
         value={str}
         placeholder={placeholder}

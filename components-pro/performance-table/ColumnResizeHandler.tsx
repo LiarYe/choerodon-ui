@@ -1,5 +1,4 @@
 import * as React from 'react';
-import ReactDOM from 'react-dom';
 import classNames from 'classnames';
 import clamp from 'lodash/clamp';
 import debounce from 'lodash/debounce';
@@ -61,15 +60,21 @@ class ColumnResizeHandler extends React.Component<ColumnResizeHandlerProps> {
   };
 
   columnWidth = 0;
+
   cursorDelta = 0;
+
   mouseMoveTracker;
+
   isKeyDown: boolean;
 
-  handleRef: React.RefObject<any>;
+  handleRef: React.RefObject<HTMLDivElement>;
+
   mounted: boolean = false;
 
   dragging: boolean;
+
   deltaX: any = 0;
+
   touchX: any = 0;
 
 
@@ -82,7 +87,7 @@ class ColumnResizeHandler extends React.Component<ColumnResizeHandlerProps> {
   componentDidMount() {
     this.mounted = true;
     // Touch handlers must be added with {passive: false} to be cancelable.
-    const thisNode = this.findDOMNode();
+    const thisNode = this.handleRef.current;
     if (thisNode) {
       addEvent(thisNode, 'touchstart', this.handleDragStart, { passive: false });
     }
@@ -94,7 +99,7 @@ class ColumnResizeHandler extends React.Component<ColumnResizeHandlerProps> {
       this.mouseMoveTracker.releaseMouseMoves();
       this.mouseMoveTracker = null;
     }
-    const thisNode = this.findDOMNode();
+    const thisNode = this.handleRef.current;
     if (thisNode) {
       const { ownerDocument } = thisNode;
       removeEvent(ownerDocument, 'touchmove', this.handleDrag);
@@ -103,14 +108,9 @@ class ColumnResizeHandler extends React.Component<ColumnResizeHandlerProps> {
     }
   }
 
-  // React Strict Mode compatibility: if `nodeRef` is passed, we will use it instead of trying to find
-  // the underlying DOM node ourselves. See the README for more information.
-  findDOMNode(): HTMLElement {
-    const { handleRef } = this;
-    return handleRef && handleRef.current || ReactDOM.findDOMNode(this);
-  }
-
   handleDragStart = (e) => {
+    const thisNode = this.handleRef.current;
+    if (!thisNode || !this.mounted) return;
     if (e.touches) {
       this.dragging = true;
       this.cursorDelta = 0;
@@ -129,10 +129,8 @@ class ColumnResizeHandler extends React.Component<ColumnResizeHandlerProps> {
       }
     }
 
-    const thisNode = this.findDOMNode();
     const { ownerDocument } = thisNode;
     if (e.type === 'touchstart') e.preventDefault();
-    if (!this.mounted) return;
 
     addEvent(ownerDocument, 'touchmove', this.handleDrag);
     addEvent(ownerDocument, 'touchend', this.handleDragStop);
@@ -162,14 +160,14 @@ class ColumnResizeHandler extends React.Component<ColumnResizeHandlerProps> {
       return;
     }
 
-    const { onColumnResizeMove, defaultColumnWidth, columnLeft, columnFixed } = this.props;
+    const { onColumnResizeMove, defaultColumnWidth, columnLeft, columnFixed, minWidth } = this.props;
     const { rtl } = this.context;
     this.cursorDelta += deltaX;
 
     this.columnWidth = clamp(
       // @ts-ignore
       defaultColumnWidth + (rtl ? -this.cursorDelta : this.cursorDelta),
-      this.props.minWidth ? Math.max(this.props.minWidth, RESIZE_MIN_WIDTH) : RESIZE_MIN_WIDTH,
+      minWidth ? Math.max(minWidth, RESIZE_MIN_WIDTH) : RESIZE_MIN_WIDTH,
       20000,
     );
     if (onColumnResizeMove) {
@@ -201,7 +199,7 @@ class ColumnResizeHandler extends React.Component<ColumnResizeHandlerProps> {
     const client = {
       clientX: transformZoomData(event.clientX),
       clientY: transformZoomData(event.clientY),
-      preventDefault: Function(),
+      preventDefault: () => undefined,
     };
     const { onColumnResizeStart } = this.props;
     if (onColumnResizeStart) {

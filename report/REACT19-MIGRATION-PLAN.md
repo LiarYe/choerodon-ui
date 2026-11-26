@@ -50,20 +50,21 @@
 
 ### B5 复核记录
 
-- React 16.14.0 虚拟 MenuItem 的限制：在 jsdom 挂载 `DOMWrap virtual`，记录传给 `MenuItem` 的 `virtualRowRef` 调用。`attribute.ref="legacy"` 时，`MenuItem.refs.legacy` 是实际 `li`，但测量回调未被调用；同一行换成对象 ref 后，对象与测量回调都收到原 `li`，卸载时回调收到 `null`。`getItemRef` 原样返回字符串以保留 React 16 的 owner ref 语义，不能直接用只支持回调/对象的 `mergeRefs` 合并。需要逐行测量时请改用回调或对象 ref；此验证不涉及实际布局或滚动表现。
-
-- 根执行 `npm install rc-virtual-list@3.19.2 --save-exact --strict-peer-deps --ignore-scripts`，再 `npm update rc-resize-observer --strict-peer-deps --ignore-scripts`；`npm ls rc-virtual-list rc-resize-observer --all` 与锁一致。根 React 未变。
-- `npm run tsc -- --noEmit` 通过。`npm --prefix tests-react19 test -- cases/components/menu cases/components/tree` 通过 15/15；同一套可跨版本的 Tree / connectedMenu 用例切根 React 16 后通过 12/12。变更测试 ESLint 通过，强制检查默认忽略的 Menu 源码未新增诊断。独立 19 全库类型仍未收敛，留 C6。
-- `npm --prefix tests-react19 run preview:build` 通过。浏览器复验：两个终端分别运行 `node tests-react19/preview.cjs`（默认 4191）和 `$env:PREVIEW_PORT='4192'; node tests-react19/preview.cjs --react16`。本机需有 Edge；将 `playwright-core@1.55.0` 安装在临时目录并把该目录的 `node_modules` 加入 `NODE_PATH`，执行 `node tests-react19/preview-b5.cjs http://localhost:4191 http://localhost:4192`。不向根库引入浏览器驱动。
-- 根 Menu 既有交互测试通过。旧 Menu/Tree demo 在基线 `26c7d0677` 与升级后均为同名 15/16 个快照失败；仅 Tree `virtual-scroll` 的实际 DOM 因新版内层样式和滚动条标记改变，未批量重录历史差异。React 19 开启默认菜单波纹点击时，`AnimateChild.transition` 调用已移除的 `findDOMNode`；B10 修复后须在本场景打开波纹复验。
+- **已验证：** React 16/19 下，Tree 和 Menu 虚拟列表随视口调整挂载行数，可滚到第 200 项并返回首行。默认菜单波纹与选中行为已在 B10 验证。
+- **兼容边界：** React 16 保留虚拟 MenuItem 的字符串 `attribute.ref`，但它不能与行测量回调合并。需要测量时应使用回调或对象 ref。
+- **切根后待验：** C0e 验证调用方 ref 与测量回调收到同一 `li`，再移除字符串 ref 分支；React 19 全库类型检查留 C6。
 
 ### B9 复核记录
 
-- 根执行 `npm install --save-prod --save-exact --strict-peer-deps --ignore-scripts react-codemirror2@9.0.1 @types/codemirror@5.60.15`。`npm ls react-codemirror2 codemirror @types/codemirror --all` 确认包装器复用根编辑器。三个 lint helper 只改 `Annotation` 类型导入；中英文属性表同步更新。
-- `npm --prefix tests-react19 test -- cases/components-pro/code-area/editor.test.jsx`：独立 React 19.3.1 通过 5/5；同一 Jest 配置把 React/DOM 映射到根 `node_modules` 后，16.14.0 也通过 5/5。测试挂载真实包装器和编辑器，覆盖挂载回调、输入与受控回写、默认失焦提交、Tab 和格式化快捷键、卸载。回归用例发现两版均可能在卸载后收到延迟 blur；现只处理当前编辑器的事件。jsdom 不验证真实布局、滚动或 IME；Tooltip 组合留 C3b。
-- `npm run tsc -- --noEmit`、`node node_modules/typescript/bin/tsc -p tests-react19/cases/components-pro/code-area/tsconfig.json`、变更源码及用例的 `eslint --no-ignore` 均通过。
+- **已验证：** CodeArea 在 React 16/19 下均通过 5 项真实编辑器用例，覆盖挂载回调、受控输入、失焦提交、快捷键和卸载。公开属性类型检查通过；React 16 下新旧包装器的渲染输出一致。
+- **兼容边界：** 只处理当前编辑器实例的 `blur`，避免卸载后的延迟事件触发提交。现有用例不覆盖浏览器布局、滚动或输入法组合输入（IME）。
+- **切根后待验：** C3b 完成 Pro Tooltip 改造后，在根 React 19 上复验 CodeArea 与 Tooltip 的组合交互。
 
-- React 16 下用 `.jest.mobx-source.js` 跑 CodeArea 原有 `index`、`lifecycle`、`demo` 三组：生命周期 3/3 通过；仓库快照有 10 项内容不符、1 项缺失。独立副本以 `e8046cadd` + 包装器 5.1.0 的实际渲染输出为基准，再用 9.0.1 执行同组 `--ci` 测试，14/14 通过、11/11 快照一致。未重录仓库快照。
+### B10 复核记录
+
+- **已验证：** React 19.3.1 专项 22/22 通过，根工程类型检查和变更文件 ESLint 通过。B5 遗留的默认菜单波纹与选中行为已在 React 16/19 验证。
+- **兼容边界：** React 19 不能从组件实例反查 DOM。自定义触发器、表格行和需滚动定位的表单字段须暴露真实节点；iframe 上传标签若要精确覆盖外层，须转发外层 DOM ref，否则按 CSS 定位包含块布局。公开实例 ref 和回调清理语义不变。
+- **切根后待验：** C0d 修复共享尺寸监听后复验基础 Trigger 首次打开及外部点击；C7 验证完整 PerformanceTable 拖宽，独立拖柄通过不算整表通过。按 C0e 验证函数组件转发 ref、实例 ref 和卸载清理后，再移除 React 16 的 `findDOMNode` 回退和旧 ref 读取方式。
 
 ## P｜在 C0 之前解除 peer 冲突，不让根切换变成一次业务重写
 

@@ -1,8 +1,9 @@
 import React, { Children, cloneElement, PureComponent, ReactElement, ReactNode, Ref } from 'react';
 import * as ReactDOM from 'react-dom';
+import acceptsHostRef from '../_util/acceptsHostRef';
 import useMergedRef from '../_util/useMergedRef';
 
-function elementRef(child: ReactElement) {
+export function elementRef(child: ReactElement) {
   // React 16 stores ref on the element; React 19 stores it in props.
   const descriptor = Object.getOwnPropertyDescriptor(child.props, 'ref');
   return descriptor && 'value' in descriptor ? descriptor.value : Object.getOwnPropertyDescriptor(child, 'ref')?.value;
@@ -12,8 +13,11 @@ type Host = Element | Text;
 export type RegisterHost = (read: () => Host | null, mounted: boolean) => void;
 
 // Look up opaque children lazily: they can replace their DOM without updating Trigger.
-class LegacyHost extends PureComponent<{ children?: ReactNode; register: RegisterHost }> {
+class LegacyHost extends PureComponent<{ children?: ReactNode; register: RegisterHost; readExplicit?: () => Host | null }> {
   read = () => {
+    const { readExplicit } = this.props;
+    const explicit = readExplicit?.();
+    if (explicit) return explicit;
     const { findDOMNode } = ReactDOM as { findDOMNode?: (instance: LegacyHost) => Host | null };
     return findDOMNode ? findDOMNode(this) : null;
   };
@@ -37,14 +41,18 @@ class LegacyHost extends PureComponent<{ children?: ReactNode; register: Registe
 export function HostChild({ child, register }: { child: ReactNode; register: RegisterHost }) {
   const node = React.useRef<Element | null>(null);
   const read = React.useCallback(() => node.current, []);
+  const acceptsRef = React.isValidElement<{ ref?: Ref<Element> }>(child) && acceptsHostRef(child.type);
+  const legacyForward = acceptsRef && typeof child.type !== 'string' && typeof ReactDOM.findDOMNode === 'function';
   const save = React.useCallback((value: Element | null) => {
-    node.current = value;
-    register(read, !!value);
-  }, [register, read]);
-  const native = React.isValidElement<{ ref?: Ref<Element> }>(child) && typeof child.type === 'string';
-  const original = native ? elementRef(child) : null;
+    node.current = value && value.nodeType === 1 ? value : null;
+    if (!legacyForward) register(read, !!node.current);
+  }, [register, read, legacyForward]);
+  const original = acceptsRef ? elementRef(child) : null;
   const ref = useMergedRef(save, original);
-  if (native && typeof original !== 'string') return cloneElement(child, { ref });
+  if (acceptsRef && typeof original !== 'string') {
+    const cloned = cloneElement(child, { ref });
+    return legacyForward ? <LegacyHost register={register} readExplicit={read}>{cloned}</LegacyHost> : cloned;
+  }
   return <LegacyHost register={register}>{child}</LegacyHost>;
 }
 

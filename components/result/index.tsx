@@ -77,7 +77,7 @@ const renderStatus = (prefixCls: string, { status, icon, statusRenderer }: Resul
 const renderExtra = (prefixCls: string, { extra }: ResultProps) =>
   extra && <div className={`${prefixCls}-extra`}>{extra}</div>;
 
-const Result = (props: ResultProps) => {
+const Result = ({ status = 'info', ...props }: ResultProps) => {
   const {
     prefixCls: customizePrefixCls,
     className: customizeClassName,
@@ -85,24 +85,21 @@ const Result = (props: ResultProps) => {
     title,
     style,
     children,
-    status,
+    icon,
+    statusRenderer,
   } = props;
   const { getPrefixCls, getConfig } = useContext(ConfigContext);
   const prefixCls = getPrefixCls('result', customizePrefixCls);
   const className = classnames(prefixCls, `${prefixCls}-${status}`, customizeClassName);
   return (
     <div className={className} style={style}>
-      {renderStatus(prefixCls, props, getConfig('resultStatusRenderer'))}
+      {renderStatus(prefixCls, { status, icon, statusRenderer }, getConfig('resultStatusRenderer'))}
       <div className={`${prefixCls}-title`}>{title}</div>
       {subTitle && <div className={`${prefixCls}-subtitle`}>{subTitle}</div>}
       {children && <div className={`${prefixCls}-content`}>{children}</div>}
       {renderExtra(prefixCls, props)}
     </div>
   );
-};
-
-Result.defaultProps = {
-  status: 'info',
 };
 
 export default Result;

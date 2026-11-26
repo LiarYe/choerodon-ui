@@ -38,6 +38,7 @@ export interface AnimateProps {
   component?: any;
   componentProps?: object;
   animation?: object;
+  getAnimationNode?: (key: Key) => Element | Text | null;
   transitionName?: string | object;
   transitionEnter?: boolean;
   transitionAppear?: boolean;
@@ -209,6 +210,7 @@ export default class Animate extends PureComponent<AnimateProps> {
       transitionEnter,
       transitionAppear,
       transitionLeave,
+      getAnimationNode,
       component: Cmp,
       componentProps,
       ...otherProps
@@ -233,6 +235,7 @@ export default class Animate extends PureComponent<AnimateProps> {
               }
             },
             animation,
+            getNode: getAnimationNode && (() => getAnimationNode(child.key!)),
             transitionName,
             transitionEnter,
             transitionAppear,

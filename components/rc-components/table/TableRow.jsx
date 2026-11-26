@@ -2,9 +2,18 @@ import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
 import { connect } from 'mini-store';
 import ResizeObserver from 'resize-observer-polyfill';
+import acceptsHostRef from '../../_util/acceptsHostRef';
+import useMergedRef from '../../_util/useMergedRef';
 import TableCell from './TableCell';
 import warning from '../../_util/warning';
 import TableRowContext, { InnerRowCtx } from './TableRowContext';
+
+function RowHost({ component: Row, register, publicRef, ...props }) {
+  const nativeRef = useMergedRef(register, publicRef);
+  return acceptsHostRef(Row)
+    ? <Row {...props} ref={nativeRef} />
+    : <Row {...props} ref={publicRef} rowNodeRef={register} />;
+}
 
 class TableRow extends Component {
   static defaultProps = {
@@ -43,31 +52,20 @@ class TableRow extends Component {
   }
 
   componentDidMount() {
-    if (this.state.shouldRender) {
-      this.saveRowRef();
-      if (this.rowRef) {
-        this.resizeObserver = new ResizeObserver(this.syncRowHeight);
-        const dom = ReactDOM.findDOMNode(this);
-        this.resizeObserver.observe(dom);
-      }
-    }
+    this.syncLegacyRow();
   }
 
   shouldComponentUpdate(nextProps) {
-    return !!(this.props.visible || nextProps.visible);
+    const { visible } = this.props;
+    return !!(visible || nextProps.visible);
   }
 
   componentDidUpdate() {
-    if (this.state.shouldRender && !this.rowRef) {
-      this.saveRowRef();
-    }
+    this.syncLegacyRow();
   }
 
   componentWillUnmount() {
-    if (this.resizeObserver) {
-      this.resizeObserver.disconnect();
-      delete this.resizeObserver;
-    }
+    this.setRowNode(null);
   }
 
   onRowClick = (event) => {
@@ -150,15 +148,32 @@ class TableRow extends Component {
     return this.style;
   }
 
-  saveRowRef() {
-    this.rowRef = ReactDOM.findDOMNode(this);
-    this.syncRowHeight();
+  syncLegacyRow() {
+    // Opaque React 16 rows predate the explicit rowNodeRef contract.
+    if (!this.explicitNode && ReactDOM.findDOMNode) this.setRowNode(ReactDOM.findDOMNode(this));
+  }
+
+  registerRow = node => {
+    this.explicitNode = node && node.nodeType === 1 ? node : null;
+    this.setRowNode(this.explicitNode);
+  };
+
+  setRowNode(node) {
+    if (node === this.rowRef) return;
+    if (this.resizeObserver) this.resizeObserver.disconnect();
+    this.resizeObserver = null;
+    this.rowRef = node;
+    if (node) {
+      this.resizeObserver = new ResizeObserver(this.syncRowHeight);
+      this.resizeObserver.observe(node);
+      this.syncRowHeight();
+    }
   }
 
   syncRowHeight = () => {
     const { isAnyColumnsFixed, fixed, expandedRow, ancestorKeys } = this.props;
 
-    if (!isAnyColumnsFixed) {
+    if (!this.rowRef || !isAnyColumnsFixed) {
       return;
     }
 
@@ -172,7 +187,8 @@ class TableRow extends Component {
   };
 
   render() {
-    if (!this.state.shouldRender) {
+    const { shouldRender } = this.state;
+    if (!shouldRender) {
       return null;
     }
 
@@ -239,7 +255,7 @@ class TableRow extends Component {
     const rowClassName =
       `${prefixCls} ${className} ${prefixCls}-level-${indent}`.trim();
 
-    const rowProps = onRow(record, index);
+    const { ref: publicRef, ...rowProps } = onRow(record, index) || {};
     const customStyle = rowProps ? rowProps.style : {};
     let style = { height };
 
@@ -251,7 +267,7 @@ class TableRow extends Component {
 
     return (
       <InnerRowCtx.Provider value={{ syncRowHeight: this.syncRowHeight }}>
-        <BodyRow
+        <RowHost
           onClick={this.onRowClick}
           onDoubleClick={this.onRowDoubleClick}
           onMouseEnter={this.onMouseEnter}
@@ -261,11 +277,14 @@ class TableRow extends Component {
           fixed={fixed}
           record={record}
           {...rowProps}
+          component={BodyRow}
+          register={this.registerRow}
+          publicRef={publicRef}
           style={style}
           data-row-key={rowKey}
         >
           {cells}
-        </BodyRow>
+        </RowHost>
       </InnerRowCtx.Provider>
     );
   }
@@ -293,7 +312,7 @@ function getRowHeight(state, props) {
 export default connect((state, props) => {
   const { currentHoverKey, expandedRowKeys } = state;
   const { rowKey, ancestorKeys } = props;
-  const visible = ancestorKeys.length === 0 || ancestorKeys.every(k => ~expandedRowKeys.indexOf(k));
+  const visible = ancestorKeys.length === 0 || ancestorKeys.every(k => expandedRowKeys.indexOf(k) !== -1);
 
   return {
     visible,
