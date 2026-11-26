@@ -12,16 +12,18 @@ const source = name => path.join(root, name);
 const defaultEntry = legacy && process.argv.includes('--b7') ? './preview/b7.jsx' : './preview/main.tsx';
 const entry = process.argv.includes('--b10-resize-upload') ? './preview/b10-resize-upload.jsx' : defaultEntry;
 const tableFormEntry = process.argv.includes('--b10-table-form') ? './preview/b10-table-form.jsx' : entry;
+const p1Transfer = process.argv.includes('--p1-transfer');
 const compiler = webpack({
   context: __dirname,
   mode: 'development',
   // Direct component imports need the library's UI defaults before the first render.
-  entry: ['./preview/index.html', source('components/configure/index.tsx'), tableFormEntry],
+  entry: ['./preview/index.html', source('components/configure/index.tsx'), p1Transfer ? './preview/p1-transfer.jsx' : tableFormEntry],
   output: { path: path.join(__dirname, 'dist'), publicPath: '/', filename: 'preview.js' },
   resolve: {
     extensions: ['.tsx', '.ts', '.jsx', '.js', '.json'],
     alias: {
       ...(legacy && { 'react-dom/client$': path.join(__dirname, 'preview/client16.js') }),
+      'react-intersection-observer$': require.resolve('react-intersection-observer', { paths: [legacy ? root : __dirname] }),
       react: local('react'),
       'react-dom': local('react-dom'),
       'choerodon-ui$': source('components'),
@@ -57,6 +59,10 @@ const compiler = webpack({
 compiler.hooks.afterCompile.tap('React19Resolution', compilation => {
   const seen = new Set();
   for (const { resource } of compilation.modules) {
+    if (resource && /[\\/]node_modules[\\/]react-intersection-observer[\\/]/.test(resource)) {
+      const expected = path.join(legacy ? root : __dirname, 'node_modules/react-intersection-observer') + path.sep;
+      if (!resource.startsWith(expected)) compilation.errors.push(new Error(`Unexpected observer: ${resource}`));
+    }
     const match = resource && resource.match(/[\\/]node_modules[\\/](react(?:-dom)?)[\\/]/);
     if (!match) continue;
     if (!resource.startsWith(local(match[1]) + path.sep)) {

@@ -1,9 +1,9 @@
 import React, { FunctionComponent, ReactNode, useContext } from 'react';
 import { observer } from 'mobx-react-lite';
 import { DraggableProvided } from 'react-beautiful-dnd';
-import { useInView } from 'react-intersection-observer';
 import Group from 'choerodon-ui/dataset/data-set/Group';
 import { pxToRem } from 'choerodon-ui/lib/_util/UnitConvertor';
+import useVirtualInView from './useVirtualInView';
 import Record from '../data-set/Record';
 import { ElementProps } from '../core/ViewComponent';
 import TableContext from './TableContext';
@@ -29,7 +29,7 @@ export interface TableVirtualCellProps extends ElementProps {
 
 const TableVirtualCell: FunctionComponent<TableVirtualCellProps> = function TableVirtualCell(props) {
   const { tableStore: { node } } = useContext(TableContext);
-  const { ref: intersectionRef, inView, entry } = useInView({
+  const { ref: intersectionRef, inView, entry } = useVirtualInView({
     root: node.tableBodyWrap || node.element,
     rootMargin: `${VIRTUAL_ROOT_MARGIN}px`,
     initialInView: true,

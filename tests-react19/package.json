@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "typecheck": "tsc --project tsconfig.json",
+    "typecheck:p1": "tsc --project tsconfig.p1.json",
     "lint": "eslint --max-warnings 0 --ext .ts,.tsx cases preview",
     "preview": "node preview.cjs",
     "preview:build": "node preview.cjs --build",
@@ -22,6 +23,7 @@
     "jest-environment-jsdom": "29.7.0",
     "react": "19.3.1",
     "react-dom": "19.3.1",
+    "react-intersection-observer": "11.0.1",
     "typescript": "5.9.3",
     "webpack-dev-middleware": "^7.4.6"
   }

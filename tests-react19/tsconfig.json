@@ -7,6 +7,7 @@
     "types": ["node", "jest", "react", "react-dom"],
     "typeRoots": ["./node_modules/@types"],
     "paths": {
+      "react-intersection-observer": ["tests-react19/node_modules/react-intersection-observer"],
       "react": ["tests-react19/node_modules/@types/react"],
       "react/*": ["tests-react19/node_modules/@types/react/*"],
       "react-dom": ["tests-react19/node_modules/@types/react-dom"],

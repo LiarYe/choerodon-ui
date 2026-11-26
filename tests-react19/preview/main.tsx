@@ -1,20 +1,24 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
-import AvatarDemo from './components/avatar';
-import IconDemo from './components/icon';
-
-import MenuDemo from './components/menu';
-
 import B5Demo from './b5';
-
 import B6Demo from './b6';
+
+type DemoModule = { default: React.ComponentType; title?: string };
+declare const require: { context(dir: string, recursive: boolean, pattern: RegExp): {
+  keys(): string[];
+  (key: string): DemoModule;
+} };
+const demos = require.context('./components', true, /^\.\/[^/]+\/index\.[jt]sx$/);
+const titles: Record<string, string> = { menu: 'Menu 容器', avatar: 'Avatar 头像', icon: 'Icon 图标' };
 
 const pages = [
   { hash: '#/b6', title: 'B6 Carousel 轮播', Demo: B6Demo },
   { hash: '#/b5', title: 'B5 Tree / Menu 虚拟布局', Demo: B5Demo },
-  { hash: '#/components/menu', title: 'Menu 容器', Demo: MenuDemo },
-  { hash: '#/components/avatar', title: 'Avatar 头像', Demo: AvatarDemo },
-  { hash: '#/components/icon', title: 'Icon 图标', Demo: IconDemo },
+  ...demos.keys().sort().map(key => {
+    const slug = key.split('/')[1];
+    const { default: Demo, title } = demos(key);
+    return { hash: `#/components/${slug}`, title: title || titles[slug] || slug, Demo };
+  }),
 ];
 
 function Preview({ hash }: { hash: string }) {

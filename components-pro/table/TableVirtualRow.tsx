@@ -1,8 +1,8 @@
 import React, { FunctionComponent, ReactNode, useContext, useEffect, useRef } from 'react';
 import { observer } from 'mobx-react-lite';
 import { DraggableProvided, DraggableStateSnapshot } from 'react-beautiful-dnd';
-import { useInView } from 'react-intersection-observer';
 import { pxToRem } from 'choerodon-ui/lib/_util/UnitConvertor';
+import useVirtualInView from './useVirtualInView';
 import Record from '../data-set/Record';
 import { ElementProps } from '../core/ViewComponent';
 import TableContext from './TableContext';
@@ -38,7 +38,7 @@ const TableVirtualRow: FunctionComponent<TableVirtualRowProps> = function TableV
   const { tableStore } = context;
   const { node } = tableStore;
   const mounted = useRef<boolean>(false);
-  const { ref: intersectionRef, inView, entry } = useInView({
+  const { ref: intersectionRef, inView, entry } = useVirtualInView({
     root: tableStore.overflowY ? node.tableBodyWrap || node.element : null,
     rootMargin: `${VIRTUAL_ROOT_MARGIN}px`,
     initialInView: mounted.current || tableStore.isRowInView(index),

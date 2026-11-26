@@ -21,6 +21,16 @@ test('uses the isolated React 19 runtime', () => {
   }
 });
 
+test('resolves the P1 observer and its React peer from library source', () => {
+  const observer = require.resolve('react-intersection-observer');
+  jest.requireActual('../../../components-pro/picture/Picture.tsx');
+  expect(require.cache[observer]).toBeDefined();
+  expect(observer).toBe(createRequire(__filename).resolve('react-intersection-observer'));
+  const fromObserver = createRequire(observer);
+  expect(fromObserver('../package.json').version).toBe('11.0.1');
+  expect(fromObserver.resolve('react')).toBe(require.resolve('react'));
+});
+
 test('mounts, increments and unmounts a counter', () => {
   const { unmount } = render(<Counter />);
   fireEvent.click(screen.getByRole('button', { name: '0' }));

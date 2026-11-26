@@ -6,8 +6,6 @@ declare module 'css-unit-converter';
 
 declare module 'array-tree-filter';
 
-declare module 'react-lazy-load';
-
 declare module 'dom-closest';
 
 declare module 'rc-motion';

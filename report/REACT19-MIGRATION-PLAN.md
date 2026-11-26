@@ -72,7 +72,7 @@
 
 | 步骤 | 准备什么 | 如何关闭本项 |
 |---|---|---|
-| P1 可见性组件 | 在独立 19 工程装 `react-intersection-observer@11.0.1`（旧 8.34.0）；新版本 React peer 从 17 起。把 Picture/虚拟行改为具名 InView；下一小项以同包替换 Transfer 的 `react-lazy-load@3.1.13`。 | 前者验首次可见及首次 false 的处理；后者验嵌套滚动根、默认提前 500px、整行占位、勾选后滚出再回来仍在。 |
+| P1 可见性组件（已完成） | 根 16 保留 `^8.31.1`（锁 8.34.0），独立 19 精确锁 11.0.1。Picture、站点 Demo 用具名 `InView`；Pro Table 虚拟行、单元格、表头用 `observe` 保留首次不可见通知；基础 Transfer 替换 `react-lazy-load`，移除旧依赖及本地声明。 | C0b 将 observer 11 写入根；C0c 删除 Jest、预览及 TS 的候选映射。切根后复验搜索清空、移回左栏及 500px 边界；C7 验整表滚动时外部 ref 与测量 ref 均指向实际单元格。 |
 | P2 拖拽 | 在独立 19 工程装 `@hello-pangea/dnd@18.0.1` 替换 `react-beautiful-dnd@13.0.0`；先 Pro Table，再逐入口迁 Upload/Tabs、Attachment、Board/PerformanceTable。公共 Context 不混用。 | 每个入口单测排序；Pro Table 按 [跨表示例](../components-pro/table/demo/multi-table-drag.md) 用真实属性 `customDragDropContenxt`、不同表标识和外部回调，验证数据跨表变化和默认单表。最后清点旧 import/类型、确认根 Redux 7 无独立调用。 |
 | P3 图片预览 | `react-image-lightbox` 4.6.0 → `yet-another-react-lightbox@3.33.1`，双端 peer 允许；优先在根做，先验证 ESM/CJS 构建。编辑器、Viewer 的 `findDOMNode` 同步改真实节点。 | 两个入口均从中间图打开、首尾停止、关闭回焦；若 16 工具链不能消费 ESM，按 P1 的独立 19 方式预验，不强装。 |
 | P4 富文本入口 | `react-quill` 1.3.5 → `react-quill-new@3.8.3`；其依赖 Quill `~2.0.3`（验证 2.0.3），必需 peer `quill-delta` 用 5.1.0；旧 Delta 3、Parchment 1 类型不能复用。先只验证模块边界，再做编辑行为。 | 无 DOM Node 直接加载包装器实测失败（19 下 `document is not defined`）；验的是**本库** ES/CJS 服务端入口不初始化编辑器，以及浏览器能加载 Snow CSS、插件。若不通，暂停此候选，在同一测试下试直接集成 Quill 2；不得直接进 C0。 |

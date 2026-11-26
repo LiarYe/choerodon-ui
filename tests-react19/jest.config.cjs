@@ -12,6 +12,7 @@ module.exports = {
     '^choerodon-ui/shared$': '<rootDir>/../components-shared/index.ts',
     '^choerodon-ui/dataset$': '<rootDir>/../components-dataset/index.ts',
     '^choerodon-ui/dataset/(.*)$': '<rootDir>/../components-dataset/$1',
+    '^react-intersection-observer$': '<rootDir>/node_modules/react-intersection-observer',
     '^(react|react-dom)(/.*)?$': '<rootDir>/node_modules/$1$2',
   },
   transform: {

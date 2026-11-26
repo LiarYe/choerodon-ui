@@ -1,5 +1,11 @@
 ## 2026-11-26
 
+- 在独立 React 19 工程中锁定 `react-intersection-observer@11.0.1`；根项目仍使用 React 16.14.0 和 `react-intersection-observer@8.34.0`。Picture 和文档站 Demo 改用具名 `InView`，保留首次进入视口时才加载的行为。
+- Pro Table 虚拟行、单元格和表头保留首次不可见通知，以正确计算占位高度和列可见状态；修复无 `IntersectionObserver` 且配置 `defaultFallbackInView(true)` 时虚拟行挂载报错的问题。
+- 基础 Transfer 移除 `react-lazy-load`，保留整行占位、默认提前 500px 加载及滚动后的勾选状态。修复可视行空白、清空搜索或将条目移回后内容不显示的问题。自定义防抖不再延迟首屏；不能提供 DOM ref 的自定义包装组件直接显示内容。
+
+## 2026-11-26
+
 - 将 TimePicker 面板输入框的字符串 ref 改为对象 ref，保留打开时的聚焦和全选行为。Result 改用参数默认值，省略 `status` 时仍显示 `info` 样式和图标。
 - 将 RC Trigger、Popup、Align、Animate 和表格行的定位、动画及测量改为优先使用真实 DOM ref，支持 `forwardRef` 和 `memo(forwardRef)`，保留原有实例 ref 和动画回调。修复 React 19 下默认菜单波纹触发旧 DOM API 的问题。
 - 保留 RC Form 校验失败时滚动到首个可见错误字段的行为，修复仅更换字段 ref 就可能影响其他字段值的问题。iframe 上传优先测量外层节点，PerformanceTable 列宽拖柄复用已有 DOM ref。

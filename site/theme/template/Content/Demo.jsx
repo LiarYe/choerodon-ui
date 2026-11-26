@@ -7,7 +7,7 @@ import CopyToClipboard from 'react-copy-to-clipboard';
 import classNames from 'classnames';
 import LZString from 'lz-string';
 import { Icon, Tooltip } from 'choerodon-ui';
-import ReactIntersectionObserver from 'react-intersection-observer';
+import { InView } from 'react-intersection-observer';
 import stackblitzSdk from '@stackblitz/sdk';
 import EditButton from './EditButton';
 import BrowserFrame from '../BrowserFrame';
@@ -241,7 +241,7 @@ ${state.sourceCode.replace('mountNode', 'document.getElementById(\'container\')'
     };
     return (
       <section className={codeBoxClass} id={meta.id}>
-        <ReactIntersectionObserver triggerOnce>
+        <InView triggerOnce>
           {
             ({ inView, ref }) => (
               <section ref={ref} className="code-box-demo" style={inView ? undefined : { minHeight: 300 }}>
@@ -250,7 +250,7 @@ ${state.sourceCode.replace('mountNode', 'document.getElementById(\'container\')'
               </section>
             )
           }
-        </ReactIntersectionObserver>
+        </InView>
         <section className="code-box-meta markdown">
           <div className="code-box-title">
             <a href={`#${meta.id}`} ref={this.saveAnchor}>
@@ -270,20 +270,20 @@ ${state.sourceCode.replace('mountNode', 'document.getElementById(\'container\')'
               <Icon type="refresh" onClick={this.refresh} className="code-refresh-icon" />
             </Tooltip>
             <Tooltip title={codeExpand ? 'Hide Code' : 'Show Code'}>
-            <span className="code-expand-icon">
-              <img
-                alt="expand code"
-                src="https://gw.alipayobjects.com/zos/rmsportal/wSAkBuJFbdxsosKKpqyq.svg"
-                className={codeExpand ? 'code-expand-icon-hide' : 'code-expand-icon-show'}
-                onClick={this.handleCodeExpand}
-              />
-              <img
-                alt="expand code"
-                src="https://gw.alipayobjects.com/zos/rmsportal/OpROPHYqWmrMDBFMZtKF.svg"
-                className={codeExpand ? 'code-expand-icon-show' : 'code-expand-icon-hide'}
-                onClick={this.handleCodeExpand}
-              />
-            </span>
+              <span className="code-expand-icon">
+                <img
+                  alt="expand code"
+                  src="https://gw.alipayobjects.com/zos/rmsportal/wSAkBuJFbdxsosKKpqyq.svg"
+                  className={codeExpand ? 'code-expand-icon-hide' : 'code-expand-icon-show'}
+                  onClick={this.handleCodeExpand}
+                />
+                <img
+                  alt="expand code"
+                  src="https://gw.alipayobjects.com/zos/rmsportal/OpROPHYqWmrMDBFMZtKF.svg"
+                  className={codeExpand ? 'code-expand-icon-show' : 'code-expand-icon-hide'}
+                  onClick={this.handleCodeExpand}
+                />
+              </span>
             </Tooltip>
           </div>
         </section>

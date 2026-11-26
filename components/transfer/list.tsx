@@ -1,12 +1,10 @@
 import React, { ChangeEvent, Component, CSSProperties, isValidElement, ReactNode } from 'react';
-import { findDOMNode } from 'react-dom';
 import classNames from 'classnames';
 import noop from 'lodash/noop';
 import Checkbox from '../checkbox';
 import { TransferItem } from './index';
 import Search from './search';
 import Item from './item';
-import triggerEvent from '../_util/triggerEvent';
 import Animate from '../animate';
 import PureRenderMixin from '../rc-components/util/PureRenderMixin';
 import { InputProps } from '../input';
@@ -63,8 +61,6 @@ export default class TransferList extends Component<TransferListProps, any> {
 
   timer: number;
 
-  triggerScrollTimer: number;
-
   fixIERepaintTimer: number;
 
   notFoundNode: HTMLDivElement;
@@ -83,7 +79,6 @@ export default class TransferList extends Component<TransferListProps, any> {
 
   componentWillUnmount() {
     clearTimeout(this.timer);
-    clearTimeout(this.triggerScrollTimer);
     clearTimeout(this.fixIERepaintTimer);
   }
 
@@ -109,23 +104,9 @@ export default class TransferList extends Component<TransferListProps, any> {
   };
 
   handleFilter = (e: ChangeEvent<HTMLInputElement>) => {
-    const { handleFilter, prefixCls } = this.props;
+    const { handleFilter } = this.props;
     handleFilter(e);
-    if (!e.target.value) {
-      return;
-    }
-    // Manually trigger scroll event for lazy search bug
-
-    this.triggerScrollTimer = window.setTimeout(() => {
-      const transferNode = findDOMNode(this) as Element;
-      const listNode = transferNode.querySelectorAll(
-        `.${prefixCls}-content`,
-      )[0];
-      if (listNode) {
-        triggerEvent(listNode, 'scroll');
-      }
-    }, 0);
-    this.fixIERepaint();
+    if (e.target.value) this.fixIERepaint();
   };
 
   handleClear = () => {

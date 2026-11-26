@@ -19,7 +19,7 @@ import React, {
 import classNames from 'classnames';
 import noop from 'lodash/noop';
 import { Property } from 'csstype';
-import ReactIntersectionObserver from 'react-intersection-observer';
+import { InView } from 'react-intersection-observer';
 import isNumber from 'lodash/isNumber';
 import ConfigContext from 'choerodon-ui/lib/config-provider/ConfigContext';
 import { pxToRem } from 'choerodon-ui/lib/_util/UnitConvertor';
@@ -256,9 +256,9 @@ function Picture(props: PictureProps, ref: Ref<PictureForwardRef>) {
 
   if (lazy && !propStatus && status !== 'loaded') {
     return (
-      <ReactIntersectionObserver onChange={setInView}>
+      <InView onChange={setInView}>
         {picture}
-      </ReactIntersectionObserver>
+      </InView>
     );
   }
   return picture;

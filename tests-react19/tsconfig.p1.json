@@ -1,0 +1,13 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": { "allowJs": true },
+  "include": [
+    "../typings/index.d.ts",
+    "../components-pro/picture/Picture.tsx",
+    "../components-pro/table/TableVirtual*.tsx",
+    "../components/transfer/item.tsx",
+    "../components/transfer/list.tsx",
+    "../components/rc-components/table/ViewSection.jsx",
+    "../site/theme/template/Content/Demo.jsx"
+  ]
+}

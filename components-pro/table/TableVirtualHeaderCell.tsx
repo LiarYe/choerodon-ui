@@ -1,6 +1,6 @@
 import React, { FunctionComponent, ReactNode, useContext, useEffect } from 'react';
-import { useInView } from 'react-intersection-observer';
 import { observer } from 'mobx-react-lite';
+import useVirtualInView from './useVirtualInView';
 import TableContext from './TableContext';
 import { ElementProps } from '../core/ViewComponent';
 import ColumnGroup from './ColumnGroup';
@@ -21,7 +21,7 @@ export interface TableVirtualHeaderCellProps extends ElementProps {
 const TableVirtualHeaderCell: FunctionComponent<TableVirtualHeaderCellProps> = function TableVirtualHeaderCell(props) {
   const { columnGroup } = props;
   const { tableStore } = useContext(TableContext);
-  const { ref, inView } = useInView({
+  const { ref, inView } = useVirtualInView({
     root: tableStore.node.wrapper,
     rootMargin: '100px',
     initialInView: true,
