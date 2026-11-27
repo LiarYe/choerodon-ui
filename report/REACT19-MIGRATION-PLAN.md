@@ -72,11 +72,11 @@
 
 | 步骤 | 准备什么 | 如何关闭本项 |
 |---|---|---|
-| P1 可见性组件（已完成） | 根 16 保留 `^8.31.1`（锁 8.34.0），独立 19 精确锁 11.0.1。Picture、站点 Demo 用具名 `InView`；Pro Table 虚拟行、单元格、表头用 `observe` 保留首次不可见通知；基础 Transfer 替换 `react-lazy-load`，移除旧依赖及本地声明。 | C0b 将 observer 11 写入根；C0c 删除 Jest、预览及 TS 的候选映射。切根后复验搜索清空、移回左栏及 500px 边界；C7 验整表滚动时外部 ref 与测量 ref 均指向实际单元格。 |
-| P2 拖拽 | 在独立 19 工程装 `@hello-pangea/dnd@18.0.1` 替换 `react-beautiful-dnd@13.0.0`；先 Pro Table，再逐入口迁 Upload/Tabs、Attachment、Board/PerformanceTable。公共 Context 不混用。 | 每个入口单测排序；Pro Table 按 [跨表示例](../components-pro/table/demo/multi-table-drag.md) 用真实属性 `customDragDropContenxt`、不同表标识和外部回调，验证数据跨表变化和默认单表。最后清点旧 import/类型、确认根 Redux 7 无独立调用。 |
-| P3 图片预览 | `react-image-lightbox` 4.6.0 → `yet-another-react-lightbox@3.33.1`，双端 peer 允许；优先在根做，先验证 ESM/CJS 构建。编辑器、Viewer 的 `findDOMNode` 同步改真实节点。 | 两个入口均从中间图打开、首尾停止、关闭回焦；若 16 工具链不能消费 ESM，按 P1 的独立 19 方式预验，不强装。 |
-| P4 富文本入口 | `react-quill` 1.3.5 → `react-quill-new@3.8.3`；其依赖 Quill `~2.0.3`（验证 2.0.3），必需 peer `quill-delta` 用 5.1.0；旧 Delta 3、Parchment 1 类型不能复用。先只验证模块边界，再做编辑行为。 | 无 DOM Node 直接加载包装器实测失败（19 下 `document is not defined`）；验的是**本库** ES/CJS 服务端入口不初始化编辑器，以及浏览器能加载 Snow CSS、插件。若不通，暂停此候选，在同一测试下试直接集成 Quill 2；不得直接进 C0。 |
-| P5 富文本行为 | 在 P4 通过的入口迁 Delta、插件和历史数据读写。 | 一份历史 Delta 加载→编辑→保存完整 Delta→Viewer 展示；另验粘贴/拖图。与 SSR 分开出结果。 |
+| P1 可见性组件（已完成） | 根 16 保留 `react-intersection-observer` `^8.31.1`（锁 8.34.0），独立 19 精确锁 11.0.1。Picture、站点 Demo 用具名 `InView`；Pro Table 虚拟行、单元格、表头用 `observe` 保留首次不可见通知；基础 Transfer 替换 `react-lazy-load`，移除旧依赖及本地声明。 | C0b 将 observer 11 写入根；C0c 删除 Jest、预览及 TS 的候选映射。切根后复验搜索清空、移回左栏及 500px 边界；C7 验整表滚动时外部 ref 与测量 ref 均指向实际单元格。 |
+| P2 拖拽 | 在独立 19 工程装 `@hello-pangea/dnd@18.0.1` 替换 `react-beautiful-dnd@13.0.0`。默认单表用法不变；跨表从 `choerodon-ui` 导入 `DragDropContext`，保留 `customDragDropContenxt`、回调签名和自定义 clone。 | [Pro Table](../components-pro/table/demo/multi-table-drag.md) 和 [PerformanceTable](../components-pro/performance-table/demo/multi-table-drag.md) 单表排序、跨表移动后数据顺序正确，取消后两侧数据不变。 |
+| P3 图片预览 | `react-image-lightbox` 4.6.0 → `yet-another-react-lightbox@3.33.1`。在 Editor/Viewer 内部将图片列表、点击索引映射到 `slides/index`，设 `carousel.finite`，接入 Zoom、CSS；在已有 DOM 容器处理点击，替换两处 `findDOMNode`。不新增业务 props。 | 先验本库 ES/CJS 发布入口及浏览器样式，再验两个入口从中间图打开、首尾不循环、缩放、Esc 关闭回焦。覆盖重复/相对 URL、预览模式不打开两层。若仅 16 工具链不通，在独立 19 预验；若发布的 CJS 仍不能消费，不以 Jest 映射放行。 |
+| P4 富文本入口 | `react-quill` 1.3.5 → `react-quill-new@3.8.3`：验证其 Quill `~2.0.3`（锁 2.0.3）及必需 peer `quill-delta@5.1.0`。把编辑器加载限制在浏览器，Viewer 不加载 Quill。保留 `options`、toolbar hook、ref 和 `RichText.Quill` 注册能力；发布类型不能引用旧 `react-quill/lib` 或 Parchment 私有路径。 | 此前无 DOM 直接加载包装器报 `document is not defined`。验**本库产物** ES/CJS 服务端导入、Viewer 输出正文、浏览器接管后 Snow CSS/插件可用。用现有业务写法在首个编辑器挂载前注册模块，验证实例能使用；若只能改为异步注册，列为公开破坏项，不得默认为兼容。 |
+| P5 富文本行为 | 保持 DataSet 的完整 `ops[]` 或 `null`，不改存 HTML，不要求业务传 Delta 实例。适配 Quill 2 的剪贴板和插件接口；列明已移除的旧 options（如 `scrollingContainer`）及影响。 | 历史记录（含图片、格式）及仓内无末尾换行样例：加载 → 局部编辑 → 保存 → 重载 → Viewer；核对完整 ops 而非本次增量，清空为 `null`。另验外部赋值、选区、双编辑器工具栏、粘图/拖图一次只插一张、插件禁用。数据丢失不进 C0。 |
 
 P 阶段使用测试工程的候选包时，**从正式源码导入它**，在 Jest 为该包（包括用到的导出子路径）显式解析到子工程安装位置，断言实际解析路径和版本；测试文件能直接 import 不算。依赖样式可在 jsdom 隔离，但必须另验真实构建。C0 删除临时候选映射。对已经在根完成的项，不再重复安装。
 
@@ -85,8 +85,8 @@ P 阶段使用测试工程的候选包时，**从正式源码导入它**，在 J
 | 步骤 | 操作 | 完成条件 |
 |---|---|---|
 | C0a 候选锁预检 | 临时复制当前根清单/锁；应用 B/P 已验版本及下行运行时。迁出旧 Enzyme16 adapter、旧 renderer；逐项隔离站点专用 `react-copy-to-clipboard`、`react-infinite-scroller`、`react-intl`、`react-document-title`，查实际消费者再移，不能只删声明。同步检查站点仍能取得这些工具。 | `npm install --package-lock-only --strict-peer-deps --ignore-scripts`。比较保留旧锁与无锁解析；列出所有 React/DOM 安装路径。如需重算，审查无关漂移并缩小差异，不能盲交新锁。失败不进入 C0b。 |
-| **C0b 根升级** | 合入准备好的 P 改动；根 dev React/DOM 与根 `react-is` 锁 **19.3.1**，`@types/react`、`@types/react-dom` **19.3.0**；React/DOM 保持消费者 peer，先限 `^19.3.1`。正式依赖写根，删除无引用的旧 DnD/类型和旧根 `react-redux@7.2.0`（新 DnD 自带 Redux 5/React Redux 9）。 | 从干净工作树执行根 `npm ci --strict-peer-deps`（含生命周期）；`npm ls react react-dom react-is mobx mobx-react mobx-react-lite --all`。React/DOM 各一个实例，嵌套 react-is 可不同。若失败在本步解决，不用 force/全树 overrides。 |
-| C0c 测试改用根实例 | 保留 `tests-react19/cases`，将 Jest 的 React/DOM 及 JSX/client 子入口统一映射到**根**，替代包也从根解析；更新 runtime 断言（旧断言预期子目录）。启用 A3 迁好的普通/MobX 入口。 | 从组件、RTL、ReactDOM 的测试运行环境证明使用同一根 React；重跑 runtime、Avatar、DataSet element/Fragment、observer 更新以及 P 的定向用例。不要求所有组件此时已兼容。 |
+| **C0b 根升级** | 合入准备好的 P 改动；根 dev React/DOM 与根 `react-is` 锁 **19.3.1**，`@types/react`、`@types/react-dom` **19.3.0**；React/DOM 保持消费者 peer，先限 `^19.3.1`。正式依赖写根。根安装 `@hello-pangea/dnd@18.0.1`，[拖拽统一入口](../components/drag-drop-context/index.tsx)改为从 `@hello-pangea/dnd` 导出，保留现有导出和导入路径。根清单移除 `react-beautiful-dnd`、`@types/react-beautiful-dnd` 和无引用的 `react-redux@7.2.0`（新 DnD 自带类型，使用 Redux 5 和 React Redux 9）。 | 从干净工作树执行根 `npm ci --strict-peer-deps`（含生命周期）；`npm ls react react-dom react-is mobx mobx-react mobx-react-lite --all`。React/DOM 各一个实例，嵌套 react-is 可不同。若失败在本步解决，不用 force/全树 overrides。 |
+| C0c 测试改用根实例 | 保留 `tests-react19/cases`，将 Jest 的 React/DOM 及 JSX/client 子入口统一映射到**根**，替代包也从根解析。移除独立工程 Jest、浏览器预览和 TypeScript 中将 `react-beautiful-dnd` 指向 `@hello-pangea/dnd` 的临时别名，并更新 runtime 断言，确认公开 `DragDropContext` 与内部 `Draggable`、`Droppable` 共用根安装的同一份 DnD 模块。启用 A3 迁好的普通/MobX 入口。 | 从组件、RTL、ReactDOM 的测试运行环境证明使用同一根 React；重跑 runtime、Avatar、DataSet element/Fragment、observer 更新以及 P 的定向用例。不要求所有组件此时已兼容。 |
 
 ## C｜此后直接改根源码与依赖；每行验完即可关闭
 
@@ -101,7 +101,7 @@ P 阶段使用测试工程的候选包时，**从正式源码导入它**，在 J
 | C4 文本提取 | `getReactNodeText` **已返回 Promise**；在提交完成后读 DOM，再卸载。保留已有值语义。 | await 字符串、0（现为 `''`）、非零数、复合节点、无 DOM；用 Tabs 或 TableStore 验一个真实调用且无节点残留。 |
 | C5 JSX 编译 | 根 TS 5.9.3 已足够；分别处理 gulp TSX 与 Babel vendored JSX、Jest 和 webpack externals，不能只改 TS。 | 每条编译链各取样例，检查 ES/CJS 的 JSX runtime 解析；更新并跑 `node tools/tests/webpack5.test.js`，不把 React 私有副本打包。 |
 | C6 类型 | 使用根 19 声明，逐族处理 `React.JSX`、useRef 初值、ref 返回值、unknown props；Picture 公开类型直接引用 `csstype` 时在发布声明补齐。19 类型声明支持 TS ≥5.6，根满足；站点 TS 4.9.5 单独处理。 | 每族记录 `npm run tsc -- --noEmit` 对应诊断归零；最后全量零错。独立消费者编译 Table/CodeArea/QRCode/Picture，不用 SWC 或 any 代替。 |
-| C7 自建与业务集成 | 分目录复验 B/P 需组合的真实路径；扫 vendored rc 和 Pro 的旧 Context、字符串 ref、`element.ref`、被移除 ReactDOM API。 | Board 虚拟行键盘/指针拖拽、Transfer、编辑器分别有浏览器证据；每个执行路径有用例，StrictMode 重挂载不重复监听；历史文本不当作可执行命中。 |
+| C7 自建与业务集成 | 分目录复验 B/P 需组合的真实路径；扫 vendored rc 和 Pro 的旧 Context、字符串 ref、`element.ref`、被移除 ReactDOM API。 | **Pro Table：**回调否决时顺序不变，改写时按返回结果排序；虚拟行自定义 clone 使用完整 `TableRow`，拖动前后及拖动中列宽、单元格均对齐。树节点合并或移回根后父子关系和顺序正确，原位释放或 Esc 取消不改变两者；覆盖 `childrenField` 嵌套输入和无业务 ID 的新根节点。<br>**PerformanceTable：**起拖占位、切换单表/跨表及改宽后布局稳定；默认单表有效落行时，顺序随拖拽清理同步更新，不回跳；有异步前置回调时须等其放行。覆盖拖动中虚拟源行滚出窗口后的落行与清理。<br>**Board 与列表：**用键盘和指针拖动 Board 虚拟行，验证跨列结果及工厂回调；无未分组聚合记录时也能首次拖入空列再拖回，业务分组值不得使用保留标识 `_empty`。验证 Upload、Tabs、Attachment 拖后顺序，Tabs 保存后顺序不变。<br>Board、Transfer、编辑器分别有浏览器证据；每个执行路径有用例，StrictMode 重挂载不重复监听；历史文本不当作可执行命中。 |
 
 ## D｜根已是 19；这里只有验收，没有第二次切换
 

@@ -7,21 +7,17 @@ title:
 
 ## zh-CN
 
-使用 react-beautiful-dnd 扩展多表之间的行拖拽能力。开启 rowDraggable 和 customDragDropContenxt 属性，同时使用 id 属性区分 PerformanceTable 拖拽标识.
-
-批量拖拽参考：https://github.com/atlassian/react-beautiful-dnd/blob/master/docs/patterns/multi-drag.md
+使用 `choerodon-ui` 导出的同一个 `DragDropContext` 包裹两个表格。为每个表格开启 `rowDraggable` 和 `customDragDropContenxt`，并设置不同的 `id` 以区分拖放区域。
 
 ## en-US
 
-Extend row dragging between multiple tables using react-beautiful-dnd.Enable the rowDraggable and customDragDropContenxt attributes, and use the code attribute to differentiate between PerformanceTable drags.
-
-multi-drag：https://github.com/atlassian/react-beautiful-dnd/blob/master/docs/patterns/multi-drag.md
+Wrap both tables in one `DragDropContext` from `choerodon-ui`. Enable `rowDraggable` and `customDragDropContenxt` on each table and give each a distinct `id` to identify its drop area.
 
 ````jsx
 import '../../../components-pro/performance-table/style/index.less';
 import fakeLargeData from '../../../site/theme/mock/performance-data/fakeLargeData.json';
 import { Button, PerformanceTable } from 'choerodon-ui/pro';
-import { DragDropContext } from 'react-beautiful-dnd';
+import { DragDropContext } from 'choerodon-ui';
 
 const { Column, HeaderCell, Cell } = PerformanceTable;
 
@@ -71,6 +67,9 @@ const Table = () => {
   ];
 
   const handleDragEnd = React.useCallback((result) => {
+    if (!result.destination) {
+      return;
+    }
     const { source: { index: sIndex, droppableId: sDroppableId }, destination: { index: dIndex, droppableId: dDroppableId } } = result;
     if (sDroppableId === dDroppableId) {
       let setData;

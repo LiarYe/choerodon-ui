@@ -7,11 +7,11 @@ title:
 
 ## zh-CN
 
-树形数据。
+在树模式下，将一行拖到另一个节点上可将它变为该节点的子节点。按 Esc 取消则保留原父节点和顺序。
 
 ## en-US
 
-Tree Data.
+In tree mode, drop a row onto another node to make it a child. Press Esc to keep the original parent and order.
 
 ```jsx
 import { DataSet, Table, Button, Icon } from 'choerodon-ui/pro';

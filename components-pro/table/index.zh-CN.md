@@ -70,7 +70,7 @@ subtitle: 表格
 | columnHideable | 可调整列显示, customizable 为 true 才起作用 | boolean | [globalConfig.tableColumnHideable](/components/configure#API) |
 | columnTitleEditable | 可编辑列标题, customizable 为 true 才起作用 | boolean | [globalConfig.tableColumnTitleEditable](/components/configure#API) |
 | columnDraggable | 列拖拽, customizable 为 true 才起作用 | boolean | [globalConfig.tableColumnDraggable](/components/configure#API) |
-| rowDraggable | 行拖拽，实现行的拖拽， 树形数据无法使用; multiDrag 支持多行拖拽选中记录(树形不支持多拖) | boolean \| 'multiDrag' | [globalConfig.tableRowDraggable](/components/configure#API) |
+| rowDraggable | 启用行拖拽。`multiDrag` 可一起拖动选中的记录，不适用于树形数据。 | boolean \| 'multiDrag' | [globalConfig.tableRowDraggable](/components/configure#API) |
 | multiDragSelectMode | 多行拖拽时，多选记录的方式: keyboard: ctrl + 点击; checkbox: 使用表格勾选框勾选 | 'keyboard' \| 'checkbox' | 'keyboard' |
 | heightChangeable | 高度设置, customizable 为 true 才起作用 | boolean | [globalConfig.tableHeightChangeable](/components/configure#API) |
 | pageSizeChangeable | 分页大小设置, customizable 为 true 才起作用 | boolean \| { autoQuery：boolean } | [globalConfig.tablePageSizeChangeable](/components/configure#API) |
@@ -91,7 +91,7 @@ subtitle: 表格
 | onDragEndBefore |完成拖拽后,切换位置之前的触发事件，可以通过 resultDrag.destination.droppableId === 'table' or ‘tableHeader’ 来判断是行拖拽还是列拖拽,返回false阻止拖拽换位置。树形拖拽可通过 recordIndexFromTo 获取到正确的记录索引: \[sourceRecordIndex, destinationRecordIndex\] | (dataSet:DataSet,columns:ColumnProps[],resultDrag: DropResult, provided: ResponderProvided, recordIndexFromTo: \[number?, number?\]) => false \| void \|resultDrag   | - |
 | dragDropContextProps | react-beautiful-dnd DragDropContextProps | [DragDropContextProps](https://github.com/atlassian/react-beautiful-dnd/blob/master/docs/api/drag-drop-context.md) |  |
 | columnsDragRender | 控制列的拖拽渲染，从这里可以实现对默认的拖拽的一些自定义的设置，需要参阅react-beautiful-dnd | 请查看DragRender[配置项](#DragRender)  |  |
-| rowDragRender | 控制列的拖拽渲染，从这里可以实现对默认的拖拽的一些自定义的设置，需要参阅react-beautiful-dnd | 请查看DragRender[配置项](#DragRender) |  |
+| rowDragRender | 自定义行拖拽行为和拖动预览。 | 请查看DragRender[配置项](#DragRender) |  |
 | keyboard | 开启关闭新增的快捷按钮事件 | boolean | [globalConfig.tableKeyboard](/components/configure#API) |
 | treeLoadData | 树形异步加载数据 | ({ record, dataSet }) => Promise | |
 | treeAsync | 树形异步加载，需要后端接口配合，对应的数据源会自动调用查询接口，接口参数中会带有 parentField 对应的参数名和 idField 对应的参数值，接口返回的数据会附加到已有的数据之中 | boolean |  |
@@ -121,7 +121,7 @@ subtitle: 表格
 | boxSizing | 样式高度影响的范围，默认 content， 如果指定为 wrapper, 样式的高度会包括表格前后内容的高度， 且该高度发生变化会自动调整表格高度  | 'content' \| 'wrapper' | 'content' |
 | fullColumnWidth | 所有列都设置列宽且没有超出表格宽度时最后一列宽度是否自动填满表格  | boolean | true |
 | clipboard | 配置 Table 是否可复制粘贴。参考[配置项](#clipboard)。Lov 字段可自定义批量查询 [lovQueryBatchAxiosConfig](/components-pro/data-set-cn/#Field-Props)  | Clipboard | { copy: false, paste: false } |
-| customDragDropContenxt | 是否开启自定义 DragDropContenxt, 一般用于自定义 react-beautiful-dnd 的 DragDropContenxt 实现多表拖拽   | boolean | false |
+| customDragDropContenxt | 跨表拖拽时，用 `choerodon-ui` 导出的同一个 `DragDropContext` 包裹两个表格；两表均开启 `rowDraggable` 和 `customDragDropContenxt`，并设置不同的 `id`。 | boolean | false |
 | rowNumberColumnProps | 行号列属性 |	ColumnProps \| ((defaultProps: ColumnProps) => ColumnProps) |	 |
 | tableFilterBarButtonIcon | Table 动态筛选条按钮是否展示icon。true 展示默认icon，false不展示，对象类型可以分别设置具体icon | boolean \| { saveIconType?: string \| boolean; saveAsIconType?: string \| boolean; resetIconType?: string \| boolean; } |  |
 | combineColumnFilter | 是否开启前端组合过滤  | boolean  | true |
@@ -298,7 +298,7 @@ subtitle: 表格
 | -------- | ------------------ | --------------------------- | -------- |
 | droppableProps | droppableProps 参考文档 | object |  |
 | draggableProps | DraggableProps 参考文档 | object |  |
-| renderClone | 拖拽起来的时候会在body下面新增加一个table 会在这个table注入元素 | `(DragTableRowProps \| DragTableHeaderCellProps) => ReactElement<any>` | |
+| renderClone | 自定义拖动时的预览。虚拟行的 `rowDragRender.renderClone` 可将收到的行属性传给 `Table.TableRow`，让预览保留原行的单元格和列布局。 | `(DragTableRowProps \| DragTableHeaderCellProps) => ReactElement<any>` | |
 | renderIcon | 可以自定义图标图标 | 当为row时候`（{record}）=> ReactElement<any>`   为column 时候 `（{column，dataSet, snapshot}）=> ReactElement<any>` |  |
 
 ### spin

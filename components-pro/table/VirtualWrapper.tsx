@@ -1,7 +1,7 @@
 import React, { CSSProperties, FunctionComponent, ReactNode, useContext, useEffect, useState } from 'react';
 import { action } from 'mobx';
 import { observer } from 'mobx-react-lite';
-import { Droppable, DroppableProvided, DroppableStateSnapshot } from 'react-beautiful-dnd';
+import { Droppable, DroppableProvided, DroppableStateSnapshot } from 'choerodon-ui/lib/drag-drop-context';
 import omit from 'lodash/omit';
 import { pxToRem } from 'choerodon-ui/lib/_util/UnitConvertor';
 import Spin from '../spin';
@@ -95,7 +95,7 @@ const VirtualWrapper: FunctionComponent<VirtualWrapperProps> = function VirtualW
       isCombineEnabled={isTree}
       mode="virtual"
       renderClone={renderClone}
-      getContainerForClone={() => instance(tableStore.node.getClassName(), prefixCls).tbody as React.ReactElement<HTMLElement>}
+      getContainerForClone={() => instance(tableStore.node.getClassName(), prefixCls).tbody as ReturnType<NonNullable<React.ComponentProps<typeof Droppable>['getContainerForClone']>>}
       {...(rowDragRender && rowDragRender.droppableProps)}
     >
       {getBody}

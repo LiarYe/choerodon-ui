@@ -1,5 +1,5 @@
 import React, { FunctionComponent, CSSProperties, useMemo, useEffect, useRef } from 'react';
-import { DraggableProvided } from 'react-beautiful-dnd';
+import { DraggableProvided } from 'choerodon-ui/lib/drag-drop-context';
 import ResizeObserver from 'resize-observer-polyfill';
 import { observer } from 'mobx-react-lite'
 import noop from 'lodash/noop';

@@ -29,9 +29,10 @@ import {
   Droppable,
   DroppableProps,
   DroppableProvided,
+  DroppableStateSnapshot,
   DropResult,
   ResponderProvided,
-} from 'react-beautiful-dnd';
+} from 'choerodon-ui/lib/drag-drop-context';
 import isPromise from 'is-promise';
 
 import ConfigContext, { ConfigContextValue } from 'choerodon-ui/lib/config-provider/ConfigContext';
@@ -50,7 +51,7 @@ import CellGroup from './CellGroup';
 import Scrollbar from './Scrollbar';
 import SelectionBox from './SelectionBox';
 import SelectionCheckboxAll from './SelectionCheckboxAll';
-import TableContext from './TableContext';
+import TableContext, { LiftedRowContext } from './TableContext';
 import { CELL_PADDING_HEIGHT, SCROLLBAR_LARGE_WIDTH, SCROLLBAR_MIN_WIDTH, SCROLLBAR_WIDTH } from './constants';
 import { TableQueryBarType } from './enum';
 import {
@@ -311,7 +312,7 @@ export interface TableProps extends StandardProps {
   onDragEnd?: (result: DropResult, provided: ResponderProvided, data: object) => void;
   onDragEndBefore?: (result: DropResult, provided: ResponderProvided) => boolean;
   /**
-   * 是否自定义 DragDropContenxt，配合 rowDraggable 属性一起使用。开启后，使用 react-beautiful-dnd 的 DragDropContenxt 可以实现表格与表格之间的拖拽
+   * 是否自定义 DragDropContenxt，配合 rowDraggable 属性一起使用。开启后，使用 choerodon-ui 导出的 DragDropContext 可以实现表格与表格之间的拖拽
    */
   customDragDropContenxt?: boolean;
 }
@@ -581,6 +582,31 @@ export default class PerformanceTable extends React.Component<TableProps, TableS
   _cacheRenderCols: any = [];
   _cacheChildrenSize = 0;
   _visibleRows: any = [];
+
+  draggableRows = new Map<string, HTMLElement>();
+
+  liftedRow?: { id: string; index: number; height: number };
+
+  getLiftedRow(id: string | null) {
+    if (id == null) {
+      this.liftedRow = undefined;
+    } else if (this.liftedRow?.id !== id) {
+      // The source is still mounted on lift; retain its margin box even if a
+      // clone replaces it or the virtual window scrolls past it afterwards.
+      const row = this.draggableRows.get(id);
+      if (row) {
+        const { marginTop, marginBottom } = getComputedStyle(row);
+        this.liftedRow = {
+          id,
+          index: Number(row.dataset.rowindex),
+          height: row.getBoundingClientRect().height + parseFloat(marginTop) + parseFloat(marginBottom),
+        };
+      } else {
+        this.liftedRow = undefined;
+      }
+    }
+    return this.liftedRow;
+  }
   _lastRowIndex: string | number;
 
   tableStore: TableStore = new TableStore(this);
@@ -2192,12 +2218,8 @@ export default class PerformanceTable extends React.Component<TableProps, TableS
     if (resultBefore && resultBefore.destination) {
       const resData = [...data];
       arrayMove(resData, resultBefore.source.index, resultBefore.destination.index);
-      // 使setState变成同步处理
-      setTimeout(() => {
-        this.setState({
-          data: resData,
-        });
-      });
+      // Commit the new order with DnD's drop cleanup, not in a later timer.
+      this.setState({ data: resData });
       if (onDragEnd) {
         onDragEnd(resultBefore, provided, resData);
       }
@@ -2444,7 +2466,7 @@ export default class PerformanceTable extends React.Component<TableProps, TableS
         this._cacheCells = null;
       }
 
-      if (nextWidth !== 0) {
+      if (width !== nextWidth && nextWidth !== 0) {
         this.setState({ width: nextWidth });
       }
     }
@@ -2456,7 +2478,9 @@ export default class PerformanceTable extends React.Component<TableProps, TableS
     const row = table.querySelector(`.${this.addPrefix('row')}:not(.virtualized)`);
     const contentWidth = row ? getWidth(row) : 0;
 
-    this.setState({ contentWidth });
+    if (this.state.contentWidth !== contentWidth) {
+      this.setState({ contentWidth });
+    }
     // 这里 -SCROLLBAR_WIDTH 是为了让滚动条不挡住内容部分
     this.minScrollX = -(contentWidth - this.state.width) - this.getScrollBarYWidth;
     /**
@@ -2613,13 +2637,23 @@ export default class PerformanceTable extends React.Component<TableProps, TableS
     }
   };
 
-  bindTableRowsRef = (index: number | string, rowData: any, provided?: DraggableProvided) => (ref: HTMLElement) => {
+  bindTableRowsRef = (index: number | string, rowData: any) => (ref: HTMLElement | null) => {
     if (ref) {
       this.tableRows[index] = [ref, rowData];
-      if (provided) {
-        provided.innerRef(ref);
-      }
     }
+  };
+
+  bindDraggableRowRef = (index: number | string, rowData: any, id: string, provided: DraggableProvided) => {
+    const bindRow = this.bindTableRowsRef(index, rowData);
+    return (ref: HTMLElement | null) => {
+      bindRow(ref);
+      if (ref) {
+        this.draggableRows.set(id, ref);
+      } else {
+        this.draggableRows.delete(id);
+      }
+      provided.innerRef(ref);
+    };
   };
 
   bindRowClick = (rowIndex: number | string, index: number | string, rowData: object) => {
@@ -2679,6 +2713,7 @@ export default class PerformanceTable extends React.Component<TableProps, TableS
     const { renderTreeToggle, rowKey, wordWrap, isTree, components } = this.props;
     const hasChildren = isTree && rowData.children && Array.isArray(rowData.children);
     const nextRowKey = typeof rowData[rowKey!] !== 'undefined' ? rowData[rowKey!] : props.key;
+
 
     const rowProps: TableRowProps = {
       ...props,
@@ -2933,7 +2968,7 @@ export default class PerformanceTable extends React.Component<TableProps, TableS
                 isHeaderRow={isHeaderRow}
                 provided={provided}
                 snapshot={snapshot}
-                rowRef={this.bindTableRowsRef(props.key!, rowData, provided)}
+                rowRef={this.bindDraggableRowRef(props.key!, rowData, String(rowKey), provided)}
               >
                 {fixedLeftCellGroupWidth ? (
                   <CellGroup
@@ -3036,7 +3071,7 @@ export default class PerformanceTable extends React.Component<TableProps, TableS
               provided={provided}
               snapshot={snapshot}
               isHeaderRow={isHeaderRow}
-              rowRef={this.bindTableRowsRef(props.key!, rowData, provided)}
+              rowRef={this.bindDraggableRowRef(props.key!, rowData, String(rowKey), provided)}
             // {...(rowDragRender && rowDragRender.draggableProps)} todo
             >
               <CellGroup
@@ -3160,7 +3195,8 @@ export default class PerformanceTable extends React.Component<TableProps, TableS
   }
 
   renderDraggingRow = (rowData, provided, snapshot) => {
-    const {rowKey, wordWrap } = this.props;
+    const { rowKey, wordWrap } = this.props;
+    const height = provided.draggableProps.style?.height ?? this.getRowHeight(rowData);
     const { bodyCells } = this.getCellDescriptor();
     const cells = [];
     for (let i = 0; i < bodyCells.length; i++) {
@@ -3170,7 +3206,7 @@ export default class PerformanceTable extends React.Component<TableProps, TableS
         React.cloneElement<any>(cell, {
           rowData,
           wordWrap,
-          height: this.getRowHeight(),
+          height,
           rowIndex: -1,
           depth: -1,
           rowKey,
@@ -3178,7 +3214,7 @@ export default class PerformanceTable extends React.Component<TableProps, TableS
       );
     }
     const rowProps = {
-      height: this.getRowHeight(),
+      height,
       rowIndex: -1,
       provided,
       snapshot,
@@ -3547,14 +3583,30 @@ export default class PerformanceTable extends React.Component<TableProps, TableS
     if (rowDraggable) {
       const { customDragDropContenxt } = this.props;
       const { width } = this.state;
+      const renderDroppable = (provided: DroppableProvided, snapshot: DroppableStateSnapshot) => (
+        <div
+          style={customDragDropContenxt ? { width } : undefined}
+          ref={provided.innerRef}
+          {...provided.droppableProps}
+        >
+          <LiftedRowContext.Provider value={this.getLiftedRow(snapshot.draggingFromThisWith)}>
+            {body}
+          </LiftedRowContext.Provider>
+          {provided.placeholder}
+        </div>
+      );
       if (customDragDropContenxt) {
         return (
           <Droppable
             droppableId={this.tableStore.node.props.id || 'table'}
             key="table"
             renderClone={(provided: DraggableProvided, snapshot: DraggableStateSnapshot, rubric: DraggableRubric) => {
-              const { draggableId } = rubric;
-              const rowData = data.find((item: any) => String(item[rowKey!]) === draggableId);
+              const { draggableId, source: { index } } = rubric;
+              const indexedRow = data[index];
+              const rowData = indexedRow && String(this.getRecordKey(indexedRow, index)) === draggableId
+                ? indexedRow
+                : data.find((record, i) => String(this.getRecordKey(record, i)) === draggableId);
+              if (!rowData) return null;
               const draggingRow = this.renderDraggingRow(rowData, provided, snapshot);
               return (
                 <div
@@ -3568,15 +3620,7 @@ export default class PerformanceTable extends React.Component<TableProps, TableS
               );
             }}
           >
-            {(droppableProvided: DroppableProvided) => (
-              <div
-                ref={droppableProvided.innerRef}
-                {...droppableProvided.droppableProps}
-              >
-                {body}
-                {droppableProvided.placeholder}
-              </div>
-            )}
+            {renderDroppable}
           </Droppable>
         );
       }
@@ -3586,15 +3630,7 @@ export default class PerformanceTable extends React.Component<TableProps, TableS
             droppableId="table"
             key="table"
           >
-            {(droppableProvided: DroppableProvided) => (
-              <div
-                ref={droppableProvided.innerRef}
-                {...droppableProvided.droppableProps}
-              >
-                {body}
-                {droppableProvided.placeholder}
-              </div>
-            )}
+            {renderDroppable}
           </Droppable>
         </DragDropContext>
       );

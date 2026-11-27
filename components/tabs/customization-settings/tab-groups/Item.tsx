@@ -1,9 +1,9 @@
 import React, { FunctionComponent, ReactNode, useCallback, useContext, useEffect, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import classNames from 'classnames';
-import { DraggableProvided, DraggableStateSnapshot } from 'react-beautiful-dnd';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
 import { $l } from 'choerodon-ui/pro/lib/locale-context';
+import { DraggableProvided, DraggableStateSnapshot } from '../../../drag-drop-context';
 import Icon from '../../../icon';
 import TabsContext from '../../TabsContext';
 import ItemTitle from './ItemTitle';

@@ -7,11 +7,11 @@ title:
 
 ## zh-CN
 
-基本使用。
+拖动一行到新位置，松开后表格直接显示新顺序。`onDragEnd` 的第三个参数是排序后的数据。
 
 ## en-US
 
-Basic usage example.
+Drag a row to a new position and release it. The table shows the new order immediately and passes the reordered data as the third argument to `onDragEnd`.
 
 ````jsx
 import '../../../components-pro/performance-table/style/index.less';
@@ -99,7 +99,7 @@ const Table = () => {
         columns={columns}
         height={400}
         data={fakeLargeData.slice(0, 50)}
-        onDragEnd={(props) => console.log('onDragEnd', props)}
+        onDragEnd={(result, _provided, data) => console.log('onDragEnd', result, data)}
         ref={tableRef}
         onRowClick={(data) => {
           console.log(data);

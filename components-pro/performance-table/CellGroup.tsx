@@ -1,7 +1,7 @@
 // @ts-nocheck
 import * as React from 'react';
 import classNames from 'classnames';
-import { DraggableProvided, DraggableStateSnapshot } from 'react-beautiful-dnd';
+import { DraggableProvided, DraggableStateSnapshot } from 'choerodon-ui/lib/drag-drop-context';
 import { defaultClassPrefix, getUnhandledProps, prefix } from './utils';
 import TableContext from './TableContext';
 

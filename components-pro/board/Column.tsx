@@ -9,7 +9,7 @@ import {
   DraggableRubric,
   Draggable,
   Droppable,
-} from 'react-beautiful-dnd';
+} from 'choerodon-ui/lib/drag-drop-context';
 import classnames from 'classnames';
 import QuoteItem from './QuoteItem';
 

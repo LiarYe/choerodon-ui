@@ -9,8 +9,7 @@ import {
   DraggableRubric,
   Draggable,
   Droppable,
-  DraggableProps,
-} from 'react-beautiful-dnd';
+} from 'choerodon-ui/lib/drag-drop-context';
 import isFunction from 'lodash/isFunction';
 // import noop from 'lodash/noop';
 import { Col } from 'choerodon-ui/lib/grid';
@@ -68,7 +67,7 @@ type RowProps = {
 
 // Using a higher order function so that we can look up the quotes data to retrieve
 // our quote from within the rowRender function
-const getRowRender = (quotes: any, columnId, prefixCls: string, viewProps, listDragging, command, renderCommand, commandsLimit, dataSet, kanbanDS, displayFields, isDragDropDisabled, draggableProps?: DraggableProps) => ({ index, style }: RowProps) => {
+const getRowRender = (quotes: any, columnId, prefixCls: string, viewProps, listDragging, command, renderCommand, commandsLimit, dataSet, kanbanDS, displayFields, isDragDropDisabled, draggableProps?: KanbanProps['draggableProps']) => ({ index, style }: RowProps) => {
   const quote: any = quotes.get(index);
   const isLast = quotes && quotes.length === (index + 1);
 
@@ -188,10 +187,10 @@ const KanbanColumn: FunctionComponent<KanbanColumnProps> = function KanbanColumn
 
   const restDroppableProps = useCallback(() => {
     if (isFunction(droppableProps)) {
-      return droppableProps({ columnDS, dataSet });
+      return droppableProps({ columnDS, dataSet: dataSet! });
     }
     return droppableProps;
-  }, []);
+  }, [droppableProps, columnDS, dataSet]);
 
   const cls = classnames(
     `${prefixCls}-column-container`,

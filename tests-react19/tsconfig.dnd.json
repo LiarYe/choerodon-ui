@@ -1,0 +1,4 @@
+{
+  "extends": "./tsconfig.json",
+  "include": ["cases/runtime/dnd-resolution.test.ts"]
+}

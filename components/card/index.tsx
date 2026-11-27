@@ -8,6 +8,7 @@ import Meta from './Meta';
 import Tabs, { TabsProps } from '../tabs';
 import { throttleByAnimationFrameDecorator } from '../_util/throttleByAnimationFrame';
 import warning from '../_util/warning';
+import ReactResizeObserver from '../_util/resizeObserver';
 import addEventListener from '../_util/addEventListener';
 import ConfigContext, { ConfigContextValue } from '../config-provider/ConfigContext';
 
@@ -49,6 +50,7 @@ export interface CardProps extends Omit<React.HTMLAttributes<HTMLDivElement>, 't
   selected?: boolean;
   cornerPlacement?: CornerPlacement;
   onSelectChange?: (selected: boolean) => void;
+  onHeightChange?: (width: number, height: number, target: Element | null) => void;
 }
 
 export interface CardState {
@@ -196,6 +198,7 @@ export default class Card extends Component<CardProps, CardState> {
       selected,
       cornerPlacement,
       onSelectChange = noop,
+      onHeightChange,
       ...others
     } = this.props;
     const { widerPadding, size } = this.state;
@@ -288,7 +291,7 @@ export default class Card extends Component<CardProps, CardState> {
         <ul className={`${prefixCls}-actions`}>{this.getAction(actions)}</ul>
       ) : null;
     const divProps = omit(others, ['onTabChange', 'noHovering', 'hoverable']);
-    return (
+    const root = (
       <div {...divProps} className={classString} ref={this.saveRef}>
         {head}
         {coverDom}
@@ -296,5 +299,10 @@ export default class Card extends Component<CardProps, CardState> {
         {actionDom}
       </div>
     );
+    return onHeightChange ? (
+      <ReactResizeObserver resizeProp="height" onResize={onHeightChange} immediately>
+        {root}
+      </ReactResizeObserver>
+    ) : root;
   }
 }

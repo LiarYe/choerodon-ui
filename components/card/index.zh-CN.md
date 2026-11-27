@@ -39,6 +39,7 @@ cols: 1
 | onSelectChange | 选中事件的回调，点击卡片内容区域触发 | (selected) => void | - |
 | onTabChange | 页签切换的回调 | (key) => void | - |
 | onHeadClick | 卡片头部的点击事件 | React.MouseEventHandler<any> | - |
+| onHeightChange | 首次测量卡片根元素及其高度变化时触发，传入宽度、高度和根元素。 | `(width: number, height: number, target: Element \| null) => void` | - |
 
 ### Card.Grid
 

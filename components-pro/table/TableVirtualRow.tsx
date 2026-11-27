@@ -1,6 +1,6 @@
 import React, { FunctionComponent, ReactNode, useContext, useEffect, useRef } from 'react';
 import { observer } from 'mobx-react-lite';
-import { DraggableProvided, DraggableStateSnapshot } from 'react-beautiful-dnd';
+import { DraggableProvided, DraggableStateSnapshot } from 'choerodon-ui/lib/drag-drop-context';
 import { pxToRem } from 'choerodon-ui/lib/_util/UnitConvertor';
 import useVirtualInView from './useVirtualInView';
 import Record from '../data-set/Record';

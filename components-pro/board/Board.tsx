@@ -8,7 +8,7 @@ import React, {
   useState,
 } from 'react';
 import noop from 'lodash/noop';
-import { DraggableProps, DroppableProps, DragDropContextProps } from 'react-beautiful-dnd';
+import { DraggableProps, DroppableProps, DragDropContextProps } from 'choerodon-ui/lib/drag-drop-context';
 import ConfigContext from 'choerodon-ui/lib/config-provider/ConfigContext';
 import { CardProps } from 'choerodon-ui/lib/card';
 import BoardWithContext, { normalizeColumns } from './BoardWithContext';
@@ -32,9 +32,9 @@ export interface KanbanProps {
   isDragDropDisabled: boolean;
   allDsProps: DataSetProps;
   columnDsProps: DataSetProps;
-  droppableProps: DroppableProps;
-  draggableProps: DraggableProps;
-  dragDropContext: DragDropContextProps;
+  droppableProps: Partial<DroppableProps> | ((args: { columnDS: DataSet; dataSet: DataSet }) => Partial<DroppableProps>);
+  draggableProps: Partial<DraggableProps> | ((args: { columnDS: DataSet; dataSet: DataSet }) => Partial<DraggableProps>);
+  dragDropContext: Omit<DragDropContextProps, 'children'> | ((args: { kanbanDS: DataSet; dataSet: DataSet }) => Omit<DragDropContextProps, 'children'>);
   cardWidth?: 4 | 6 | 8 | 12;
 }
 

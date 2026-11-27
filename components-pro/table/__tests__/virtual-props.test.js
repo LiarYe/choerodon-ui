@@ -1,6 +1,6 @@
 import React from 'react';
 import { mount } from 'enzyme';
-import { Droppable } from 'react-beautiful-dnd';
+import { Droppable } from 'choerodon-ui/lib/drag-drop-context';
 import { autorun } from 'mobx';
 import { act } from 'react-dom/test-utils';
 import Table from '../Table';

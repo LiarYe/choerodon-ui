@@ -1,13 +1,9 @@
 import React, { Children, cloneElement, PureComponent, ReactElement, ReactNode, Ref } from 'react';
 import * as ReactDOM from 'react-dom';
 import acceptsHostRef from '../_util/acceptsHostRef';
-import useMergedRef from '../_util/useMergedRef';
+import useMergedRef, { elementRef } from '../_util/useMergedRef';
 
-export function elementRef(child: ReactElement) {
-  // React 16 stores ref on the element; React 19 stores it in props.
-  const descriptor = Object.getOwnPropertyDescriptor(child.props, 'ref');
-  return descriptor && 'value' in descriptor ? descriptor.value : Object.getOwnPropertyDescriptor(child, 'ref')?.value;
-}
+export { elementRef };
 
 type Host = Element | Text;
 export type RegisterHost = (read: () => Host | null, mounted: boolean) => void;

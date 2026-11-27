@@ -1,8 +1,8 @@
 import React, { FunctionComponent, ReactElement, ReactNode, useContext } from 'react';
 import { observer } from 'mobx-react-lite';
-import { Draggable, DraggableProps, DraggableProvided, DraggableStateSnapshot, Droppable, DroppableProvided } from 'react-beautiful-dnd';
 import sortBy from 'lodash/sortBy';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
+import { Draggable, DraggableProps, DraggableProvided, DraggableStateSnapshot, Droppable, DroppableProvided } from '../../../drag-drop-context';
 import TabsContext from '../../TabsContext';
 import Item from './Item';
 

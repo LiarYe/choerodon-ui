@@ -7,20 +7,16 @@ title:
 
 ## zh-CN
 
-使用 react-beautiful-dnd 扩展多表之间的行拖拽能力。开启 rowDraggable 和 customDragDropContenxt 属性，同时使用 id 属性区分 Table 拖拽标识.
-
-批量拖拽参考：https://github.com/atlassian/react-beautiful-dnd/blob/master/docs/patterns/multi-drag.md
+使用 `choerodon-ui` 导出的同一个 `DragDropContext` 包裹两个表格。为每个表格开启 `rowDraggable` 和 `customDragDropContenxt`，并设置不同的 `id` 以区分拖放区域。
 
 ## en-US
 
-Extend row dragging between multiple tables using react-beautiful-dnd.Enable the rowDraggable and customDragDropContenxt attributes, and use the code attribute to differentiate between table drags.
-
-multi-drag：https://github.com/atlassian/react-beautiful-dnd/blob/master/docs/patterns/multi-drag.md
+Wrap both tables in one `DragDropContext` from `choerodon-ui`. Enable `rowDraggable` and `customDragDropContenxt` on each table and give each a distinct `id` to identify its drop area.
 
 ```jsx
 import React from 'react';
 import { DataSet, Table } from 'choerodon-ui/pro';
-import { DragDropContext } from 'react-beautiful-dnd'
+import { DragDropContext } from 'choerodon-ui';
 
 const {Column} = Table;
 

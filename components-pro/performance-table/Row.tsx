@@ -1,9 +1,9 @@
 // @ts-nocheck
 import * as React from 'react';
 import classNames from 'classnames';
-import { DraggableProvided, DraggableStateSnapshot } from 'react-beautiful-dnd';
+import { DraggableProvided, DraggableStateSnapshot } from 'choerodon-ui/lib/drag-drop-context';
 import { defaultClassPrefix, getUnhandledProps, prefix } from './utils';
-import TableContext from './TableContext';
+import TableContext, { LiftedRowContext } from './TableContext';
 import { StandardProps } from './common';
 
 export interface RowProps extends StandardProps {
@@ -35,6 +35,8 @@ const propTypeKeys = [
 ];
 
 class Row extends React.PureComponent<RowProps> {
+  static contextType = LiftedRowContext;
+
   static defaultProps = {
     classPrefix: defaultClassPrefix('performance-table-row'),
     height: 46,
@@ -79,39 +81,27 @@ class Row extends React.PureComponent<RowProps> {
     return (
       <TableContext.Consumer>
         {({ translateDOMPositionXY }) => {
-          if (top !== undefined && !rowDraggable) {
+          const providedProps = {};
+          if (rowDraggable && provided) {
+            const { isDragging } = snapshot;
+            const { transform, transition } = provided.draggableProps.style;
+            Object.assign(providedProps, provided.draggableProps, provided.dragHandleProps);
+            // DnD assumes rows below the source have already moved up in normal flow.
+            // Remove that slot from their absolute layout before applying DnD's transform.
+            const lifted = this.context;
+            const afterSource = lifted && rest['data-rowindex'] > lifted.index;
+            styles = {
+              ...styles,
+              top: afterSource ? top - lifted.height : top,
+              cursor: 'move',
+              transform,
+              transition,
+              zIndex: isDragging ? 999 : styles.zIndex,
+            };
+          } else if (top !== undefined && !rowDraggable) {
             styles.top = top;
           } else if (translateDOMPositionXY) {
             translateDOMPositionXY(styles, 0, top);
-          }
-          const providedProps = {};
-          let transform = styles.transform;
-          if (rowDraggable && provided) {
-            let regex = new RegExp('translate\\((.*?)px, (.*?)px\\)');
-            let regex3d = new RegExp('translate3d\\((.*?)px,(.*?)px,(.*?)\\)');
-
-            // the transform property of parent style gotten through reference and passed in as a prop
-            let parentValues = regex3d.exec(styles.transform || '');
-            let childValues = regex.exec(provided.draggableProps.style.transform || '');
-
-            // if both the parent (the nested list) and the child (item beeing dragged) has transform values, recalculate the child items transform to account for position fixed not working
-            if (childValues != null && parentValues != null) {
-              let x = (parseFloat(childValues[1], 10));
-              let y = (parseFloat(childValues[2], 10));
-              let p_x = (parseFloat(parentValues[1], 10));
-              let p_y = (parseFloat(parentValues[2], 10));
-              let p_z = (parseFloat(parentValues[3], 10));
-              transform = `translate3d(${x + p_x}px, ${y + p_y}px, ${p_z}px)`;
-            }
-            Object.assign(providedProps, provided.draggableProps, provided.dragHandleProps);
-            styles = {
-              ...styles,
-              top: 'auto !important',
-              left: 'auto !important',
-              cursor: 'move',
-              transform,
-              zIndex: snapshot.isDragging ? 999 : styles.zIndex,
-            };
           }
           return <div {...providedProps} role="row" {...unhandledProps} ref={rowRef} className={classes} style={styles}>
             {children}

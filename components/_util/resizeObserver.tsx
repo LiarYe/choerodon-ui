@@ -1,105 +1,66 @@
-import { PureComponent, ReactNode } from 'react';
-import { findDOMNode } from 'react-dom';
+import React, { cloneElement, isValidElement, ReactNode, Ref, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import ResizeObserver from 'resize-observer-polyfill';
-
-type DomElement = Element | null;
+import acceptsHostRef from './acceptsHostRef';
+import useMergedRef, { elementRef } from './useMergedRef';
 
 interface ResizeObserverProps {
   children?: ReactNode;
+  /** Resolve the DOM node after commit for children that do not forward a host ref. */
+  getTarget?: () => Element | null | undefined;
   disabled?: boolean;
-  onResize?: (width: number, height: number, target: DomElement) => void;
+  onResize?: (width: number, height: number, target: Element | null) => void;
   resizeProp?: 'width' | 'height' | 'both';
   immediately?: boolean;
   boxSize?: 'borderBox' | 'contentBox';
 }
 
-class ReactResizeObserver extends PureComponent<ResizeObserverProps> {
-  static defaultProps = {
-    resizeProp: 'both',
-    boxSize: 'borderBox',
-  };
+const useLayout = typeof window === 'undefined' ? useEffect : useLayoutEffect;
 
-  resizeObserver: ResizeObserver | null = null;
+export default function ReactResizeObserver(props: ResizeObserverProps) {
+  const { children, getTarget, disabled, immediately, onResize, resizeProp = 'both', boxSize = 'borderBox' } = props;
+  const [node, setNode] = useState<Element | null>(null);
+  const child = !getTarget && isValidElement<{ ref?: Ref<Element> }>(children) && acceptsHostRef(children.type) ? children : null;
+  const original = child && elementRef(child);
+  const ref = useMergedRef<Element>(setNode, original);
+  const latest = useRef({ onResize, resizeProp, boxSize });
+  const active = useRef<{ target: Element; observer: ResizeObserver }>();
 
-  width = 0;
-
-  height = 0;
-
-  componentDidMount() {
-    this.onComponentUpdated();
-  }
-
-  componentDidUpdate() {
-    this.onComponentUpdated();
-  }
-
-  componentWillUnmount() {
-    this.destroyObserver();
-  }
-
-  onComponentUpdated() {
-    const { disabled } = this.props;
-    const element = findDOMNode(this) as HTMLElement | null;
-    if (!this.resizeObserver && !disabled && element) {
-      // Add resize observer
-      this.resizeObserver = new ResizeObserver(this.onResize);
-      this.resizeObserver.observe(element);
-      const { onResize, immediately } = this.props;
-      if (immediately && onResize) {
-        onResize(element.offsetWidth, element.offsetHeight, element);
-      }
-    } else if (disabled) {
-      // Remove resize observer
-      this.destroyObserver();
+  useLayout(() => {
+    latest.current = { onResize, resizeProp, boxSize };
+    const target = !disabled && (getTarget ? getTarget() : node);
+    if (active.current && active.current.target !== target) {
+      active.current.observer.disconnect();
+      active.current = undefined;
     }
-  }
-
-  onResize: ResizeObserverCallback = (entries: ResizeObserverEntry[]) => {
-    const { onResize, resizeProp, boxSize } = this.props;
-    const [entry] = entries;
-    const {
-      target,
-      contentRect,
-    } = entry;
-    const { borderBoxSize } = entry as any;
-    const borderBox = borderBoxSize && borderBoxSize[0];
-    const isBorderBox = boxSize === 'borderBox';
-    const { width, height } = (() => {
-      if (isBorderBox) {
-        if (borderBox) {
-          return { width: borderBox.inlineSize, height: borderBox.blockSize };
+    if (!active.current && target && target.nodeType === 1) {
+      let width = 0;
+      let height = 0;
+      const observer = new ResizeObserver(([entry]) => {
+        if (active.current?.observer !== observer || entry?.target !== target) return;
+        const { onResize: notify, resizeProp: dimension, boxSize: box } = latest.current;
+        const border = entry.borderBoxSize?.[0];
+        const rect = box === 'contentBox' ? entry.contentRect : border || target.getBoundingClientRect();
+        const w = Math.round('inlineSize' in rect ? rect.inlineSize : rect.width);
+        const h = Math.round('blockSize' in rect ? rect.blockSize : rect.height);
+        if ((dimension !== 'height' && width !== w) || (dimension !== 'width' && height !== h)) {
+          width = w;
+          height = h;
+          notify?.(w, h, target);
         }
-        return target.getBoundingClientRect();
-      }
-      return contentRect;
-    })();
-    const fixedWidth = Math.round(width);
-    const fixedHeight = Math.round(height);
-
-    if (
-      (this.width !== fixedWidth && ['width', 'both'].includes(resizeProp!)) ||
-      (this.height !== fixedHeight && ['height', 'both'].includes(resizeProp!))
-    ) {
-      this.width = fixedWidth;
-      this.height = fixedHeight;
-
-      if (onResize) {
-        onResize(fixedWidth, fixedHeight, target);
+      });
+      active.current = { target, observer };
+      observer.observe(target);
+      if (immediately && onResize) {
+        const element = target as HTMLElement;
+        onResize(element.offsetWidth, element.offsetHeight, target);
       }
     }
-  };
+  });
 
-  destroyObserver() {
-    if (this.resizeObserver) {
-      this.resizeObserver.disconnect();
-      this.resizeObserver = null;
-    }
-  }
+  useLayout(() => () => {
+    active.current?.observer.disconnect();
+    active.current = undefined;
+  }, []);
 
-  render() {
-    const { children = null } = this.props;
-    return children;
-  }
+  return child && typeof original !== 'string' ? cloneElement(child, { ref }) : <>{children}</>;
 }
-
-export default ReactResizeObserver;

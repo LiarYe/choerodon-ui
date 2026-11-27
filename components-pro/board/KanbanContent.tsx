@@ -1,7 +1,7 @@
 import React, { isValidElement, CSSProperties, FunctionComponent, ReactElement, ReactNode, useCallback, useContext, useEffect, useState, cloneElement, useMemo, JSXElementConstructor, MouseEventHandler, useRef } from 'react';
 import classnames from 'classnames';
 import { observer } from 'mobx-react-lite';
-import { DragDropContext } from 'react-beautiful-dnd';
+import { DragDropContext } from 'choerodon-ui/lib/drag-drop-context';
 import isArrayLike from 'choerodon-ui/dataset/mobx-helper/isArrayLike';
 import isString from 'lodash/isString';
 import noop from 'lodash/noop';
@@ -482,13 +482,8 @@ const KanbanContent: FunctionComponent<KanbanContentProps> = function KanbanCont
     return result;
   }, []);
 
-  const restDragDropContext = useCallback(() => {
-    const { dragDropContext } = kanbanProps;
-    if (isFunction(dragDropContext)) {
-      return dragDropContext({ kanbanDS, dataSet })
-    }
-    return dragDropContext;
-  }, [kanbanDS, dataSet]);
+  const { dragDropContext } = kanbanProps;
+  const restDragDropContext = isFunction(dragDropContext) ? dragDropContext({ kanbanDS, dataSet }) : dragDropContext;
 
   return (
     <div style={{ height: '100%' }}>
@@ -501,7 +496,7 @@ const KanbanContent: FunctionComponent<KanbanContentProps> = function KanbanCont
           buttons={getCustomizationIcon()}
         />
       ) : getCustomizationIcon()}
-      <DragDropContext {...restDragDropContext()}>
+      <DragDropContext {...restDragDropContext}>
         <Row gutter={16} className={cls}>
           {getBoardColumns()}
         </Row>

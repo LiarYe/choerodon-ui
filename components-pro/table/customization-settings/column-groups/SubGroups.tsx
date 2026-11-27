@@ -1,7 +1,7 @@
 import React, { cloneElement, FunctionComponent, ReactElement, ReactNode, useContext } from 'react';
 import { observer } from 'mobx-react-lite';
 import sortBy from 'lodash/sortBy';
-import { Draggable, DraggableProps, DraggableProvided, DraggableStateSnapshot, DropResult, ResponderProvided } from 'react-beautiful-dnd';
+import { Draggable, DraggableProps, DraggableProvided, DraggableStateSnapshot, DropResult, ResponderProvided } from 'choerodon-ui/lib/drag-drop-context';
 import TreeNode, { TreeNodeProps } from '../tree/TreeNode';
 import SubGroup, { SubGroupProps } from './SubGroup';
 import TableContext from '../../TableContext';

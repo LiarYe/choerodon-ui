@@ -1,6 +1,12 @@
-import { MutableRefObject, Ref, useMemo, version } from 'react';
+import { MutableRefObject, ReactElement, Ref, useMemo, version } from 'react';
 
 const supportsRefCleanup = parseInt(version, 10) >= 19;
+
+export function elementRef(child: ReactElement) {
+  // Avoid invoking the React 16 props.ref or React 19 element.ref warning getters.
+  const descriptor = Object.getOwnPropertyDescriptor(child.props, 'ref');
+  return descriptor && 'value' in descriptor ? descriptor.value : Object.getOwnPropertyDescriptor(child, 'ref')?.value;
+}
 
 function attach<T>(ref: NonNullable<Ref<T>>, node: T, honorCleanup: boolean): () => void {
   if (typeof ref === 'function') {

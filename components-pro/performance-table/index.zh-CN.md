@@ -70,8 +70,8 @@ cols: 1
 | customizedCode | 个性化编码，设置后默认将会存储列拖拽等个性化设置更改到 localStorage，如果要存储到后端, 请重写全局配置中的表格个性化钩子： `customizedSave` `customizedLoad` | string |
 | rowSelection | object | 表格行是否可选择，[配置项](#rowSelection) |
 | rowDraggable | boolean `(false)` | 行拖拽，实现行的拖拽  |
-| customDragDropContenxt | boolean \| undefined |是否开启自定义 DragDropContenxt, 一般用于自定义 react-beautiful-dnd 的 DragDropContenxt 实现多表拖拽 |
-| onDragEnd |  (resultDrag: DropResult, provided: ResponderProvided, data) => void | 完成拖拽后的触发事件 |
+| customDragDropContenxt | boolean \| undefined | 跨表拖拽时，用 `choerodon-ui` 导出的同一个 `DragDropContext` 包裹两个表格；两表均开启 `rowDraggable` 和 `customDragDropContenxt`，并设置不同的 `id`。 |
+| onDragEnd |  (resultDrag: DropResult, provided: ResponderProvided, data) => void | 默认单表在有效落点按新顺序更新行，并将排序后的数组作为第三个参数 `data` 传入，无需延时重排。取消或否决拖拽时不触发。 |
 | onDragEndBefore |  (resultDrag: DropResult, provided: ResponderProvided) => void | 完成拖拽前的触发事件 |
 | onDragStart |  (initial: DragStart, provided: ResponderProvided) => void | 拖拽前触发事件 |
 | components |  [TableComponents](#TableComponents) | 覆盖默认的 table 元素 |

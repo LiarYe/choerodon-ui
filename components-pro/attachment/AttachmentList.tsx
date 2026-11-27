@@ -1,7 +1,7 @@
 import React, { Fragment, FunctionComponent, ReactNode, useCallback, useEffect, useRef } from 'react';
 import { observer } from 'mobx-react-lite';
 import classNames from 'classnames';
-import { DragDropContext, Draggable, DraggableProvided, Droppable, DroppableProvided, DropResult } from 'react-beautiful-dnd';
+import { DragDropContext, Draggable, DraggableProvided, Droppable, DroppableProvided, DropResult } from 'choerodon-ui/lib/drag-drop-context';
 import isNumber from 'lodash/isNumber';
 import { PopconfirmProps } from 'choerodon-ui/lib/popconfirm';
 import { AttachmentFileProps } from 'choerodon-ui/dataset/configure';

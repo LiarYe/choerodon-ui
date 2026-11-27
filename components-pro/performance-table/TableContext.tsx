@@ -1,8 +1,10 @@
-import { CSSProperties } from 'react';
+import { createContext, CSSProperties } from 'react';
 import { getContext, Symbols } from 'choerodon-ui/shared';
 import translateDOMPositionXY from './utils/translateDOMPositionXY';
 import isRTL from './utils/isRTL';
 import TableStore from './TableStore';
+
+export const LiftedRowContext = createContext<{ index: number; height: number } | undefined>(undefined);
 
 export interface Props {
   rtl: boolean;

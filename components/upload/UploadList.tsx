@@ -1,7 +1,7 @@
 ﻿import React, { Component, createElement, CSSProperties, SyntheticEvent } from 'react';
 import classNames from 'classnames';
-import { DragDropContext, Draggable, Droppable } from 'react-beautiful-dnd';
 import isFunction from 'lodash/isFunction';
+import { DragDropContext, Draggable, Droppable } from '../drag-drop-context';
 import Icon from '../icon';
 import Tooltip from '../tooltip';
 import Progress from '../progress';

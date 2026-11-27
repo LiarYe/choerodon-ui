@@ -341,7 +341,7 @@ const Base: IBase = forwardRef<HTMLDivElement, BaseBlockProps>((props, ref) => {
   ];
 
   return (
-    <ReactResizeObserver onResize={onResize} disabled={!mergedEnableEllipsis || cssEllipsis}>
+    <ReactResizeObserver getTarget={() => typographyRef.current} onResize={onResize} disabled={!mergedEnableEllipsis || cssEllipsis}>
       <EllipsisTooltip
         title={tooltipTitle}
         enabledEllipsis={mergedEnableEllipsis}

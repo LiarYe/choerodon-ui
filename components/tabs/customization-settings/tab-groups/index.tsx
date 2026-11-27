@@ -1,10 +1,10 @@
 import React, { FunctionComponent, ReactElement, useCallback, useContext } from 'react';
 import { action } from 'mobx';
 import { observer } from 'mobx-react-lite';
-import { DragDropContext, DropResult } from 'react-beautiful-dnd';
 import sortBy from 'lodash/sortBy';
 import DataSet from 'choerodon-ui/pro/lib/data-set/DataSet';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
+import { DragDropContext, DropResult } from '../../../drag-drop-context';
 import Group, { GroupProps } from './Group';
 import ItemSuffix from './ItemSuffix';
 import TabsContext from '../../TabsContext';

@@ -1,7 +1,7 @@
 import React, { cloneElement, FunctionComponent, Key, MouseEvent, ReactElement, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { action, observable } from 'mobx';
 import { observer } from 'mobx-react-lite';
-import { DragDropContext, Draggable, DraggableProps, DraggableProvided, DraggableStateSnapshot, Droppable, DropResult } from 'react-beautiful-dnd';
+import { DragDropContext, Draggable, DraggableProps, DraggableProvided, DraggableStateSnapshot, Droppable, DropResult } from 'choerodon-ui/lib/drag-drop-context';
 import sortBy from 'lodash/sortBy';
 import isNumber from 'lodash/isNumber';
 import omit from 'lodash/omit';

@@ -38,6 +38,7 @@ A card can be used to display content related to a single subject. The content c
 | onSelectChange | Select the callback of the event and click the card content area to trigger | (selected) => void | - |
 | onTabChange | Callback when tab is switched | (key) => void | - |
 | onHeadClick | Callback while Click Card head | React.MouseEventHandler<any> | - |
+| onHeightChange | Called when the card root is first measured and when its height changes. Receives the width, height, and root element. | `(width: number, height: number, target: Element \| null) => void` | - |
 
 ### Card.Grid
 

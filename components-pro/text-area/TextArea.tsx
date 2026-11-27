@@ -266,7 +266,7 @@ export default class TextArea<T extends TextAreaProps> extends TextField<T> {
         <label>
           {
             resizable ? (
-              <ReactResizeObserver onResize={this.handleResize} resizeProp={getResizeProp(resize)}>
+              <ReactResizeObserver getTarget={() => this.element} onResize={this.handleResize} resizeProp={getResizeProp(resize)}>
                 {children}
               </ReactResizeObserver>
             ) : children

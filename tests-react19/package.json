@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "typecheck": "tsc --project tsconfig.json",
+    "typecheck:dnd": "tsc --project tsconfig.dnd.json",
     "typecheck:p1": "tsc --project tsconfig.p1.json",
     "lint": "eslint --max-warnings 0 --ext .ts,.tsx cases preview",
     "preview": "node preview.cjs",
@@ -11,6 +12,7 @@
     "test": "jest --config jest.config.cjs --runInBand"
   },
   "devDependencies": {
+    "@hello-pangea/dnd": "18.0.1",
     "@swc/core": "1.11.24",
     "@swc/jest": "0.2.39",
     "@testing-library/dom": "10.4.2",

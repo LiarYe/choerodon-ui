@@ -1,5 +1,5 @@
 import React, { useCallback, useContext } from 'react';
-import { DraggableProvided, DraggableRubric, DraggableStateSnapshot } from 'react-beautiful-dnd';
+import { DraggableProvided, DraggableRubric, DraggableStateSnapshot } from 'choerodon-ui/lib/drag-drop-context';
 import isFunction from 'lodash/isFunction';
 import ColumnGroups from './ColumnGroups';
 import TableContext from './TableContext';

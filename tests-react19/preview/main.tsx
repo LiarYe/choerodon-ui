@@ -11,7 +11,9 @@ declare const require: { context(dir: string, recursive: boolean, pattern: RegEx
 const demos = require.context('./components', true, /^\.\/[^/]+\/index\.[jt]sx$/);
 const titles: Record<string, string> = { menu: 'Menu 容器', avatar: 'Avatar 头像', icon: 'Icon 图标' };
 
+const P2Demo = React.lazy(() => import('./p2'));
 const pages = [
+  { hash: '#/p2', title: 'P2 拖拽', Demo: P2Demo },
   { hash: '#/b6', title: 'B6 Carousel 轮播', Demo: B6Demo },
   { hash: '#/b5', title: 'B5 Tree / Menu 虚拟布局', Demo: B5Demo },
   ...demos.keys().sort().map(key => {
@@ -35,7 +37,7 @@ function Preview({ hash }: { hash: string }) {
           ))}
         </ul>
       </nav>
-      {page ? <page.Demo /> : hash && hash !== '#/' ? <p>未找到该示例。</p> : null}
+      {page ? <React.Suspense fallback="加载中…"><page.Demo /></React.Suspense> : hash && hash !== '#/' ? <p>未找到该示例。</p> : null}
     </main>
   );
 }

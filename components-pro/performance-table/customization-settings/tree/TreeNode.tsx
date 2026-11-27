@@ -1,7 +1,7 @@
 import React, { Children, cloneElement, FunctionComponent, isValidElement, ReactNode, useCallback, useContext, useEffect, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import classNames from 'classnames';
-import { DraggableProvided, DraggableStateSnapshot, Droppable, DroppableProvided } from 'react-beautiful-dnd';
+import { DraggableProvided, DraggableStateSnapshot, Droppable, DroppableProvided } from 'choerodon-ui/lib/drag-drop-context';
 import defaultTo from 'lodash/defaultTo';
 import isFunction from 'lodash/isFunction';
 import Record from '../../../data-set/Record';

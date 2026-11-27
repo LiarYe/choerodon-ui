@@ -22,6 +22,7 @@ const compiler = webpack({
   resolve: {
     extensions: ['.tsx', '.ts', '.jsx', '.js', '.json'],
     alias: {
+      ...(!legacy && { 'react-beautiful-dnd$': local('@hello-pangea/dnd') }),
       ...(legacy && { 'react-dom/client$': path.join(__dirname, 'preview/client16.js') }),
       'react-intersection-observer$': require.resolve('react-intersection-observer', { paths: [legacy ? root : __dirname] }),
       react: local('react'),
@@ -62,6 +63,10 @@ compiler.hooks.afterCompile.tap('React19Resolution', compilation => {
     if (resource && /[\\/]node_modules[\\/]react-intersection-observer[\\/]/.test(resource)) {
       const expected = path.join(legacy ? root : __dirname, 'node_modules/react-intersection-observer') + path.sep;
       if (!resource.startsWith(expected)) compilation.errors.push(new Error(`Unexpected observer: ${resource}`));
+    }
+    if (resource && /[\\/]node_modules[\\/](?:react-beautiful-dnd|@hello-pangea[\\/]dnd)[\\/]/.test(resource)) {
+      const expected = local(legacy ? 'react-beautiful-dnd' : '@hello-pangea/dnd') + path.sep;
+      if (!resource.startsWith(expected)) compilation.errors.push(new Error(`Unexpected DnD implementation: ${resource}`));
     }
     const match = resource && resource.match(/[\\/]node_modules[\\/](react(?:-dom)?)[\\/]/);
     if (!match) continue;

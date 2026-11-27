@@ -1,6 +1,6 @@
 import React, { FunctionComponent, ReactNode, useContext } from 'react';
 import { observer } from 'mobx-react-lite';
-import { Droppable, DroppableProvided } from 'react-beautiful-dnd';
+import { Droppable, DroppableProvided } from 'choerodon-ui/lib/drag-drop-context';
 import TableContext from '../../TableContext';
 
 export interface TreeProps {

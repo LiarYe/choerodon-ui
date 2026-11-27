@@ -12,7 +12,7 @@ import React, {
 } from 'react';
 import { observer } from 'mobx-react-lite';
 import { action } from 'mobx';
-import { Draggable, DraggableProvided, DraggableStateSnapshot, Droppable, DroppableProvided, DroppableStateSnapshot } from 'react-beautiful-dnd';
+import { Draggable, DraggableProvided, DraggableStateSnapshot, Droppable, DroppableProvided, DroppableStateSnapshot } from 'choerodon-ui/lib/drag-drop-context';
 import classNames from 'classnames';
 import isFunction from 'lodash/isFunction';
 import Group from 'choerodon-ui/dataset/data-set/Group';
@@ -529,7 +529,7 @@ const VirtualRows: FunctionComponent<RowsProps> = function VirtualRows(props) {
     lock, columnGroups, onClearCache, expandIconColumnIndex, tableStore, rowDragRender,
     isTree, rowDraggable, snapshot, dragRowHeight, isFixedRowHeight, virtualCell,
   } = props;
-  const draggableId = snapshot && snapshot.draggingFromThisWith;
+  const draggableId = snapshot?.draggingFromThisWith ?? undefined;
   const [totalRows, statistics]: [ReactNode[], Statistics] = useComputed(() => {
     const $statistics: Statistics = { count: 0, rowMetaData: [] };
     const cachedRows = generateCachedRows({
@@ -782,17 +782,22 @@ const TableTBody: FunctionComponent<TableTBodyProps> = function TableTBody(props
       virtualCell={virtualCell}
     />
   );
-  const tbody = rowDraggable && !tableStore.virtual ? (
+  const observeBody = (tbody: ReactElement) => lock ? tbody : (
+    <ReactResizeObserver onResize={handleResize} resizeProp="height" immediately>
+      {tbody}
+    </ReactResizeObserver>
+  );
+  return rowDraggable && !tableStore.virtual ? (
     <Droppable
       droppableId={tableStore.props.id || "table"}
       key="table"
       isCombineEnabled={isTree}
       mode="standard"
       renderClone={renderClone}
-      getContainerForClone={() => instance(tableStore.node.getClassName(), prefixCls).tbody as React.ReactElement<HTMLElement>}
+      getContainerForClone={() => instance(tableStore.node.getClassName(), prefixCls).tbody as ReturnType<NonNullable<React.ComponentProps<typeof Droppable>['getContainerForClone']>>}
       {...(rowDragRender && rowDragRender.droppableProps)}
     >
-      {(droppableProvided: DroppableProvided) => (
+      {(droppableProvided: DroppableProvided) => observeBody(
         <tbody
           ref={droppableProvided.innerRef}
           {...droppableProvided.droppableProps}
@@ -802,19 +807,14 @@ const TableTBody: FunctionComponent<TableTBodyProps> = function TableTBody(props
           {body}
           {newRowRow}
           {droppableProvided.placeholder}
-        </tbody>
+        </tbody>,
       )}
     </Droppable>
-  ) : (
+  ) : observeBody(
     <tbody className={`${prefixCls}-tbody`} {...rest}>
       {body}
       {newRowRow}
-    </tbody>
-  );
-  return lock ? tbody : (
-    <ReactResizeObserver onResize={handleResize} resizeProp="height" immediately>
-      {tbody}
-    </ReactResizeObserver>
+    </tbody>,
   );
 };
 

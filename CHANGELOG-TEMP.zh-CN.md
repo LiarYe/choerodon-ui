@@ -1,3 +1,12 @@
+## 2026-11-27
+
+- 统一表格、Board、Tabs、Upload 和 Attachment 的拖拽入口。跨表拖拽可从 `choerodon-ui` 导入 `DragDropContext`，保留 `customDragDropContenxt` 和现有回调签名。独立 React 19 工程锁定 `@hello-pangea/dnd@18.0.1`；根项目仍使用 React 16.14.0 和 `react-beautiful-dnd@13.0.0`。
+- 共享 ResizeObserver 改为直接监听真实 DOM 节点，移除 `findDOMNode`，不新增包裹元素；保留首次测量、尺寸变化通知及禁用或卸载时的清理行为。
+- 修复 Pro Table 行拖拽时占位丢失、树形子节点移回根层后排序不准的问题；虚拟行自定义拖拽副本示例复用表格行，保留各列宽度和对齐方式。
+- 修复 PerformanceTable 宽度未变化时重复更新、起拖时相邻行跳位及落行闪动的问题。跨表拖动期间源数据刷新后，副本仍按拖拽标识匹配记录；无业务键的虚拟行按实际行索引测量。
+- 修复 Board 刷新后拖拽回调使用旧数据或配置、卡片测高未转发 `cardProps.onHeightChange` 的问题；看板示例支持首次将卡片拖入未分组列并拖回。
+- 补充拖拽中英文 API 文档、示例及浏览器回归，在 React 16.14.0 和 19.3.1 下验证表格排序、跨表移动与取消、Board 跨列及 Tabs、Upload、Attachment 排序。
+
 ## 2026-11-26
 
 - 在独立 React 19 工程中锁定 `react-intersection-observer@11.0.1`；根项目仍使用 React 16.14.0 和 `react-intersection-observer@8.34.0`。Picture 和文档站 Demo 改用具名 `InView`，保留首次进入视口时才加载的行为。

@@ -1,7 +1,7 @@
 import React, { FunctionComponent, ReactElement, useCallback, useContext, useMemo } from 'react';
 import { action, observable } from 'mobx';
 import { observer } from 'mobx-react-lite';
-import { DragDropContext, DraggableProvided, DropResult } from 'react-beautiful-dnd';
+import { DragDropContext, DraggableProvided, DropResult } from 'choerodon-ui/lib/drag-drop-context';
 import sortBy from 'lodash/sortBy';
 import Group, { GroupProps } from './Group';
 import { ColumnLock } from '../../enum';

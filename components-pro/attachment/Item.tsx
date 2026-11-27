@@ -2,7 +2,7 @@ import React, { cloneElement, FunctionComponent, isValidElement, MouseEventHandl
 import { observer } from 'mobx-react-lite';
 import isArrayLike from 'choerodon-ui/dataset/mobx-helper/isArrayLike';
 import classnames from 'classnames';
-import { DraggableProvided } from 'react-beautiful-dnd';
+import { DraggableProvided } from 'choerodon-ui/lib/drag-drop-context';
 import isString from 'lodash/isString';
 import isFunction from 'lodash/isFunction';
 import isObject from 'lodash/isObject';

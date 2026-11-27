@@ -28,7 +28,7 @@ import {
   DropResult,
   ResponderProvided,
   DragUpdate,
-} from 'react-beautiful-dnd';
+} from 'choerodon-ui/lib/drag-drop-context';
 import Group from 'choerodon-ui/dataset/data-set/Group';
 import { QUERY_CANCELABLE } from 'choerodon-ui/dataset/data-set/DataSet';
 import { SortOrder } from 'choerodon-ui/pro/lib/data-set/enum';
@@ -887,7 +887,7 @@ export interface TableProps extends DataSetComponentProps {
    */
   boxSizing?: TableBoxSizing;
   /**
-   * 是否自定义 DragDropContenxt，配合 rowDraggable 属性一起使用。开启后，使用 react-beautiful-dnd 的 DragDropContenxt 可以实现表格与表格之间的拖拽
+   * 是否自定义 DragDropContenxt，配合 rowDraggable 属性一起使用。开启后，使用 choerodon-ui 导出的 DragDropContext 可以实现表格与表格之间的拖拽
    */
   customDragDropContenxt?: boolean;
   rowNumberColumnProps?: ColumnProps | ((defaultProps: ColumnProps) => ColumnProps);
@@ -1257,6 +1257,8 @@ export default class Table extends DataSetComponent<TableProps> {
 
   @autobind
   handleKeyDown(e) {
+    // The drag sensor consumes navigation keys before they reach the table.
+    if (e.defaultPrevented) return;
     const { tableStore, reactiveProps: { clipboard } } = this;
     const { keyboard } = tableStore;
     const ctrlKey = e.ctrlKey || e.metaKey;
@@ -2612,6 +2614,14 @@ export default class Table extends DataSetComponent<TableProps> {
     }
   }
 
+  moveTreeRoot(record: Record, target: Record, after: boolean) {
+    const { dataSet } = this.tableStore;
+    const from = dataSet.records.indexOf(record);
+    const anchor = dataSet.records.indexOf(target);
+    // The visible tree order can differ from records after reparenting. Insert relative to the anchor after removal.
+    dataSet.move(from, anchor - (from < anchor ? 1 : 0) + (after ? 1 : 0));
+  }
+
   handleDragEnd(resultDrag: DropResult, provided: ResponderProvided) {
     if (this.tableStore.dragUpdateState) {
       this.tableStore.dragUpdateState = undefined;
@@ -2621,7 +2631,9 @@ export default class Table extends DataSetComponent<TableProps> {
     const { onDragEnd, onDragEndBefore, dragDropContextProps, multiDragSelectMode, rowDragRender } = this.reactiveProps;
     let resultBefore: DropResult | undefined = resultDrag;
     const recordFromIndex = rowMetaData ? rowMetaData[resultBefore.source.index].record?.index : undefined;
-    const recordToIndex = rowMetaData && resultBefore.destination ? rowMetaData[resultBefore.destination.index].record?.index : undefined;
+    const { destination: originalDestination } = resultDrag;
+    const recordToIndex = originalDestination
+      ? rowMetaData?.[originalDestination.index]?.record?.index : undefined;
     if (clipboard && clipboard.copy) {
       this.clearClipboard();
     }
@@ -2661,7 +2673,7 @@ export default class Table extends DataSetComponent<TableProps> {
                 }
               } else {
                 currentRecord.set(parentField, undefined);
-                dataSet.move(currentRecord.index, destinationRecord.index);
+                this.moveTreeRoot(currentRecord, destinationRecord, destination.index > source.index);
               }
               this.clearSortInfo();
             }
@@ -2702,7 +2714,7 @@ export default class Table extends DataSetComponent<TableProps> {
                   this.removeSourceRecord(currentRecord);
                   currentRecord.parent = undefined;
                 }
-                dataSet.move(currentRecord.index, destinationRecord.index);
+                this.moveTreeRoot(currentRecord, destinationRecord, destination.index > source.index);
               }
               this.clearSortInfo();
             }

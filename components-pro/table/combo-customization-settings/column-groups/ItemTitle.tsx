@@ -1,7 +1,7 @@
 import React, { FunctionComponent, isValidElement, useCallback, useContext } from 'react';
 import { toJS } from 'mobx';
 import { observer } from 'mobx-react-lite';
-import { DraggableProvided } from 'react-beautiful-dnd';
+import { DraggableProvided } from 'choerodon-ui/lib/drag-drop-context';
 import ObserverTextField from '../../../text-field/TextField';
 import { getHeader } from '../../utils';
 import TableContext from '../../TableContext';

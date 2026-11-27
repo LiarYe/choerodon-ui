@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import ReactDOM from 'react-dom';
-import { DragDropContext } from 'react-beautiful-dnd';
+import { DragDropContext } from '../../components/drag-drop-context';
 import Column from '../../components-pro/board/Column';
 import KanbanColumn from '../../components-pro/board/KanbanColumn';
 import BoardContext from '../../components-pro/board/BoardContext';

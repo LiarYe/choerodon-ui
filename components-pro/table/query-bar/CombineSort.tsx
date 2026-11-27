@@ -1,5 +1,5 @@
 import React, { FunctionComponent, useMemo, useState, useCallback, useContext, ReactNode } from 'react';
-import { DragDropContext, Droppable, Draggable, DropResult } from 'react-beautiful-dnd';
+import { DragDropContext, Droppable, Draggable, DropResult } from 'choerodon-ui/lib/drag-drop-context';
 import { observable, runInAction } from 'mobx';
 import { observer } from 'mobx-react-lite';
 import { FieldType, SortOrder } from 'choerodon-ui/pro/lib/data-set/enum';

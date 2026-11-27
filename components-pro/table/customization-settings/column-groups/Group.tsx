@@ -1,6 +1,6 @@
 import React, { FunctionComponent, ReactNode, useContext } from 'react';
 import { observer } from 'mobx-react-lite';
-import { DraggableProvided, DropResult, ResponderProvided } from 'react-beautiful-dnd';
+import { DraggableProvided, DropResult, ResponderProvided } from 'choerodon-ui/lib/drag-drop-context';
 import Tree from '../tree/Tree';
 import SubGroups from './SubGroups';
 import TableContext from '../../TableContext';

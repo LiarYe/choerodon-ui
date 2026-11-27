@@ -1,7 +1,7 @@
 import React, { Children, CSSProperties, isValidElement, Key, ReactNode } from 'react';
 import { action, computed, get, IReactionDisposer, observable, ObservableMap, reaction, runInAction, set, makeObservable } from 'mobx';
 import classNames from 'classnames';
-import { DragUpdate } from 'react-beautiful-dnd';
+import { DragUpdate } from 'choerodon-ui/lib/drag-drop-context';
 import sortBy from 'lodash/sortBy';
 import debounce from 'lodash/debounce';
 import isNil from 'lodash/isNil';

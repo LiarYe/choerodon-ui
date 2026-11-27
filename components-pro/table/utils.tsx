@@ -1,5 +1,5 @@
 import React, { isValidElement, Key, ReactElement, ReactNode } from 'react';
-import { DraggingStyle, DropResult, NotDraggingStyle } from 'react-beautiful-dnd';
+import { DraggingStyle, DropResult, NotDraggingStyle } from 'choerodon-ui/lib/drag-drop-context';
 import moment, { Moment } from 'moment';
 import isString from 'lodash/isString';
 import attempt from 'lodash/attempt';

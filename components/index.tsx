@@ -13,6 +13,8 @@ if (ENV !== 'production' &&
 }
 /* @remove-on-es-build-end */
 
+export { DragDropContext } from './drag-drop-context';
+
 export { default as Affix } from './affix';
 
 export { default as Anchor } from './anchor';

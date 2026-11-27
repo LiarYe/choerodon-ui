@@ -7,12 +7,12 @@ title:
 
 ## zh-CN
 
-可以通过rowDragRender里面方法进行对于整体的拖拽空控制，比如droppableProps，droppableProps 控制是否可以拖动和放入等，可以查看react-beautiful-dnd。这里是控制 renderClone 拖拽起来的时候会在body下面新增加一个table 会在这个table注入元素	比如下面的示例可以实现在类名为c7n-pro-table-drag-container 的 table里面渲染对应的元素，这里你可以增加样式覆盖完成你想要的拖拽样式，由于拖拽使用的Fixed定位所以会导致table的长度变化，你可以根据业务修改合适的colums的宽度来让表现更加自然。renderIcon 来渲染 拖拽的自定义ICON。
+本例用 `rowDragRender.renderClone` 自定义虚拟行的拖动预览。将 `key` 单独传入，并将其余行属性透传给 `Table.TableRow`，让预览按原行的单元格和列宽渲染。
 
 
 ## en-US
 
-You can use the rowDragRender method to control the overall drag and drop, such as droppableProps, droppableProps control whether you can drag and drop, etc., you can check react-beautiful-dnd. Here is to control renderClone to add a new table below the body when it is dragged and inject elements into this table. For example, the following example can be implemented to render the corresponding elements in the table with the class name c7n-pro-table-drag-container. Here you can add style coverage to complete the drag-and-drop style you want. Due to the fixed positioning used by drag-and-drop, the length of the table will change. You can modify the width of the appropriate colums according to your business to make the performance more natural. renderIcon to render the drag-and-drop custom ICON.
+This example customizes the drag preview for a virtual row with `rowDragRender.renderClone`. Pass `key` separately and forward the remaining row props to `Table.TableRow` so the preview retains the original cells and column widths.
 
 ```jsx
 import {
@@ -26,9 +26,7 @@ import {
   Button,
 } from 'choerodon-ui/pro';
 
-const { Column } = Table;
-
-const {TableRow} = Table;
+const { Column, TableRow } = Table;
 
 class EditButton extends React.Component {
   handleClick = e => {
@@ -119,10 +117,9 @@ class App extends React.Component {
   };
 
 
-  renderDragRow = (props) =>  {
-     delete props.dragColumnAlign;
-     return <TableRow {...props}/>
-  }
+  renderDragRow = ({ key, ...rowProps }) => (
+    <TableRow key={key} {...rowProps} className="dragging-row" />
+  );
 
 
   render() {
@@ -141,12 +138,15 @@ class App extends React.Component {
           }
         }}}
         dragColumnAlign="left"
-        rowDraggable 
+        rowDraggable
+        virtual
+        style={{ height: 220 }}
         key="userid"
         buttons={buttons}
         dataSet={this.userDs}
         pristine
         onDragEndBefore={(ds, col, res) => {
+          if (!res.destination) return false;
           const dropDisabled = (res.source.index < 3 && res.destination.index >= 3) || (res.source.index > 4 && res.destination.index <= 4)
           if (dropDisabled) {
             return false;
